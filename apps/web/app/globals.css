@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* 디자인 토큰은 여기 @theme 블록에서 확장한다 (Tailwind v4) */
 @theme {
   --color-brand: #2563eb;
 }

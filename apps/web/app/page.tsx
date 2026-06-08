@@ -1,4 +1,3 @@
-// NOTE: 공유 타입은 추후 @insurance/shared 패키지로 옮긴다 (현재 패키지 비어있음).
 type InsuranceProduct = {
   id: string;
   name: string;
