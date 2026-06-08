@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "plugins": [{ "name": "next" }],
+    "noEmit": true,
+    "paths": {
+      "@/*": ["./src/*"],
+      "@insurance/bridge": ["../../packages/bridge/src"],
+      "@insurance/shared": ["../../packages/shared/src"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}

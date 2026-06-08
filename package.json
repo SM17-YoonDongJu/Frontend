@@ -1,0 +1,20 @@
+{
+  "name": "insurance-platform",
+  "private": true,
+  "version": "0.0.0",
+  "description": "보험 플랫폼 프론트 모노레포 (web + mobile WebView 브릿지)",
+  "packageManager": "pnpm@11.5.2",
+  "engines": {
+    "node": ">=24.16.0",
+    "pnpm": ">=11.0.0"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @insurance/web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}
