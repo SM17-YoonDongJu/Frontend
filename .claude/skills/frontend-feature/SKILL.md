@@ -20,7 +20,7 @@ description: 손해사정 플랫폼 프론트엔드 기능을 에이전트 팀(f
 
 ## Phase 1: 설계 (fe-architect 단독)
 1. `TeamCreate`로 팀 구성, 4 에이전트 멤버 등록(모두 `model: "opus"`).
-2. fe-architect에 기능 명세 작성 지시. Notion EPIC/스토리가 출처면 `mcp__notion__notion-fetch`로 읽게 한다.
+2. fe-architect에 기능 명세 작성 지시. Notion EPIC/스토리가 출처면 `mcp__notion__notion-fetch`로 읽게 하고, 도메인 의미는 `references/domain-glossary.md`(역할·플로우·상태·용어·컴플라이언스)를 먼저 읽게 한다.
 3. 산출물: `_workspace/01_architect_<feature>.md` (라우트·렌더링·역할·Feature-Based 슬라이스·zod 계약·쿼리키·화면명세·검증포인트).
 4. 계약에 `⚠️ 확인필요`가 있으면 리더가 사용자에게 확인 후 진행.
 

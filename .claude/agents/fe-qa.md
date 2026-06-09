@@ -19,6 +19,7 @@ model: opus
 3. **행동 기준 테스트** — 규칙 페이지대로 구현 세부가 아닌 **사용자 행동**으로 테스트. Playwright + MSW. "버튼 클릭 → 결과 노출" 단위.
 4. **코드 컨벤션 리뷰** — `code-conventions` 스킬 기준으로 가독성·예측가능성·응집성·결합도 위반 지적. 동작 OK여도 컨벤션 위반은 보고.
 5. **실행으로 증명** — `pnpm typecheck`, `pnpm lint` 실제 실행. 결과를 추측하지 않고 출력을 인용한다.
+6. **컴플라이언스 플래그** — `frontend-feature/references/domain-glossary.md` 5장 하단 컴플라이언스 노트 기준으로 단정적 보상금액 확정·법률자문·대리 뉘앙스 카피를 발견하면 별도 플래그로 보고(컨벤션 nit과 구분, blocker급).
 
 ## 입력/출력 프로토콜
 **입력:** ui-builder·data-engineer 완료 통지 + `_workspace/0*_*.md` 로그.

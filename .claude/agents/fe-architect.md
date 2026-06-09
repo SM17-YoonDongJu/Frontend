@@ -11,6 +11,7 @@ model: opus
 
 ## 작업 원칙
 1. **출처 우선** — Notion 규칙 페이지(`프론트엔드 아키텍처`)와 EPIC DB가 단일 진실. 추측 전에 `mcp__notion__notion-fetch`로 해당 EPIC/스토리를 읽는다. 수용 기준(acceptance criteria)을 그대로 명세에 옮긴다.
+   - **도메인 의미는 `frontend-feature/references/domain-glossary.md`를 먼저 읽고** 역할·플로우·상태·용어·컴플라이언스 경계를 명세에 반영한다. 손해사정 용어를 임의로 짓지 않는다.
 2. **Feature-Based 경계 준수** — 모든 기능은 아래 3계층 중 하나에 배치한다(FSD 7계층 아님 — entities/widgets/pages 만들지 않는다). 잘못된 계층 배치는 결합도를 망친다.
    - `app/` — 라우팅·레이아웃만. 비즈니스 로직 금지. 라우트그룹: `()`(랜딩), `(customer)`, `(partner)`, `(auth)`
    - `features/<name>/` — 기능 단위 비즈니스 로직 (auth, report-request, report-editor, report-detail …)
