@@ -45,13 +45,11 @@ function ReportList() {
 
 ## Tailwind 스타일
 - 기존 토큰 따르기: 다크모드 `dark:` 변형, `app/layout.tsx`의 `bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100`.
-- 매직 색/간격 반복되면 컴포넌트로 추출하거나 공통 클래스 묶음으로. 인라인 long-class는 가독성 위해 논리 그룹 순서(layout → spacing → color → state)로 정렬.
+- 인라인 long-class는 논리 그룹 순서(layout → spacing → color → state)로 정렬.
 - 모바일 우선: 기본이 모바일, `md:` 이상에서 데스크탑. 기획의 "모바일은 필터칩+카드" 같은 반응형 분기 반영.
 
-## 접근성 기본
-- 인터랙티브 요소는 의미 태그(`<button>`, `<a>`) 사용, `div onClick` 지양.
-- 폼 입력은 `<label>` 연결. 이미지·아이콘 버튼은 `aria-label`.
-- 포커스 가시성 유지(Tailwind `focus-visible:`).
+## 접근성
+표준 a11y(의미 태그·label 연결·aria-label·focus 가시성) 지킨다. 기획이 모바일 반응형·툴팁·쉬운말 토글을 요구하므로 접근성은 선택 아닌 요구사항.
 
 ## 공통 UI 승격 기준
 같은 컴포넌트를 2개 이상 기능이 쓰면 `shared/ui/`로. 1곳만 쓰면 `features/<name>/ui/`에 유지(성급한 공유화 = 결합도 ↑).
