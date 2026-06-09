@@ -19,3 +19,4 @@
 |------|----------|------|------|
 | 2026-06-09 | 초기 구성 (에이전트 4 + 스킬 5) | 전체 | - |
 | 2026-06-09 | frontend-design 포인터 추가 + zod/Playwright 설치 노트 | ui-builder, component-build, react-query-data, fe-integration-qa | 갑 점검: 디자인 품질 가이드 연결, 전제 도구 미설치 무성실패 방지 |
+| 2026-06-09 | commit-style 스킬 추가 | skills/commit-style | 팀 커밋 말투(Type : 한글 명사형) 반영 |
