@@ -21,3 +21,4 @@
 | 2026-06-09 | frontend-design 포인터 추가 + zod/Playwright 설치 노트 | ui-builder, component-build, react-query-data, fe-integration-qa | 갑 점검: 디자인 품질 가이드 연결, 전제 도구 미설치 무성실패 방지 |
 | 2026-06-09 | commit-style 스킬 추가 | skills/commit-style | 팀 커밋 말투(Type : 한글 명사형) 반영 |
 | 2026-06-09 | 도메인 용어집 추가 | skills/frontend-feature/references/domain-glossary.md | 하네스에 손해사정 도메인 지식 부재 → Notion 출처로 용어·플로우·상태·컴플라이언스 정리, fe-architect·ui-builder·fe-qa 연결 |
+| 2026-06-09 | React 합성·재사용 패턴 reference 추가 | skills/component-build/references/react-patterns.md | custom hook·compound·render props를 4원칙으로 엮어 정리(context 제외) |

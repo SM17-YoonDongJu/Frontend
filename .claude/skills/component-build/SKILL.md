@@ -55,3 +55,6 @@ function ReportList() {
 
 ## 공통 UI 승격 기준
 같은 컴포넌트를 2개 이상 기능이 쓰면 `shared/ui/`로. 1곳만 쓰면 `features/<name>/ui/`에 유지(성급한 공유화 = 결합도 ↑).
+
+## 합성·재사용 패턴
+custom hook(로직 추출)·compound component(복합 UI, 예: 검수화면)·render props가 필요하면 `references/react-patterns.md`를 읽는다. 각 패턴을 4원칙으로 판단하는 기준이 정리돼 있다. 조각이 단순하면 패턴 없이 props가 정답.
