@@ -28,6 +28,19 @@
   --color-terra: #b0492c;
   --color-terra-2: #e0987f;
   --color-terra-soft: #f6e7df;
+
+  /* radius 스케일 → rounded-* 유틸 */
+  --radius-tag: 6px;
+  --radius-pill: 7px;
+  --radius-chip: 9px;
+  --radius-button: 11px;
+  --radius-input: 13px;
+  --radius-card: 16px;
+  --radius-card-lg: 22px;
+
+  /* 폰트 → font-* 유틸 (serif=Title 전용) */
+  --font-serif: var(--font-gowun-batang), "Gowun Batang", serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 }
 
 :root {
