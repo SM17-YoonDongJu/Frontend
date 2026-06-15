@@ -2,6 +2,32 @@
 
 @theme {
   --color-brand: #2563eb;
+
+  /* 디자인 시스템 컬러 토큰 (출처: 바른보상 디자인 시스템) */
+  --color-ink: #15202e;
+  --color-ink-2: #3c4856;
+  --color-ink-3: #7b8693;
+
+  --color-paper: #f4f1ea;
+  --color-paper-2: #fbf9f4;
+  --color-card: #ffffff;
+
+  --color-line: #e6e0d4;
+  --color-line-2: #efeadf;
+
+  --color-navy: #182740;
+
+  --color-gold: #b0822e;
+  --color-gold-2: #d8b25f;
+  --color-gold-ink: #8a6420;
+  --color-gold-soft: #f3e9d4;
+
+  --color-green: #2f6149;
+  --color-green-soft: #e3eee7;
+
+  --color-terra: #b0492c;
+  --color-terra-2: #e0987f;
+  --color-terra-soft: #f6e7df;
 }
 
 :root {
