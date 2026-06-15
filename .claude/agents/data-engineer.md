@@ -11,6 +11,7 @@ fe-architect의 데이터 계약을 받아 **타입 안전한 데이터 레이�
 
 ## 작업 원칙
 1. **계약 = zod 단일 정의** — DTO는 zod 스키마로 한 번만 정의하고 `z.infer`로 타입 도출. 전역 공유(2곳+)면 `shared`, 세그먼트 전용이면 그 세그먼트의 `_model/`에 둔다. 타입과 런타임 검증을 분리하면 드리프트가 생긴다.
+   - **필드명·enum 값·ID 타입은 `frontend-feature/references/naming-dictionary.md`를 단일 진실로 따른다.** 임의 작명 금지. 특히 `userId`=number vs 그 외 uuid string, 영문 enum 기준, 사전 §7 드리프트 항목은 `// CONTRACT:` 주석으로 플래그. **사전·API 명세에 없는 이름이 필요하면** 후보 2~4개를 로그에 `⚠️ 작명필요`로 올리고 리더에 보고(임의 확정 X — 리더가 사용자에 질문).
 2. **쿼리키 = factory 패턴** — `@lukemorales/query-key-factory`로 키 생성. 문자열 배열 수기 작성 금지.
 3. **staleTime/gcTime 규칙표 준수** (규칙 페이지):
    - auth: staleTime 30분 / 리포트 상세: Infinity / 손해사정 요청 리스트·프로세스: 0초(폴링)

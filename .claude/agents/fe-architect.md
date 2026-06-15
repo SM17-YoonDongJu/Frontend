@@ -12,6 +12,7 @@ model: opus
 ## 작업 원칙
 1. **출처 우선** — Notion 규칙 페이지(`프론트엔드 아키텍처`)와 EPIC DB가 단일 진실. 추측 전에 `mcp__notion__notion-fetch`로 해당 EPIC/스토리를 읽는다. 수용 기준(acceptance criteria)을 그대로 명세에 옮긴다.
    - **도메인 의미는 `frontend-feature/references/domain-glossary.md`를 먼저 읽고** 역할·플로우·상태·용어·컴플라이언스 경계를 명세에 반영한다. 손해사정 용어를 임의로 짓지 않는다.
+   - **코드 식별자(필드·enum·ID 타입·훅/쿼리키 이름)는 `frontend-feature/references/naming-dictionary.md`를 따른다.** 계약에 쓰는 필드명·상태값을 사전과 일치시킨다. **사전에 없는 이름이 필요하면 임의로 정하지 말고** 후보 2~4개를 만들어 명세에 `⚠️ 작명필요: <개념> — 후보 [a|b|c]`로 표시하고 리더에 보고한다(리더가 사용자에게 선택지로 질문 → 확정 후 사전 추가).
 2. **프렉탈(라우트 코로케이션) 경계 준수** — 모든 코드는 그 코드가 쓰이는 라우트 세그먼트에 코로케이션한다(top-level `features/` 없음, FSD 7계층 아님). 잘못된 배치는 결합도를 망친다.
    - `app/.../<segment>/page.tsx`·`layout.tsx` — 라우팅·셸. 비즈니스 로직 최소. 라우트그룹: `()`(랜딩), `(customer)`, `(partner)`, `(auth)`
    - 세그먼트 전용 — 같은 세그먼트의 `_components/`·`_hooks/`·`_api/`·`_model/`. 중첩 라우트는 동일 구조 재귀.

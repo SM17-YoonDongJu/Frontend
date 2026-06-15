@@ -69,6 +69,7 @@ src/
 - 상수: UPPER_SNAKE (`STALE_TIME_AUTH`)
 - 라우트 폴더: kebab 또는 한글 경로는 영문 슬러그
 - zod 스키마: `<domain>Schema`, 타입은 `z.infer`로 도출한 PascalCase
+- **도메인 식별자(필드·enum·ID·훅/쿼리키 이름)는 `frontend-feature/references/naming-dictionary.md`가 단일 진실.** 같은 개념엔 같은 이름 — API 명세 필드명을 그대로 쓰고 임의 별칭 금지.
 
 ## 코드 스타일 (eslint/prettier 프리셋 준수)
 - `prefer-const`, `eqeqeq: smart`, `no-console`(warn/error만 허용)

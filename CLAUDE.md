@@ -24,3 +24,4 @@
 | 2026-06-09 | React 합성·재사용 패턴 reference 추가 | skills/component-build/references/react-patterns.md | custom hook·compound·render props를 4원칙으로 엮어 정리(context 제외) |
 | 2026-06-09 | TMI 트림 | skills/component-build | 일반 a11y·Tailwind 상식 압축, 프로젝트 고유 규칙만 유지 |
 | 2026-06-15 | 아키텍처 전환 Feature-Based→프렉탈(라우트 코로케이션) | CLAUDE.md, code-conventions, fe-architect, ui-builder, data-engineer, react-query-data, component-build, frontend-feature, react-patterns | top-level features/ 폐기, app 라우트 트리 코로케이션(_components/_hooks/_api/_model)·중첩 재귀·_shared 승격·전역 src/shared 유지로 결정 |
+| 2026-06-15 | 식별자 사전 추가 | frontend-feature/references/naming-dictionary.md (+ fe-architect·ui-builder·data-engineer·code-conventions·frontend-feature 포인터) | API 명세 필드명을 단일 진실로 박아 변수·필드·enum·ID타입·훅/쿼리키 작명 통일, 명세 내 드리프트 4건 플래그 |
