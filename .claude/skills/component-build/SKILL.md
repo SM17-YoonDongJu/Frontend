@@ -5,7 +5,7 @@ description: 손해사정 플랫폼 Next.js App Router UI 구현 패턴. 페이�
 
 # Next.js App Router 컴포넌트 구현 패턴
 
-대상: React 19 + Next.js 16 App Router + Tailwind 4. 코드 컨벤션은 `code-conventions` 스킬과 함께 적용한다(이 스킬은 "어떻게 만드나", 컨벤션 스킬은 "어떻게 잘 쓰나"). 시각 디자인 완성도가 필요한 화면은 `frontend-design` 스킬을 품질 가이드로 참조하되, 아래 프로젝트 규칙(Tailwind 토큰·3상태·접근성)이 항상 우선한다.
+대상: React 19 + Next.js 16 App Router + Tailwind 4. 코드 컨벤션은 `code-conventions` 스킬과 함께 적용한다(이 스킬은 "어떻게 만드나", 컨벤션 스킬은 "어떻게 잘 쓰나"). 시각 디자인 완성도가 필요한 화면은 `frontend-design` 스킬을 품질 가이드로 참조하되, 아래 프로젝트 규칙(Tailwind 토큰·3상태·접근성)이 항상 우선한다. 색·radius·폰트 토큰은 `references/design-tokens.md`가 단일 진실.
 
 ## 라우트그룹 = 역할 경계
 ```
@@ -44,7 +44,8 @@ function ReportList() {
 - props는 도메인 타입을 받되, 필요한 필드만 좁혀 받는다(`Pick`).
 
 ## Tailwind 스타일
-- 기존 토큰 따르기: 다크모드 `dark:` 변형, `app/layout.tsx`의 `bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100`.
+- **디자인 토큰 따르기** — 색·radius·폰트는 `@theme` 토큰 유틸로(`bg-paper`/`text-ink`/`border-line`/`rounded-card`/`font-serif`). 인라인 hex·임의 색 금지. 전체 토큰표·상태 유틸 레시피는 `references/design-tokens.md`.
+- **light 전용** — 디자인 시스템은 라이트 테마만. `dark:` 변형 쓰지 않는다.
 - 인라인 long-class는 논리 그룹 순서(layout → spacing → color → state)로 정렬.
 - 모바일 우선: 기본이 모바일, `md:` 이상에서 데스크탑. 기획의 "모바일은 필터칩+카드" 같은 반응형 분기 반영.
 

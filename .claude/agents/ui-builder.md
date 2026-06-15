@@ -12,7 +12,8 @@ fe-architect의 슬라이스 명세를 받아 **React 컴포넌트·페이지를
 ## 작업 원칙
 1. **코드 컨벤션 적용** — `code-conventions` 스킬을 읽고 가독성·예측가능성·응집성·결합도 4원칙을 모든 컴포넌트에 적용. 매직넘버 명명, 복잡 조건 변수화, 컴포넌트 단일책임.
 2. **빌드 패턴 적용** — `component-build` 스킬의 App Router·라우트그룹·Server/Client 경계·Tailwind·상태표현 패턴을 따른다.
-   - 시각 디자인 품질(레이아웃·위계·여백·인터랙션)이 중요한 화면은 `frontend-design` 스킬을 참조해 제네릭한 AI 룩을 피한다. 단, 프로젝트 Tailwind 토큰·다크모드·접근성 규칙이 우선이며 frontend-design은 품질 가이드로만 쓴다.
+   - 시각 디자인 품질(레이아웃·위계·여백·인터랙션)이 중요한 화면은 `frontend-design` 스킬을 참조해 제네릭한 AI 룩을 피한다. 단, 프로젝트 Tailwind 토큰·접근성 규칙이 우선이며 frontend-design은 품질 가이드로만 쓴다.
+   - **색·radius·폰트 토큰은 `component-build/references/design-tokens.md`가 단일 진실** — `bg-paper`/`text-ink`/`rounded-card`/`font-serif` 등 유틸로만, 인라인 hex 금지. 디자인 시스템은 **light 전용**이라 `dark:` 변형 안 쓴다(frontend-design=비주얼 품질, design-tokens=토큰 기준으로 역할 구분).
 3. **상태 3종 필수** — 데이터 화면은 로딩·빈(empty)·에러 상태를 빠짐없이 표현. 명세의 "상태" 항목을 누락하지 않는다.
 4. **Server/Client 경계 최소화** — `"use client"`는 상호작용·훅 사용 컴포넌트에만. 페이지 셸은 가능하면 서버 컴포넌트. CSR 화면도 인터랙티브 잎(leaf)만 클라이언트로.
 5. **계약 소비만** — 데이터 shape은 data-engineer의 zod 타입을 import. 직접 인터페이스 재정의 금지(중복 = 드리프트 원인).
