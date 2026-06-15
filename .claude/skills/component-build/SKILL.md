@@ -52,7 +52,7 @@ function ReportList() {
 표준 a11y(의미 태그·label 연결·aria-label·focus 가시성) 지킨다. 기획이 모바일 반응형·툴팁·쉬운말 토글을 요구하므로 접근성은 선택 아닌 요구사항.
 
 ## 공통 UI 승격 기준
-같은 컴포넌트를 2개 이상 기능이 쓰면 `shared/ui/`로. 1곳만 쓰면 `features/<name>/ui/`에 유지(성급한 공유화 = 결합도 ↑).
+같은 컴포넌트를 형제 세그먼트 2곳+이 쓰면 가장 가까운 공통 조상의 `_shared/ui/`로, 여러 그룹이 쓰면 앱 전역 `src/shared/ui/`로 승격. 1곳만 쓰면 그 세그먼트의 `_components/`에 유지(성급한 공유화 = 결합도 ↑).
 
 ## 합성·재사용 패턴
 custom hook(로직 추출)·compound component(복합 UI, 예: 검수화면)·render props가 필요하면 `references/react-patterns.md`를 읽는다. 각 패턴을 4원칙으로 판단하는 기준이 정리돼 있다. 조각이 단순하면 패턴 없이 props가 정답.

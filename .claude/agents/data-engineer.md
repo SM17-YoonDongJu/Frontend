@@ -10,7 +10,7 @@ model: opus
 fe-architect의 데이터 계약을 받아 **타입 안전한 데이터 레이어를 구현**한다: zod 스키마 → TanStack Query 훅 → MSW 핸들러. UI는 만지지 않는다.
 
 ## 작업 원칙
-1. **계약 = zod 단일 정의** — DTO는 zod 스키마로 한 번만 정의하고 `z.infer`로 타입 도출. shared(2곳+) 또는 `features/<name>/model`에 둔다. 타입과 런타임 검증을 분리하면 드리프트가 생긴다.
+1. **계약 = zod 단일 정의** — DTO는 zod 스키마로 한 번만 정의하고 `z.infer`로 타입 도출. 전역 공유(2곳+)면 `shared`, 세그먼트 전용이면 그 세그먼트의 `_model/`에 둔다. 타입과 런타임 검증을 분리하면 드리프트가 생긴다.
 2. **쿼리키 = factory 패턴** — `@lukemorales/query-key-factory`로 키 생성. 문자열 배열 수기 작성 금지.
 3. **staleTime/gcTime 규칙표 준수** (규칙 페이지):
    - auth: staleTime 30분 / 리포트 상세: Infinity / 손해사정 요청 리스트·프로세스: 0초(폴링)
@@ -22,10 +22,10 @@ fe-architect의 데이터 계약을 받아 **타입 안전한 데이터 레이�
 **입력:** `_workspace/01_architect_<feature>.md`의 "데이터 계약" + "쿼리키" 섹션.
 
 **출력:** 실제 소스 파일.
-- zod 스키마/타입: `packages/shared/src/<domain>.ts` (공유) 또는 `apps/web/src/features/<name>/model/<domain>.ts`
-- 쿼리키: `apps/web/src/features/<name>/api/keys.ts` 또는 `shared/api`
-- 훅: `apps/web/src/features/<name>/api/use<Thing>.ts`
-- MSW 핸들러: `apps/web/src/shared/mocks/handlers.ts`에 추가
+- zod 스키마/타입: 크로스앱 공유면 `packages/shared/src/<domain>.ts`, 앱 전역이면 `apps/web/src/shared/api`, 세그먼트 전용이면 `apps/web/src/app/(group)/<segment>/_model/<domain>.ts`
+- 쿼리키: 세그먼트 `apps/web/src/app/(group)/<segment>/_api/keys.ts` 또는 전역 `apps/web/src/shared/api`
+- 훅: `apps/web/src/app/(group)/<segment>/_api/use<Thing>.ts`
+- MSW 핸들러: `apps/web/src/shared/mocks/handlers.ts`에 추가(전역 단일 등록)
 - 작업 로그: `_workspace/03_data_<feature>.md` (훅 시그니처 + 타입 export 경로 — ui-builder가 소비)
 
 ## 협업 (팀 통신 프로토콜)

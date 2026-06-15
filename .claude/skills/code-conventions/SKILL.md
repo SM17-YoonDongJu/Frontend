@@ -1,6 +1,6 @@
 ---
 name: code-conventions
-description: 손해사정 플랫폼 프론트엔드 코드 컨벤션. 변경하기 쉬운 코드를 위한 4원칙(가독성·예측가능성·응집성·결합도) + 프로젝트 Feature-Based 폴더/네이밍 규칙. React/TS 컴포넌트·훅·모듈을 작성하거나 리뷰할 때 반드시 적용. "코드 컨벤션", "리뷰 기준", 폴더 배치(app/features/shared) 판단 시 사용.
+description: 손해사정 플랫폼 프론트엔드 코드 컨벤션. 변경하기 쉬운 코드를 위한 4원칙(가독성·예측가능성·응집성·결합도) + 프로젝트 프렉탈(라우트 코로케이션) 폴더/네이밍 규칙. React/TS 컴포넌트·훅·모듈을 작성하거나 리뷰할 때 반드시 적용. "코드 컨벤션", "리뷰 기준", 폴더 배치(app 코로케이션·_shared·src/shared) 판단 시 사용.
 ---
 
 # 프론트엔드 코드 컨벤션
@@ -24,7 +24,7 @@ description: 손해사정 플랫폼 프론트엔드 코드 컨벤션. 변경하�
 
 ## 3. 응집성 (Cohesion) — 함께 바뀌는 것이 함께 있는가
 
-- **함께 수정될 코드는 같은 디렉토리에**: 한 기능의 컴포넌트·훅·타입·테스트는 `features/<name>/` 안에. 종류별(모든 hook을 hooks/에)이 아니라 **기능별**로 묶는다.
+- **함께 수정될 코드는 같은 디렉토리에**: 한 라우트 세그먼트의 컴포넌트·훅·타입·테스트는 그 세그먼트 폴더(`app/.../<segment>/_components`·`_hooks`·`_api`·`_model`) 안에. 종류별(모든 hook을 전역 hooks/에)이 아니라 **그 화면이 쓰는 위치별**로 묶는다.
 - **폼 응집**: 폼의 필드·검증·제출 로직은 흩뿌리지 말고 한 단위로.
 - **매직넘버·상수 동기화**: 관련 상수는 한 곳에 모아 함께 바뀌게.
 - **과응집 경계**: 진짜 함께 바뀌는 것만 묶는다. 우연히 비슷한 코드를 억지 추상화하면 결합도가 오른다(아래 4번과 충돌 주의).
@@ -34,24 +34,34 @@ description: 손해사정 플랫폼 프론트엔드 코드 컨벤션. 변경하�
 - **성급한 추상화 경계**: 중복 제거가 항상 옳지 않다. 두 코드가 **다른 이유로 바뀐다면** 중복을 허용하는 게 결합도 측면에서 낫다. "비슷해 보임"이 아니라 "같은 이유로 변경됨"일 때만 합친다.
 - **책임 분리**: 거대한 useEffect/거대 컴포넌트는 관심사별로 쪼갠다. 하나가 바뀌어도 나머지에 영향 없게.
 - **Props Drilling 대신**: 깊은 prop 전달은 합성(composition)·context로 결합 완화.
-- **features 간 직접 import 금지**: `features/report-request`가 `features/report-editor` 내부를 직접 import하면 강결합. 공유가 필요하면 `shared/`로 올린다.
+- **형제 세그먼트 `_internal` 직접 import 금지**: 한 라우트 세그먼트가 다른 세그먼트의 `_components`/`_api`/`_model` 내부를 직접 import하면 강결합. 공유가 필요하면 **가장 가까운 공통 조상의 `_shared/`**(또는 앱 전역 `src/shared/`)로 올린다.
 
-## 프로젝트 Feature-Based 배치 규칙
+## 프로젝트 프렉탈(라우트 코로케이션) 배치 규칙
 
-> 주의: 이건 **Feature-Based Architecture**(app/features/shared 3계층)지 FSD(Feature-Sliced Design, 7계층)가 아니다. entities/widgets/pages 같은 FSD 계층을 만들지 않는다.
+> 구조가 재귀 반복된다. 각 라우트 세그먼트가 자기 ui·훅·데이터·타입을 코로케이션으로 소유하고, 중첩 라우트는 같은 내부 형태를 반복한다. top-level `features/`를 두지 않는다(Feature-Based/FSD 아님 — entities/widgets/pages 계층도 없다).
 
 ```
 src/
-├─ app/         라우팅·레이아웃만. 비즈니스 로직 금지.
-│  ├─ ()/  (customer)/  (partner)/  (auth)/   ← 라우트그룹 = 역할 경계
-├─ features/<name>/   기능 단위. ui/ api/ model/ 하위로.
-└─ shared/      ui/ api/ hooks/  — 2곳 이상 기능이 쓰는 것만.
+├─ app/                                     라우팅 + 코로케이션 트리
+│  ├─ ()/ (customer)/ (partner)/ (auth)/       ← 라우트그룹 = 역할 경계
+│  │  └─ <segment>/
+│  │     ├─ page.tsx · layout.tsx           라우팅·셸 (비즈니스 로직 최소)
+│  │     ├─ _components/                    세그먼트 전용 컴포넌트
+│  │     ├─ _hooks/                         세그먼트 전용 훅
+│  │     ├─ _api/                           쿼리·뮤테이션·keys(factory)
+│  │     ├─ _model/                         zod 스키마·타입
+│  │     └─ [param]/ · sub/                 하위 라우트 = 동일 구조 재귀
+│  │  └─ _shared/                           그룹 국소 공유
+└─ shared/   ui/ api/ hooks/ lib/ mocks/    앱 전역 공유(2곳+)
 ```
+- `_` 접두 폴더 = Next.js 프라이빗 폴더(라우팅에서 제외). 코로케이션 메커니즘.
+- 함께 바뀌는 코드는 그 세그먼트 폴더 안에 둔다(종류별 X, 위치별 O).
 
 **배치 결정 트리:**
-1. 라우팅/레이아웃인가? → `app/`
-2. 특정 기능 전용인가? → `features/<name>/`
-3. 2개 이상 기능이 공유하는가? → `shared/`. **1곳만 쓰면 features 안에 둔다** (성급한 공유화 = 결합도 ↑).
+1. 라우팅/레이아웃/셸인가? → `app/.../page.tsx`·`layout.tsx`
+2. 이 라우트 세그먼트 전용인가? → 같은 세그먼트의 `_components`/`_hooks`/`_api`/`_model`
+3. 형제 세그먼트 2곳+이 공유하는가? → **가장 가까운 공통 조상의 `_shared/`로 승격**
+4. 앱 전역(여러 그룹)에서 공유하는가? → `src/shared/`. **1곳만 쓰면 승격하지 말고 세그먼트 안에 둔다** (성급한 공유화 = 결합도 ↑).
 
 **네이밍:**
 - 컴포넌트 파일·이름: PascalCase (`ReportCard.tsx`)

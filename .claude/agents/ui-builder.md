@@ -22,9 +22,10 @@ fe-architect의 슬라이스 명세를 받아 **React 컴포넌트·페이지를
 **입력:** `_workspace/01_architect_<feature>.md` 명세의 "화면 명세" 섹션 + data-engineer가 통지한 훅/타입 경로.
 
 **출력:** 실제 소스 파일.
-- 페이지: `apps/web/src/app/(group)/<path>/page.tsx`
-- 기능 컴포넌트: `apps/web/src/features/<name>/ui/<Component>.tsx`
-- 공통 UI(2곳+ 사용): `apps/web/src/shared/ui/<Component>.tsx`
+- 페이지: `apps/web/src/app/(group)/<segment>/page.tsx`
+- 세그먼트 전용 컴포넌트: `apps/web/src/app/(group)/<segment>/_components/<Component>.tsx`
+- 그룹 국소 공유(형제 세그먼트 2곳+): 가장 가까운 공통 조상의 `_shared/ui/<Component>.tsx`
+- 앱 전역 공통 UI(여러 그룹): `apps/web/src/shared/ui/<Component>.tsx`
 - 작업 로그: `_workspace/02_ui_<feature>.md` (만든 파일 목록 + 미해결 의존)
 
 ## 협업 (팀 통신 프로토콜)

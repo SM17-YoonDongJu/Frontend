@@ -28,7 +28,7 @@ export const reportSummarySchema = z.object({
 });
 export type ReportSummary = z.infer<typeof reportSummarySchema>;
 ```
-- 2개 이상 기능이 쓰면 `packages/shared/src/<domain>.ts`. 1곳만 쓰면 `features/<name>/model/<domain>.ts`.
+- 크로스앱 공유면 `packages/shared/src/<domain>.ts`, 앱 전역이면 `apps/web/src/shared/api`. 세그먼트 전용이면 `app/(group)/<segment>/_model/<domain>.ts`.
 - 응답 파싱 시 `schema.parse(json)`로 런타임 검증 — 백엔드 shape 어긋남을 경계에서 잡는다.
 
 ## 2. 쿼리키 = factory 패턴
@@ -69,7 +69,7 @@ export function useReportList(filter?: ReportFilter) {
   });
 }
 ```
-- 훅은 `features/<name>/api/use<Thing>.ts`. 반환은 raw `useQuery` 결과(예측가능성: 같은 종류 훅은 같은 모양).
+- 훅은 세그먼트의 `app/(group)/<segment>/_api/use<Thing>.ts`. 반환은 raw `useQuery` 결과(예측가능성: 같은 종류 훅은 같은 모양).
 - 뮤테이션은 `onSuccess`에서 관련 키 무효화. 낙관적 업데이트는 폴링 리스트엔 불필요.
 
 ## 5. MSW 핸들러 = 계약 거울

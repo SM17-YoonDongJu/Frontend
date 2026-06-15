@@ -9,7 +9,7 @@ React 19. 복합 컴포넌트·재사용 로직을 만들 때 읽는다. 패턴�
 상태·효과 로직을 함수로 분리해 JSX와 가른다.
 
 ```ts
-// features/report-request/model/useAccidentForm.ts
+// app/(customer)/report-request/_hooks/useAccidentForm.ts
 export function useAccidentForm(initial?: AccidentInput) {
   const [values, setValues] = useState(initial ?? EMPTY_ACCIDENT);
   const setField = <K extends keyof AccidentInput>(key: K, v: AccidentInput[K]) =>
@@ -21,8 +21,8 @@ export function useAccidentForm(initial?: AccidentInput) {
 
 **프로젝트 규칙:**
 - **반환 모양 일관(예측가능성)**: 데이터 훅은 `{ data, isPending, isError }`(쿼리 훅 모양), 폼 훅은 `{ values, setField, isValid, errors }`. 같은 종류면 같은 모양.
-- **배치(응집성)**: 기능 전용 훅은 `features/<name>/model`(또는 `api`)에. 종류별 `hooks/`에 모으지 않는다.
-- **승격(결합도)**: 2곳+ 쓰는 훅만 `shared/hooks`로. 1곳뿐이면 올리지 않는다.
+- **배치(응집성)**: 세그먼트 전용 훅은 그 세그먼트의 `_hooks`(또는 `_api`/`_model`)에. 종류별 전역 `hooks/`에 모으지 않는다.
+- **승격(결합도)**: 형제 2곳+ 쓰는 훅만 공통 조상 `_shared/hooks`(또는 전역 `src/shared/hooks`)로. 1곳뿐이면 올리지 않는다.
 - **추출 시점**: 로직이 2곳+ 반복 / 본문에서 "무엇을 렌더"가 안 보일 때. 한 번 쓰고 단순하면 인라인 유지(성급한 추출 금지).
 
 ## 2. Compound Component — 복합 UI 합성
