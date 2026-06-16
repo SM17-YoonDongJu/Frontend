@@ -27,3 +27,6 @@ pnpm-debug.log*
 # native
 apps/mobile/ios/Pods/
 apps/mobile/android/.gradle/
+
+*storybook.log
+storybook-static
