@@ -6,24 +6,10 @@ import {
   type TextareaHTMLAttributes
 } from "react";
 import { cn } from "@/shared/lib/utils";
+import { Chevron } from "@/shared/ui/icons/Chevron";
 
 const control =
   "w-full rounded-input border bg-card text-[14.5px] text-ink outline-none transition placeholder:text-ink-3 focus:border-gold focus:ring-[3px] focus:ring-gold-soft";
-
-function Chevron() {
-  return (
-    <svg
-      className="pointer-events-none absolute right-[13px] top-1/2 -translate-y-1/2 text-ink-3"
-      width="17"
-      height="17"
-      viewBox="0 0 24 24"
-      fill="none"
-      aria-hidden
-    >
-      <path d="M5 9l7 7 7-7" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 /** 네이티브 input 속성(required·autoComplete·maxLength·aria-*·data-* 등)을 모두 상속.
  *  우리가 직접 다루는 키만 Omit 후 커스텀 정의로 대체한다. */

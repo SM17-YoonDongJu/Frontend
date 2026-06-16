@@ -64,6 +64,8 @@ src/
 4. 앱 전역(여러 그룹)에서 공유하는가? → `src/shared/`. **1곳만 쓰면 승격하지 말고 세그먼트 안에 둔다** (성급한 공유화 = 결합도 ↑).
 
 **네이밍:**
+- **1파일 1컴포넌트**: 한 파일은 컴포넌트 하나만 export. 파일 내부 사적 헬퍼 컴포넌트(아이콘·스피너 등)도 별도 파일로 분리한다.
+- **사적 SVG 아이콘은 `shared/ui/icons/`로 격리**: 도메인 컴포넌트(`shared/ui` flat)와 섞지 않는다. 아이콘 파일은 순수 SVG만 두고, 위치·여백 클래스는 소비처에서 준다(단일 소비처면 둬도 무방).
 - 컴포넌트 파일·이름: PascalCase (`ReportCard.tsx`)
 - 훅: `use` 접두 camelCase (`useReportList.ts`)
 - 상수: UPPER_SNAKE (`STALE_TIME_AUTH`)
