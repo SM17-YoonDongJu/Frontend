@@ -10,6 +10,7 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@insurance/config": "workspace:*",
+    "@playwright/test": "^1.61.0",
     "@storybook/addon-a11y": "10.4.4",
     "@storybook/addon-docs": "10.4.4",
     "@storybook/nextjs-vite": "10.4.4",
