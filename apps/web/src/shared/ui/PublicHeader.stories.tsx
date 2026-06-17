@@ -1,18 +1,18 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Footer } from "./Footer";
+import { PublicHeader } from "./PublicHeader";
 
 const meta = {
-  title: "UI/Footer",
-  component: Footer,
+  title: "UI/PublicHeader",
+  component: PublicHeader,
   parameters: { layout: "fullscreen" }
-} satisfies Meta<typeof Footer>;
+} satisfies Meta<typeof PublicHeader>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-/** 모바일 폭(2단 그리드) 확인용. */
+/** 모바일 폭(네비 숨김, 로고 + CTA만) 확인용. */
 export const Mobile: Story = {
   globals: { viewport: { value: "mobile1" } }
 };

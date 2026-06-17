@@ -11,16 +11,18 @@ const preview: Preview = {
       }
     },
     backgrounds: {
-      default: "paper",
-      values: [
-        { name: "paper", value: "#f4f1ea" },
-        { name: "card", value: "#ffffff" }
-      ]
+      options: {
+        paper: { name: "paper", value: "#f4f1ea" },
+        card: { name: "card", value: "#ffffff" }
+      }
     },
     a11y: {
       // 'todo' = 위반을 테스트 UI에만 표시 / 'error' = CI 실패 / 'off' = 끔
       test: "todo"
     }
+  },
+  initialGlobals: {
+    backgrounds: { value: "paper" }
   }
 };
 
