@@ -20,25 +20,27 @@ export function PublicHeader() {
           바른보상
         </Link>
 
-        <nav className="hidden items-center gap-8 md:flex">
-          {NAV_ITEMS.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="text-sm text-ink-2 transition hover:text-ink"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="flex items-center gap-6">
+          <nav className="hidden items-center gap-8 md:flex">
+            {NAV_ITEMS.map((item) => (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="text-sm text-ink-2 transition hover:text-ink"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-        <div className="flex items-center gap-2">
-          <Link href="#" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-            로그인
-          </Link>
-          <Link href="#" className={buttonVariants({ variant: "primary", size: "sm" })}>
-            회원가입
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="#" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+              로그인
+            </Link>
+            <Link href="#" className={buttonVariants({ variant: "primary", size: "sm" })}>
+              회원가입
+            </Link>
+          </div>
         </div>
       </div>
     </header>
