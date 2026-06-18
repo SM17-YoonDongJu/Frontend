@@ -2,6 +2,7 @@
 
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import { Button } from "@/shared/ui/Button";
+import { DatePicker } from "@/shared/ui/DatePicker";
 import { Input } from "@/shared/ui/Input";
 import type { AdjustRequestDraft } from "../_model/types";
 
@@ -29,11 +30,11 @@ export function Step3AccidentDate() {
           control={control}
           name="accidentDate"
           render={({ field }) => (
-            <Input
-              type="date"
-              className="max-w-[200px]"
-              value={field.value ?? ""}
+            <DatePicker
+              className="max-w-[220px]"
+              value={field.value}
               onChange={field.onChange}
+              placeholder="사고 발생일 선택"
               error={errors.accidentDate?.message}
             />
           )}
@@ -78,10 +79,10 @@ export function Step3AccidentDate() {
                       control={control}
                       name={`hospitalizations.${index}.start`}
                       render={({ field: f }) => (
-                        <Input
-                          type="date"
-                          value={f.value ?? ""}
+                        <DatePicker
+                          value={f.value ?? undefined}
                           onChange={f.onChange}
+                          placeholder="입원일 선택"
                           error={errors.hospitalizations?.[index]?.start?.message}
                         />
                       )}
@@ -93,10 +94,10 @@ export function Step3AccidentDate() {
                       control={control}
                       name={`hospitalizations.${index}.end`}
                       render={({ field: f }) => (
-                        <Input
-                          type="date"
-                          value={f.value ?? ""}
+                        <DatePicker
+                          value={f.value ?? undefined}
                           onChange={f.onChange}
+                          placeholder="퇴원일 선택"
                           error={errors.hospitalizations?.[index]?.end?.message}
                         />
                       )}

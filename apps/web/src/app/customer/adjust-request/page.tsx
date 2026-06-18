@@ -36,8 +36,8 @@ function AdjustRequestFunnel() {
     form.clearErrors();
     if (!result.success) {
       for (const issue of result.error.issues) {
-        const name = issue.path[0];
-        if (typeof name === "string") {
+        const name = issue.path.join("."); // 중첩/배열 경로 포함 (예: hospitalizations.0.start)
+        if (name) {
           form.setError(name as FieldPath<AdjustRequestDraft>, { message: issue.message });
         }
       }
