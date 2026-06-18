@@ -22,11 +22,8 @@ export function EstimatedPayout({
           <p className="mt-0.5 text-[12px] text-white/50">이 사정서의 검토 범위 · 참고용 추정</p>
         </div>
         {confidenceLevel && (
-          <div className="w-[220px] shrink-0">
-            <div className="mb-1.5 flex justify-between text-[11px] text-white/40">
-              <span>최저 견적치</span>
-              <span>최대 견적치</span>
-            </div>
+          <div className="w-[200px] shrink-0">
+            <p className="mb-2 text-right text-[11px] text-white/50">분석 신뢰도</p>
             <ConfidenceGauge level={confidenceLevel} />
           </div>
         )}

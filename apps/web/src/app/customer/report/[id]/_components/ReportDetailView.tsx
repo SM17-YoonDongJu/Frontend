@@ -58,7 +58,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
           claimedMaxAmount={data.claimedMaxAmount}
           offeredAmount={data.offeredAmount}
         />
-        <AdjusterContact nickname={data.adjuster?.nickname} career={data.adjuster?.career} />
+        <AdjusterContact nickname={data.adjuster?.nickname} />
       </aside>
       </div>
     </div>
