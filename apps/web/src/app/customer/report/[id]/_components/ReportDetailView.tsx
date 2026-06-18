@@ -13,15 +13,7 @@ import { ReportSummary } from "./ReportSummary";
 import { ReportSummaryAside } from "./ReportSummaryAside";
 
 export function ReportDetailView({ reportId }: { reportId: string }) {
-  const { data, isPending, isError } = useReportDetail(reportId);
-
-  if (isPending) {
-    return <p className="px-4 py-16 text-center text-ink-3">리포트를 불러오는 중…</p>;
-  }
-
-  if (isError || !data) {
-    return <p className="px-4 py-16 text-center text-ink-3">리포트를 불러오지 못했습니다.</p>;
-  }
+  const { data } = useReportDetail(reportId);
 
   return (
     <div className="mx-auto w-full max-w-[1080px] px-4 py-8">

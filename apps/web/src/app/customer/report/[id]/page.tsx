@@ -1,6 +1,6 @@
-import { ReportDetailView } from "./_components/ReportDetailView";
+import { ReportDetailBoundary } from "./_components/ReportDetailBoundary";
 
 export default async function ReportPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <ReportDetailView reportId={id} />;
+  return <ReportDetailBoundary reportId={id} />;
 }
