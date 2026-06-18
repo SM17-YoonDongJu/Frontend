@@ -63,6 +63,10 @@ export const handlers = [
         issue: ["의료자문 동의서 누락", "장해등급 적용 재검토", "진행 방향: 추가 자료 확보 후 재산정"],
         question: "보험금이 적게 나온 것 같아요",
         adjusterId: crypto.randomUUID(),
+        reviewComment:
+          "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다.",
+        reviewedAt: "2026.05.22",
+        adjuster: { nickname: "정우성", career: "12년 경력 손해사정사" },
       },
     });
   }),

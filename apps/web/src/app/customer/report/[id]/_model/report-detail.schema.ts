@@ -23,4 +23,12 @@ export const reportDetailSchema = z.object({
   issue: z.array(z.string()),
   question: z.string().nullable(),
   adjusterId: z.uuid().nullable(),
+  reviewComment: z.string().nullable(),
+  reviewedAt: z.string().nullable(),
+  adjuster: z
+    .object({
+      nickname: z.string(),
+      career: z.string().nullable(),
+    })
+    .nullable(),
 });

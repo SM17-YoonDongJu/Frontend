@@ -26,6 +26,9 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
           status={data.status}
           accidentType={data.accidentType}
           treatment={data.treatment}
+          reviewComment={data.reviewComment}
+          reviewedAt={data.reviewedAt}
+          adjusterName={data.adjuster?.nickname}
         />
         <EstimatedPayout
           claimedMinAmount={data.claimedMinAmount}
