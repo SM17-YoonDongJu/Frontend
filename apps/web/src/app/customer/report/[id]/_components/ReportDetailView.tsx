@@ -2,6 +2,7 @@
 
 import { useReportDetail } from "../_api/use-report-detail";
 import { EstimatedPayout } from "./EstimatedPayout";
+import { IssueReview } from "./IssueReview";
 import { ReportSummary } from "./ReportSummary";
 
 export function ReportDetailView({ reportId }: { reportId: string }) {
@@ -28,6 +29,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
           claimedMaxAmount={data.claimedMaxAmount}
           offeredAmount={data.offeredAmount}
         />
+        <IssueReview issues={data.issue} />
       </div>
       <aside />
     </div>
