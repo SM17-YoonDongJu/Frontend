@@ -9,6 +9,7 @@ import { Step1AccidentType } from "./_components/Step1AccidentType";
 import { Step2TreatmentDetail } from "./_components/Step2TreatmentDetail";
 import { Step3AccidentDate } from "./_components/Step3AccidentDate";
 import { Step4OfferedAmount } from "./_components/Step4OfferedAmount";
+import { Step5Documents } from "./_components/Step5Documents";
 import { useDraftAutosave, loadDraft } from "./_hooks/use-draft";
 import { useFunnel } from "./_hooks/use-funnel";
 import { FUNNEL_STEPS } from "./_model/funnel-config";
@@ -58,7 +59,8 @@ function AdjustRequestFunnel() {
           {funnel.currentStep === 2 && <Step2TreatmentDetail />}
           {funnel.currentStep === 3 && <Step3AccidentDate />}
           {funnel.currentStep === 4 && <Step4OfferedAmount />}
-          {funnel.currentStep > 4 && <StepPlaceholder title={step.title} />}
+          {funnel.currentStep === 5 && <Step5Documents />}
+          {funnel.currentStep > 5 && <StepPlaceholder title={step.title} />}
         </div>
       </FormProvider>
 

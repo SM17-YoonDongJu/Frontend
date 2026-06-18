@@ -51,6 +51,15 @@ export const step4InsuranceSchema = z
     message: "제안받은 보험금을 입력하거나 '아직 제안받지 않았어요'를 선택하세요.",
   });
 
+export const step5DocumentSchema = z.object({
+  documentUrls: z.array(z.url()).nullish(), // 업로드된 증빙 url, 선택
+});
+
+/** POST /uploads 응답 data. */
+export const uploadDocumentResponseSchema = z.object({
+  url: z.url(),
+});
+
 /** 자동저장용 — 부분 입력 허용. 슬라이스마다 필드 추가. */
 export const adjustRequestDraftSchema = z.object({
   accidentType: accidentTypeSchema.optional(),
@@ -64,4 +73,5 @@ export const adjustRequestDraftSchema = z.object({
   hospitalizations: z.array(hospitalizationSchema).optional(),
   insuranceNotOffered: z.boolean().optional(),
   insuranceOffered: z.number().int().min(0).nullish(),
+  documentUrls: z.array(z.url()).nullish(),
 });
