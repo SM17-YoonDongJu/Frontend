@@ -25,7 +25,7 @@ export function AccidentTypeCard({
       disabled={disabled}
       onClick={onSelect}
       className={cn(
-        "flex items-center justify-between gap-3 rounded-card border px-4 py-3.5 text-left transition",
+        "flex min-h-[64px] items-center justify-between gap-3 rounded-card border px-5 py-4 text-left transition",
         selected ? "border-ink bg-ink text-white" : "border-line bg-card text-ink",
         disabled ? "cursor-not-allowed opacity-[.45]" : "hover:border-ink/40",
       )}

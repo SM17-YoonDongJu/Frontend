@@ -5,11 +5,32 @@ import { z } from "zod";
 /** MVP는 실손 의료비 단일. 그 외는 UNSUPPORTED_OPERATION. */
 export const accidentTypeSchema = z.enum(["MEDICAL_EXPENSE"]);
 
+/** 치료 형태(복수). FE 내부 표현 — 제출 시 additionalInformation으로 직렬화. */
+export const treatmentTypeSchema = z.enum(["ADMISSION", "OUTPATIENT", "MEDICATION", "SURGERY"]);
+
+/** 비급여 포함 여부. */
+export const nonCoveredOptionSchema = z.enum(["INCLUDED", "EXCLUDED", "UNKNOWN"]);
+
 export const step1AccidentTypeSchema = z.object({
   accidentType: accidentTypeSchema,
+});
+
+export const step2TreatmentSchema = z.object({
+  treatmentTypes: z.array(treatmentTypeSchema).min(1, "치료 형태를 선택하세요."),
+  diagnosis: z.string().min(1, "진단명·치료 내용을 입력하세요."),
+  treatmentCount: z.number().int().min(0).nullable(), // 입원·통원 횟수(회)
+  totalTreatmentCost: z.number().int().min(0).nullable(), // 총 치료비 본인부담(원)
+  nonCoveredOption: nonCoveredOptionSchema,
+  enrolledInsurance: z.string().nullable(),
 });
 
 /** 자동저장용 — 부분 입력 허용. 슬라이스마다 필드 추가. */
 export const adjustRequestDraftSchema = z.object({
   accidentType: accidentTypeSchema.optional(),
+  treatmentTypes: z.array(treatmentTypeSchema).optional(),
+  diagnosis: z.string().optional(),
+  treatmentCount: z.number().int().min(0).nullable().optional(),
+  totalTreatmentCost: z.number().int().min(0).nullable().optional(),
+  nonCoveredOption: nonCoveredOptionSchema.optional(),
+  enrolledInsurance: z.string().nullable().optional(),
 });

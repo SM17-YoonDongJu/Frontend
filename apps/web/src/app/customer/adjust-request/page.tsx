@@ -1,15 +1,15 @@
 "use client";
 
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Suspense } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import type { FieldPath } from "react-hook-form";
 import { FunnelFooter } from "./_components/FunnelFooter";
 import { FunnelProgress } from "./_components/FunnelProgress";
 import { Step1AccidentType } from "./_components/Step1AccidentType";
+import { Step2TreatmentDetail } from "./_components/Step2TreatmentDetail";
 import { useDraftAutosave, loadDraft } from "./_hooks/use-draft";
 import { useFunnel } from "./_hooks/use-funnel";
 import { FUNNEL_STEPS } from "./_model/funnel-config";
-import { adjustRequestDraftSchema } from "./_model/report-request.schema";
 import type { AdjustRequestDraft } from "./_model/types";
 
 function StepPlaceholder({ title }: { title: string }) {
@@ -24,32 +24,37 @@ function StepPlaceholder({ title }: { title: string }) {
 function AdjustRequestFunnel() {
   const funnel = useFunnel();
   const form = useForm<AdjustRequestDraft>({
-    resolver: zodResolver(adjustRequestDraftSchema),
     defaultValues: loadDraft(),
-    mode: "onChange",
   });
   useDraftAutosave(form.watch);
 
   const step = FUNNEL_STEPS[funnel.currentStep - 1]!; // currentStep은 1..total로 clamp됨
 
-  const handleNext = async () => {
-    const ok = await form.trigger(step.fields);
-    if (!ok) return;
+  const handleNext = () => {
+    const result = step.schema.safeParse(form.getValues());
+    form.clearErrors();
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        const name = issue.path[0];
+        if (typeof name === "string") {
+          form.setError(name as FieldPath<AdjustRequestDraft>, { message: issue.message });
+        }
+      }
+      return;
+    }
     if (funnel.isLast) return; // 제출은 이후 슬라이스
     funnel.next();
   };
 
   return (
-    <div className="mx-auto w-full max-w-[640px] px-4 py-8">
+    <div className="mx-auto w-full max-w-[760px] px-4 py-8">
       <FunnelProgress current={funnel.currentStep} total={funnel.total} title={step.title} />
 
       <FormProvider {...form}>
         <div className="mt-6 rounded-card-lg border border-line bg-card p-6">
-          {funnel.currentStep === 1 ? (
-            <Step1AccidentType />
-          ) : (
-            <StepPlaceholder title={step.title} />
-          )}
+          {funnel.currentStep === 1 && <Step1AccidentType />}
+          {funnel.currentStep === 2 && <Step2TreatmentDetail />}
+          {funnel.currentStep > 2 && <StepPlaceholder title={step.title} />}
         </div>
       </FormProvider>
 
