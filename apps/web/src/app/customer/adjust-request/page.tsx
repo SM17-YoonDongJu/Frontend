@@ -86,7 +86,7 @@ function AdjustRequestFunnel() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-[760px] px-4 pb-12 pt-8">
+    <div className="mx-auto min-h-[100dvh] w-full max-w-[760px] px-4 pb-12 pt-8">
       <FunnelProgress current={funnel.currentStep} total={funnel.total} title={step.title} />
 
       <FormProvider {...form}>
