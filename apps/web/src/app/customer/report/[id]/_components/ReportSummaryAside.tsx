@@ -19,7 +19,7 @@ export function ReportSummaryAside({
   const meta = REPORT_STATUS_META[status];
 
   return (
-    <div className="rounded-card-lg border border-line bg-card p-6 lg:sticky lg:top-6">
+    <div className="rounded-card-lg border border-line bg-card p-6">
       <h2 className="text-[15px] font-semibold text-ink">한눈에 보기</h2>
 
       <dl className="mt-4 space-y-4">

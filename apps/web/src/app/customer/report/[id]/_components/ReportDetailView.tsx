@@ -6,6 +6,7 @@ import { CoveragePotentialMissing } from "./CoveragePotentialMissing";
 import { EstimatedPayout } from "./EstimatedPayout";
 import { IssueReview } from "./IssueReview";
 import { LegalBasis } from "./LegalBasis";
+import { AdjusterContact } from "./AdjusterContact";
 import { ReportSummary } from "./ReportSummary";
 import { ReportSummaryAside } from "./ReportSummaryAside";
 
@@ -43,13 +44,14 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
         </div>
         <LegalBasis items={data.basisTermsPrecedents} />
       </div>
-      <aside>
+      <aside className="space-y-6 lg:sticky lg:top-6 lg:self-start">
         <ReportSummaryAside
           status={data.status}
           claimedMinAmount={data.claimedMinAmount}
           claimedMaxAmount={data.claimedMaxAmount}
           offeredAmount={data.offeredAmount}
         />
+        <AdjusterContact nickname={data.adjuster?.nickname} career={data.adjuster?.career} />
       </aside>
     </div>
   );
