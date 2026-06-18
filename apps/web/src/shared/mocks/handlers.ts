@@ -37,4 +37,33 @@ export const handlers = [
       data: { reportId: crypto.randomUUID(), status: "AWAITING_INSPECTION" },
     });
   }),
+
+  // 리포트 상세 조회
+  http.get(`${API_BASE_URL}/reports/:reportId`, async ({ params }) => {
+    await delay(500);
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        reportId: params.reportId,
+        status: "MATCHED",
+        accidentType: "질병",
+        treatment: "요추 추간판 탈출증",
+        claimedMinAmount: 13_500_000,
+        claimedMaxAmount: 17_000_000,
+        offeredAmount: 8_500_000,
+        applicableGuarantees: ["상해후유장해 담보", "골절 진단비 특약", "입원·통원 일당"],
+        omittedSpecialContract: ["외모변형 장해특약"],
+        basisTermsPrecedents: [
+          "약관 제12조 (후유장해 보험금 산정기준)",
+          "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
+          "대법원 2019다○○○○ (후유장해 인과관계 판단)",
+        ],
+        issue: ["의료자문 동의서 누락", "장해등급 적용 재검토", "진행 방향: 추가 자료 확보 후 재산정"],
+        question: "보험금이 적게 나온 것 같아요",
+        adjusterId: crypto.randomUUID(),
+      },
+    });
+  }),
 ];
