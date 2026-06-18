@@ -34,10 +34,6 @@ export function AdjusterContact({ nickname }: AdjusterContactProps) {
       >
         이 의견으로 상담하기
       </Button>
-
-      <p className="mt-3 text-center text-[11.5px] text-ink-3">
-        보수 기준은 상담 시 사전 안내됩니다.
-      </p>
     </div>
   );
 }
