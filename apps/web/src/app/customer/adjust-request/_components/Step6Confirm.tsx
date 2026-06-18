@@ -28,9 +28,11 @@ export function Step6Confirm() {
   const stays = v.hospitalizations ?? [];
   const starts = stays.map((s) => s.start).filter(Boolean).sort();
   const ends = stays.map((s) => s.end).filter((x): x is string => !!x).sort();
+  const hasOngoingStay = stays.some((s) => s.start && !s.end);
+  const lastEnd = ends[ends.length - 1];
   const hospitalRange =
     starts.length > 0
-      ? `${starts[0]} ~ ${ends[ends.length - 1] ?? "진행 중"}`
+      ? `${starts[0]} ~ ${hasOngoingStay ? "진행 중" : (lastEnd ?? "진행 중")}`
       : "없음";
 
   const treatments = (v.treatmentTypes ?? []).map((t) => TREATMENT_LABELS[t]).join(", ") || "-";
