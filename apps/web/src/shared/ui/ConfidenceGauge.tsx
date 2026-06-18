@@ -25,7 +25,7 @@ export function ConfidenceGauge({ level, showLabel = true, className, ...props }
           style={{ left: `${percent}%` }}
         />
       </div>
-      {showLabel && <span className="shrink-0 text-[13px] font-semibold text-ink">{label}</span>}
+      {showLabel && <span className="shrink-0 text-[13px] font-semibold">{label}</span>}
     </div>
   );
 }

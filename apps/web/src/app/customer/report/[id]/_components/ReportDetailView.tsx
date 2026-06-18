@@ -36,6 +36,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
           claimedMinAmount={data.claimedMinAmount}
           claimedMaxAmount={data.claimedMaxAmount}
           offeredAmount={data.offeredAmount}
+          confidenceLevel={data.confidenceLevel}
         />
         <IssueReview issues={data.issue} />
         <div className="grid gap-6 md:grid-cols-2">
