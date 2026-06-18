@@ -7,7 +7,10 @@ export function CoverageApplicable({ guarantees }: CoverageApplicableProps) {
 
   return (
     <section className="rounded-card-lg border border-line bg-card p-6">
-      <h2 className="text-[17px] font-semibold text-ink">적용 가능 보장</h2>
+      <div className="flex items-center gap-2">
+        <h2 className="text-[17px] font-semibold text-ink">적용 가능 보장</h2>
+        <span className="text-[13px] text-ink-3">{guarantees.length}건</span>
+      </div>
       <ul className="mt-4 space-y-2">
         {guarantees.map((guarantee, i) => (
           <li key={i} className="flex items-center gap-2 text-[14px] text-ink-2">

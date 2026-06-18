@@ -4,21 +4,24 @@ import { ConfidenceGauge, type ConfidenceLevel } from "@/shared/ui/ConfidenceGau
 export interface EstimatedPayoutProps {
   claimedMinAmount: number;
   claimedMaxAmount: number;
-  offeredAmount?: number | null;
   confidenceLevel?: ConfidenceLevel | null;
 }
 
 export function EstimatedPayout({
   claimedMinAmount,
   claimedMaxAmount,
-  offeredAmount,
   confidenceLevel,
 }: EstimatedPayoutProps) {
   return (
     <section className="rounded-card-lg bg-navy p-6 text-white">
       <div className="flex items-start justify-between gap-6">
         <div>
-          <p className="text-[14px] font-semibold">검토 보장</p>
+          <p className="flex items-center gap-1.5 text-[14px] font-semibold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" className="text-terra-2" aria-hidden>
+              <path d="M12 9v4m0 4h.01M10.3 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.7 3.86a2 2 0 0 0-3.42 0Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            검토 보장
+          </p>
           <p className="mt-0.5 text-[12px] text-white/50">이 사정서의 검토 범위 · 참고용 추정</p>
         </div>
         {confidenceLevel && (
@@ -40,13 +43,6 @@ export function EstimatedPayout({
           확실함 — 현재 자료 기준 단계적으로 검토하는 보수적 범위입니다.
         </p>
       </div>
-
-      {offeredAmount != null && (
-        <div className="mt-5 flex items-center justify-between border-t border-white/15 pt-4 text-[14px]">
-          <span className="text-white/60">보험사 제안 금액</span>
-          <AmountRange min={offeredAmount} className="text-white" />
-        </div>
-      )}
     </section>
   );
 }

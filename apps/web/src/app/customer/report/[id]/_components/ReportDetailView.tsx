@@ -41,7 +41,6 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
         <EstimatedPayout
           claimedMinAmount={data.claimedMinAmount}
           claimedMaxAmount={data.claimedMaxAmount}
-          offeredAmount={data.offeredAmount}
           confidenceLevel={data.confidenceLevel}
         />
         <IssueReview issues={data.issue} />
