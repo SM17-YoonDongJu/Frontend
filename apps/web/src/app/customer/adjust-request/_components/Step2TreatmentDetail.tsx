@@ -1,6 +1,7 @@
 "use client";
 
 import { Controller, useFormContext } from "react-hook-form";
+import { blockNonNumericKeys, toNonNegativeInt } from "@/shared/lib/number-input";
 import { Input } from "@/shared/ui/Input";
 import { ToggleChip } from "./ToggleChip";
 import type { AdjustRequestDraft, NonCoveredOption, TreatmentType } from "../_model/types";
@@ -94,7 +95,8 @@ export function Step2TreatmentDetail() {
                 placeholder="예) 12"
                 suffix="회"
                 value={field.value ?? ""}
-                onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                onKeyDown={blockNonNumericKeys}
+                onChange={(e) => field.onChange(toNonNegativeInt(e.target.value))}
               />
             )}
           />
@@ -112,7 +114,8 @@ export function Step2TreatmentDetail() {
                 placeholder="예) 3200000"
                 suffix="원"
                 value={field.value ?? ""}
-                onChange={(e) => field.onChange(e.target.value === "" ? null : Number(e.target.value))}
+                onKeyDown={blockNonNumericKeys}
+                onChange={(e) => field.onChange(toNonNegativeInt(e.target.value))}
               />
             )}
           />

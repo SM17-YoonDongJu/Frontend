@@ -41,6 +41,16 @@ export const step2TreatmentSchema = z.object({
   enrolledInsurance: z.string().nullish(),
 });
 
+export const step4InsuranceSchema = z
+  .object({
+    insuranceNotOffered: z.boolean(),
+    insuranceOffered: z.number().int().min(0).nullish(), // 제안받은 보험금(원)
+  })
+  .refine((v) => v.insuranceNotOffered || v.insuranceOffered != null, {
+    path: ["insuranceOffered"],
+    message: "제안받은 보험금을 입력하거나 '아직 제안받지 않았어요'를 선택하세요.",
+  });
+
 /** 자동저장용 — 부분 입력 허용. 슬라이스마다 필드 추가. */
 export const adjustRequestDraftSchema = z.object({
   accidentType: accidentTypeSchema.optional(),
@@ -52,4 +62,6 @@ export const adjustRequestDraftSchema = z.object({
   enrolledInsurance: z.string().nullable().optional(),
   accidentDate: z.string().optional(),
   hospitalizations: z.array(hospitalizationSchema).optional(),
+  insuranceNotOffered: z.boolean().optional(),
+  insuranceOffered: z.number().int().min(0).nullish(),
 });
