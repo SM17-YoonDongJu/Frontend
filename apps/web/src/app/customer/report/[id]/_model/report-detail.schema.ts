@@ -9,6 +9,15 @@ export const reportStatusSchema = z.enum([
   "MATCHED",
 ]);
 
+export const issueStatusSchema = z.enum(["CONFIRMED", "TRUSTED", "INFO"]);
+
+export const issueItemSchema = z.object({
+  title: z.string(),
+  opinion: z.string(),
+  status: issueStatusSchema,
+  tag: z.string().nullable(),
+});
+
 export const reportDetailSchema = z.object({
   reportId: z.uuid(),
   status: reportStatusSchema,
@@ -20,7 +29,7 @@ export const reportDetailSchema = z.object({
   applicableGuarantees: z.array(z.string()),
   omittedSpecialContract: z.array(z.string()),
   basisTermsPrecedents: z.array(z.string()),
-  issue: z.array(z.string()),
+  issue: z.array(issueItemSchema),
   question: z.string().nullable(),
   adjusterId: z.uuid().nullable(),
   confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullable(),
