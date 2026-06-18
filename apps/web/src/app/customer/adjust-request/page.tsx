@@ -1,10 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { FieldPath } from "react-hook-form";
 import { useCreateReport } from "./_api/use-create-report";
+import { SubmitComplete } from "./_components/SubmitComplete";
 import { FunnelFooter } from "./_components/FunnelFooter";
 import { FunnelProgress } from "./_components/FunnelProgress";
 import { Step1AccidentType } from "./_components/Step1AccidentType";
@@ -17,13 +17,13 @@ import { useDraftAutosave, loadDraft, clearDraft } from "./_hooks/use-draft";
 import { useFunnel } from "./_hooks/use-funnel";
 import { FUNNEL_STEPS, firstIncompleteStep } from "./_model/funnel-config";
 import { toCreateReportBody } from "./_model/report-request.schema";
-import type { AdjustRequestDraft } from "./_model/types";
+import type { AdjustRequestDraft, CreateReportResponse } from "./_model/types";
 
 function AdjustRequestFunnel() {
-  const router = useRouter();
   const funnel = useFunnel();
   const createReport = useCreateReport();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [result, setResult] = useState<CreateReportResponse | null>(null);
 
   const form = useForm<AdjustRequestDraft>({
     defaultValues: loadDraft(),
@@ -55,9 +55,9 @@ function AdjustRequestFunnel() {
   const handleSubmit = () => {
     setSubmitError(null);
     createReport.mutate(toCreateReportBody(form.getValues()), {
-      onSuccess: () => {
+      onSuccess: (data) => {
         clearDraft();
-        router.push("/customer/dashboard");
+        setResult(data);
       },
       onError: (e) => setSubmitError(e.message),
     });
@@ -72,8 +72,21 @@ function AdjustRequestFunnel() {
     funnel.next();
   };
 
+  if (result) {
+    return (
+      <SubmitComplete
+        result={result}
+        onRestart={() => {
+          setResult(null);
+          form.reset({});
+          funnel.goTo(1, { replace: true });
+        }}
+      />
+    );
+  }
+
   return (
-    <div className="mx-auto w-full max-w-[760px] px-4 py-8">
+    <div className="mx-auto w-full max-w-[760px] px-4 pb-12 pt-8">
       <FunnelProgress current={funnel.currentStep} total={funnel.total} title={step.title} />
 
       <FormProvider {...form}>

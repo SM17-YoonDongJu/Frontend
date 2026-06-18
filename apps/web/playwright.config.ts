@@ -15,6 +15,14 @@ export default defineConfig({
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
     },
+    {
+      name: "webkit", // Safari 엔진
+      use: { ...devices["Desktop Safari"] },
+    },
+    {
+      name: "edge",
+      use: { ...devices["Desktop Edge"], channel: "msedge" },
+    },
   ],
   webServer: {
     command: "pnpm dev",

@@ -8,10 +8,10 @@ interface FunnelFooterProps {
   onNext: () => void;
 }
 
-/** 하단 이전/다음(마지막은 분석 요청). */
+/** 이전/다음(마지막은 분석 요청). 일반 흐름 — 중간 영역 아래에 위치. */
 export function FunnelFooter({ isFirst, isLast, loading, onPrev, onNext }: FunnelFooterProps) {
   return (
-    <div className="mt-8 flex items-center justify-between">
+    <div className="mt-6 flex items-center justify-between">
       <Button variant="ghost" onClick={onPrev} disabled={isFirst || loading}>
         ‹ 이전
       </Button>
