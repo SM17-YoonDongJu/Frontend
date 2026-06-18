@@ -7,6 +7,7 @@ import { FunnelFooter } from "./_components/FunnelFooter";
 import { FunnelProgress } from "./_components/FunnelProgress";
 import { Step1AccidentType } from "./_components/Step1AccidentType";
 import { Step2TreatmentDetail } from "./_components/Step2TreatmentDetail";
+import { Step3AccidentDate } from "./_components/Step3AccidentDate";
 import { useDraftAutosave, loadDraft } from "./_hooks/use-draft";
 import { useFunnel } from "./_hooks/use-funnel";
 import { FUNNEL_STEPS } from "./_model/funnel-config";
@@ -54,7 +55,8 @@ function AdjustRequestFunnel() {
         <div className="mt-6 rounded-card-lg border border-line bg-card p-6">
           {funnel.currentStep === 1 && <Step1AccidentType />}
           {funnel.currentStep === 2 && <Step2TreatmentDetail />}
-          {funnel.currentStep > 2 && <StepPlaceholder title={step.title} />}
+          {funnel.currentStep === 3 && <Step3AccidentDate />}
+          {funnel.currentStep > 3 && <StepPlaceholder title={step.title} />}
         </div>
       </FormProvider>
 
