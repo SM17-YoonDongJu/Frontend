@@ -1,6 +1,7 @@
 "use client";
 
 import { useReportDetail } from "../_api/use-report-detail";
+import { CoverageApplicable } from "./CoverageApplicable";
 import { EstimatedPayout } from "./EstimatedPayout";
 import { IssueReview } from "./IssueReview";
 import { ReportSummary } from "./ReportSummary";
@@ -30,6 +31,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
           offeredAmount={data.offeredAmount}
         />
         <IssueReview issues={data.issue} />
+        <CoverageApplicable guarantees={data.applicableGuarantees} />
       </div>
       <aside />
     </div>
