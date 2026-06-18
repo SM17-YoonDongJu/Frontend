@@ -7,6 +7,7 @@ import { EstimatedPayout } from "./EstimatedPayout";
 import { IssueReview } from "./IssueReview";
 import { LegalBasis } from "./LegalBasis";
 import { AdjusterContact } from "./AdjusterContact";
+import { ReportActions } from "./ReportActions";
 import { ReportHeader } from "./ReportHeader";
 import { ReportSummary } from "./ReportSummary";
 import { ReportSummaryAside } from "./ReportSummaryAside";
@@ -28,6 +29,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
         accidentType={data.accidentType}
         treatment={data.treatment}
         issueCount={data.issue.length}
+        actions={<ReportActions report={data} />}
       />
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">

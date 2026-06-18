@@ -1,12 +1,13 @@
-import { Button } from "@/shared/ui/Button";
+import type { ReactNode } from "react";
 
 export interface ReportHeaderProps {
   accidentType: string;
   treatment: string;
   issueCount: number;
+  actions?: ReactNode;
 }
 
-export function ReportHeader({ accidentType, treatment, issueCount }: ReportHeaderProps) {
+export function ReportHeader({ accidentType, treatment, issueCount, actions }: ReportHeaderProps) {
   return (
     <header className="flex flex-wrap items-start justify-between gap-4">
       <div>
@@ -23,14 +24,7 @@ export function ReportHeader({ accidentType, treatment, issueCount }: ReportHead
         <h1 className="mt-2 font-serif text-[26px] font-bold text-ink">보험 보상 분석 리포트</h1>
       </div>
 
-      <div className="flex shrink-0 gap-2">
-        <Button variant="outline" size="sm">
-          PDF 저장
-        </Button>
-        <Button variant="outline" size="sm">
-          공유
-        </Button>
-      </div>
+      {actions}
     </header>
   );
 }
