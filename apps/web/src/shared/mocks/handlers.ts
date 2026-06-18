@@ -39,14 +39,14 @@ export const handlers = [
   }),
 
   // 리포트 상세 조회
-  http.get(`${API_BASE_URL}/reports/:reportId`, async ({ params }) => {
+  http.get(`${API_BASE_URL}/reports/:reportId`, async () => {
     await delay(500);
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
-        reportId: params.reportId,
+        reportId: crypto.randomUUID(),
         status: "MATCHED",
         accidentType: "질병",
         treatment: "요추 추간판 탈출증",
