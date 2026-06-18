@@ -7,6 +7,7 @@ import { EstimatedPayout } from "./EstimatedPayout";
 import { IssueReview } from "./IssueReview";
 import { LegalBasis } from "./LegalBasis";
 import { AdjusterContact } from "./AdjusterContact";
+import { ReportHeader } from "./ReportHeader";
 import { ReportSummary } from "./ReportSummary";
 import { ReportSummaryAside } from "./ReportSummaryAside";
 
@@ -22,15 +23,20 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
   }
 
   return (
-    <div className="mx-auto grid w-full max-w-[1080px] gap-6 px-4 py-8 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-6">
+    <div className="mx-auto w-full max-w-[1080px] px-4 py-8">
+      <ReportHeader
+        accidentType={data.accidentType}
+        treatment={data.treatment}
+        issueCount={data.issue.length}
+      />
+      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
+        <div className="space-y-6">
         <ReportSummary
           status={data.status}
-          accidentType={data.accidentType}
-          treatment={data.treatment}
           reviewComment={data.reviewComment}
           reviewedAt={data.reviewedAt}
           adjusterName={data.adjuster?.nickname}
+          adjusterCareer={data.adjuster?.career}
         />
         <EstimatedPayout
           claimedMinAmount={data.claimedMinAmount}
@@ -54,6 +60,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
         />
         <AdjusterContact nickname={data.adjuster?.nickname} career={data.adjuster?.career} />
       </aside>
+      </div>
     </div>
   );
 }

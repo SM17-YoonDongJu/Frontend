@@ -1,0 +1,31 @@
+import { Button } from "@/shared/ui/Button";
+
+export interface ReportHeaderProps {
+  accidentType: string;
+  treatment: string;
+  issueCount: number;
+}
+
+export function ReportHeader({ accidentType, treatment, issueCount }: ReportHeaderProps) {
+  return (
+    <header className="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <div className="flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-3">
+          <span className="rounded-pill bg-paper-2 px-2.5 py-1">{accidentType}</span>
+          <span className="rounded-pill bg-paper-2 px-2.5 py-1">{treatment}</span>
+          <span className="rounded-pill bg-paper-2 px-2.5 py-1">검수 의견 {issueCount}건</span>
+        </div>
+        <h1 className="mt-2 font-serif text-[26px] font-bold text-ink">보험 보상 분석 리포트</h1>
+      </div>
+
+      <div className="flex shrink-0 gap-2">
+        <Button variant="outline" size="sm">
+          PDF 저장
+        </Button>
+        <Button variant="outline" size="sm">
+          공유
+        </Button>
+      </div>
+    </header>
+  );
+}
