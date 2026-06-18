@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Gowun_Batang } from "next/font/google";
-import { MockProvider } from "@/shared/mocks/mock-provider";
-import QueryProvider from "@/shared/providers/query-provider";
+import { Providers } from "@/shared/providers";
 import "./globals.css";
 
-// Title 계열 전용 세리프. CJK라 전체 preload 안 함(용량) → preload: false.
 const gowunBatang = Gowun_Batang({
   weight: ["400", "700"],
   variable: "--font-gowun-batang",
@@ -21,10 +19,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ko" className={gowunBatang.variable}>
-      <body className="min-h-dvh bg-white text-gray-900 antialiased">
-        <MockProvider>
-          <QueryProvider>{children}</QueryProvider>
-        </MockProvider>
+      <body className="min-h-dvh bg-paper text-ink antialiased">
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
