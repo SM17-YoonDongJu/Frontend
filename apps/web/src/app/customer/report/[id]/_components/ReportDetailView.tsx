@@ -7,6 +7,7 @@ import { EstimatedPayout } from "./EstimatedPayout";
 import { IssueReview } from "./IssueReview";
 import { LegalBasis } from "./LegalBasis";
 import { ReportSummary } from "./ReportSummary";
+import { ReportSummaryAside } from "./ReportSummaryAside";
 
 export function ReportDetailView({ reportId }: { reportId: string }) {
   const { data, isPending, isError } = useReportDetail(reportId);
@@ -42,7 +43,14 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
         </div>
         <LegalBasis items={data.basisTermsPrecedents} />
       </div>
-      <aside />
+      <aside>
+        <ReportSummaryAside
+          status={data.status}
+          claimedMinAmount={data.claimedMinAmount}
+          claimedMaxAmount={data.claimedMaxAmount}
+          offeredAmount={data.offeredAmount}
+        />
+      </aside>
     </div>
   );
 }
