@@ -60,6 +60,32 @@ export const uploadDocumentResponseSchema = z.object({
   url: z.url(),
 });
 
+export const step6ConsentSchema = z.object({
+  agreedToPrivacy: z.literal(true, { message: "민감정보 처리에 동의해 주세요." }),
+  agreedToTerms: z.literal(true, { message: "필수 고지사항을 확인해 주세요." }),
+});
+
+/** POST /reports 요청 body (naming-dictionary §3). */
+export const createReportBodySchema = z.object({
+  productId: z.uuid().optional(), // 퍼널에 상품선택 없음 → 생략
+  accidentType: accidentTypeSchema,
+  accidentDate: z.string(),
+  diagnosis: z.string(),
+  insuranceOffered: z.number().int().nullable(),
+  hospitalStart: z.string().nullable(),
+  hospitalEnd: z.string().nullable(),
+  description: z.string().nullable(),
+  additionalInformation: z.string().nullable(),
+  documentUrls: z.array(z.string()).nullable(),
+  question: z.string().nullable(),
+});
+
+/** POST /reports 응답 data. */
+export const createReportResponseSchema = z.object({
+  reportId: z.uuid(),
+  status: z.string(), // CONTRACT: 생성 직후 status 백엔드 확인(MSW는 AWAITING_INSPECTION)
+});
+
 /** 자동저장용 — 부분 입력 허용. 슬라이스마다 필드 추가. */
 export const adjustRequestDraftSchema = z.object({
   accidentType: accidentTypeSchema.optional(),
@@ -74,4 +100,65 @@ export const adjustRequestDraftSchema = z.object({
   insuranceNotOffered: z.boolean().optional(),
   insuranceOffered: z.number().int().min(0).nullish(),
   documentUrls: z.array(z.url()).nullish(),
+  agreedToPrivacy: z.boolean().optional(),
+  agreedToTerms: z.boolean().optional(),
 });
+
+const TREATMENT_LABELS: Record<z.infer<typeof treatmentTypeSchema>, string> = {
+  ADMISSION: "입원",
+  OUTPATIENT: "통원",
+  MEDICATION: "약제",
+  SURGERY: "수술",
+};
+const NON_COVERED_LABELS: Record<z.infer<typeof nonCoveredOptionSchema>, string> = {
+  INCLUDED: "포함",
+  EXCLUDED: "미포함",
+  UNKNOWN: "모름",
+};
+
+/** 무매핑 입력을 사정사가 읽을 라벨:값 텍스트로 직렬화(기계 파싱 아님 → 가독성 우선). */
+function serializeAdditionalInformation(draft: AdjustRequestDraftInput): string | null {
+  const lines: string[] = [];
+  if (draft.treatmentTypes?.length) {
+    lines.push(`치료형태: ${draft.treatmentTypes.map((t) => TREATMENT_LABELS[t]).join(", ")}`);
+  }
+  if (draft.treatmentCount != null) lines.push(`입원·통원 횟수: ${draft.treatmentCount}회`);
+  if (draft.totalTreatmentCost != null) lines.push(`총 치료비(본인부담): ${draft.totalTreatmentCost}원`);
+  if (draft.nonCoveredOption) lines.push(`비급여 포함 여부: ${NON_COVERED_LABELS[draft.nonCoveredOption]}`);
+  if (draft.enrolledInsurance) lines.push(`가입보험·특약: ${draft.enrolledInsurance}`);
+
+  const reasons = (draft.hospitalizations ?? [])
+    .map((h, i) => (h.reason ? `입원 ${i + 1} 사유: ${h.reason}` : null))
+    .filter((v): v is string => v !== null);
+  lines.push(...reasons);
+
+  return lines.length ? lines.join("\n") : null;
+}
+
+type AdjustRequestDraftInput = z.infer<typeof adjustRequestDraftSchema>;
+
+/**
+ * draft를 POST /reports body로 변환.
+ * 입원 기록 배열 → hospitalStart(최초 입원일)·hospitalEnd(최종 퇴원일)로 압축,
+ * 입원 사유 등 무매핑 입력은 additionalInformation으로.
+ */
+export function toCreateReportBody(
+  draft: AdjustRequestDraftInput,
+): z.infer<typeof createReportBodySchema> {
+  const stays = draft.hospitalizations ?? [];
+  const starts = stays.map((s) => s.start).filter(Boolean).sort();
+  const ends = stays.map((s) => s.end).filter((v): v is string => !!v).sort();
+
+  return createReportBodySchema.parse({
+    accidentType: draft.accidentType ?? "MEDICAL_EXPENSE",
+    accidentDate: draft.accidentDate ?? "",
+    diagnosis: draft.diagnosis ?? "",
+    insuranceOffered: draft.insuranceNotOffered ? null : (draft.insuranceOffered ?? null),
+    hospitalStart: starts[0] ?? null,
+    hospitalEnd: ends[ends.length - 1] ?? null,
+    description: null,
+    additionalInformation: serializeAdditionalInformation(draft),
+    documentUrls: draft.documentUrls ?? null,
+    question: null,
+  });
+}

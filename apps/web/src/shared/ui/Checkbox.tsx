@@ -14,7 +14,7 @@ export function Checkbox({ checked, onChange, label, disabled, className }: Chec
   return (
     <label
       className={cn(
-        "inline-flex cursor-pointer select-none items-center gap-2.5 text-[14px] text-ink",
+        "relative inline-flex cursor-pointer select-none items-center gap-2.5 text-[14px] text-ink",
         disabled && "cursor-not-allowed opacity-60",
         className,
       )}

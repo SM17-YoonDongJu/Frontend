@@ -1,8 +1,10 @@
 "use client";
 
-import { Suspense } from "react";
+import { useRouter } from "next/navigation";
+import { Suspense, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { FieldPath } from "react-hook-form";
+import { useCreateReport } from "./_api/use-create-report";
 import { FunnelFooter } from "./_components/FunnelFooter";
 import { FunnelProgress } from "./_components/FunnelProgress";
 import { Step1AccidentType } from "./_components/Step1AccidentType";
@@ -10,22 +12,19 @@ import { Step2TreatmentDetail } from "./_components/Step2TreatmentDetail";
 import { Step3AccidentDate } from "./_components/Step3AccidentDate";
 import { Step4OfferedAmount } from "./_components/Step4OfferedAmount";
 import { Step5Documents } from "./_components/Step5Documents";
-import { useDraftAutosave, loadDraft } from "./_hooks/use-draft";
+import { Step6Confirm } from "./_components/Step6Confirm";
+import { useDraftAutosave, loadDraft, clearDraft } from "./_hooks/use-draft";
 import { useFunnel } from "./_hooks/use-funnel";
 import { FUNNEL_STEPS } from "./_model/funnel-config";
+import { toCreateReportBody } from "./_model/report-request.schema";
 import type { AdjustRequestDraft } from "./_model/types";
 
-function StepPlaceholder({ title }: { title: string }) {
-  return (
-    <section className="py-10 text-center text-ink-3">
-      <p className="font-serif text-[18px] text-ink">{title}</p>
-      <p className="mt-1 text-[13px]">준비 중인 단계입니다.</p>
-    </section>
-  );
-}
-
 function AdjustRequestFunnel() {
+  const router = useRouter();
   const funnel = useFunnel();
+  const createReport = useCreateReport();
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
   const form = useForm<AdjustRequestDraft>({
     defaultValues: loadDraft(),
   });
@@ -33,19 +32,36 @@ function AdjustRequestFunnel() {
 
   const step = FUNNEL_STEPS[funnel.currentStep - 1]!; // currentStep은 1..total로 clamp됨
 
-  const handleNext = () => {
+  const validateStep = () => {
     const result = step.schema.safeParse(form.getValues());
     form.clearErrors();
     if (!result.success) {
       for (const issue of result.error.issues) {
-        const name = issue.path.join("."); // 중첩/배열 경로 포함 (예: hospitalizations.0.start)
-        if (name) {
-          form.setError(name as FieldPath<AdjustRequestDraft>, { message: issue.message });
-        }
+        const name = issue.path.join(".");
+        if (name) form.setError(name as FieldPath<AdjustRequestDraft>, { message: issue.message });
       }
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = () => {
+    setSubmitError(null);
+    createReport.mutate(toCreateReportBody(form.getValues()), {
+      onSuccess: () => {
+        clearDraft();
+        router.push("/customer/dashboard");
+      },
+      onError: (e) => setSubmitError(e.message),
+    });
+  };
+
+  const handleNext = () => {
+    if (!validateStep()) return;
+    if (funnel.isLast) {
+      handleSubmit();
       return;
     }
-    if (funnel.isLast) return; // 제출은 이후 슬라이스
     funnel.next();
   };
 
@@ -60,13 +76,18 @@ function AdjustRequestFunnel() {
           {funnel.currentStep === 3 && <Step3AccidentDate />}
           {funnel.currentStep === 4 && <Step4OfferedAmount />}
           {funnel.currentStep === 5 && <Step5Documents />}
-          {funnel.currentStep > 5 && <StepPlaceholder title={step.title} />}
+          {funnel.currentStep === 6 && <Step6Confirm />}
         </div>
       </FormProvider>
+
+      {submitError && (
+        <p className="mt-3 text-[13px] font-medium text-terra">{submitError}</p>
+      )}
 
       <FunnelFooter
         isFirst={funnel.isFirst}
         isLast={funnel.isLast}
+        loading={createReport.isPending}
         onPrev={funnel.prev}
         onNext={handleNext}
       />

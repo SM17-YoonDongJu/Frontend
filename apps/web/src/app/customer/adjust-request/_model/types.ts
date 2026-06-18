@@ -5,6 +5,8 @@ import type {
   nonCoveredOptionSchema,
   hospitalizationSchema,
   uploadDocumentResponseSchema,
+  createReportBodySchema,
+  createReportResponseSchema,
   adjustRequestDraftSchema,
 } from "./report-request.schema";
 
@@ -14,4 +16,6 @@ export type TreatmentType = z.infer<typeof treatmentTypeSchema>;
 export type NonCoveredOption = z.infer<typeof nonCoveredOptionSchema>;
 export type Hospitalization = z.infer<typeof hospitalizationSchema>;
 export type UploadDocumentResponse = z.infer<typeof uploadDocumentResponseSchema>;
+export type CreateReportBody = z.infer<typeof createReportBodySchema>;
+export type CreateReportResponse = z.infer<typeof createReportResponseSchema>;
 export type AdjustRequestDraft = z.infer<typeof adjustRequestDraftSchema>;
