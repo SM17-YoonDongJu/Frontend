@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { FieldPath } from "react-hook-form";
 import { useCreateReport } from "./_api/use-create-report";
@@ -15,7 +15,7 @@ import { Step5Documents } from "./_components/Step5Documents";
 import { Step6Confirm } from "./_components/Step6Confirm";
 import { useDraftAutosave, loadDraft, clearDraft } from "./_hooks/use-draft";
 import { useFunnel } from "./_hooks/use-funnel";
-import { FUNNEL_STEPS } from "./_model/funnel-config";
+import { FUNNEL_STEPS, firstIncompleteStep } from "./_model/funnel-config";
 import { toCreateReportBody } from "./_model/report-request.schema";
 import type { AdjustRequestDraft } from "./_model/types";
 
@@ -31,6 +31,13 @@ function AdjustRequestFunnel() {
   useDraftAutosave(form.watch);
 
   const step = FUNNEL_STEPS[funnel.currentStep - 1]!; // currentStep은 1..total로 clamp됨
+
+  // 단계 가드: 선행 단계 미완 상태로 직접 진입(?step=N) 시 첫 미완 단계로 돌림
+  useEffect(() => {
+    const allowed = firstIncompleteStep(form.getValues());
+    if (funnel.currentStep > allowed) funnel.goTo(allowed, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [funnel.currentStep]);
 
   const validateStep = () => {
     const result = step.schema.safeParse(form.getValues());

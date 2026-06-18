@@ -13,10 +13,12 @@ export function useFunnel() {
   const currentStep = clamp(Number(searchParams.get("step")) || 1);
 
   const goTo = useCallback(
-    (step: number) => {
+    (step: number, opts?: { replace?: boolean }) => {
       const params = new URLSearchParams(searchParams);
       params.set("step", String(clamp(step)));
-      router.push(`?${params.toString()}`, { scroll: false });
+      const url = `?${params.toString()}`;
+      if (opts?.replace) router.replace(url, { scroll: false });
+      else router.push(url, { scroll: false });
     },
     [router, searchParams],
   );

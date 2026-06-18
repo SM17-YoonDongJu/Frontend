@@ -24,3 +24,11 @@ export const FUNNEL_STEPS: FunnelStep[] = [
 ];
 
 export const FUNNEL_TOTAL = FUNNEL_STEPS.length;
+
+/** 선행 단계가 모두 통과하는 한도 = 도달 가능한 최대 step(1-based). */
+export function firstIncompleteStep(values: unknown): number {
+  for (let i = 0; i < FUNNEL_STEPS.length; i++) {
+    if (!FUNNEL_STEPS[i]!.schema.safeParse(values).success) return i + 1;
+  }
+  return FUNNEL_TOTAL;
+}
