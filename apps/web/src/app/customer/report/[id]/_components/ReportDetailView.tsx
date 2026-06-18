@@ -2,6 +2,7 @@
 
 import { useReportDetail } from "../_api/use-report-detail";
 import { CoverageApplicable } from "./CoverageApplicable";
+import { CoveragePotentialMissing } from "./CoveragePotentialMissing";
 import { EstimatedPayout } from "./EstimatedPayout";
 import { IssueReview } from "./IssueReview";
 import { ReportSummary } from "./ReportSummary";
@@ -31,7 +32,10 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
           offeredAmount={data.offeredAmount}
         />
         <IssueReview issues={data.issue} />
-        <CoverageApplicable guarantees={data.applicableGuarantees} />
+        <div className="grid gap-6 md:grid-cols-2">
+          <CoverageApplicable guarantees={data.applicableGuarantees} />
+          <CoveragePotentialMissing contracts={data.omittedSpecialContract} />
+        </div>
       </div>
       <aside />
     </div>
