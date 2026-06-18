@@ -5,6 +5,7 @@ import { CoverageApplicable } from "./CoverageApplicable";
 import { CoveragePotentialMissing } from "./CoveragePotentialMissing";
 import { EstimatedPayout } from "./EstimatedPayout";
 import { IssueReview } from "./IssueReview";
+import { LegalBasis } from "./LegalBasis";
 import { ReportSummary } from "./ReportSummary";
 
 export function ReportDetailView({ reportId }: { reportId: string }) {
@@ -36,6 +37,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
           <CoverageApplicable guarantees={data.applicableGuarantees} />
           <CoveragePotentialMissing contracts={data.omittedSpecialContract} />
         </div>
+        <LegalBasis items={data.basisTermsPrecedents} />
       </div>
       <aside />
     </div>
