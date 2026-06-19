@@ -72,6 +72,7 @@
 
 - `GET /reports/{reportID}` (상세): `reportId` · `status` · `accidentType` · `diagnosis` · `claimedMinAmount` · `claimedMaxAmount` · `offeredAmount`(보험사 제안금액·§7-1) · `applicableGuarantees`(string[] 적용가능 특약) · `omittedSpecialContract`(string[] 누락 특약) · `basisTermsPrecedents`(string[] 근거 약관·판례) · `issue`(string[] 쟁점) · `question` · `adjusterId`(nullable)
 - `GET /reports?status={status}&page={page}` (목록/프로세스): items[]{ `reportId` · `status` · `accidentType` · `createdAt` } + `page` · `totalPages` · `totalCount`
+- `GET /reports/pending-review?status&page&size` (검수 대기 목록·활성 사정사 전용·403 FORBIDDEN): `data.list[]{ reportId · accidentType · status · createdAt }` + `data.pagination{ page · size · totalElements · totalPages · hasNext }`
 - `PATCH /reports/{reportID}` (검수 반영): `applicableGuarantees`(N) · `omittedSpecialContract`(N) · `issue`(N) · `review`(string 사정사 의견) · `status`(N)
 
 ### matching — `POST /matches/{reportID}` (상담 신청)
