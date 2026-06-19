@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { REPORT_TITLE } from "../_model/report-meta";
 
 export interface ReportHeaderProps {
   accidentType: string;
@@ -21,7 +22,7 @@ export function ReportHeader({ accidentType, treatment, issueCount, actions }: R
             검수 의견 {issueCount}건
           </span>
         </div>
-        <h1 className="mt-2 font-serif text-[26px] font-bold text-ink">보험 보상 분석 리포트</h1>
+        <h1 className="mt-2 font-serif text-[26px] font-bold text-ink">{REPORT_TITLE}</h1>
       </div>
 
       {actions}

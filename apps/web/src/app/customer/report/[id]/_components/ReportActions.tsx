@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/shared/ui/Button";
+import { REPORT_FILENAME, REPORT_TITLE } from "../_model/report-meta";
 import type { ReportDetail } from "../_model/types";
 
 export function ReportActions({ report }: { report: ReportDetail }) {
@@ -13,7 +14,7 @@ export function ReportActions({ report }: { report: ReportDetail }) {
     const url = window.location.href;
     if (navigator.share) {
       try {
-        await navigator.share({ title: "보험 보상 분석 리포트", url });
+        await navigator.share({ title: REPORT_TITLE, url });
       } catch {
         // 사용자 취소 — 무시
       }
@@ -40,7 +41,7 @@ export function ReportActions({ report }: { report: ReportDetail }) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `보험보상분석리포트.pdf`;
+      a.download = REPORT_FILENAME;
       a.click();
       URL.revokeObjectURL(url);
     } catch {

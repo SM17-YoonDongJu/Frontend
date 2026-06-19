@@ -1,4 +1,5 @@
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { REPORT_TITLE } from "../_model/report-meta";
 import type { IssueStatus, ReportDetail } from "../_model/types";
 
 Font.register({
@@ -51,7 +52,7 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
         <Text style={s.crumb}>
           {report.accidentType} · {report.treatment} · 검수 의견 {report.issue.length}건
         </Text>
-        <Text style={s.title}>보험 보상 분석 리포트</Text>
+        <Text style={s.title}>{REPORT_TITLE}</Text>
 
         {(report.adjuster?.nickname || report.reviewComment) && (
           <View style={s.section}>
