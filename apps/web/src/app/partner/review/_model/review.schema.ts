@@ -9,6 +9,15 @@ export const reviewListItemSchema = z.object({
   accidentType: z.string(),
   status: reviewStatusSchema,
   createdAt: z.string(),
+  // ⚠️ API 명세 미정(드리프트) — 디자인 요구 카드 필드. 백엔드에 list 확장 요청.
+  caseId: z.string(),
+  title: z.string(),
+  region: z.string(),
+  matchingScore: z.number().int(),
+  claimedMinAmount: z.number().int(),
+  claimedMaxAmount: z.number().int(),
+  offerHeadroom: z.number().int(),
+  competitorCount: z.number().int(),
 });
 
 export const paginationSchema = z.object({
