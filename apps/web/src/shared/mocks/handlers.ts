@@ -38,6 +38,32 @@ export const handlers = [
     });
   }),
 
+  // 검수 대기 목록 (활성 손해사정사 전용) — :reportId 라우트보다 먼저 등록
+  http.get(`${API_BASE_URL}/reports/pending-review`, async ({ request }) => {
+    await delay(400);
+
+    const url = new URL(request.url, "http://localhost");
+    const page = Number(url.searchParams.get("page") ?? "1");
+    const size = Number(url.searchParams.get("size") ?? "10");
+
+    const list = [
+      { reportId: crypto.randomUUID(), accidentType: "후유장해", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z" },
+      { reportId: crypto.randomUUID(), accidentType: "교통사고", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z" },
+      { reportId: crypto.randomUUID(), accidentType: "후유장해", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z" },
+      { reportId: crypto.randomUUID(), accidentType: "실손", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z" },
+      { reportId: crypto.randomUUID(), accidentType: "교통사고", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z" },
+    ];
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list,
+        pagination: { page, size, totalElements: list.length, totalPages: 1, hasNext: false },
+      },
+    });
+  }),
+
   // 리포트 상세 조회
   http.get(`${API_BASE_URL}/reports/:reportId`, async () => {
     await delay(500);
