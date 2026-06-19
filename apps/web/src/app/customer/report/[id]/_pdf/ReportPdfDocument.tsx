@@ -1,13 +1,11 @@
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { IssueStatus, ReportDetail } from "../_model/types";
 
-const FONT_CDN = "https://cdn.jsdelivr.net/gh/google/fonts@main/ofl/gowunbatang";
-
 Font.register({
   family: "Gowun",
   fonts: [
-    { src: `${FONT_CDN}/GowunBatang-Regular.ttf` },
-    { src: `${FONT_CDN}/GowunBatang-Bold.ttf`, fontWeight: "bold" },
+    { src: "/fonts/GowunBatang-Regular.ttf" },
+    { src: "/fonts/GowunBatang-Bold.ttf", fontWeight: "bold" },
   ],
 });
 
