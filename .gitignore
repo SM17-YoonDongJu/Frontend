@@ -30,3 +30,8 @@ apps/mobile/android/.gradle/
 
 *storybook.log
 storybook-static
+
+# playwright
+test-results/
+playwright-report/
+playwright/.cache/
