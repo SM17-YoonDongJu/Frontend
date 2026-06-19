@@ -7,6 +7,7 @@ import type { ReportDetail } from "../_model/types";
 export function ReportActions({ report }: { report: ReportDetail }) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [pdfError, setPdfError] = useState(false);
 
   const handleShare = async () => {
     const url = window.location.href;
@@ -29,6 +30,7 @@ export function ReportActions({ report }: { report: ReportDetail }) {
 
   const handlePdf = async () => {
     setLoading(true);
+    setPdfError(false);
     try {
       const [{ pdf }, { ReportPdfDocument }] = await Promise.all([
         import("@react-pdf/renderer"),
@@ -41,19 +43,28 @@ export function ReportActions({ report }: { report: ReportDetail }) {
       a.download = `보험보상분석리포트.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+    } catch {
+      setPdfError(true);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex shrink-0 gap-2">
-      <Button variant="outline" size="sm" loading={loading} onClick={handlePdf}>
-        PDF 저장
-      </Button>
-      <Button variant="outline" size="sm" onClick={handleShare}>
-        {copied ? "링크 복사됨" : "공유"}
-      </Button>
+    <div className="flex shrink-0 flex-col items-end gap-1">
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" loading={loading} onClick={handlePdf}>
+          PDF 저장
+        </Button>
+        <Button variant="outline" size="sm" onClick={handleShare}>
+          {copied ? "링크 복사됨" : "공유"}
+        </Button>
+      </div>
+      {pdfError && (
+        <p role="alert" className="text-[12px] text-terra">
+          PDF 저장에 실패했어요. 잠시 후 다시 시도해 주세요.
+        </p>
+      )}
     </div>
   );
 }
