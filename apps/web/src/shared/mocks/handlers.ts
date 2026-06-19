@@ -37,4 +37,60 @@ export const handlers = [
       data: { reportId: crypto.randomUUID(), status: "AWAITING_INSPECTION" },
     });
   }),
+
+  // 리포트 상세 조회
+  http.get(`${API_BASE_URL}/reports/:reportId`, async () => {
+    await delay(500);
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        reportId: crypto.randomUUID(),
+        status: "MATCHED",
+        accidentType: "질병",
+        treatment: "요추 추간판 탈출증",
+        claimedMinAmount: 13_500_000,
+        claimedMaxAmount: 17_000_000,
+        offeredAmount: 8_500_000,
+        applicableGuarantees: ["상해후유장해 담보", "골절 진단비 특약", "입원·통원 일당"],
+        omittedSpecialContract: ["외모변형 장해특약"],
+        basisTermsPrecedents: [
+          "약관 제12조 (후유장해 보험금 산정기준)",
+          "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
+          "대법원 2019다○○○○ (후유장해 인과관계 판단)",
+        ],
+        issue: [
+          {
+            title: "외모추상 특약 누락",
+            opinion:
+              "누락분 청구 검토가 가장 확실한 출발점이에요. 촬영본·의무기록만으로도 검토를 시작할 수 있어요.",
+            status: "CONFIRMED",
+            tag: "특약 제5조",
+          },
+          {
+            title: "장해등급 적용",
+            opinion:
+              "현재 자료만으로는 12급 적용을 단정하기 어려워요. 6개월 경과 후 재검사 결과를 보고 판단하는 편이 안전해요.",
+            status: "TRUSTED",
+            tag: "약관 제12조",
+          },
+          {
+            title: "진행 방향",
+            opinion:
+              "추가 의료자료 확보 → 재산정 → 필요 시 분쟁조정 순서를 권해요. 서두르면 오히려 불리할 수 있어요.",
+            status: "INFO",
+            tag: "분쟁조정 절차",
+          },
+        ],
+        question: "보험금이 적게 나온 것 같아요",
+        confidenceLevel: "HIGH",
+        adjusterId: crypto.randomUUID(),
+        reviewComment:
+          "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다.",
+        reviewedAt: "2026.05.22",
+        adjuster: { nickname: "정우성", career: "12년 경력 손해사정사" },
+      },
+    });
+  }),
 ];

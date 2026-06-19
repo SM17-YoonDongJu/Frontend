@@ -1,14 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-/**
- * 고객 손해사정 요청 퍼널 E2E.
- *
- * 원칙(빅테크/공식 가이드):
- * - 격리: 각 테스트는 fresh navigation으로 독립 실행(Playwright/Google).
- * - 사용자 중심: role·text·placeholder로 접근, 구현 세부 의존 금지(Testing Library).
- * - auto-wait: 고정 sleep 없이 web-first assertion(toBeVisible) 사용 — flaky 회피.
- * - 데이터 통제: 응답은 MSW가 결정적으로 제공(랜덤 실패하는 업로드는 선택 단계라 happy-path에서 생략).
- */
 
 const PATH = "/customer/adjust-request";
 
