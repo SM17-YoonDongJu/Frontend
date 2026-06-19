@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { useUploadDocument } from "../_api/use-upload-document";
 import type { AdjustRequestDraft } from "../_model/types";
@@ -25,9 +25,15 @@ export function Step5Documents() {
   const upload = useUploadDocument();
   const [items, setItems] = useState<UploadItem[]>([]);
   const [rejected, setRejected] = useState<string[]>([]);
+  const mounted = useRef(false);
 
-  // 완료된 파일 url만 폼에 반영
+  // 완료된 파일 url만 폼에 반영. 첫 렌더(items 빈 상태)는 건너뛰어
+  // 복원된 documentUrls 덮어쓰기 방지. (File은 복원 불가 → items는 빈 채 시작)
   useEffect(() => {
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
     const urls = items.filter((i) => i.status === "done" && i.url).map((i) => i.url as string);
     setValue("documentUrls", urls.length ? urls : null);
   }, [items, setValue]);
