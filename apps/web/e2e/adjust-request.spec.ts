@@ -33,7 +33,10 @@ async function fillThroughConsent(page: import("@playwright/test").Page) {
   // step3 사고 일자 — 달력에서 날짜 선택
   await expect(page.getByRole("heading", { name: "언제 있었던 일인가요?" })).toBeVisible();
   await page.getByRole("button", { name: "사고 발생일 선택" }).click();
-  await page.getByRole("button", { name: /15일/ }).click();
+  await page
+    .getByRole("button", { name: /15일|15/ })
+    .first()
+    .click();
   await page.getByRole("button", { name: /다음/ }).click();
 
   // step4 보험금 — 미제안 선택(숫자 입력 생략)
