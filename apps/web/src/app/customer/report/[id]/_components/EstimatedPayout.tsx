@@ -1,6 +1,12 @@
 import { AmountRange } from "@/shared/ui/AmountRange";
 import { ConfidenceGauge, type ConfidenceLevel } from "@/shared/ui/ConfidenceGauge";
 
+const CONFIDENCE_NOTE: Record<ConfidenceLevel, string> = {
+  HIGH: "신뢰도 높음 — 현재 자료 기준 단계적으로 검토하는 보수적 범위입니다.",
+  MEDIUM: "신뢰도 보통 — 추가 자료 확보 시 범위가 조정될 수 있어요.",
+  LOW: "신뢰도 낮음 — 자료가 부족해 변동 폭이 커요. 자료 보강을 권해요.",
+};
+
 export interface EstimatedPayoutProps {
   claimedMinAmount: number;
   claimedMaxAmount: number;
@@ -39,9 +45,11 @@ export function EstimatedPayout({
           size="lg"
           className="text-white"
         />
-        <p className="max-w-[240px] rounded-card bg-white/10 px-4 py-3 text-[12.5px] leading-relaxed text-white/80">
-          확실함 — 현재 자료 기준 단계적으로 검토하는 보수적 범위입니다.
-        </p>
+        {confidenceLevel && (
+          <p className="max-w-[240px] rounded-card bg-white/10 px-4 py-3 text-[12.5px] leading-relaxed text-white/80">
+            {CONFIDENCE_NOTE[confidenceLevel]}
+          </p>
+        )}
       </div>
     </section>
   );
