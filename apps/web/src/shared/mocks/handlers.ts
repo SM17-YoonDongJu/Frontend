@@ -64,6 +64,17 @@ export const handlers = [
     });
   }),
 
+  // 검수 현황 요약 (⚠️ API 명세 미정 — 목업)
+  http.get(`${API_BASE_URL}/reports/pending-review/summary`, async () => {
+    await delay(300);
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { pendingCount: 5, specialtyMatchCount: 3, dueSoonCount: 1 },
+    });
+  }),
+
   // 리포트 상세 조회
   http.get(`${API_BASE_URL}/reports/:reportId`, async () => {
     await delay(500);

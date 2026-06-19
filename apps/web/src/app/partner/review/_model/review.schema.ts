@@ -23,3 +23,10 @@ export const reviewListSchema = z.object({
   list: z.array(reviewListItemSchema),
   pagination: paginationSchema,
 });
+
+/** 검수 현황 요약. ⚠️ API 명세 미정(드리프트) — 목업 사용, 백엔드 확인 필요. */
+export const reviewSummarySchema = z.object({
+  pendingCount: z.number().int(),
+  specialtyMatchCount: z.number().int(),
+  dueSoonCount: z.number().int(),
+});
