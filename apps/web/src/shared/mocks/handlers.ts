@@ -4,11 +4,11 @@ import { API_BASE_URL } from "@/shared/api/config";
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
-  // 증빙 업로드 — 지연 + ~30% 랜덤 실패(재시도 검증용)
-  http.post(`${API_BASE_URL}/uploads`, async () => {
-    await delay(800 + Math.random() * 700);
+  // 증빙 업로드 — 기본 성공(결정적). x-mock-failure 헤더로 실패 주입(재시도 검증용)
+  http.post(`${API_BASE_URL}/uploads`, async ({ request }) => {
+    await delay(800);
 
-    if (Math.random() < 0.3) {
+    if (request.headers.get("x-mock-failure") === "upload") {
       return HttpResponse.json(
         { status: "502", code: "EXTERNAL_API_ERROR", message: "업로드 처리 중 오류가 발생했습니다." },
         { status: 502 },

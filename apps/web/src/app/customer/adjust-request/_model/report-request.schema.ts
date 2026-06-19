@@ -69,14 +69,14 @@ export const step6ConsentSchema = z.object({
 export const createReportBodySchema = z.object({
   productId: z.uuid().optional(), // 퍼널에 상품선택 없음 → 생략
   accidentType: accidentTypeSchema,
-  accidentDate: z.string(),
-  diagnosis: z.string(),
+  accidentDate: z.string().date(),
+  diagnosis: z.string().min(1),
   insuranceOffered: z.number().int().nullable(),
   hospitalStart: z.string().nullable(),
   hospitalEnd: z.string().nullable(),
   description: z.string().nullable(),
   additionalInformation: z.string().nullable(),
-  documentUrls: z.array(z.string()).nullable(),
+  documentUrls: z.array(z.url()).nullable(),
   question: z.string().nullable(),
 });
 
@@ -151,8 +151,8 @@ export function toCreateReportBody(
 
   return createReportBodySchema.parse({
     accidentType: draft.accidentType ?? "MEDICAL_EXPENSE",
-    accidentDate: draft.accidentDate ?? "",
-    diagnosis: draft.diagnosis ?? "",
+    accidentDate: draft.accidentDate,
+    diagnosis: draft.diagnosis,
     insuranceOffered: draft.insuranceNotOffered ? null : (draft.insuranceOffered ?? null),
     hospitalStart: starts[0] ?? null,
     hospitalEnd: ends[ends.length - 1] ?? null,
