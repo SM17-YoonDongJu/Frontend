@@ -3,8 +3,7 @@ import { expect, test } from "@playwright/test";
 /**
  * 고객 보험 보상 분석 리포트 E2E (happy-path).
  *
- * 원칙: 핵심 사용자 흐름만 — 리포트 열람 + PDF 저장. 응답은 MSW가 결정적으로 제공.
- * 엣지·검증은 통합테스트(RTL+MSW) 영역.
+ * 원칙: 핵심 사용자 흐름만 — 리포트 열람 + PDF 저장. 응답은 MSW가 제공.
  */
 
 const PATH = "/customer/report/test-id-123";
