@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense } from "react";
 import { useReportDetail } from "@/app/customer/report/[id]/_api/use-report-detail";
 import { AmountRange } from "@/shared/ui/AmountRange";
+import { buttonVariants } from "@/shared/ui/Button";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
 import type { IssueStatus } from "@/app/customer/report/[id]/_model/types";
 
@@ -73,6 +75,13 @@ function DraftContent({ reportId }: { reportId: string }) {
           </ul>
         </section>
       )}
+
+      <Link
+        href={`/customer/report/${reportId}`}
+        className={buttonVariants({ variant: "outline", full: true, className: "mt-5" })}
+      >
+        초안 전체 보기
+      </Link>
     </div>
   );
 }
