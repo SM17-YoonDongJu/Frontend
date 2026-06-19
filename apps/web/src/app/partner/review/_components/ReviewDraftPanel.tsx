@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { useReportDetail } from "@/app/customer/report/[id]/_api/use-report-detail";
 import { AmountRange } from "@/shared/ui/AmountRange";
-import { buttonVariants } from "@/shared/ui/Button";
+import { Button, buttonVariants } from "@/shared/ui/Button";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
 import type { IssueStatus } from "@/app/customer/report/[id]/_model/types";
 
@@ -30,6 +31,7 @@ export function ReviewDraftPanel({ reportId }: { reportId: string | null }) {
 
 function DraftContent({ reportId }: { reportId: string }) {
   const { data } = useReportDetail(reportId);
+  const router = useRouter();
 
   return (
     <div className="rounded-card-lg border border-line bg-card p-5">
@@ -76,9 +78,18 @@ function DraftContent({ reportId }: { reportId: string }) {
         </section>
       )}
 
+      <Button
+        variant="gold"
+        full
+        className="mt-5"
+        onClick={() => router.push(`/partner/review/${reportId}`)}
+      >
+        검수 시작
+      </Button>
+
       <Link
         href={`/customer/report/${reportId}`}
-        className={buttonVariants({ variant: "outline", full: true, className: "mt-5" })}
+        className={buttonVariants({ variant: "outline", full: true, className: "mt-2" })}
       >
         초안 전체 보기
       </Link>
