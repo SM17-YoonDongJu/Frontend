@@ -8,15 +8,25 @@ export function useReviewFilter() {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const active = params.get("cat") as ReviewCategory | null;
 
-  const setActive = (cat: ReviewCategory) => {
+  const active = params.get("cat") as ReviewCategory | null;
+  const type = params.get("type") ?? "전체";
+  const region = params.get("region") ?? "전체";
+
+  const update = (key: string, value: string | null) => {
     const next = new URLSearchParams(params);
-    if (active === cat) next.delete("cat");
-    else next.set("cat", cat);
+    if (value === null || value === "전체") next.delete(key);
+    else next.set(key, value);
     const query = next.toString();
     router.replace(query ? `${pathname}?${query}` : pathname);
   };
 
-  return { active, setActive };
+  return {
+    active,
+    type,
+    region,
+    setActive: (cat: ReviewCategory) => update("cat", active === cat ? null : cat),
+    setType: (value: string) => update("type", value),
+    setRegion: (value: string) => update("region", value),
+  };
 }
