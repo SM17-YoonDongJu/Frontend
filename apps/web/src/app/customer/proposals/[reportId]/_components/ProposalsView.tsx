@@ -1,14 +1,13 @@
 "use client";
 
-import { useReportDetail } from "@/app/customer/report/[id]/_api/use-report-detail";
 import { useProposalList } from "../_api/use-proposal-list";
 import { AnalysisTargetCard } from "./AnalysisTargetCard";
 import { ProposalList } from "./ProposalList";
 
 export function ProposalsView({ reportId }: { reportId: string }) {
   const { data: proposalList } = useProposalList(reportId);
-  const { data: report } = useReportDetail(reportId);
 
+  const { target } = proposalList;
   const proposals = proposalList.list;
   const proposalCount = proposalList.pagination.totalElements;
 
@@ -24,7 +23,9 @@ export function ProposalsView({ reportId }: { reportId: string }) {
 
       <div className="mt-6">
         <AnalysisTargetCard
-          accidentType={report.accidentType}
+          accidentType={target.accidentType}
+          reportNo={target.reportNo}
+          receivedAt={target.receivedAt}
           proposalCount={proposalCount}
         />
       </div>
