@@ -47,6 +47,10 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
     router.push(`/customer/report/${reportId}`);
   };
 
+  const openAdjusterProfile = () => {
+    router.push(`/customer/adjusters/${adjusterId}`);
+  };
+
   const handleReject = () => {
     rejectProposal.mutate(adjusterId, {
       onSuccess: () => markRejected(adjusterId),
@@ -89,9 +93,8 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
         </div>
         <button
           type="button"
-          disabled
-          aria-label="프로필 보기 (준비 중)"
-          className="shrink-0 text-[13px] text-ink-3 disabled:cursor-not-allowed disabled:opacity-[.42]"
+          onClick={openAdjusterProfile}
+          className="shrink-0 text-[13px] text-ink-3 transition hover:text-ink"
         >
           프로필 보기
         </button>
