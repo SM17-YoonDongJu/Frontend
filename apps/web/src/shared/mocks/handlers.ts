@@ -1,6 +1,17 @@
 import { delay, http, HttpResponse } from "msw";
 import { API_BASE_URL } from "@/shared/api/config";
 
+// 검수 대기 목 데이터 — 보류 상태 반영 위해 모듈 스코프에 고정(reportId 안정)
+const PENDING_REVIEWS = [
+  { reportId: crypto.randomUUID(), accidentType: "후유장해", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", matchingScore: 96, claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2 },
+  { reportId: crypto.randomUUID(), accidentType: "교통사고", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z", caseId: "20260619-041", title: "다발성 늑골 골절 · 일실수입 과소 산정 의심", region: "경기 성남", matchingScore: 91, claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3 },
+  { reportId: crypto.randomUUID(), accidentType: "후유장해", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "20260618-030", title: "요추 추간판탈출 · 외모추상 특약 청구 누락", region: "서울 송파", matchingScore: 88, claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2 },
+  { reportId: crypto.randomUUID(), accidentType: "실손", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "20260618-019", title: "비급여 도수치료 · 통원 한도 적용 분쟁", region: "인천 연수", matchingScore: 74, claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1 },
+  { reportId: crypto.randomUUID(), accidentType: "교통사고", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z", caseId: "20260517-007", title: "경추 염좌 · 향후 치료비 미반영", region: "경기 수원", matchingScore: 82, claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 1_800_000, issueCount: 1 },
+];
+
+const heldReportIds = new Set<string>();
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
@@ -35,6 +46,55 @@ export const handlers = [
       status: "200",
       message: "분석 요청이 접수되었습니다.",
       data: { reportId: crypto.randomUUID(), status: "AWAITING_INSPECTION" },
+    });
+  }),
+
+  // 검수 대기 목록 (활성 손해사정사 전용) — :reportId 라우트보다 먼저 등록
+  http.get(`${API_BASE_URL}/reports/pending-review`, async ({ request }) => {
+    await delay(400);
+
+    const url = new URL(request.url, "http://localhost");
+    const page = Number(url.searchParams.get("page") ?? "1");
+    const size = Number(url.searchParams.get("size") ?? "10");
+
+    const list = PENDING_REVIEWS.map((review) => ({
+      ...review,
+      held: heldReportIds.has(review.reportId),
+    }));
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list,
+        pagination: { page, size, totalElements: list.length, totalPages: 1, hasNext: false },
+      },
+    });
+  }),
+
+  // 검수 보류 처리 (⚠️ API 명세 미정 — 목업)
+  http.patch(`${API_BASE_URL}/reports/:reportId/hold`, async ({ params }) => {
+    await delay(300);
+    const reportId = String(params.reportId);
+    heldReportIds.add(reportId);
+
+    return HttpResponse.json({
+      status: "200",
+      message: "보류 처리되었습니다.",
+      data: { reportId, held: true },
+    });
+  }),
+
+  // 검수 현황 요약 (⚠️ API 명세 미정 — 목업)
+  http.get(`${API_BASE_URL}/reports/pending-review/summary`, async () => {
+    await delay(300);
+
+    const pendingCount = PENDING_REVIEWS.filter((r) => !heldReportIds.has(r.reportId)).length;
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { pendingCount, specialtyMatchCount: 3, dueSoonCount: 1 },
     });
   }),
 

@@ -72,6 +72,7 @@
 
 - `GET /reports/{reportID}` (상세): `reportId` · `status` · `accidentType` · `diagnosis` · `claimedMinAmount` · `claimedMaxAmount` · `offeredAmount`(보험사 제안금액·§7-1) · `applicableGuarantees`(string[] 적용가능 특약) · `omittedSpecialContract`(string[] 누락 특약) · `basisTermsPrecedents`(string[] 근거 약관·판례) · `issue`(string[] 쟁점) · `question` · `adjusterId`(nullable)
 - `GET /reports?status={status}&page={page}` (목록/프로세스): items[]{ `reportId` · `status` · `accidentType` · `createdAt` } + `page` · `totalPages` · `totalCount`
+- `GET /reports/pending-review?status&page&size` (검수 대기 목록·활성 사정사 전용·403 FORBIDDEN): `data.list[]{ reportId · accidentType · status · createdAt }` + `data.pagination{ page · size · totalElements · totalPages · hasNext }`
 - `PATCH /reports/{reportID}` (검수 반영): `applicableGuarantees`(N) · `omittedSpecialContract`(N) · `issue`(N) · `review`(string 사정사 의견) · `status`(N)
 
 ### matching — `POST /matches/{reportID}` (상담 신청)
@@ -124,6 +125,9 @@ items[]{ `paymentId` · `amount`(int) · `type`(`SUBSCRIPTION`) · `status`(`PAI
 2. **`userId` 타입:** user/auth에선 `number(int)`, 그 외 모든 ID는 `uuid(string)`. zod에서 `z.number()` vs `z.string().uuid()` 구분 — 혼용 금지.
 3. **리포트 status 표기 혼재:** 목록 응답은 영문 enum(`MATCHED`…), 상세 응답 예시는 한글(`"완료"`·`"생성 중"`). **FE는 영문 enum 기준**으로 통일하고 한글은 표시 라벨로 매핑. 상세 status 실제값을 백엔드에 확인.
 4. **`userType` 값 혼재:** `register`는 `insured_person`/`adjuster`, `GET /users/me` 예시는 한글 `"검증 o 손해사정사"`(검증여부+역할 혼합). 코드값은 `insured_person`/`adjuster`, **검증 여부는 별도 필드로 분리** 필요 — 백엔드 확인.
+5. **검수 현황 요약 엔드포인트 미정:** 검수 대기 화면 상단 3카드(검수 대기/내 전문분야 매칭/마감 임박 건수)에 대응하는 API 없음. FE 임시값 `GET /reports/pending-review/summary` → `{ pendingCount, specialtyMatchCount, dueSoonCount }`로 목킹 중. 백엔드에 신설 요청 필요.
+6. **`pending-review` 목록 카드 필드 부족:** 명세 `list[]`는 `reportId·accidentType·status·createdAt` 4필드뿐인데 디자인은 더 요구. FE 임시 추가(목킹): `caseId`(접수번호 `YYYYMMDD-NNN`) · `title`(요약) · `region`(지역) · `matchingScore`(AI 매칭률 int %) · `claimedMinAmount`/`claimedMaxAmount`(예상 보상범위) · `offerHeadroom`(제안 대비 여력 int 원) · `issueCount`(쟁점 건수 int) · `held`(보류 여부 bool). 백엔드에 list 응답 확장 요청 필요.
+7. **검수 보류 엔드포인트 미정:** 사정사가 사건을 보류하는 API 없음. FE 임시값 `PATCH /reports/{reportId}/hold` → `{ reportId, held }`로 목킹 중. 백엔드에 신설 요청 필요(보류 상태 enum 포함).
 
 ## 출처
 

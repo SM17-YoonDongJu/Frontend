@@ -3,7 +3,7 @@ import { Scale } from "@/shared/ui/icons/Scale";
 import { Bell } from "@/shared/ui/icons/Bell";
 
 const NAV_ITEMS = [
-  { label: "검수 대기", href: "#", count: 5 },
+  { label: "검수 대기", href: "/partner/review", count: 5 },
   { label: "진행 중", href: "#" },
   { label: "이용안내", href: "#" }
 ] as const;
