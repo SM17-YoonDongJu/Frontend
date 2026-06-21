@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useReviewDetail } from "../_api/use-review-detail";
 import { useSubmitReview } from "../_api/use-submit-review";
 import { clearReviewDraft, useReviewDraft } from "../_hooks/use-review-draft";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { AccidentNarrativeSection } from "./AccidentNarrativeSection";
 import { AttachmentSection } from "./AttachmentSection";
 import { ClaimInfoSection } from "./ClaimInfoSection";
@@ -17,10 +18,11 @@ import { ReviewSidebar } from "./ReviewSidebar";
 
 export function ReviewDetailView({ reportId }: { reportId: string }) {
   const { data } = useReviewDetail(reportId);
-  const { state, derived, actions, toSubmitBody } = useReviewDraft(data);
+  const { state, derived, actions, toSubmitBody, draftPrompt } = useReviewDraft(data);
   const submitReview = useSubmitReview(reportId);
   const router = useRouter();
   const [isSavingDraft, setIsSavingDraft] = useState(false);
+  const [revertOpen, setRevertOpen] = useState(false);
 
   async function handleSaveDraft() {
     setIsSavingDraft(true);
@@ -92,10 +94,35 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
             allReviewed={derived.allReviewed}
             isSubmitting={submitReview.isPending && !isSavingDraft}
             onComplete={handleComplete}
-            onRevert={actions.reset}
+            onRevert={() => setRevertOpen(true)}
           />
         </aside>
       </div>
+
+      <ConfirmDialog
+        open={draftPrompt.open}
+        title="임시저장된 검수 내용이 있어요"
+        description="이전에 작성하던 검수 내용이 남아 있습니다. 이어서 작성할까요? 새로 시작하면 저장된 내용은 지워집니다."
+        confirmLabel="이어서 작성"
+        cancelLabel="새로 시작"
+        dismissible={false}
+        onConfirm={draftPrompt.restore}
+        onCancel={draftPrompt.discard}
+      />
+
+      <ConfirmDialog
+        open={revertOpen}
+        title="초안으로 되돌릴까요?"
+        description="작성한 검수 내용(쟁점 판단·확정 금액·종합 의견)이 모두 사라지고 AI 초안 상태로 돌아갑니다."
+        confirmLabel="되돌리기"
+        cancelLabel="취소"
+        confirmTone="danger"
+        onConfirm={() => {
+          actions.reset();
+          setRevertOpen(false);
+        }}
+        onCancel={() => setRevertOpen(false)}
+      />
     </div>
   );
 }

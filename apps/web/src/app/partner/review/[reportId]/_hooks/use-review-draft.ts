@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import type {
   ReviewDetail,
   ReviewIssue,
@@ -44,6 +44,7 @@ export interface ReviewDraftState {
 type ReviewDraftAction =
   | { type: "INIT"; detail: ReviewDetail }
   | { type: "RESET"; detail: ReviewDetail }
+  | { type: "RESTORE"; state: ReviewDraftState }
   | { type: "SET_STATUS"; id: string; status: ReviewIssueStatus }
   | { type: "EDIT_ISSUE"; id: string; patch: Partial<ReviewIssue> }
   | { type: "ADD_ISSUE"; title: string; description: string; impactAmount: number | null }
@@ -68,6 +69,8 @@ function reducer(
     case "INIT":
     case "RESET":
       return fromDetail(action.detail);
+    case "RESTORE":
+      return action.state;
     case "SET_STATUS":
       return {
         ...state,
@@ -128,14 +131,17 @@ export function toSubmitBody(
   };
 }
 
-function initState(detail: ReviewDetail): ReviewDraftState {
-  return loadDraft(detail.reportId) ?? fromDetail(detail);
-}
-
 export function useReviewDraft(detail: ReviewDetail) {
-  const [state, dispatch] = useReducer(reducer, detail, initState);
+  const [state, dispatch] = useReducer(reducer, detail, fromDetail);
 
+  // 첫 마운트 시 저장본 존재 여부(이 reportId 키 대조). 있으면 사용자가 결정할 때까지 대기.
+  const [savedDraft] = useState(() => loadDraft(detail.reportId));
+  const [resolved, setResolved] = useState(savedDraft === null);
+  const draftPromptOpen = !resolved;
+
+  // 결정 전에는 자동 저장 보류(저장본을 새 초안으로 덮어쓰지 않도록).
   useEffect(() => {
+    if (draftPromptOpen) return;
     const timer = window.setTimeout(() => {
       try {
         window.localStorage.setItem(draftKey(detail.reportId), JSON.stringify(state));
@@ -144,7 +150,22 @@ export function useReviewDraft(detail: ReviewDetail) {
       }
     }, 500);
     return () => window.clearTimeout(timer);
-  }, [state, detail.reportId]);
+  }, [state, detail.reportId, draftPromptOpen]);
+
+  const draftPrompt = useMemo(
+    () => ({
+      open: draftPromptOpen,
+      restore: () => {
+        if (savedDraft) dispatch({ type: "RESTORE", state: savedDraft });
+        setResolved(true);
+      },
+      discard: () => {
+        clearReviewDraft(detail.reportId);
+        setResolved(true);
+      },
+    }),
+    [draftPromptOpen, savedDraft, detail.reportId],
+  );
 
   const derived = useMemo(() => {
     const reviewed = state.issues.filter((i) => i.status !== "PENDING").length;
@@ -182,5 +203,5 @@ export function useReviewDraft(detail: ReviewDetail) {
     [detail],
   );
 
-  return { state, derived, actions, toSubmitBody };
+  return { state, derived, actions, toSubmitBody, draftPrompt };
 }
