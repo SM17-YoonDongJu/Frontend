@@ -1,12 +1,38 @@
 "use client";
 
-import { useMemo, useReducer } from "react";
+import { useEffect, useMemo, useReducer } from "react";
 import type {
   ReviewDetail,
   ReviewIssue,
   ReviewIssueStatus,
   ReviewSubmit,
 } from "../_model/types";
+
+const DRAFT_PREFIX = "review-draft:";
+
+function draftKey(reportId: string): string {
+  return `${DRAFT_PREFIX}${reportId}`;
+}
+
+function loadDraft(reportId: string): ReviewDraftState | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(draftKey(reportId));
+    return raw ? (JSON.parse(raw) as ReviewDraftState) : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 임시저장 드래프트 삭제(검수 완료·초기화 시). */
+export function clearReviewDraft(reportId: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(draftKey(reportId));
+  } catch {
+    /* noop */
+  }
+}
 
 export interface ReviewDraftState {
   issues: ReviewIssue[];
@@ -102,8 +128,23 @@ export function toSubmitBody(
   };
 }
 
+function initState(detail: ReviewDetail): ReviewDraftState {
+  return loadDraft(detail.reportId) ?? fromDetail(detail);
+}
+
 export function useReviewDraft(detail: ReviewDetail) {
-  const [state, dispatch] = useReducer(reducer, detail, fromDetail);
+  const [state, dispatch] = useReducer(reducer, detail, initState);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      try {
+        window.localStorage.setItem(draftKey(detail.reportId), JSON.stringify(state));
+      } catch {
+        /* noop */
+      }
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [state, detail.reportId]);
 
   const derived = useMemo(() => {
     const reviewed = state.issues.filter((i) => i.status !== "PENDING").length;
@@ -133,7 +174,10 @@ export function useReviewDraft(detail: ReviewDetail) {
       setRange: (min: number | null, max: number | null) =>
         dispatch({ type: "SET_RANGE", min, max }),
       setReview: (review: string) => dispatch({ type: "SET_REVIEW", review }),
-      reset: () => dispatch({ type: "RESET", detail }),
+      reset: () => {
+        clearReviewDraft(detail.reportId);
+        dispatch({ type: "RESET", detail });
+      },
     }),
     [detail],
   );

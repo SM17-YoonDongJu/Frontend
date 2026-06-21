@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useReviewDetail } from "../_api/use-review-detail";
 import { useSubmitReview } from "../_api/use-submit-review";
-import { useReviewDraft } from "../_hooks/use-review-draft";
+import { clearReviewDraft, useReviewDraft } from "../_hooks/use-review-draft";
 import { AccidentNarrativeSection } from "./AccidentNarrativeSection";
 import { AttachmentSection } from "./AttachmentSection";
 import { ClaimInfoSection } from "./ClaimInfoSection";
@@ -33,6 +33,7 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
 
   async function handleComplete() {
     await submitReview.mutateAsync(toSubmitBody(state, { complete: true }));
+    clearReviewDraft(reportId);
     router.push(
       `/partner/review/${reportId}/complete?caseId=${encodeURIComponent(data.caseId)}`,
     );
