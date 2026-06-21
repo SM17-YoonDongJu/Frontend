@@ -17,3 +17,7 @@ export const reportKeys = createQueryKeys("report", {
   pendingReview: (filter?: ReviewListFilter) => [{ filter: filter ?? {} }],
   pendingReviewSummary: () => ["summary"],
 });
+
+export const proposalKeys = createQueryKeys("proposal", {
+  list: (reportId: string) => [reportId],
+});
