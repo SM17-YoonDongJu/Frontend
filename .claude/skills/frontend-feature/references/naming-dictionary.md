@@ -181,6 +181,16 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 | 사정사 확정 최대 | `confirmedMaxAmount` | number(int) |
 | 종합 의견 | `review` | string (명세 PATCH 필드 그대로) |
 
+### 입원 (명세 POST /reports 기준 — 배열)
+| 개념 | 필드 | 타입 |
+|------|------|------|
+| 입원 리스트 | `hospitalizations` | `Hospitalization[]` |
+| 입원일 | `hospitalStart` | string\|null(date) |
+| 퇴원일 | `hospitalEnd` | string\|null(date) |
+| 입원 사유 | `hospitalReason` | string\|null |
+
+⚠️ 입원은 **다건 가능**(배열). 단일 `hospitalStart`/`hospitalEnd` top-level 금지.
+
 ### 검수 쿼리키 / 훅
 | 개념 | 식별자 |
 |------|--------|
