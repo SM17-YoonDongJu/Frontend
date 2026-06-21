@@ -109,6 +109,24 @@ items[]{ `paymentId` · `amount`(int) · `type`(`SUBSCRIPTION`) · `status`(`PAI
 - **API 함수:** `<verb><Entity>` — `getReport` · `getReportList` · `createReport` · `reviewReport` · `createMatch` · `getMe` …
 - **쿼리키 factory**(`@lukemorales/query-key-factory`): 도메인별 `createQueryKeys('<domain>', …)` → `report.list(params)` · `report.detail(reportId)` · `user.me` · `chat.list` · `payment.history`
 
+## 5b. 받은 제안 목록 (이슈 #18, `GET /reports/{reportId}/proposals`)
+
+API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이미지의 예상보상범위·보수기준·전문분야·경력·신규배지·아바타는 현 API에 없음 → 표시 안 함).
+
+| 개념 | 식별자 | 타입 | 비고 |
+|------|--------|------|------|
+| 제안 식별자 | `adjusterId` | uuid | 별도 proposalId 없음(reportId당 사정사 1제안). 거절·프로필 이동 키 |
+| 사정사 이름 | `nickname` | string | 아바타 없음 → 첫 글자 폴백 |
+| 평점 | `rating` | number | 예 4.8 |
+| 제안 요약 | `proposalSummary` | string | 카드 메시지로 표시 |
+| 제안 상태 | `status` | enum | `COMPLETED` 등(영문 enum 기준) |
+| 제출일 | `submittedAt` | iso datetime | |
+| 페이지네이션 | `pagination` | `{page,size,totalElements,totalPages,hasNext}` | |
+
+- **쿼리키:** `proposal.list(reportId)` — `createQueryKeys('proposal', …)`. staleTime `STALE_TIME_LIST`(0, 폴링) / gcTime `GC_TIME_DEFAULT`.
+- **분석 대상 정보**(사고유형·접수일 등 기능1)는 별도 `GET /reports/{reportId}` 사용.
+- **거절:** 사유 없이 바로 거절. ⚠️ 현 API `PATCH /reports/{reportId}/reject`는 reportId만 키(사정사별 불가) + body 명세 깨짐 → **사정사별 거절 API `PATCH /reports/{reportId}/proposals/{adjusterId}/reject` 백엔드 신규 요청**, 확정 전 MSW mock로 선구현(§7-5).
+
 ## 6. 상수
 
 | 상수 | 값 | 용도 |
@@ -128,6 +146,7 @@ items[]{ `paymentId` · `amount`(int) · `type`(`SUBSCRIPTION`) · `status`(`PAI
 5. **검수 현황 요약 엔드포인트 미정:** 검수 대기 화면 상단 3카드(검수 대기/내 전문분야 매칭/마감 임박 건수)에 대응하는 API 없음. FE 임시값 `GET /reports/pending-review/summary` → `{ pendingCount, specialtyMatchCount, dueSoonCount }`로 목킹 중. 백엔드에 신설 요청 필요.
 6. **`pending-review` 목록 카드 필드 부족:** 명세 `list[]`는 `reportId·accidentType·status·createdAt` 4필드뿐인데 디자인은 더 요구. FE 임시 추가(목킹): `caseId`(접수번호 `YYYYMMDD-NNN`) · `title`(요약) · `region`(지역) · `matchingScore`(AI 매칭률 int %) · `claimedMinAmount`/`claimedMaxAmount`(예상 보상범위) · `offerHeadroom`(제안 대비 여력 int 원) · `issueCount`(쟁점 건수 int) · `held`(보류 여부 bool). 백엔드에 list 응답 확장 요청 필요.
 7. **검수 보류 엔드포인트 미정:** 사정사가 사건을 보류하는 API 없음. FE 임시값 `PATCH /reports/{reportId}/hold` → `{ reportId, held }`로 목킹 중. 백엔드에 신설 요청 필요(보류 상태 enum 포함).
+8. **거절 API 결함(이슈 #18):** `PATCH /reports/{reportId}/reject`가 (a) reportId만 키라 사정사별 거절 불가, (b) body 명세에 회원가입 내용이 잘못 붙음. **사정사별 거절 엔드포인트 신설** 요청(`PATCH /reports/{reportId}/proposals/{adjusterId}/reject`, body 없음 가정). 확정 전 FE는 MSW mock로 진행.
 
 ## 출처
 

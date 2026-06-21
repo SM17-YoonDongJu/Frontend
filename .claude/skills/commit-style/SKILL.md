@@ -97,7 +97,7 @@ description: 손해사정 플랫폼 프론트엔드 커밋 메시지 컨벤션. 
 ### 불릿 문자
 
 - **feat·fix·refactor·docs·test → `*` 불릿.** 변경 2개 이상 나열, 각 줄 명사형 종결.
-  ```
+  ```text
   feat : AI 초안 정보 패널 추가
 
   * 선택 사건의 리포트 상세 정보를 재사용하는 우측 패널 추가
@@ -120,14 +120,14 @@ description: 손해사정 플랫폼 프론트엔드 커밋 메시지 컨벤션. 
 
 라이브러리를 설치하는 커밋은 **`-` 불릿으로 각 패키지를 `이름@버전: 용도` 형식**으로 나열한다. 버전 명시 필수, 끝은 "용도".
 
-```
+```text
 chore : zod, react-hook-form, @hookform/resolvers 라이브러리 추가
 
  - zod@4.4.3: 단계별 입력 스키마 정의·런타임 검증, API 응답 envelope 파싱 용도
  - react-hook-form@7.79.0: 퍼널 전체 폼 상태 관리·단계별 부분 검증 용도
  - @hookform/resolvers@5.4.0: react-hook-form ↔ zod 스키마 연결 용도
 ```
-```
+```text
 chore : @playwright/test 설치 및 E2E 설정 추가
 
  - @playwright/test@1.61.0 : 프론트엔드 페이지 E2E 테스트 용도

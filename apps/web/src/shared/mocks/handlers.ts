@@ -98,6 +98,92 @@ export const handlers = [
     });
   }),
 
+  // 받은 제안 목록 조회 (이슈 #18)
+  http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async () => {
+    await delay(500);
+
+    const list = [
+      {
+        adjusterId: "11111111-1111-4111-8111-111111111111",
+        nickname: "김도현",
+        rating: 4.8,
+        proposalSummary: "장해등급 재산정으로 12급 적용 여지가 있어 보입니다. 상담 후 함께 판단해요.",
+        status: "COMPLETED",
+        submittedAt: "2026-05-22T10:14:00+09:00",
+        speciality: "후유장해 전문",
+        career: 12,
+        isNew: true,
+        isVerified: true,
+        estimateMinAmount: 14_000_000,
+        estimateMaxAmount: 17_500_000,
+        feeBasis: "상담 시 서면 안내",
+      },
+      {
+        adjusterId: "22222222-2222-4222-8222-222222222222",
+        nickname: "정우성",
+        rating: 4.6,
+        proposalSummary: "외모추상 특약 누락 건까지 함께 청구를 검토할 수 있습니다.",
+        status: "COMPLETED",
+        submittedAt: "2026-05-21T16:40:00+09:00",
+        speciality: "후유장해 전문",
+        career: 18,
+        isNew: true,
+        isVerified: true,
+        estimateMinAmount: 13_500_000,
+        estimateMaxAmount: 17_000_000,
+        feeBasis: "상담 시 서면 안내",
+      },
+      {
+        adjusterId: "33333333-3333-4333-8333-333333333333",
+        nickname: "이서연",
+        rating: 4.9,
+        proposalSummary: "과실 비율 재검토 여지가 있는지 리포트를 살펴보고 싶습니다.",
+        status: "COMPLETED",
+        submittedAt: "2026-05-20T09:05:00+09:00",
+        speciality: "교통사고 전문",
+        career: 8,
+        isNew: false,
+        isVerified: true,
+        estimateMinAmount: null,
+        estimateMaxAmount: null,
+        feeBasis: "상담 시 서면 안내",
+      },
+    ];
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        target: {
+          accidentType: "교통사고 · 후유장해",
+          reportNo: "20260520-017",
+          receivedAt: "2026.05.20",
+        },
+        list,
+        pagination: {
+          page: 0,
+          size: 10,
+          totalElements: list.length,
+          totalPages: 1,
+          hasNext: false,
+        },
+      },
+    });
+  }),
+
+  // 제안 거절 (사정사별, 백엔드 신규 요청 — MSW 선구현)
+  http.patch(
+    `${API_BASE_URL}/reports/:reportId/proposals/:adjusterId/reject`,
+    async () => {
+      await delay(400);
+      return HttpResponse.json({
+        status: "200",
+        message: "제안을 거절했습니다.",
+        data: null,
+      });
+    },
+  ),
+
   // 리포트 상세 조회
   http.get(`${API_BASE_URL}/reports/:reportId`, async () => {
     await delay(500);
