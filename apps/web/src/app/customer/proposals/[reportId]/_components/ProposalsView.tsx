@@ -1,0 +1,42 @@
+"use client";
+
+import { useReportDetail } from "@/app/customer/report/[id]/_api/use-report-detail";
+import { useProposalList } from "../_api/use-proposal-list";
+import { AnalysisTargetCard } from "./AnalysisTargetCard";
+import { ProposalList } from "./ProposalList";
+
+export function ProposalsView({ reportId }: { reportId: string }) {
+  const { data: proposalList } = useProposalList(reportId);
+  const { data: report } = useReportDetail(reportId);
+
+  const proposals = proposalList.list;
+  const proposalCount = proposalList.pagination.totalElements;
+
+  return (
+    <div className="mx-auto w-full max-w-[760px] px-4 py-8">
+      <p className="text-[13px] font-semibold text-gold-ink">받은 제안</p>
+      <h1 className="mt-1 font-serif text-[26px] font-bold leading-tight text-ink">
+        제안 {proposalCount}건이 도착했어요
+      </h1>
+      <p className="mt-2 text-[14px] text-ink-3">
+        검수 펼침된 리포트를 본 손해사정사들의 상담 제안입니다.
+      </p>
+
+      <div className="mt-6">
+        <AnalysisTargetCard
+          accidentType={report.accidentType}
+          proposalCount={proposalCount}
+        />
+      </div>
+
+      <div className="mt-6">
+        <ProposalList reportId={reportId} proposals={proposals} />
+      </div>
+
+      <p className="mt-8 rounded-card border border-line bg-paper-2 px-4 py-3 text-[12.5px] leading-relaxed text-ink-3">
+        검토 범위는 추정·참고용이며 결과를 보장하지 않습니다. 상담은 해당 손해사정사에게
+        전달되며, 검토 의견은 가입자님의 판단을 돕기 위한 참고 자료입니다.
+      </p>
+    </div>
+  );
+}
