@@ -29,6 +29,13 @@ export const reviewAttachmentSchema = z.object({
   aiSummary: z.string().nullable(),
 });
 
+// 입원 이력. 출처: API 명세 POST /reports body의 hospitalizations 형태와 동일.
+export const hospitalizationSchema = z.object({
+  hospitalStart: z.string().nullable(),
+  hospitalEnd: z.string().nullable(),
+  hospitalReason: z.string().nullable(),
+});
+
 export const reviewDetailSchema = z.object({
   reportId: z.uuid(),
   status: reviewReportStatusSchema,
@@ -52,8 +59,7 @@ export const reviewDetailSchema = z.object({
   // ⚠️ 명세 드리프트: 아래 확장 필드는 GET /reports/{id} 명세 미존재. MSW 목킹, 백엔드 반영 요청.
   caseId: z.string(),
   accidentDate: z.string(),
-  hospitalStart: z.string().nullable(),
-  hospitalEnd: z.string().nullable(),
+  hospitalizations: z.array(hospitalizationSchema),
   description: z.string().nullable(),
   client: reviewClientSchema,
   isMasked: z.boolean(),
