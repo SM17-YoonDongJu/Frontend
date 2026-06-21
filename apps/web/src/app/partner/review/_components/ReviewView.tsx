@@ -20,6 +20,7 @@ export function ReviewView() {
       (type === "전체" || item.accidentType === type) &&
       (region === "전체" || item.region === region),
   );
+  const selected = data.list.find((item) => item.reportId === selectedId) ?? null;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -34,7 +35,7 @@ export function ReviewView() {
         )}
       </div>
 
-      <ReviewDraftPanel reportId={selectedId} />
+      <ReviewDraftPanel item={selected} />
     </div>
   );
 }

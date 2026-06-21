@@ -17,7 +17,7 @@ export const reviewListItemSchema = z.object({
   claimedMinAmount: z.number().int(),
   claimedMaxAmount: z.number().int(),
   offerHeadroom: z.number().int(),
-  competitorCount: z.number().int(),
+  issueCount: z.number().int(),
   held: z.boolean(),
 });
 

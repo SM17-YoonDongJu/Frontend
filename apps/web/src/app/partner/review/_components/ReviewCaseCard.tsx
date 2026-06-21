@@ -1,6 +1,13 @@
-import { AmountRange } from "@/shared/ui/AmountRange";
-import { StatusBadge } from "@/shared/ui/StatusBadge";
+import { Chevron } from "@/shared/ui/icons/Chevron";
+import { TrendingUp } from "@/shared/ui/icons/TrendingUp";
+import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
 import type { ReviewListItem } from "../_model/types";
+
+type Tone = NonNullable<StatusBadgeProps["tone"]>;
+
+const TYPE_TONE: Record<string, Tone> = {
+  후유장해: "gold",
+};
 
 const toManwon = (won: number) => Math.round(won / 10_000).toLocaleString("ko-KR");
 
@@ -25,34 +32,55 @@ export function ReviewCaseCard({ item, selected, onSelect }: Props) {
         item.held
           ? "border-line-2 bg-paper-2 opacity-60"
           : selected
-            ? "border-gold bg-gold-soft"
+            ? "border-gold bg-gold-soft/30"
             : "border-line bg-card hover:border-gold"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge tone="navy">{item.accidentType}</StatusBadge>
+          <StatusBadge tone={TYPE_TONE[item.accidentType] ?? "neutral"}>
+            {item.accidentType}
+          </StatusBadge>
           {item.held && <StatusBadge tone="neutral">보류</StatusBadge>}
-          {!item.held && isNew(item.createdAt) && <StatusBadge tone="terra">NEW</StatusBadge>}
+          {!item.held && isNew(item.createdAt) && <StatusBadge tone="gold">NEW</StatusBadge>}
           <span className="text-xs text-ink-3">#{item.caseId}</span>
-          <span className="text-xs text-ink-3">· {item.region}</span>
+          <span className="inline-flex items-center gap-1 rounded-pill bg-paper-2 px-2 py-0.5 text-xs text-ink-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-green" />
+            {item.region}
+          </span>
         </div>
-        <span className="shrink-0 text-sm font-semibold text-gold">매칭 {item.matchingScore}%</span>
+        <span className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold text-green">
+          <TrendingUp />
+          매칭 {item.matchingScore}%
+        </span>
       </div>
 
-      <p className="mt-2 text-[15px] font-semibold text-ink">{item.title}</p>
+      <p className="mt-3 text-[15px] font-semibold text-ink">{item.title}</p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-ink-3">
-        <span className="inline-flex items-center gap-1">
-          예상 보상
-          <AmountRange min={item.claimedMinAmount} max={item.claimedMaxAmount} />
-        </span>
-        <span>
-          제안 여력 <span className="font-semibold text-green">+약 {toManwon(item.offerHeadroom)}만</span>
-        </span>
-        <span>
-          경쟁 <span className="font-semibold text-ink">{item.competitorCount}건</span>
-        </span>
+      <div className="mt-3 flex items-center gap-6">
+        <div>
+          <p className="text-[12px] text-ink-3">예상 보상 범위</p>
+          <p className="mt-0.5 font-semibold tabular-nums text-ink">
+            {toManwon(item.claimedMinAmount)} – {toManwon(item.claimedMaxAmount)}만
+          </p>
+        </div>
+        <div className="border-l border-line pl-6">
+          <p className="text-[12px] text-ink-3">제안 대비</p>
+          <p className="mt-0.5 font-semibold tabular-nums text-gold">
+            + 약 {toManwon(item.offerHeadroom)}만
+          </p>
+        </div>
+        <div className="border-l border-line pl-6">
+          <p className="text-[12px] text-ink-3">쟁점</p>
+          <p className="mt-0.5 font-semibold tabular-nums text-ink">{item.issueCount}건</p>
+        </div>
+
+        {selected && !item.held && (
+          <span className="ml-auto inline-flex items-center gap-1 self-center text-sm text-gold">
+            미리보기 중
+            <Chevron />
+          </span>
+        )}
       </div>
     </button>
   );

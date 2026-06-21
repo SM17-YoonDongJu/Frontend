@@ -24,7 +24,7 @@ test("사건을 선택하면 우측에 AI 초안 정보가 보인다", async ({ 
 
   await page.getByRole("button", { name: CARD_NAME }).click();
 
-  await expect(page.getByText("보상 가능 범위")).toBeVisible();
+  await expect(page.getByText("검토 가능한 예상 보상 범위")).toBeVisible();
   await expect(page.getByRole("heading", { name: /AI가 짚은 쟁점/ })).toBeVisible();
   await expect(page.getByRole("button", { name: "검수 시작" })).toBeVisible();
 });
