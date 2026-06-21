@@ -1,0 +1,107 @@
+"use client";
+
+import { cn } from "@/shared/lib/utils";
+import { Input } from "@/shared/ui/Input";
+import { StatusBadge } from "@/shared/ui/StatusBadge";
+import { Scale } from "@/shared/ui/icons/Scale";
+import type { ReviewIssue, ReviewIssueStatus } from "../_model/types";
+import { IssueStatusControl } from "./IssueStatusControl";
+import { IssueModifyForm } from "./IssueModifyForm";
+import { IssueExcludeForm } from "./IssueExcludeForm";
+
+function formatImpact(won: number | null): string | null {
+  if (won == null || won === 0) return null;
+  const manwon = Math.round(won / 10_000).toLocaleString("ko-KR");
+  return won > 0 ? `+약 ${manwon}만` : `-약 ${Math.abs(Number(manwon.replace(/,/g, ""))).toLocaleString("ko-KR")}만`;
+}
+
+export interface IssueCardProps {
+  issue: ReviewIssue;
+  index: number;
+  onSetStatus: (status: ReviewIssueStatus) => void;
+  onPatch: (patch: Partial<ReviewIssue>) => void;
+  onRemove: () => void;
+}
+
+export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: IssueCardProps) {
+  const impact = formatImpact(issue.impactAmount);
+  const isPending = issue.status === "PENDING";
+  const isModified = issue.status === "MODIFIED";
+
+  return (
+    <li
+      className={cn(
+        "rounded-card border p-4 transition",
+        isModified ? "border-gold-2 bg-gold-soft/20" : "border-line-2 bg-paper-2",
+        isPending && "opacity-90",
+      )}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start gap-2.5">
+          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-semibold text-white">
+            {index + 1}
+          </span>
+          <div>
+            <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-[15px] font-semibold text-ink">{issue.title}</h3>
+              {impact && (
+                <span className="text-[13px] font-semibold text-green">{impact}</span>
+              )}
+              {issue.isNew && <StatusBadge tone="gold">신규</StatusBadge>}
+            </div>
+          </div>
+        </div>
+        <IssueStatusControl value={issue.status} onChange={onSetStatus} />
+      </div>
+
+      {!isModified && (
+        <p className="mt-2.5 pl-[34px] text-[13.5px] leading-relaxed text-ink-2">
+          {issue.description}
+        </p>
+      )}
+
+      {issue.tags.length > 0 && (
+        <ul className="mt-2.5 flex flex-wrap gap-1.5 pl-[34px]">
+          {issue.tags.map((tag) => (
+            <li key={tag}>
+              <StatusBadge tone="neutral">{tag}</StatusBadge>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <div className="mt-3 pl-[34px]">
+        {isModified && <IssueModifyForm issue={issue} onPatch={onPatch} />}
+        {issue.status === "EXCLUDED" && <IssueExcludeForm issue={issue} onPatch={onPatch} />}
+
+        <div className="mt-3 flex items-start gap-2">
+          <span
+            aria-hidden
+            className="mt-1.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-navy text-gold"
+          >
+            <Scale className="text-[13px]" />
+          </span>
+          <Input
+            aria-label="사정사 의견"
+            multiline
+            rows={2}
+            className="flex-1"
+            placeholder="사정사 의견을 입력하세요..."
+            value={issue.adjusterOpinion ?? ""}
+            onChange={(e) => onPatch({ adjusterOpinion: e.target.value })}
+          />
+        </div>
+
+        {issue.isNew && (
+          <button
+            type="button"
+            onClick={onRemove}
+            className="mt-2 text-[12.5px] font-medium text-terra hover:underline"
+          >
+            쟁점 삭제
+          </button>
+        )}
+      </div>
+    </li>
+  );
+}
