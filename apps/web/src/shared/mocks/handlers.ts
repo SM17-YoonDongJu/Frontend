@@ -98,6 +98,69 @@ export const handlers = [
     });
   }),
 
+  // 받은 제안 목록 조회 (이슈 #18)
+  http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async () => {
+    await delay(500);
+
+    const list = [
+      {
+        adjusterId: crypto.randomUUID(),
+        nickname: "김도현",
+        rating: 4.8,
+        proposalSummary:
+          "외모추상 특약 누락분 청구 검토가 가장 확실한 출발점이에요. 촬영본만으로도 시작할 수 있어요.",
+        status: "COMPLETED",
+        submittedAt: "2026-05-22T10:14:00+09:00",
+      },
+      {
+        adjusterId: crypto.randomUUID(),
+        nickname: "정우성",
+        rating: 4.6,
+        proposalSummary:
+          "장해등급은 6개월 경과 후 재검사 결과를 보고 재산정하는 편이 안전합니다.",
+        status: "COMPLETED",
+        submittedAt: "2026-05-21T16:40:00+09:00",
+      },
+      {
+        adjusterId: crypto.randomUUID(),
+        nickname: "이서연",
+        rating: 4.9,
+        proposalSummary:
+          "추가 의료자료 확보 후 재산정, 필요 시 분쟁조정 순서를 권해드려요.",
+        status: "COMPLETED",
+        submittedAt: "2026-05-20T09:05:00+09:00",
+      },
+    ];
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list,
+        pagination: {
+          page: 0,
+          size: 10,
+          totalElements: list.length,
+          totalPages: 1,
+          hasNext: false,
+        },
+      },
+    });
+  }),
+
+  // 제안 거절 (사정사별, 백엔드 신규 요청 — MSW 선구현)
+  http.patch(
+    `${API_BASE_URL}/reports/:reportId/proposals/:adjusterId/reject`,
+    async () => {
+      await delay(400);
+      return HttpResponse.json({
+        status: "200",
+        message: "제안을 거절했습니다.",
+        data: null,
+      });
+    },
+  ),
+
   // 리포트 상세 조회
   http.get(`${API_BASE_URL}/reports/:reportId`, async () => {
     await delay(500);
