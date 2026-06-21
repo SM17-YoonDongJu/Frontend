@@ -89,10 +89,12 @@ export const handlers = [
   http.get(`${API_BASE_URL}/reports/pending-review/summary`, async () => {
     await delay(300);
 
+    const pendingCount = PENDING_REVIEWS.filter((r) => !heldReportIds.has(r.reportId)).length;
+
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { pendingCount: 5, specialtyMatchCount: 3, dueSoonCount: 1 },
+      data: { pendingCount, specialtyMatchCount: 3, dueSoonCount: 1 },
     });
   }),
 

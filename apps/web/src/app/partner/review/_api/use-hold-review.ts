@@ -11,6 +11,7 @@ export function useHoldReview() {
     mutationFn: holdReview,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: reportKeys.pendingReview._def });
+      queryClient.invalidateQueries({ queryKey: reportKeys.pendingReviewSummary._def });
     },
   });
 }
