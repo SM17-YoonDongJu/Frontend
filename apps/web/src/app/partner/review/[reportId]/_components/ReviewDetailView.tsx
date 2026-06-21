@@ -39,18 +39,22 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-6 py-8">
-      <ReviewHeader
-        caseId={data.caseId}
-        treatment={data.treatment}
-        accidentType={data.accidentType}
-        region={data.client.region}
-        clientName={data.client.maskedName}
-        onSaveDraft={handleSaveDraft}
-        isSaving={isSavingDraft}
-      />
+    <div className="w-full">
+      <div className="border-b border-line bg-card">
+        <div className="mx-auto w-full max-w-6xl px-6 py-5">
+          <ReviewHeader
+            caseId={data.caseId}
+            treatment={data.treatment}
+            accidentType={data.accidentType}
+            region={data.client.region}
+            clientName={data.client.maskedName}
+            onSaveDraft={handleSaveDraft}
+            isSaving={isSavingDraft}
+          />
+        </div>
+      </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="mx-auto w-full max-w-6xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
           <section className="space-y-5 rounded-card-lg border border-line bg-card p-6">
             <ClientAccidentSection client={data.client} isMasked={data.isMasked} />
