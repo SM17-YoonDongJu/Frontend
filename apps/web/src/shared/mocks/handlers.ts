@@ -185,19 +185,26 @@ export const handlers = [
   ),
 
   // 리포트 상세 조회
-  http.get(`${API_BASE_URL}/reports/:reportId`, async () => {
+  // ⚠️ 명세 드리프트: 고객측(issue: CONFIRMED/TRUSTED/INFO)·사정사측(reviewIssues 리치) 동일 URL.
+  //   양측 스키마가 unknown 키를 strip하므로 superset 응답으로 둘 다 통과시킴.
+  http.get(`${API_BASE_URL}/reports/:reportId`, async ({ params }) => {
     await delay(500);
+
+    const reportId =
+      typeof params.reportId === "string"
+        ? params.reportId
+        : crypto.randomUUID();
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
-        reportId: crypto.randomUUID(),
-        status: "MATCHED",
-        accidentType: "질병",
-        treatment: "요추 추간판 탈출증",
-        claimedMinAmount: 13_500_000,
-        claimedMaxAmount: 17_000_000,
+        reportId,
+        status: "AWAITING_INSPECTION",
+        accidentType: "교통사고(후유장해)",
+        treatment: "우측 슬관절 후방십자인대 파열",
+        claimedMinAmount: 12_000_000,
+        claimedMaxAmount: 18_000_000,
         offeredAmount: 8_500_000,
         applicableGuarantees: ["상해후유장해 담보", "골절 진단비 특약", "입원·통원 일당"],
         omittedSpecialContract: ["외모변형 장해특약"],
@@ -206,25 +213,23 @@ export const handlers = [
           "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
           "대법원 2019다○○○○ (후유장해 인과관계 판단)",
         ],
+        // 고객측 호환 필드(superset)
         issue: [
           {
             title: "외모추상 특약 누락",
-            opinion:
-              "누락분 청구 검토가 가장 확실한 출발점이에요. 촬영본·의무기록만으로도 검토를 시작할 수 있어요.",
+            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
             status: "CONFIRMED",
             tag: "특약 제5조",
           },
           {
             title: "장해등급 적용",
-            opinion:
-              "현재 자료만으로는 12급 적용을 단정하기 어려워요. 6개월 경과 후 재검사 결과를 보고 판단하는 편이 안전해요.",
+            opinion: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
             status: "TRUSTED",
             tag: "약관 제12조",
           },
           {
             title: "진행 방향",
-            opinion:
-              "추가 의료자료 확보 → 재산정 → 필요 시 분쟁조정 순서를 권해요. 서두르면 오히려 불리할 수 있어요.",
+            opinion: "추가 의료자료 확보 → 재산정 순서를 권해요.",
             status: "INFO",
             tag: "분쟁조정 절차",
           },
@@ -232,11 +237,134 @@ export const handlers = [
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
         adjusterId: crypto.randomUUID(),
-        reviewComment:
-          "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다.",
-        reviewedAt: "2026.05.22",
+        reviewComment: null,
+        reviewedAt: null,
         adjuster: { nickname: "정우성", career: "12년 경력 손해사정사" },
+
+        // 사정사 검수 확장 필드(MSW 전용)
+        caseId: "20260531-042",
+        accidentDate: "2026.05.01",
+        hospitalizations: [
+          {
+            hospitalStart: "2026.05.02",
+            hospitalEnd: "2026.05.18",
+            hospitalReason: "후방십자인대 파열 수술",
+          },
+          {
+            hospitalStart: "2026.06.10",
+            hospitalEnd: "2026.06.21",
+            hospitalReason: "재활 및 관절 가동범위 회복 재입원",
+          },
+        ],
+        description:
+          "퇴근길 신호 대기 중 후방 추돌 사고를 당했습니다. 사고 직후 우측 무릎 통증과 부종이 심해 응급실에 내원했고, 정밀검사 결과 후방십자인대 파열 진단을 받아 입원 치료 후 수술을 받았습니다.",
+        client: {
+          maskedName: "윤O서",
+          ageBand: "만 34세",
+          gender: "여",
+          region: "서울 강남",
+          joinedAt: "2024.03",
+        },
+        isMasked: true,
+        attachments: [
+          {
+            id: "att-1",
+            name: "진단서",
+            fileType: "PDF",
+            pageCount: 2,
+            url: "https://cdn.example.com/reports/att-1.pdf",
+            issuedBy: "강남세브란스병원",
+            issuedAt: "2026.05.18",
+            aiSummary:
+              "우측 슬관절 후방십자인대 완전 파열, 관절경적 재건술 시행. 향후 장해 잔존 가능성 명시.",
+          },
+          {
+            id: "att-2",
+            name: "MRI 영상 판독지",
+            fileType: "PDF",
+            pageCount: 1,
+            url: "https://cdn.example.com/reports/att-2.pdf",
+            issuedBy: "강남세브란스병원 영상의학과",
+            issuedAt: "2026.05.03",
+            aiSummary: "후방십자인대 연속성 소실 확인, 동반 반월상연골 손상 의심.",
+          },
+          {
+            id: "att-3",
+            name: "입퇴원 확인서",
+            fileType: "JPG",
+            pageCount: null,
+            url: "https://cdn.example.com/reports/att-3.jpg",
+            issuedBy: "병원 발행",
+            issuedAt: "2026.05.18",
+            aiSummary: null,
+          },
+        ],
+        // ⚠️ 명세 드리프트: 명세 issue는 string[]. 리치 reviewIssues 별도 키로 superset 반환.
+        reviewIssues: [
+          {
+            id: "issue-1",
+            title: "후유장해 등급 재산정",
+            description:
+              "AI 초안은 14급으로 추정했으나, 관절 운동범위 제한 정도를 고려하면 12급 적용 여지가 있습니다.",
+            impactAmount: 3_500_000,
+            status: "PENDING",
+            modifiedReason: null,
+            excludedReason: null,
+            adjusterOpinion: null,
+            tags: ["약관 제12조", "분쟁조정 2023-1456"],
+            isNew: false,
+          },
+          {
+            id: "issue-2",
+            title: "입원 일당 미반영분",
+            description: "입원 17일 중 초안에 14일만 반영되어 3일분 누락 추정.",
+            impactAmount: 600_000,
+            status: "PENDING",
+            modifiedReason: null,
+            excludedReason: null,
+            adjusterOpinion: null,
+            tags: ["특약 제5조"],
+            isNew: false,
+          },
+          {
+            id: "issue-3",
+            title: "외모변형 장해 특약 적용",
+            description:
+              "수술 흉터 관련 외모변형 장해 특약 청구 가능성 검토 항목.",
+            impactAmount: null,
+            status: "PENDING",
+            modifiedReason: null,
+            excludedReason: null,
+            adjusterOpinion: null,
+            tags: ["외모변형 장해특약"],
+            isNew: false,
+          },
+        ],
       },
+    });
+  }),
+
+  // 검수 반영 제출 (사정사) — body echo, 검수완료 시 AWAITING_ADOPTION
+  http.patch(`${API_BASE_URL}/reports/:reportId`, async ({ request, params }) => {
+    await delay(600);
+
+    if (request.headers.get("x-mock-failure") === "submit-review") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_ERROR", message: "검수 반영 중 오류가 발생했습니다." },
+        { status: 500 },
+      );
+    }
+
+    const body = (await request.json().catch(() => ({}))) as { status?: string };
+    const reportId =
+      typeof params.reportId === "string"
+        ? params.reportId
+        : crypto.randomUUID();
+
+    return HttpResponse.json({
+      status: "200",
+      message: "검수 내용이 반영되었습니다.",
+      data: { reportId, status: body.status ?? "AWAITING_ADOPTION" },
     });
   }),
 ];
