@@ -148,6 +148,49 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 7. **검수 보류 엔드포인트 미정:** 사정사가 사건을 보류하는 API 없음. FE 임시값 `PATCH /reports/{reportId}/hold` → `{ reportId, held }`로 목킹 중. 백엔드에 신설 요청 필요(보류 상태 enum 포함).
 8. **거절 API 결함(이슈 #18):** `PATCH /reports/{reportId}/reject`가 (a) reportId만 키라 사정사별 거절 불가, (b) body 명세에 회원가입 내용이 잘못 붙음. **사정사별 거절 엔드포인트 신설** 요청(`PATCH /reports/{reportId}/proposals/{adjusterId}/reject`, body 없음 가정). 확정 전 FE는 MSW mock로 진행.
 
+## 8. 손해사정사 검수 화면 (#10 adjusterReview) — 사용자 확정 (2026-06-22)
+
+사진 1·2 기준 리치 검수 모델. 명세 `GET/PATCH /reports/{reportId}`는 빈약(issue=string[]) → 아래는 FE 리치 모델로 **MSW 풀 목킹**, 실제 PATCH 계약 확장은 백엔드 협의 필요(드리프트).
+
+### 쟁점 상태 enum (UPPER_SNAKE) — 기존 `issue.status`(CONFIRMED/TRUSTED/INFO, 고객 신뢰도용)와 **별개**
+| 한글 | 값 |
+|------|----|
+| 미검토 | `PENDING` |
+| 인정 | `ACCEPTED` |
+| 수정 | `MODIFIED` |
+| 제외 | `EXCLUDED` |
+
+### 리치 쟁점(reviewIssue) 필드
+| 개념 | 필드 | 타입 | 비고 |
+|------|------|------|------|
+| 쟁점 식별자 | `id` | string | 로컬/신규 쟁점 포함 |
+| 제목 | `title` | string | |
+| 설명 | `description` | string | |
+| 영향 금액 | `impactAmount` | number(int) | 사진 '+약 350만', 인정/수정 시 보상범위 반영 |
+| 상태 | `status` | 위 enum | |
+| 수정 사유 | `modifiedReason` | string\|null | MODIFIED 시 입력 |
+| 제외 사유 | `excludedReason` | string\|null | EXCLUDED 시 입력 |
+| 사정사 의견 | `adjusterOpinion` | string\|null | 각 쟁점 하단 코멘트 |
+| 근거 태그 | `tags` | string[] | 약관/판례(기존 issue.tag 복수화) |
+| 신규 여부 | `isNew` | boolean | 사정사 추가 쟁점 |
+
+### 확정 보상범위 / 종합의견
+| 개념 | 필드 | 타입 |
+|------|------|------|
+| 사정사 확정 최소 | `confirmedMinAmount` | number(int) |
+| 사정사 확정 최대 | `confirmedMaxAmount` | number(int) |
+| 종합 의견 | `review` | string (명세 PATCH 필드 그대로) |
+
+### 검수 쿼리키 / 훅
+| 개념 | 식별자 |
+|------|--------|
+| 쿼리키 factory | `reviewKeys`(`pending`, `detail(reportId)`) |
+| 대기목록 훅 | `usePendingReviews` |
+| 상세 훅 | `useReviewDetail` |
+| 제출 뮤테이션 | `useSubmitReview` |
+| 로컬 검수 상태 | `useReviewDraft`(useReducer) |
+| 사건 표시 ID | `caseId`(YYYYMMDD-NNN) / 라우팅 키 `reportId`(uuid) |
+
 ## 출처
 
 - API 명세서 DB: `collection://7ce30798-f08f-82ee-81bb-875a29ed96bd` (필드·enum 단일 진실)
