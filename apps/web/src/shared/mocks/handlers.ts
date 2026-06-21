@@ -104,7 +104,7 @@ export const handlers = [
 
     const list = [
       {
-        adjusterId: crypto.randomUUID(),
+        adjusterId: "11111111-1111-4111-8111-111111111111",
         nickname: "김도현",
         rating: 4.8,
         proposalSummary: "장해등급 재산정으로 12급 적용 여지가 있어 보입니다. 상담 후 함께 판단해요.",
@@ -119,7 +119,7 @@ export const handlers = [
         feeBasis: "상담 시 서면 안내",
       },
       {
-        adjusterId: crypto.randomUUID(),
+        adjusterId: "22222222-2222-4222-8222-222222222222",
         nickname: "정우성",
         rating: 4.6,
         proposalSummary: "외모추상 특약 누락 건까지 함께 청구를 검토할 수 있습니다.",
@@ -134,7 +134,7 @@ export const handlers = [
         feeBasis: "상담 시 서면 안내",
       },
       {
-        adjusterId: crypto.randomUUID(),
+        adjusterId: "33333333-3333-4333-8333-333333333333",
         nickname: "이서연",
         rating: 4.9,
         proposalSummary: "과실 비율 재검토 여지가 있는지 리포트를 살펴보고 싶습니다.",
