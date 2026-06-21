@@ -5,18 +5,13 @@ import type { ReviewClient } from "../_model/types";
 export interface ClientAccidentSectionProps {
   client: ReviewClient;
   isMasked: boolean;
-  description: string | null;
 }
 
-export function ClientAccidentSection({
-  client,
-  isMasked,
-  description,
-}: ClientAccidentSectionProps) {
+export function ClientAccidentSection({ client, isMasked }: ClientAccidentSectionProps) {
   const initial = client.maskedName.charAt(0);
 
   return (
-    <section className="rounded-card-lg border border-line bg-card p-6">
+    <div>
       <div className="flex items-center justify-between gap-2">
         <h2 className="flex items-center gap-2 font-serif text-[17px] font-bold text-ink">
           <User className="text-ink-3" />
@@ -33,21 +28,15 @@ export function ClientAccidentSection({
           {initial}
         </span>
         <div className="text-[14px]">
-          <p className="font-semibold text-ink">
-            {client.maskedName} · {client.ageBand} · {client.gender}
+          <p>
+            <span className="font-semibold text-ink">{client.maskedName}</span>
+            <span className="text-ink-3"> · {client.ageBand} · {client.gender}</span>
           </p>
           <p className="mt-0.5 text-ink-3">
             {client.region} · 가입 {client.joinedAt}
           </p>
         </div>
       </div>
-
-      {description && (
-        <div className="mt-4">
-          <p className="text-[12.5px] font-semibold text-ink-3">의뢰인이 작성한 사고 경위</p>
-          <p className="mt-2 text-[14px] leading-relaxed text-ink-2">{description}</p>
-        </div>
-      )}
-    </section>
+    </div>
   );
 }

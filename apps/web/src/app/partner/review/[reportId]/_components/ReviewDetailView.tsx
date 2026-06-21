@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useReviewDetail } from "../_api/use-review-detail";
 import { useSubmitReview } from "../_api/use-submit-review";
 import { useReviewDraft } from "../_hooks/use-review-draft";
+import { AccidentNarrativeSection } from "./AccidentNarrativeSection";
 import { AttachmentSection } from "./AttachmentSection";
 import { ClaimInfoSection } from "./ClaimInfoSection";
 import { ClientAccidentSection } from "./ClientAccidentSection";
@@ -51,21 +52,19 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
         <div className="space-y-6">
-          <ClientAccidentSection
-            client={data.client}
-            isMasked={data.isMasked}
-            description={data.description}
-          />
-          <ClaimInfoSection
-            accidentType={data.accidentType}
-            treatment={data.treatment}
-            accidentDate={data.accidentDate}
-            hospitalStart={data.hospitalStart}
-            hospitalEnd={data.hospitalEnd}
-            offeredAmount={data.offeredAmount}
-            applicableGuarantees={data.applicableGuarantees}
-          />
-          <AttachmentSection attachments={data.attachments} />
+          <section className="space-y-5 rounded-card-lg border border-line bg-card p-6">
+            <ClientAccidentSection client={data.client} isMasked={data.isMasked} />
+            <ClaimInfoSection
+              accidentType={data.accidentType}
+              treatment={data.treatment}
+              accidentDate={data.accidentDate}
+              hospitalizations={data.hospitalizations}
+              offeredAmount={data.offeredAmount}
+              applicableGuarantees={data.applicableGuarantees}
+            />
+            <AccidentNarrativeSection description={data.description} />
+            <AttachmentSection attachments={data.attachments} />
+          </section>
           <EstimatedRangeSection
             aiMin={data.claimedMinAmount}
             aiMax={data.claimedMaxAmount}

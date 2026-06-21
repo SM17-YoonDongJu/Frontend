@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
-import { Button } from "@/shared/ui/Button";
+import { Button, buttonVariants } from "@/shared/ui/Button";
 import type { ReviewAttachment } from "../_model/types";
 
 export interface AttachmentSectionProps {
@@ -14,21 +14,43 @@ function fileMeta(file: ReviewAttachment): string {
   return `${file.fileType}${pages}`;
 }
 
+function FileTypeIcon({ fileType }: { fileType: string }) {
+  const isImage = /jpe?g|png|gif|webp|image/i.test(fileType);
+
+  if (isImage) {
+    return (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" />
+        <circle cx="8.5" cy="9.5" r="1.5" stroke="currentColor" strokeWidth="1.4" />
+        <path d="M5 18l4.5-4.5 3 3 3-3L19 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    );
+  }
+
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M14 3v5h5" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
+      <path d="M8.5 13h7M8.5 16h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function AttachmentSection({ attachments }: AttachmentSectionProps) {
   const [selectedId, setSelectedId] = useState(attachments[0]?.id ?? null);
   const selected = attachments.find((file) => file.id === selectedId) ?? attachments[0];
 
   if (!attachments.length) {
     return (
-      <section className="rounded-card-lg border border-line bg-card p-6">
+      <div>
         <h2 className="font-serif text-[17px] font-bold text-ink">첨부 자료</h2>
         <p className="mt-3 text-[14px] text-ink-3">첨부된 자료가 없습니다.</p>
-      </section>
+      </div>
     );
   }
 
   return (
-    <section className="rounded-card-lg border border-line bg-card p-6">
+    <div>
       <div className="flex items-center justify-between gap-2">
         <h2 className="font-serif text-[17px] font-bold text-ink">
           첨부 자료 <span className="text-gold-ink">{attachments.length}건</span>
@@ -55,8 +77,20 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
                       : "border-line-2 bg-paper-2 hover:border-line",
                   )}
                 >
-                  <p className="text-[14px] font-semibold text-ink">{file.name}</p>
-                  <p className="mt-0.5 text-[12px] text-ink-3">{fileMeta(file)}</p>
+                  <div className="flex items-start gap-2.5">
+                    <span
+                      className={cn(
+                        "mt-0.5 shrink-0",
+                        active ? "text-gold-ink" : "text-ink-3",
+                      )}
+                    >
+                      <FileTypeIcon fileType={file.fileType} />
+                    </span>
+                    <div>
+                      <p className="text-[14px] font-semibold text-ink">{file.name}</p>
+                      <p className="mt-0.5 text-[12px] text-ink-3">{fileMeta(file)}</p>
+                    </div>
+                  </div>
                 </button>
               </li>
             );
@@ -90,16 +124,34 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
             </div>
 
             <div className="mt-4 flex gap-2">
-              <Button variant="outline" size="sm">
+              <a
+                href={selected.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
+                  <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7" />
+                  <path
+                    d="M20 20l-3.2-3.2"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                  />
+                </svg>
                 원본 크게 보기
-              </Button>
-              <Button variant="outline" size="sm">
+              </a>
+              <a
+                href={selected.url}
+                download={selected.name}
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
                 다운로드
-              </Button>
+              </a>
             </div>
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }

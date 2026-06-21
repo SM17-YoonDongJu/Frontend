@@ -29,9 +29,17 @@ export function ReviewHeader({
         <Link
           href="/partner/review"
           aria-label="검수 대기 목록으로"
-          className="mt-1 flex size-9 shrink-0 items-center justify-center rounded-full border border-line bg-card text-ink-2 transition hover:bg-paper"
+          className="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-card border border-line bg-card text-ink-2 transition hover:bg-paper"
         >
-          <span aria-hidden>←</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path
+              d="M15 6l-6 6 6 6"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </Link>
         <div>
           <div className="flex flex-wrap items-center gap-2">

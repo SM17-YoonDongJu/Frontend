@@ -64,7 +64,9 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
         <ul className="mt-2.5 flex flex-wrap gap-1.5 pl-[34px]">
           {issue.tags.map((tag) => (
             <li key={tag}>
-              <StatusBadge tone="neutral">{tag}</StatusBadge>
+              <span className="inline-flex items-center rounded-tag border border-line bg-card px-2 py-1 text-[12px] text-ink-3">
+                {tag}
+              </span>
             </li>
           ))}
         </ul>

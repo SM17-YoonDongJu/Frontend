@@ -1,7 +1,6 @@
 "use client";
 
 import { AmountRange } from "@/shared/ui/AmountRange";
-import { Input } from "@/shared/ui/Input";
 import { Label } from "@/shared/ui/Label";
 
 const MANWON = 10_000;
@@ -13,6 +12,28 @@ function toManwonValue(won: number | null): string {
 function parseManwon(text: string): number | null {
   const digits = text.replace(/[^\d]/g, "");
   return digits ? Number(digits) * MANWON : null;
+}
+
+interface ConfirmedAmountInputProps {
+  label: string;
+  value: string;
+  onValueChange: (text: string) => void;
+}
+
+function ConfirmedAmountInput({ label, value, onValueChange }: ConfirmedAmountInputProps) {
+  return (
+    <div className="relative flex flex-1 items-center">
+      <input
+        type="number"
+        inputMode="numeric"
+        aria-label={label}
+        value={value}
+        onChange={(e) => onValueChange(e.target.value)}
+        className="h-[42px] w-full rounded-input border border-white/20 bg-ink pl-3 pr-12 text-[15px] font-semibold text-white outline-none transition placeholder:text-white/40 focus:border-gold-2 focus:ring-[3px] focus:ring-gold/30"
+      />
+      <span className="pointer-events-none absolute right-3 text-[12px] text-white/60">만원</span>
+    </div>
+  );
 }
 
 export interface EstimatedRangeSectionProps {
@@ -46,23 +67,17 @@ export function EstimatedRangeSection({
           <p className="text-[12.5px] font-semibold uppercase tracking-[0.12em] text-gold-2">
             사정사 확정 (직접 입력)
           </p>
-          <div className="mt-2 flex items-end gap-2">
-            <Input
-              type="number"
-              inputMode="numeric"
-              aria-label="확정 보상 최소 금액(만원)"
-              suffix="만원"
+          <div className="mt-2 flex items-center gap-2">
+            <ConfirmedAmountInput
+              label="확정 보상 최소 금액(만원)"
               value={toManwonValue(confirmedMin)}
-              onChange={(e) => onChangeRange(parseManwon(e.target.value), confirmedMax)}
+              onValueChange={(text) => onChangeRange(parseManwon(text), confirmedMax)}
             />
-            <span className="pb-3 text-white">~</span>
-            <Input
-              type="number"
-              inputMode="numeric"
-              aria-label="확정 보상 최대 금액(만원)"
-              suffix="만원"
+            <span className="text-white">~</span>
+            <ConfirmedAmountInput
+              label="확정 보상 최대 금액(만원)"
               value={toManwonValue(confirmedMax)}
-              onChange={(e) => onChangeRange(confirmedMin, parseManwon(e.target.value))}
+              onValueChange={(text) => onChangeRange(confirmedMin, parseManwon(text))}
             />
           </div>
         </div>
