@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { useReportDetail } from "@/app/customer/report/[id]/_api/use-report-detail";
+import { useHoldReview } from "../_api/use-hold-review";
 import { AmountRange } from "@/shared/ui/AmountRange";
 import { Button, buttonVariants } from "@/shared/ui/Button";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
@@ -32,6 +33,7 @@ export function ReviewDraftPanel({ reportId }: { reportId: string | null }) {
 function DraftContent({ reportId }: { reportId: string }) {
   const { data } = useReportDetail(reportId);
   const router = useRouter();
+  const hold = useHoldReview();
 
   return (
     <div className="rounded-card-lg border border-line bg-card p-5">
@@ -87,12 +89,21 @@ function DraftContent({ reportId }: { reportId: string }) {
         검수 시작
       </Button>
 
-      <Link
-        href={`/customer/report/${reportId}`}
-        className={buttonVariants({ variant: "outline", full: true, className: "mt-2" })}
-      >
-        초안 전체 보기
-      </Link>
+      <div className="mt-2 flex gap-2">
+        <Link
+          href={`/customer/report/${reportId}`}
+          className={buttonVariants({ variant: "outline", className: "flex-1" })}
+        >
+          초안 전체 보기
+        </Link>
+        <Button
+          variant="ghost"
+          loading={hold.isPending}
+          onClick={() => hold.mutate(reportId)}
+        >
+          보류
+        </Button>
+      </div>
     </div>
   );
 }

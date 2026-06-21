@@ -18,6 +18,13 @@ export const reviewListItemSchema = z.object({
   claimedMaxAmount: z.number().int(),
   offerHeadroom: z.number().int(),
   competitorCount: z.number().int(),
+  held: z.boolean(),
+});
+
+/** 보류 처리 응답. ⚠️ API 명세 미정(드리프트) — 목업. */
+export const holdReviewSchema = z.object({
+  reportId: z.uuid(),
+  held: z.boolean(),
 });
 
 export const paginationSchema = z.object({

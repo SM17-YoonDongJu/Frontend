@@ -20,14 +20,20 @@ export function ReviewCaseCard({ item, selected, onSelect }: Props) {
       type="button"
       onClick={() => onSelect(item.reportId)}
       aria-pressed={selected}
+      disabled={item.held}
       className={`w-full rounded-card-lg border px-5 py-4 text-left transition ${
-        selected ? "border-gold bg-gold-soft" : "border-line bg-card hover:border-gold"
+        item.held
+          ? "border-line-2 bg-paper-2 opacity-60"
+          : selected
+            ? "border-gold bg-gold-soft"
+            : "border-line bg-card hover:border-gold"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge tone="navy">{item.accidentType}</StatusBadge>
-          {isNew(item.createdAt) && <StatusBadge tone="terra">NEW</StatusBadge>}
+          {item.held && <StatusBadge tone="neutral">보류</StatusBadge>}
+          {!item.held && isNew(item.createdAt) && <StatusBadge tone="terra">NEW</StatusBadge>}
           <span className="text-xs text-ink-3">#{item.caseId}</span>
           <span className="text-xs text-ink-3">· {item.region}</span>
         </div>
