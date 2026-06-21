@@ -1,9 +1,54 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Button, buttonVariants } from "@/shared/ui/Button";
 import type { ReviewAttachment } from "../_model/types";
+
+function PreviewModal({ file, onClose }: { file: ReviewAttachment; onClose: () => void }) {
+  const isImage = /jpe?g|png|gif|webp|image/i.test(file.fileType);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${file.name} 원본 미리보기`}
+      onClick={onClose}
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-ink/70 p-4 sm:p-8"
+    >
+      <div className="flex w-full max-w-4xl items-center justify-between gap-2 text-white">
+        <p className="text-[15px] font-semibold">{file.name}</p>
+        <button
+          type="button"
+          onClick={onClose}
+          aria-label="닫기"
+          className="rounded-full p-2 transition hover:bg-white/15"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+        </button>
+      </div>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[80vh] w-full max-w-4xl items-center justify-center overflow-auto rounded-card bg-card"
+      >
+        {isImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={file.url} alt={file.name} className="max-h-[80vh] w-auto object-contain" />
+        ) : (
+          <iframe src={file.url} title={file.name} className="h-[80vh] w-full" />
+        )}
+      </div>
+    </div>
+  );
+}
 
 export interface AttachmentSectionProps {
   attachments: ReviewAttachment[];
@@ -38,6 +83,7 @@ function FileTypeIcon({ fileType }: { fileType: string }) {
 
 export function AttachmentSection({ attachments }: AttachmentSectionProps) {
   const [selectedId, setSelectedId] = useState(attachments[0]?.id ?? null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const selected = attachments.find((file) => file.id === selectedId) ?? attachments[0];
 
   if (!attachments.length) {
@@ -124,23 +170,24 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
             </div>
 
             <div className="mt-4 flex gap-2">
-              <a
-                href={selected.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={buttonVariants({ variant: "outline", size: "sm" })}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setPreviewOpen(true)}
+                iconLeft={
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7" />
+                    <path
+                      d="M20 20l-3.2-3.2"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                }
               >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7" />
-                  <path
-                    d="M20 20l-3.2-3.2"
-                    stroke="currentColor"
-                    strokeWidth="1.7"
-                    strokeLinecap="round"
-                  />
-                </svg>
                 원본 크게 보기
-              </a>
+              </Button>
               <a
                 href={selected.url}
                 download={selected.name}
@@ -152,6 +199,10 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
           </div>
         )}
       </div>
+
+      {previewOpen && selected && (
+        <PreviewModal file={selected} onClose={() => setPreviewOpen(false)} />
+      )}
     </div>
   );
 }
