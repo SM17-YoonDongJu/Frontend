@@ -74,7 +74,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
 
         <ol className="mt-3 space-y-3">
           {data.issue.map((issue, index) => (
-            <li key={issue.title} className="flex gap-3">
+            <li key={`${issue.title}-${index}`} className="flex gap-3">
               <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gold-soft text-[12px] font-bold text-gold-ink">
                 {index + 1}
               </span>

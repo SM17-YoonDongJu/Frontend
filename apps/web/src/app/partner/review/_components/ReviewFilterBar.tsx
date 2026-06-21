@@ -35,7 +35,7 @@ export function ReviewFilterBar({ regions }: { regions: string[] }) {
           aria-label="지역 필터"
           className="appearance-none rounded-pill border border-line bg-card py-1.5 pl-6 pr-8 text-sm text-ink-2"
         >
-          {["전체", ...regions].map((r) => (
+          {[...new Set(["전체", ...regions])].map((r) => (
             <option key={r} value={r}>
               {r === "전체" ? "지역 전체" : r}
             </option>
