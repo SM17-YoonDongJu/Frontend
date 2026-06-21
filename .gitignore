@@ -35,3 +35,6 @@ storybook-static
 test-results/
 playwright-report/
 playwright/.cache/
+
+# paseo (local worktree tooling)
+paseo.json
