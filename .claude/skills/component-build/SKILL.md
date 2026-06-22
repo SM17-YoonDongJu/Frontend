@@ -52,6 +52,10 @@ function ReportList() {
 ## 접근성
 표준 a11y(의미 태그·label 연결·aria-label·focus 가시성) 지킨다. 기획이 모바일 반응형·툴팁·쉬운말 토글을 요구하므로 접근성은 선택 아닌 요구사항.
 
+**인터랙티브 요소 중첩 금지.** `<Link>`(=`<a>`)로 `<Button>`(=`<button>`)을 감싸지 말 것 — 중첩 인터랙티브는 키보드 탭/스크린리더 해석을 깨뜨린다. 액션이 곧 이동(navigation)이면 요소는 하나만:
+- 링크처럼 보이는 버튼 → `<Link className={buttonVariants({ variant, size })}>`로 `buttonVariants`를 `<Link>`에 직접 적용(`Button`은 `asChild` 미지원, `buttonVariants` export로 이 용도를 지원). 기존 `AttachmentSection`이 `<a className={buttonVariants(...)}>` 패턴.
+- 같은 원칙으로 `<button>` 안의 `<a>`, `<a>` 안의 `<a>`, `<button>` 안의 `<button>`도 금지.
+
 ## 공통 UI 승격 기준
 같은 컴포넌트를 형제 세그먼트 2곳+이 쓰면 가장 가까운 공통 조상의 `_shared/ui/`로, 여러 그룹이 쓰면 앱 전역 `src/shared/ui/`로 승격. 1곳만 쓰면 그 세그먼트의 `_components/`에 유지(성급한 공유화 = 결합도 ↑).
 
