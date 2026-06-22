@@ -24,13 +24,17 @@ export function IssueAddForm({ onAdd }: IssueAddFormProps) {
 
   const canSubmit = title.trim().length > 0;
 
-  function handleSubmit() {
-    if (!canSubmit) return;
-    onAdd(title.trim(), description.trim(), parseManwon(amount));
+  function reset() {
     setTitle("");
     setDescription("");
     setAmount("");
     setOpen(false);
+  }
+
+  function handleSubmit() {
+    if (!canSubmit) return;
+    onAdd(title.trim(), description.trim(), parseManwon(amount));
+    reset();
   }
 
   if (!open) {
@@ -87,7 +91,7 @@ export function IssueAddForm({ onAdd }: IssueAddFormProps) {
         <Button size="sm" disabled={!canSubmit} onClick={handleSubmit}>
           추가
         </Button>
-        <Button size="sm" variant="ghost" onClick={() => setOpen(false)}>
+        <Button size="sm" variant="ghost" onClick={reset}>
           취소
         </Button>
       </div>

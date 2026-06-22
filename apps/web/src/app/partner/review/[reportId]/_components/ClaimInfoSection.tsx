@@ -44,11 +44,14 @@ export function ClaimInfoSection({
     hospitalizations.length === 0 || totalDays === 0 ? (
       NOT_PROVIDED
     ) : (
-      <span className="group relative inline-block cursor-help underline decoration-line decoration-dotted underline-offset-4">
+      <span
+        tabIndex={0}
+        className="group relative inline-block cursor-help underline decoration-line decoration-dotted underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-soft"
+      >
         총 {totalDays}일{hospitalizations.length > 1 && ` · ${hospitalizations.length}회`}
         <span
           role="tooltip"
-          className="invisible absolute left-0 top-full z-30 mt-2 w-max max-w-[280px] rounded-card border border-line bg-card p-3 text-left text-[12.5px] font-normal opacity-0 shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100"
+          className="invisible absolute left-0 top-full z-30 mt-2 w-max max-w-[280px] rounded-card border border-line bg-card p-3 text-left text-[12.5px] font-normal opacity-0 shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
         >
           {hospitalizations.map((h, index) => {
             const days = periodDays(h.hospitalStart, h.hospitalEnd);
