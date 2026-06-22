@@ -195,16 +195,27 @@ export const handlers = [
         ? params.reportId
         : crypto.randomUUID();
 
+    // 같은 URL을 고객 리포트 상세와 사정사 검수가 공유.
+    // 고객(test-id-123)은 매칭완료·확정 보상범위·사정사 코멘트가 필요하고,
+    // 사정사 검수(uuid 진입)는 검수대기·미작성 상태가 필요 → 충돌 필드만 분기.
+    const isCustomerSample = reportId === "test-id-123";
+
+    // 응답 reportId는 zod uuid 검증을 통과해야 함. uuid 진입(사정사)은 그대로,
+    // 그 외(고객 샘플 등 비-uuid)는 uuid 생성으로 대체.
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reportId);
+    const responseReportId = isUuid ? reportId : crypto.randomUUID();
+
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
-        reportId,
-        status: "AWAITING_INSPECTION",
+        reportId: responseReportId,
+        status: isCustomerSample ? "MATCHED" : "AWAITING_INSPECTION",
         accidentType: "교통사고(후유장해)",
         treatment: "우측 슬관절 후방십자인대 파열",
-        claimedMinAmount: 12_000_000,
-        claimedMaxAmount: 18_000_000,
+        claimedMinAmount: isCustomerSample ? 13_500_000 : 12_000_000,
+        claimedMaxAmount: isCustomerSample ? 17_000_000 : 18_000_000,
         offeredAmount: 8_500_000,
         applicableGuarantees: ["상해후유장해 담보", "골절 진단비 특약", "입원·통원 일당"],
         omittedSpecialContract: ["외모변형 장해특약"],
@@ -237,8 +248,10 @@ export const handlers = [
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
         adjusterId: crypto.randomUUID(),
-        reviewComment: null,
-        reviewedAt: null,
+        reviewComment: isCustomerSample
+          ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
+          : null,
+        reviewedAt: isCustomerSample ? "2026.05.22" : null,
         adjuster: { nickname: "정우성", career: "12년 경력 손해사정사" },
 
         // 사정사 검수 확장 필드(MSW 전용)
