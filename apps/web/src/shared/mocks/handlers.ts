@@ -257,6 +257,7 @@ export const handlers = [
         // 사정사 검수 확장 필드(MSW 전용)
         caseId: "20260531-042",
         accidentDate: "2026.05.01",
+        insuranceName: "OO손해보험 · 행복드림",
         hospitalizations: [
           {
             hospitalStart: "2026.05.02",

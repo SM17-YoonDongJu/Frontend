@@ -85,6 +85,7 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
               accidentDate={data.accidentDate}
               hospitalizations={data.hospitalizations}
               offeredAmount={data.offeredAmount}
+              insuranceName={data.insuranceName}
               applicableGuarantees={data.applicableGuarantees}
             />
             <AccidentNarrativeSection description={data.description} />

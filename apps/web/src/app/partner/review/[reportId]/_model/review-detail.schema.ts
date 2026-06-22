@@ -59,6 +59,8 @@ export const reviewDetailSchema = z.object({
   // ⚠️ 명세 드리프트: 아래 확장 필드는 GET /reports/{id} 명세 미존재. MSW 목킹, 백엔드 반영 요청.
   caseId: z.string(),
   accidentDate: z.string(),
+  // 가입 보험(보험사 · 상품명). ⚠️ 명세 드리프트: GET 미존재, MSW 목킹.
+  insuranceName: z.string().nullable(),
   hospitalizations: z.array(hospitalizationSchema),
   description: z.string().nullable(),
   client: reviewClientSchema,
