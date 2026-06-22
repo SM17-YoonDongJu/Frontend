@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@/shared/ui/Button";
+import { useFocusTrap } from "@/shared/lib/use-focus-trap";
 
 export interface ConfirmDialogProps {
   open: boolean;
@@ -27,6 +28,9 @@ export function ConfirmDialog({
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(cardRef, open);
+
   useEffect(() => {
     if (!open || !dismissible) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onCancel();
@@ -42,11 +46,13 @@ export function ConfirmDialog({
       aria-modal="true"
       aria-label={title}
       onClick={dismissible ? onCancel : undefined}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/55 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4"
     >
       <div
+        ref={cardRef}
+        tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-sm rounded-card-lg border border-line bg-card p-6 shadow-lg"
+        className="w-full max-w-sm rounded-card-lg border border-line bg-card p-6 shadow-lg outline-none"
       >
         <h2 className="font-serif text-[18px] font-bold text-ink">{title}</h2>
         {description && (

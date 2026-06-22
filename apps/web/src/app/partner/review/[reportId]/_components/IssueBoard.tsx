@@ -26,18 +26,24 @@ export function IssueBoard({ issues, actions }: IssueBoardProps) {
         AI 초안 판단을 검토해 인정·수정·제외와 의견을 남겨주세요. 빠진 쟁점은 직접 추가할 수 있어요.
       </p>
 
-      <ol className="mt-4 space-y-3">
-        {issues.map((issue, index) => (
-          <IssueCard
-            key={issue.id}
-            issue={issue}
-            index={index}
-            onSetStatus={(status) => actions.setStatus(issue.id, status)}
-            onPatch={(patch) => actions.editIssue(issue.id, patch)}
-            onRemove={() => actions.removeIssue(issue.id)}
-          />
-        ))}
-      </ol>
+      {issues.length === 0 ? (
+        <p className="mt-4 rounded-card border border-dashed border-line-2 bg-paper-2 px-4 py-6 text-center text-[13.5px] text-ink-3">
+          AI가 추출한 쟁점이 없습니다. 아래에서 검토할 쟁점을 직접 추가해 주세요.
+        </p>
+      ) : (
+        <ol className="mt-4 space-y-3">
+          {issues.map((issue, index) => (
+            <IssueCard
+              key={issue.id}
+              issue={issue}
+              index={index}
+              onSetStatus={(status) => actions.setStatus(issue.id, status)}
+              onPatch={(patch) => actions.editIssue(issue.id, patch)}
+              onRemove={() => actions.removeIssue(issue.id)}
+            />
+          ))}
+        </ol>
+      )}
 
       <div className="mt-3">
         <IssueAddForm onAdd={actions.addIssue} />

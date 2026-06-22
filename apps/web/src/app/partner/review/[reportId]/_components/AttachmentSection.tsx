@@ -1,12 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Button, buttonVariants } from "@/shared/ui/Button";
+import { useFocusTrap } from "@/shared/lib/use-focus-trap";
 import type { ReviewAttachment } from "../_model/types";
 
 function PreviewModal({ file, onClose }: { file: ReviewAttachment; onClose: () => void }) {
   const isImage = /jpe?g|png|gif|webp|image/i.test(file.fileType);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, true);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
@@ -16,11 +19,12 @@ function PreviewModal({ file, onClose }: { file: ReviewAttachment; onClose: () =
 
   return (
     <div
+      ref={panelRef}
       role="dialog"
       aria-modal="true"
       aria-label={`${file.name} 원본 미리보기`}
       onClick={onClose}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-ink/70 p-4 sm:p-8"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-ink/60 p-4 sm:p-8"
     >
       <div className="flex w-full max-w-4xl items-center justify-between gap-2 text-white">
         <p className="text-[15px] font-semibold">{file.name}</p>

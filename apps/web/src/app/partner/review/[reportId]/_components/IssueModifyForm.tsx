@@ -25,27 +25,29 @@ export function IssueModifyForm({ issue, onPatch }: IssueModifyFormProps) {
     <div className="mt-3 space-y-3 rounded-card border border-gold-2 bg-gold-soft/40 p-4">
       <p className="text-[12.5px] font-semibold text-gold-ink">AI 초안 수정 중 — 제목·금액·설명을 고치세요</p>
 
-      <div>
-        <Label htmlFor={`modify-title-${issue.id}`}>쟁점 제목</Label>
-        <Input
-          id={`modify-title-${issue.id}`}
-          className="mt-1.5"
-          value={issue.title}
-          onChange={(e) => onPatch({ title: e.target.value })}
-        />
-      </div>
+      <div className="grid gap-3 sm:grid-cols-[1fr_160px]">
+        <div>
+          <Label htmlFor={`modify-title-${issue.id}`}>쟁점 제목</Label>
+          <Input
+            id={`modify-title-${issue.id}`}
+            className="mt-1.5"
+            value={issue.title}
+            onChange={(e) => onPatch({ title: e.target.value })}
+          />
+        </div>
 
-      <div>
-        <Label htmlFor={`modify-amount-${issue.id}`}>영향 금액 조정</Label>
-        <Input
-          id={`modify-amount-${issue.id}`}
-          type="number"
-          inputMode="numeric"
-          className="mt-1.5"
-          suffix="만원"
-          value={toManwonValue(issue.impactAmount)}
-          onChange={(e) => onPatch({ impactAmount: parseManwon(e.target.value) })}
-        />
+        <div>
+          <Label htmlFor={`modify-amount-${issue.id}`}>영향 금액</Label>
+          <Input
+            id={`modify-amount-${issue.id}`}
+            type="number"
+            inputMode="numeric"
+            className="mt-1.5"
+            suffix="만원"
+            value={toManwonValue(issue.impactAmount)}
+            onChange={(e) => onPatch({ impactAmount: parseManwon(e.target.value) })}
+          />
+        </div>
       </div>
 
       <div>

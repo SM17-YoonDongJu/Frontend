@@ -4,6 +4,11 @@ import Link from "next/link";
 import { Button } from "@/shared/ui/Button";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 
+/** "교통사고(후유장해)" → "후유장해". 괄호 분류가 있으면 그 값을, 없으면 전체. */
+function accidentCategory(accidentType: string): string {
+  return accidentType.match(/\(([^)]+)\)/)?.[1] ?? accidentType;
+}
+
 export interface ReviewHeaderProps {
   caseId: string;
   treatment: string;
@@ -44,7 +49,7 @@ export function ReviewHeader({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-serif text-[22px] font-bold text-ink">{treatment} 검수</h1>
-            <StatusBadge tone="gold">{accidentType}</StatusBadge>
+            <StatusBadge tone="gold">{accidentCategory(accidentType)}</StatusBadge>
           </div>
           <p className="mt-1 text-[13px] text-ink-3">
             #{caseId} · {region} · {clientName} 의뢰
