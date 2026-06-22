@@ -102,7 +102,7 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
           <OverallOpinionSection value={state.review} onChange={actions.setReview} />
         </div>
 
-        <aside className="lg:sticky lg:top-6 lg:self-start">
+        <aside className="lg:sticky lg:top-20 lg:max-h-[calc(100dvh-6rem)] lg:self-start lg:overflow-y-auto lg:pr-1">
           <ReviewSidebar
             progress={derived.progress}
             counts={derived.counts}
