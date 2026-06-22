@@ -86,7 +86,7 @@ test("쟁점을 인정·수정·제외하면 진행현황과 카운트가 즉시
   await expect(
     page.getByRole("heading", { name: "검수 리포트를 고객에게 전송했습니다" }),
   ).toBeVisible();
-  await expect(page.getByRole("button", { name: "검수 대기 목록으로" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "검수 대기 목록으로" })).toBeVisible();
 });
 
 test("작성 중 새로고침하면 임시저장된 내용을 이어서 작성할 수 있다", async ({ page }) => {

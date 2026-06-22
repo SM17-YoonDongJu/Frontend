@@ -25,6 +25,8 @@ export interface IssueCardProps {
 
 export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: IssueCardProps) {
   const impact = formatImpact(issue.impactAmount);
+  const impactTone =
+    issue.impactAmount != null && issue.impactAmount < 0 ? "text-terra" : "text-green";
   const isPending = issue.status === "PENDING";
   const isModified = issue.status === "MODIFIED";
 
@@ -45,7 +47,7 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
             <div className="flex flex-wrap items-center gap-2">
               <h3 className="text-[15px] font-semibold text-ink">{issue.title}</h3>
               {impact && (
-                <span className="text-[13px] font-semibold text-green">{impact}</span>
+                <span className={cn("text-[13px] font-semibold", impactTone)}>{impact}</span>
               )}
               {issue.isNew && <StatusBadge tone="gold">신규</StatusBadge>}
             </div>

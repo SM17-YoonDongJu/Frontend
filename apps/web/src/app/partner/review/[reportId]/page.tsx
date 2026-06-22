@@ -6,5 +6,6 @@ export default async function ReviewDetailPage({
   params: Promise<{ reportId: string }>;
 }) {
   const { reportId } = await params;
-  return <ReviewDetailBoundary reportId={reportId} />;
+  // reportId 변경 시 초안/리듀서 상태가 init-1회라 잔류 → key로 서브트리 재마운트.
+  return <ReviewDetailBoundary key={reportId} reportId={reportId} />;
 }

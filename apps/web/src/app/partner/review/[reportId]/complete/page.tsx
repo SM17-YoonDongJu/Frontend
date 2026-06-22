@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/shared/ui/Button";
+import { buttonVariants } from "@/shared/ui/Button";
 
 export default async function ReviewCompletePage({
   params,
@@ -47,15 +47,17 @@ export default async function ReviewCompletePage({
       </dl>
 
       <div className="mt-8 flex w-full flex-col gap-2.5">
-        <Link href="/partner/review">
-          <Button variant="primary" full>
-            검수 대기 목록으로
-          </Button>
+        <Link
+          href="/partner/review"
+          className={buttonVariants({ variant: "primary", full: true })}
+        >
+          검수 대기 목록으로
         </Link>
-        <Link href={`/partner/review/${reportId}`}>
-          <Button variant="outline" full>
-            검수 내용 다시 보기
-          </Button>
+        <Link
+          href={`/partner/review/${reportId}`}
+          className={buttonVariants({ variant: "outline", full: true })}
+        >
+          검수 내용 다시 보기
         </Link>
       </div>
     </div>

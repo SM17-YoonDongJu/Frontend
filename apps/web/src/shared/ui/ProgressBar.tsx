@@ -24,15 +24,16 @@ export function ProgressBar({
   ...props
 }: ProgressBarProps) {
   const safeMax = max > 0 ? max : 1;
-  const ratio = Math.min(Math.max(value / safeMax, 0), 1);
+  const safeValue = Math.min(Math.max(value, 0), safeMax);
+  const ratio = safeValue / safeMax;
 
   return (
     <div
       role="progressbar"
       aria-label={label}
-      aria-valuenow={value}
+      aria-valuenow={safeValue}
       aria-valuemin={0}
-      aria-valuemax={max}
+      aria-valuemax={safeMax}
       className={cn("h-2 w-full overflow-hidden rounded-pill bg-line-2", className)}
       {...props}
     >
