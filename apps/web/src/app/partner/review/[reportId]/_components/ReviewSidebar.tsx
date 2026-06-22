@@ -17,6 +17,7 @@ export interface ReviewSidebarProps {
   hasOpinion: boolean;
   allReviewed: boolean;
   isSubmitting: boolean;
+  errorMessage?: string | null;
   onComplete: () => void;
   onRevert: () => void;
 }
@@ -36,6 +37,7 @@ export function ReviewSidebar({
   hasOpinion,
   allReviewed,
   isSubmitting,
+  errorMessage,
   onComplete,
   onRevert,
 }: ReviewSidebarProps) {
@@ -106,6 +108,15 @@ export function ReviewSidebar({
           초안으로 되돌리기
         </Button>
       </div>
+
+      {errorMessage && (
+        <p
+          role="alert"
+          className="rounded-card border border-terra-2 bg-terra-soft px-4 py-3 text-[12.5px] leading-relaxed text-terra"
+        >
+          {errorMessage}
+        </p>
+      )}
 
       <p className="rounded-card bg-green-soft px-4 py-3 text-[12.5px] leading-relaxed text-green">
         전송 시 손해사정사 검수 완료 배지가 부착되어 고객에게 발송됩니다.

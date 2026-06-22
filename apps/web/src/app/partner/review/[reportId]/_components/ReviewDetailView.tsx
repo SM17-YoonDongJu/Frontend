@@ -23,18 +23,28 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
   const router = useRouter();
   const [isSavingDraft, setIsSavingDraft] = useState(false);
   const [revertOpen, setRevertOpen] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   async function handleSaveDraft() {
     setIsSavingDraft(true);
+    setSubmitError(null);
     try {
       await submitReview.mutateAsync(toSubmitBody(state));
+    } catch {
+      setSubmitError("임시저장에 실패했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setIsSavingDraft(false);
     }
   }
 
   async function handleComplete() {
-    await submitReview.mutateAsync(toSubmitBody(state, { complete: true }));
+    setSubmitError(null);
+    try {
+      await submitReview.mutateAsync(toSubmitBody(state, { complete: true }));
+    } catch {
+      setSubmitError("검수 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
     clearReviewDraft(reportId);
     router.push(
       `/partner/review/${reportId}/complete?caseId=${encodeURIComponent(data.caseId)}`,
@@ -93,6 +103,7 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
             hasOpinion={derived.hasOpinion}
             allReviewed={derived.allReviewed}
             isSubmitting={submitReview.isPending && !isSavingDraft}
+            errorMessage={submitError}
             onComplete={handleComplete}
             onRevert={() => setRevertOpen(true)}
           />
