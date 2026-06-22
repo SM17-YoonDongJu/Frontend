@@ -81,6 +81,18 @@ function FileTypeIcon({ fileType }: { fileType: string }) {
   );
 }
 
+function downloadAll(attachments: ReviewAttachment[]) {
+  attachments.forEach((file) => {
+    const a = document.createElement("a");
+    a.href = file.url;
+    a.download = file.name;
+    a.rel = "noopener";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  });
+}
+
 export function AttachmentSection({ attachments }: AttachmentSectionProps) {
   const [selectedId, setSelectedId] = useState(attachments[0]?.id ?? null);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -101,7 +113,7 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
         <h2 className="font-serif text-[17px] font-bold text-ink">
           첨부 자료 <span className="text-gold-ink">{attachments.length}건</span>
         </h2>
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={() => downloadAll(attachments)}>
           전체 다운로드
         </Button>
       </div>
