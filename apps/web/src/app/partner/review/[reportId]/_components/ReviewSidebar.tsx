@@ -15,7 +15,6 @@ export interface ReviewSidebarProps {
   confirmedMax: number | null;
   reflectedIssueCount: number;
   hasOpinion: boolean;
-  allReviewed: boolean;
   isSubmitting: boolean;
   errorMessage?: string | null;
   onComplete: () => void;
@@ -35,7 +34,6 @@ export function ReviewSidebar({
   confirmedMax,
   reflectedIssueCount,
   hasOpinion,
-  allReviewed,
   isSubmitting,
   errorMessage,
   onComplete,
@@ -99,7 +97,7 @@ export function ReviewSidebar({
           size="lg"
           full
           loading={isSubmitting}
-          disabled={!allReviewed}
+          disabled={isSubmitting}
           onClick={onComplete}
         >
           검수 완료 · 고객 전송

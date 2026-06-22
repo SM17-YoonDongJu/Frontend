@@ -38,6 +38,14 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
   }
 
   async function handleComplete() {
+    const missing: string[] = [];
+    if (!derived.allReviewed) missing.push("모든 쟁점을 인정·수정·제외로 검토해 주세요.");
+    if (!derived.hasOpinion) missing.push("종합 의견을 작성해 주세요.");
+    if (missing.length > 0) {
+      setSubmitError(`전송 전 확인해 주세요 — ${missing.join(" ")}`);
+      return;
+    }
+
     setSubmitError(null);
     try {
       await submitReview.mutateAsync(toSubmitBody(state, { complete: true }));
@@ -101,7 +109,6 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
             confirmedMax={state.confirmedMaxAmount}
             reflectedIssueCount={derived.reflectedIssueCount}
             hasOpinion={derived.hasOpinion}
-            allReviewed={derived.allReviewed}
             isSubmitting={submitReview.isPending && !isSavingDraft}
             errorMessage={submitError}
             onComplete={handleComplete}

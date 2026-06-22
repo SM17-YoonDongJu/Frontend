@@ -112,6 +112,19 @@ test("작성 중 새로고침하면 임시저장된 내용을 이어서 작성�
   await expect(page.getByText("1/3")).toBeVisible();
 });
 
+test("검토·의견 없이 전송하면 확인 안내가 뜨고 전송되지 않는다", async ({ page }) => {
+  await page.goto(DETAIL_PATH);
+  await expect(page.getByRole("heading", { name: /쟁점별 검수/ })).toBeVisible();
+
+  // 아무것도 안 한 상태에서 바로 전송
+  await page.getByRole("button", { name: "검수 완료 · 고객 전송" }).click();
+
+  await expect(page.getByText(/전송 전 확인/)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "검수 리포트를 고객에게 전송했습니다" }),
+  ).toHaveCount(0);
+});
+
 test("초안으로 되돌리기는 확인 후에만 작성 내용을 비운다", async ({ page }) => {
   await page.goto(DETAIL_PATH);
   await expect(page.getByRole("heading", { name: /쟁점별 검수/ })).toBeVisible();
