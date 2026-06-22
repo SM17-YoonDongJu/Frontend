@@ -27,3 +27,4 @@
 | 2026-06-15 | 식별자 사전 추가 | frontend-feature/references/naming-dictionary.md (+ fe-architect·ui-builder·data-engineer·code-conventions·frontend-feature 포인터) | API 명세 필드명을 단일 진실로 박아 변수·필드·enum·ID타입·훅/쿼리키 작명 통일, 명세 내 드리프트 4건 플래그 |
 | 2026-06-16 | 디자인 토큰 이식 + 레퍼런스 추가 | globals.css(@theme 색·radius·폰트), layout.tsx(next/font Gowun Batang), component-build/references/design-tokens.md (+ component-build·ui-builder 포인터) | 바른보상 디자인 시스템 토큰을 Tailwind v4 @theme 단일 진실로 박음, 상태는 유틸로(전역 .bb-* X), light 전용 확정(dark: 폐기) |
 | 2026-06-17 | Storybook 스토리 필수 규칙 추가 | component-build | 공용 UI 컴포넌트 작성 시 `<Name>.stories.tsx` 동반 작성·동일 커밋 포함, 페이지 임시 마운트 프리뷰 금지(스토리북 확인) |
+| 2026-06-23 | 인터랙티브 중첩 금지 규칙 추가 | component-build(접근성) | PR #23 CodeRabbit 지적: `<Link><Button>` 중첩 인터랙티브 반복 → 링크형 버튼은 `<Link className={buttonVariants(...)}>` 단일 요소로, a/button 상호 중첩 금지 |

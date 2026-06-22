@@ -21,3 +21,7 @@ export const reportKeys = createQueryKeys("report", {
 export const proposalKeys = createQueryKeys("proposal", {
   list: (reportId: string) => [reportId],
 });
+
+export const reviewKeys = createQueryKeys("review", {
+  detail: (reportId: string) => [reportId],
+});
