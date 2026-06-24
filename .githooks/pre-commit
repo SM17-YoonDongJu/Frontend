@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+# 커밋 직전 typecheck + lint 게이트.
+# 스테이징에 .ts/.tsx 변경이 있을 때만 실행(문서/설정만 바꾼 커밋은 빠르게 통과).
+# 실패 시 커밋 차단 — 타입 깨짐/lint 위반을 커밋에 섞지 않는다.
+
+staged=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' || true)
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+# 커밋 시점에 의존성을 멋대로 재설치하지 않도록 실행 전 검사를 끈다(설치된 deps로 검사).
+PNPM="pnpm --filter @insurance/web --config.verify-deps-before-run=false"
+
+echo "▶ pre-commit: typecheck (tsc --noEmit)..."
+if ! $PNPM typecheck; then
+  echo "✘ typecheck 실패 — 커밋 중단. 타입 오류를 고치고 다시 커밋하라."
+  echo "  (의도적으로 건너뛰려면: git commit --no-verify)"
+  exit 1
+fi
+
+echo "▶ pre-commit: lint (next lint)..."
+if ! $PNPM lint; then
+  echo "✘ lint 실패 — 커밋 중단. lint 오류를 고치고 다시 커밋하라."
+  echo "  (의도적으로 건너뛰려면: git commit --no-verify)"
+  exit 1
+fi
+
+echo "✔ pre-commit 통과"
