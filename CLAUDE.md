@@ -13,6 +13,7 @@
 - 쿼리키 factory + staleTime(auth 30분/상세 Infinity/리스트 0폴링)/gcTime(기본 30분/상세 1시간) + zod + MSW → `react-query-data`
 - App Router·라우트그룹((customer)/(partner)/(auth))·Server/Client 경계·3상태 → `component-build`
 - 테스트: Playwright + MSW, 구현 아닌 사용자 행동 기준 → `fe-integration-qa`
+- 커밋 메시지: 커밋을 만들 때는 **반드시 `commit-style` 스킬을 먼저 호출**해 메시지를 작성한다(직접 임의 작성 금지).
 
 **변경 이력:**
 | 날짜 | 변경 내용 | 대상 | 사유 |
@@ -34,3 +35,4 @@
 | 2026-06-25 | Next.js 파일 컨벤션 레퍼런스 추가 | component-build/references/nextjs-file-conventions.md (+ component-build 포인터) | 공식 문서(Next.js 16) 기준 특수 파일(loading/error/not-found/forbidden/route 등) 정리, repo가 page/layout만 써 누락된 error 바운더리·404/403/401을 api-spec 에러코드와 연결, loading.tsx↔쿼리 isPending·error.tsx↔쿼리 isError 역할 분리 |
 | 2026-06-25 | pr 스킬 삭제 | skills/pr/ 제거 | malformed(소문자 skill.md·frontmatter 없음) + 전역 commands/pr.md와 기능 중복 → 전역 명령으로 일원화 |
 | 2026-06-25 | fe-integration-qa 스킬 배선 | fe-qa 에이전트, frontend-feature Phase 3 | 스킬이 CLAUDE.md 트리거에만 매핑되고 에이전트·오케스트레이터가 명시 호출 안 하던 갭 → 양쪽에 스킬 포인터 추가 |
+| 2026-06-25 | 커밋 시 commit-style 스킬 필수 규칙 | CLAUDE.md 핵심 규칙 | 커밋 메시지를 임의 작성하지 말고 commit-style 스킬로 일관되게 작성하도록 강제 |
