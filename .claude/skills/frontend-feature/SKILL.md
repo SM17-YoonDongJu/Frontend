@@ -34,6 +34,7 @@ description: 손해사정 플랫폼 프론트엔드 기능을 에이전트 팀(f
 - `TaskCreate`로 슬라이스별 작업 등록, 의존성(`addBlockedBy`)으로 순서 관리.
 
 ## Phase 3: 검증 (fe-qa, 점진적)
+fe-qa는 `fe-integration-qa` 스킬 방법론으로 검증한다(경계면 교차검증 절차 + 행동 기반 Playwright).
 - data-engineer 완료 직후 → 데이터 경계(MSW↔zod↔훅) 검증.
 - ui-builder 완료 직후 → UI 경계(훅↔컴포넌트)+3상태 검증.
 - `pnpm typecheck`·`pnpm lint` 실제 실행, 결과 인용.
