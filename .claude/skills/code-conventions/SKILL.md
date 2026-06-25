@@ -35,6 +35,8 @@ description: 손해사정 플랫폼 프론트엔드 코드 컨벤션. 변경하�
 - **책임 분리**: 거대한 useEffect/거대 컴포넌트는 관심사별로 쪼갠다. 하나가 바뀌어도 나머지에 영향 없게.
 - **Props Drilling 대신**: 깊은 prop 전달은 합성(composition)·context로 결합 완화.
 - **형제 세그먼트 `_internal` 직접 import 금지**: 한 라우트 세그먼트가 다른 세그먼트의 `_components`/`_api`/`_model` 내부를 직접 import하면 강결합. 공유가 필요하면 **가장 가까운 공통 조상의 `_shared/`**(또는 앱 전역 `src/shared/`)로 올린다.
+- **의존 방향 고정**: 의존은 `_components`/`_hooks` → `_api` → 외부 한 방향. **`_api`/`_model`이 `_components`/`_hooks`를 import하면 안 된다**(데이터층이 UI에 의존 = 역방향 강결합).
+- **이 두 규칙은 기계가 강제한다**: `.claude/hooks/fractal-boundary-lint.sh`가 파일 작성 시 세그먼트 경계 침범·역방향 의존을 감지해 차단한다. 글로만 믿지 말고 위반을 막는다(api-spec 훅의 아키텍처 버전).
 
 ## 프로젝트 프렉탈(라우트 코로케이션) 배치 규칙
 

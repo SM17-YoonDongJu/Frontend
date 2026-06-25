@@ -38,3 +38,4 @@
 | 2026-06-25 | 커밋 시 commit-style 스킬 필수 규칙 | CLAUDE.md 핵심 규칙 | 커밋 메시지를 임의 작성하지 말고 commit-style 스킬로 일관되게 작성하도록 강제 |
 | 2026-06-25 | E2E 작성 레퍼런스 추가 + 드리프트 수정 | fe-integration-qa/references/e2e-authoring.md (+ SKILL 포인터) | 실제 스펙(apps/web/e2e/*)·playwright.config 기준 작성 패턴(파일구조·사용자셀렉터·toPass 하이드레이션 가드·기본 핸들러 MSW·헬퍼) 정리, "Playwright 미설치·pnpm test" 드리프트를 설치됨·test:e2e로 정정 |
 | 2026-06-25 | 테스트 전략 E2E-only 확정 | fe-integration-qa(SKILL·e2e-authoring), commit-style | 단위·통합테스트 안 함(Vitest/RTL/Jest 미도입) 명시, 정적 레이어(TS·zod·api-spec훅·pre-commit)가 하위 대체, 고가치 빈/에러는 E2E 핸들러 override·저가치는 의식적 미테스트, 죽은 "RTL/통합테스트로 내림" 포인터 전수 제거 |
+| 2026-06-25 | 프렉탈 경계 위반 차단 훅 추가 | .claude/hooks/fractal-boundary-lint.sh, .claude/settings.json, code-conventions | app 트리 .ts/.tsx 작성 시 세그먼트 경계 침범(다른 세그먼트 _internal 직접 import)·역방향 의존(_api/_model→_components/_hooks) 감지해 PostToolUse로 차단, 의존 방향 규칙 명문화, 프렉탈을 글이 아닌 기계가 강제 |

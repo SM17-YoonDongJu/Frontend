@@ -9,6 +9,11 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/api-spec-lint.sh\"",
             "statusMessage": "API 명세 계약 검사"
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/fractal-boundary-lint.sh\"",
+            "statusMessage": "프렉탈 경계 검사"
           }
         ]
       }
