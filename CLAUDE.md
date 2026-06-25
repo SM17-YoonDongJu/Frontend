@@ -32,3 +32,4 @@
 | 2026-06-25 | API 계약 위반 차단 훅 추가 | .claude/hooks/api-spec-lint.sh, .claude/settings.json | _api/·handlers.ts·*.schema.ts 작성 시 에러코드 enum 외 값·실패 봉투 code 누락 감지해 PostToolUse로 차단·재작성 유도 |
 | 2026-06-25 | 커밋 전 typecheck·lint 게이트 | .githooks/pre-commit, package.json(prepare), .gitattributes | .ts/.tsx 스테이징 시 커밋 직전 typecheck·lint 실행·실패 차단, core.hooksPath 자동 설정으로 팀 공유 |
 | 2026-06-25 | Next.js 파일 컨벤션 레퍼런스 추가 | component-build/references/nextjs-file-conventions.md (+ component-build 포인터) | 공식 문서(Next.js 16) 기준 특수 파일(loading/error/not-found/forbidden/route 등) 정리, repo가 page/layout만 써 누락된 error 바운더리·404/403/401을 api-spec 에러코드와 연결, loading.tsx↔쿼리 isPending·error.tsx↔쿼리 isError 역할 분리 |
+| 2026-06-25 | pr 스킬 삭제 | skills/pr/ 제거 | malformed(소문자 skill.md·frontmatter 없음) + 전역 commands/pr.md와 기능 중복 → 전역 명령으로 일원화 |
