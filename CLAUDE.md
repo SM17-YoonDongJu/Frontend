@@ -29,3 +29,6 @@
 | 2026-06-17 | Storybook 스토리 필수 규칙 추가 | component-build | 공용 UI 컴포넌트 작성 시 `<Name>.stories.tsx` 동반 작성·동일 커밋 포함, 페이지 임시 마운트 프리뷰 금지(스토리북 확인) |
 | 2026-06-23 | 인터랙티브 중첩 금지 규칙 추가 | component-build(접근성) | PR #23 CodeRabbit 지적: `<Link><Button>` 중첩 인터랙티브 반복 → 링크형 버튼은 `<Link className={buttonVariants(...)}>` 단일 요소로, a/button 상호 중첩 금지 |
 | 2026-06-25 | API 명세 레퍼런스 추가 | frontend-feature/references/api-spec.md (+ fe-architect·data-engineer·frontend-feature 포인터) | Notion API 명세서 DB(경로·도메인·메서드)+전역 응답 봉투·에러코드 enum·base url을 단일 진실로 박음, 엔드포인트는 작업 시점 fetch·MSW가 봉투/에러코드 거울 모킹 |
+| 2026-06-25 | API 계약 위반 차단 훅 추가 | .claude/hooks/api-spec-lint.sh, .claude/settings.json | _api/·handlers.ts·*.schema.ts 작성 시 에러코드 enum 외 값·실패 봉투 code 누락 감지해 PostToolUse로 차단·재작성 유도 |
+| 2026-06-25 | 커밋 전 typecheck·lint 게이트 | .githooks/pre-commit, package.json(prepare), .gitattributes | .ts/.tsx 스테이징 시 커밋 직전 typecheck·lint 실행·실패 차단, core.hooksPath 자동 설정으로 팀 공유 |
+| 2026-06-25 | Next.js 파일 컨벤션 레퍼런스 추가 | component-build/references/nextjs-file-conventions.md (+ component-build 포인터) | 공식 문서(Next.js 16) 기준 특수 파일(loading/error/not-found/forbidden/route 등) 정리, repo가 page/layout만 써 누락된 error 바운더리·404/403/401을 api-spec 에러코드와 연결, loading.tsx↔쿼리 isPending·error.tsx↔쿼리 isError 역할 분리 |
