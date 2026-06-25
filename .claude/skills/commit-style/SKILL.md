@@ -29,7 +29,7 @@ description: 손해사정 플랫폼 프론트엔드 커밋 메시지 컨벤션. 
 | `design` | 레이아웃·헤더·푸터·디자인 토큰 등 UI 셸 (동작 없는 시각 구현) |
 | `refactor` | 동작 불변 구조 개선 |
 | `docs` | 문서·스토리북 스토리 |
-| `test` | 테스트 추가/수정 (Playwright·RTL) |
+| `test` | 테스트 추가/수정 (Playwright E2E) |
 | `chore` | 라이브러리 설치·설정·빌드 |
 | `style` | 포맷·세미콜론 등 비기능 |
 | `settings` | 프로젝트/모노레포 초기 세팅·하네스 |

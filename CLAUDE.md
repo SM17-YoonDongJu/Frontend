@@ -36,3 +36,5 @@
 | 2026-06-25 | pr 스킬 삭제 | skills/pr/ 제거 | malformed(소문자 skill.md·frontmatter 없음) + 전역 commands/pr.md와 기능 중복 → 전역 명령으로 일원화 |
 | 2026-06-25 | fe-integration-qa 스킬 배선 | fe-qa 에이전트, frontend-feature Phase 3 | 스킬이 CLAUDE.md 트리거에만 매핑되고 에이전트·오케스트레이터가 명시 호출 안 하던 갭 → 양쪽에 스킬 포인터 추가 |
 | 2026-06-25 | 커밋 시 commit-style 스킬 필수 규칙 | CLAUDE.md 핵심 규칙 | 커밋 메시지를 임의 작성하지 말고 commit-style 스킬로 일관되게 작성하도록 강제 |
+| 2026-06-25 | E2E 작성 레퍼런스 추가 + 드리프트 수정 | fe-integration-qa/references/e2e-authoring.md (+ SKILL 포인터) | 실제 스펙(apps/web/e2e/*)·playwright.config 기준 작성 패턴(파일구조·사용자셀렉터·toPass 하이드레이션 가드·기본 핸들러 MSW·헬퍼) 정리, "Playwright 미설치·pnpm test" 드리프트를 설치됨·test:e2e로 정정 |
+| 2026-06-25 | 테스트 전략 E2E-only 확정 | fe-integration-qa(SKILL·e2e-authoring), commit-style | 단위·통합테스트 안 함(Vitest/RTL/Jest 미도입) 명시, 정적 레이어(TS·zod·api-spec훅·pre-commit)가 하위 대체, 고가치 빈/에러는 E2E 핸들러 override·저가치는 의식적 미테스트, 죽은 "RTL/통합테스트로 내림" 포인터 전수 제거 |
