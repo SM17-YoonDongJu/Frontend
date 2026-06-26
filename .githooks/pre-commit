@@ -19,11 +19,17 @@ if ! $PNPM typecheck; then
   exit 1
 fi
 
-echo "▶ pre-commit: lint (next lint)..."
-if ! $PNPM lint; then
-  echo "✘ lint 실패 — 커밋 중단. lint 오류를 고치고 다시 커밋하라."
-  echo "  (의도적으로 건너뛰려면: git commit --no-verify)"
-  exit 1
+echo "▶ pre-commit: lint (스테이징된 파일만)..."
+# next lint는 Next 16에서 제거됨 → eslint 직접 실행. 레거시 전수 검사 대신 변경분만 검사.
+web_ts=$(printf '%s\n' "$staged" | grep -E '^apps/web/.*\.(ts|tsx)$' | sed 's#^apps/web/##' || true)
+if [ -n "$web_ts" ]; then
+  if ! (cd apps/web && pnpm --config.verify-deps-before-run=false exec eslint --max-warnings=0 $web_ts); then
+    echo "✘ lint 실패 — 커밋 중단. lint 오류를 고치고 다시 커밋하라."
+    echo "  (의도적으로 건너뛰려면: git commit --no-verify)"
+    exit 1
+  fi
+else
+  echo "  (스테이징된 apps/web .ts/.tsx 없음 — lint 건너뜀)"
 fi
 
 echo "✔ pre-commit 통과"
