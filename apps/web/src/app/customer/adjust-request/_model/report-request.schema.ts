@@ -76,8 +76,15 @@ export const createReportBodySchema = z.object({
   accidentDate: z.string().date(),
   diagnosis: z.string().min(1),
   offeredAmount: z.number().int().nullable(),
-  hospitalStart: z.string().nullable(),
-  hospitalEnd: z.string().nullable(),
+  hospitalizations: z
+    .array(
+      z.object({
+        hospitalStart: z.string(),
+        hospitalEnd: z.string().nullable(),
+        hospitalReason: z.string().nullable(),
+      }),
+    )
+    .nullable(),
   description: z.string().nullable(),
   additionalInformation: z.string().nullable(),
   documentUrls: z.array(z.url()).nullable(),
@@ -131,11 +138,6 @@ function serializeAdditionalInformation(draft: AdjustRequestDraftInput): string 
   if (draft.nonCoveredOption) lines.push(`비급여 포함 여부: ${NON_COVERED_LABELS[draft.nonCoveredOption]}`);
   if (draft.enrolledInsurance) lines.push(`가입보험·특약: ${draft.enrolledInsurance}`);
 
-  const reasons = (draft.hospitalizations ?? [])
-    .map((h, i) => (h.reason ? `입원 ${i + 1} 사유: ${h.reason}` : null))
-    .filter((v): v is string => v !== null);
-  lines.push(...reasons);
-
   return lines.length ? lines.join("\n") : null;
 }
 
@@ -143,23 +145,26 @@ type AdjustRequestDraftInput = z.infer<typeof adjustRequestDraftSchema>;
 
 /**
  * draft를 POST /reports body로 변환.
- * 입원 기록 배열 → hospitalStart(최초 입원일)·hospitalEnd(최종 퇴원일)로 압축,
- * 입원 사유 등 무매핑 입력은 additionalInformation으로.
+ * 입원 기록은 명세 hospitalizations 배열로 그대로 전달(사유 포함),
+ * 치료형태 등 무매핑 입력만 additionalInformation으로.
  */
 export function toCreateReportBody(
   draft: AdjustRequestDraftInput,
 ): z.infer<typeof createReportBodySchema> {
   const stays = draft.hospitalizations ?? [];
-  const starts = stays.map((s) => s.start).filter(Boolean).sort();
-  const ends = stays.map((s) => s.end).filter((v): v is string => !!v).sort();
 
   return createReportBodySchema.parse({
     accidentType: draft.accidentType ?? SUPPORTED_ACCIDENT_TYPE,
     accidentDate: draft.accidentDate,
     diagnosis: draft.diagnosis,
     offeredAmount: draft.insuranceNotOffered ? null : (draft.insuranceOffered ?? null),
-    hospitalStart: starts[0] ?? null,
-    hospitalEnd: ends[ends.length - 1] ?? null,
+    hospitalizations: stays.length
+      ? stays.map((s) => ({
+          hospitalStart: s.start,
+          hospitalEnd: s.end ?? null,
+          hospitalReason: s.reason ?? null,
+        }))
+      : null,
     description: null,
     additionalInformation: serializeAdditionalInformation(draft),
     documentUrls: draft.documentUrls ?? null,
