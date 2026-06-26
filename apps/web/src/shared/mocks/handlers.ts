@@ -42,11 +42,14 @@ export const handlers = [
       );
     }
 
-    return HttpResponse.json({
-      status: "200",
-      message: "분석 요청이 접수되었습니다.",
-      data: { reportId: crypto.randomUUID(), status: "AWAITING_INSPECTION" },
-    });
+    return HttpResponse.json(
+      {
+        status: "202",
+        message: "리포트 생성을 시작했습니다.",
+        data: { reportId: crypto.randomUUID(), status: "AWAITING_INSPECTION" },
+      },
+      { status: 202 },
+    );
   }),
 
   // 검수 대기 목록 (활성 손해사정사 전용) — :reportId 라우트보다 먼저 등록
