@@ -77,10 +77,12 @@ test("쟁점을 인정·수정·제외하면 진행현황과 카운트가 즉시
   const body = req.postDataJSON() as {
     status?: string;
     review?: string;
-    reviewIssues?: unknown[];
+    issues?: { issueId?: string; reviewStatus?: string }[];
   };
   expect(body.status).toBe("AWAITING_ADOPTION");
-  expect(Array.isArray(body.reviewIssues)).toBe(true);
+  expect(Array.isArray(body.issues)).toBe(true);
+  expect(body.issues?.[0]).toHaveProperty("issueId");
+  expect(body.issues?.[0]).toHaveProperty("reviewStatus");
   expect(body.review).toContain("후유장해");
 
   await expect(
