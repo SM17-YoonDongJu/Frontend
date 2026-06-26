@@ -9,16 +9,15 @@ export const reviewListItemSchema = z.object({
   accidentType: z.string(),
   status: reviewStatusSchema,
   createdAt: z.string(),
-  // ⚠️ API 명세 미정(드리프트) — 디자인 요구 카드 필드. 백엔드에 list 확장 요청.
-  caseId: z.string(),
-  title: z.string(),
-  region: z.string(),
-  matchingScore: z.number().int(),
-  claimedMinAmount: z.number().int(),
-  claimedMaxAmount: z.number().int(),
-  offerHeadroom: z.number().int(),
-  issueCount: z.number().int(),
-  held: z.boolean(),
+  // 디자인용 카드 확장 필드 — 명세 list 응답에 없음(백엔드 확정 전까지 optional).
+  caseId: z.string().optional(),
+  title: z.string().optional(),
+  region: z.string().optional(),
+  claimedMinAmount: z.number().int().optional(),
+  claimedMaxAmount: z.number().int().optional(),
+  offerHeadroom: z.number().int().optional(),
+  issueCount: z.number().int().optional(),
+  held: z.boolean().optional(),
 });
 
 /** 보류 처리 응답. ⚠️ API 명세 미정(드리프트) — 목업. */

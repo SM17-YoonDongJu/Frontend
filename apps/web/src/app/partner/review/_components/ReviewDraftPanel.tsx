@@ -30,7 +30,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
   const hold = useHoldReview();
 
   const offered = data.offeredAmount ?? 0;
-  const fillStart = Math.min(95, Math.max(0, Math.round((offered / item.claimedMaxAmount) * 100)));
+  const fillStart = Math.min(95, Math.max(0, Math.round((offered / data.claimedMaxAmount) * 100)));
 
   const tags = [...new Set(data.issue.map((issue) => issue.tag).filter((tag): tag is string => tag !== null))];
 
@@ -53,7 +53,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
 
         <p className="mt-4 text-[13px] text-white/60">검토 가능한 예상 보상 범위</p>
         <p className="mt-1 text-[28px] font-bold leading-tight">
-          {toManwon(item.claimedMinAmount)} – {toManwon(item.claimedMaxAmount)}
+          {toManwon(data.claimedMinAmount)} – {toManwon(data.claimedMaxAmount)}
           <span className="ml-1 text-base font-medium text-white/80">만원</span>
         </p>
 
@@ -62,7 +62,9 @@ function DraftContent({ item }: { item: ReviewListItem }) {
         </div>
         <div className="mt-2 flex items-center justify-between text-[12px]">
           <span className="text-white/60">제안 {toManwon(offered)}만</span>
-          <span className="font-semibold text-gold-2">+ 약 {toManwon(item.offerHeadroom)}만</span>
+          {item.offerHeadroom != null && (
+            <span className="font-semibold text-gold-2">+ 약 {toManwon(item.offerHeadroom)}만</span>
+          )}
         </div>
       </div>
 

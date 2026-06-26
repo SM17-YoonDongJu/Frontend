@@ -14,7 +14,9 @@ export function ReviewView() {
   const { type, region } = useReviewFilter();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const regions = [...new Set(data.list.map((item) => item.region))];
+  const regions = [
+    ...new Set(data.list.map((item) => item.region).filter((r): r is string => !!r)),
+  ];
   const filtered = data.list.filter(
     (item) =>
       (type === "전체" || item.accidentType === type) &&
