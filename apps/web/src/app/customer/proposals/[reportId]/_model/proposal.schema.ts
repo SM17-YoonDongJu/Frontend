@@ -5,8 +5,8 @@ import { z } from "zod";
  * 제안 식별자는 별도 proposalId 없이 adjusterId(reportId당 사정사 1제안).
  */
 
-// CONTRACT: status enum 값은 COMPLETED만 확정. 다른 값 불명 → 확장 필요 시 추가.
-export const proposalStatusSchema = z.enum(["COMPLETED"]);
+// 서버 계산 상태: 채택(COMPLETED) / 상담중(CONSULTATION) / 발송(SENT).
+export const proposalStatusSchema = z.enum(["COMPLETED", "CONSULTATION", "SENT"]);
 
 // CONTRACT(목업 선구현): 아래 필드는 현 GET /reports/{reportId}/proposals 응답에 없음.
 // 이미지 #18 풀 디자인용 — 백엔드 응답 확장 요청분(speciality·career·isNew·isVerified·estimate·feeBasis).
