@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { useReportDetail } from "@/app/customer/report/[id]/_api/use-report-detail";
+import { ACCIDENT_TYPE_LABELS, type AccidentType } from "@/shared/model/accident-type";
 import { Button, buttonVariants } from "@/shared/ui/Button";
 import { useHoldReview } from "../_api/use-hold-review";
 import type { ReviewListItem } from "../_model/types";
@@ -41,7 +42,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-pill bg-gold px-2.5 py-1 text-[12.5px] font-semibold">
-              {item.accidentType}
+              {ACCIDENT_TYPE_LABELS[item.accidentType as AccidentType] ?? item.accidentType}
             </span>
             <span className="text-xs text-white/70">#{item.caseId}</span>
             <span className="text-xs text-white/70">· {item.region}</span>

@@ -1,28 +1,34 @@
 "use client";
 
+import { ACCIDENT_TYPE_LABELS } from "@/shared/model/accident-type";
 import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { useReviewFilter } from "../_hooks/use-review-filter";
 
-const TYPES = ["전체", "후유장해", "교통사고", "실손"];
+const TYPE_OPTIONS = [
+  { value: "전체", label: "전체" },
+  { value: "disability", label: ACCIDENT_TYPE_LABELS.disability },
+  { value: "traffic", label: ACCIDENT_TYPE_LABELS.traffic },
+  { value: "medical_indemnity", label: ACCIDENT_TYPE_LABELS.medical_indemnity },
+];
 
 export function ReviewFilterBar({ regions }: { regions: string[] }) {
   const { type, region, setType, setRegion } = useReviewFilter();
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {TYPES.map((t) => (
+      {TYPE_OPTIONS.map(({ value, label }) => (
         <button
-          key={t}
+          key={value}
           type="button"
-          onClick={() => setType(t)}
-          aria-pressed={type === t}
+          onClick={() => setType(value)}
+          aria-pressed={type === value}
           className={`rounded-pill border px-4 py-1.5 text-sm font-medium transition ${
-            type === t
+            type === value
               ? "border-ink bg-ink text-white"
               : "border-line bg-card text-ink-2 hover:border-ink"
           }`}
         >
-          {t}
+          {label}
         </button>
       ))}
 
