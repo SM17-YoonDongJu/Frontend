@@ -9,6 +9,7 @@
 **트리거:** 화면·페이지·컴포넌트·기능 개발, EPIC/스토리 구현, 또는 "다시 실행/재실행/수정/보완/부분만 다시" 후속 요청 시 `frontend-feature` 스킬을 사용하라. 단순 질문·단일 파일 수정은 직접 응답.
 
 **핵심 규칙 (상세는 .claude/skills/):**
+- **작업 착수 전 디자인 컴포넌트 문서 `component-build/references/design-tokens.md`(색·radius·폰트 단일 진실) 필독** — raw hex·임의값 금지, `@theme` 토큰/유틸로만 표현. Figma 변환은 `figma-design-convert` 스킬
 - 폴더 배치·네이밍·4원칙(가독성·예측가능성·응집성·결합도) → `code-conventions`
 - 쿼리키 factory + staleTime(auth 30분/상세 Infinity/리스트 0폴링)/gcTime(기본 30분/상세 1시간) + zod + MSW → `react-query-data`
 - App Router·라우트그룹((customer)/(partner)/(auth))·Server/Client 경계·3상태 → `component-build`
@@ -29,3 +30,4 @@
 | 2026-06-17 | Storybook 스토리 필수 규칙 추가 | component-build | 공용 UI 컴포넌트 작성 시 `<Name>.stories.tsx` 동반 작성·동일 커밋 포함, 페이지 임시 마운트 프리뷰 금지(스토리북 확인) |
 | 2026-06-23 | 인터랙티브 중첩 금지 규칙 추가 | component-build(접근성) | PR #23 CodeRabbit 지적: `<Link><Button>` 중첩 인터랙티브 반복 → 링크형 버튼은 `<Link className={buttonVariants(...)}>` 단일 요소로, a/button 상호 중첩 금지 |
 | 2026-06-27 | 피그마 변환 스킬 정의 | skills/figma-design-convert (SKILL + figma-mapping·verification-gate reference) | 이슈 #26: 로컬 Figma Dev Mode MCP 출력을 @theme 토큰·프렉탈·Storybook 컨벤션으로 매핑, 계산스타일 값 대조로 검증(픽셀/비전 비범위) |
+| 2026-06-27 | 디자인 컴포넌트 문서 필독 규칙 추가 | CLAUDE.md, component-build, frontend-feature | 모든 화면·컴포넌트 작업 착수 전 design-tokens.md 선참조 강제(토큰 드리프트 방지) |
