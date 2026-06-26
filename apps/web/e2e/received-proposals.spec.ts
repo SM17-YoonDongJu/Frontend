@@ -26,7 +26,7 @@ test("진입하면 받은 제안 목록과 분석 대상 정보가 보인다", a
   await expect(page.getByText("이서연")).toBeVisible();
 });
 
-test("거절하면 카드가 목록에 남되 회색·거절 표시로 바뀐다", async ({ page }) => {
+test("거절하면 해당 제안이 목록에서 제외된다", async ({ page }) => {
   await page.goto(PATH);
 
   const firstCard = page.getByRole("listitem").filter({ hasText: "김도현" });
@@ -34,10 +34,9 @@ test("거절하면 카드가 목록에 남되 회색·거절 표시로 바뀐다
 
   await firstCard.getByRole("button", { name: "거절" }).click();
 
-  // 목록 유지(제거 X), 거절 표시로 전환·액션 버튼 사라짐
-  await expect(firstCard.getByText("거절한 제안")).toBeVisible();
-  await expect(firstCard.getByRole("button", { name: "거절" })).toHaveCount(0);
-  await expect(firstCard.getByRole("button", { name: "검수 의견 보기" })).toHaveCount(0);
+  // 거절 성공 시 목록 갱신 → 해당 카드 제거
+  await expect(firstCard).toHaveCount(0);
+  await expect(page.getByText("정우성")).toBeVisible();
 });
 
 test("검수 의견 보기를 누르면 리포트 상세로 이동한다", async ({ page }) => {

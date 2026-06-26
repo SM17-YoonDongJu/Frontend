@@ -2,14 +2,17 @@ import { z } from "zod";
 import { API_BASE_URL } from "@/shared/api/config";
 import { fetchJson } from "@/shared/api/fetch-json";
 
-// CONTRACT: 사정사별 거절 엔드포인트 백엔드 신규 요청(사전 §7-5). body 없음, 응답 본문 미확정.
-export function rejectProposal(
-  reportId: string,
-  adjusterId: string,
-): Promise<unknown> {
+// 사정사별 제안 거절. body 없음, 성공 시 해당 제안은 목록에서 제외.
+const rejectProposalResultSchema = z.object({
+  reportId: z.uuid(),
+  adjusterId: z.uuid(),
+  rejected: z.boolean(),
+});
+
+export function rejectProposal(reportId: string, adjusterId: string) {
   return fetchJson(
     `${API_BASE_URL}/reports/${reportId}/proposals/${adjusterId}/reject`,
-    z.unknown(),
+    rejectProposalResultSchema,
     { method: "PATCH" },
   );
 }

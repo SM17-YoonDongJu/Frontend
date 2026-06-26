@@ -12,6 +12,9 @@ const PENDING_REVIEWS = [
 
 const heldReportIds = new Set<string>();
 
+// 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
+const rejectedProposals = new Set<string>();
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
@@ -101,10 +104,11 @@ export const handlers = [
     });
   }),
 
-  // 받은 제안 목록 조회 (이슈 #18)
-  http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async () => {
+  // 받은 제안 목록 조회 (이슈 #18) — 거절된 제안은 제외
+  http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async ({ params }) => {
     await delay(500);
 
+    const reportId = typeof params.reportId === "string" ? params.reportId : "";
     const list = [
       {
         adjusterId: "11111111-1111-4111-8111-111111111111",
@@ -153,6 +157,10 @@ export const handlers = [
       },
     ];
 
+    const visible = list.filter(
+      (proposal) => !rejectedProposals.has(`${reportId}:${proposal.adjusterId}`),
+    );
+
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
@@ -162,11 +170,11 @@ export const handlers = [
           reportNo: "20260520-017",
           receivedAt: "2026.05.20",
         },
-        list,
+        list: visible,
         pagination: {
           page: 1,
           size: 10,
-          totalElements: list.length,
+          totalElements: visible.length,
           totalPages: 1,
           hasNext: false,
         },
@@ -174,15 +182,23 @@ export const handlers = [
     });
   }),
 
-  // 제안 거절 (사정사별, 백엔드 신규 요청 — MSW 선구현)
+  // 제안 거절 (사정사별) — 성공 시 해당 제안은 목록에서 제외
   http.patch(
     `${API_BASE_URL}/reports/:reportId/proposals/:adjusterId/reject`,
-    async () => {
+    async ({ params }) => {
       await delay(400);
+      const rawReportId = typeof params.reportId === "string" ? params.reportId : "";
+      const adjusterId =
+        typeof params.adjusterId === "string" ? params.adjusterId : crypto.randomUUID();
+      const isUuid =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawReportId);
+
+      rejectedProposals.add(`${rawReportId}:${adjusterId}`);
+
       return HttpResponse.json({
         status: "200",
         message: "제안을 거절했습니다.",
-        data: null,
+        data: { reportId: isUuid ? rawReportId : crypto.randomUUID(), adjusterId, rejected: true },
       });
     },
   ),

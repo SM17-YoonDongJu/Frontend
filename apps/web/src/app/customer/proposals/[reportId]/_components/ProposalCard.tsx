@@ -22,7 +22,7 @@ function formatEstimateRange(min?: number | null, max?: number | null) {
 
 export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
   const router = useRouter();
-  const { isViewed, markViewed, isRejected, markRejected } = useViewedProposals();
+  const { isViewed, markViewed } = useViewedProposals();
   const rejectProposal = useRejectProposal(reportId);
 
   const {
@@ -37,7 +37,6 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
     estimateMaxAmount,
     feeBasis,
   } = proposal;
-  const rejected = isRejected(adjusterId);
   const viewed = isViewed(adjusterId);
   const avatarLabel = nickname.trim().charAt(0) || "?";
   const estimateRange = formatEstimateRange(estimateMinAmount, estimateMaxAmount);
@@ -52,18 +51,14 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
   };
 
   const handleReject = () => {
-    rejectProposal.mutate(adjusterId, {
-      onSuccess: () => markRejected(adjusterId),
-    });
+    rejectProposal.mutate(adjusterId);
   };
 
   return (
     <article
       className={cn(
-        "rounded-card-lg border bg-card p-5 transition",
-        rejected
-          ? "border-line bg-paper-2 opacity-60"
-          : cn("border-gold-2", viewed && "opacity-60"),
+        "rounded-card-lg border border-gold-2 bg-card p-5 transition",
+        viewed && "opacity-60",
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -120,28 +115,22 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {rejected ? (
-            <span className="text-[13px] font-medium text-ink-3">거절한 제안</span>
-          ) : (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                loading={rejectProposal.isPending}
-                onClick={handleReject}
-              >
-                거절
-              </Button>
-              <Button
-                size="sm"
-                icon={<ArrowRightIcon />}
-                className="bg-gold-soft text-gold-ink"
-                onClick={openReviewReport}
-              >
-                검수 의견 보기
-              </Button>
-            </>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            loading={rejectProposal.isPending}
+            onClick={handleReject}
+          >
+            거절
+          </Button>
+          <Button
+            size="sm"
+            icon={<ArrowRightIcon />}
+            className="bg-gold-soft text-gold-ink"
+            onClick={openReviewReport}
+          >
+            검수 의견 보기
+          </Button>
         </div>
       </div>
     </article>
