@@ -30,12 +30,12 @@ export const handlers = [
     return HttpResponse.json({ status: "200", message: "업로드 성공", data: { url } });
   }),
 
-  // 분석 신청 생성 — 실손(MEDICAL_EXPENSE)만 허용, 그 외 UNSUPPORTED_OPERATION
+  // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
   http.post(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(600);
     const body = (await request.json()) as { accidentType?: string };
 
-    if (body.accidentType !== "MEDICAL_EXPENSE") {
+    if (body.accidentType !== "medical_indemnity") {
       return HttpResponse.json(
         { status: "400", code: "UNSUPPORTED_OPERATION", message: "현재 실손 의료비만 분석 가능합니다." },
         { status: 400 },
@@ -364,7 +364,7 @@ export const handlers = [
 
     if (request.headers.get("x-mock-failure") === "submit-review") {
       return HttpResponse.json(
-        { status: "500", code: "INTERNAL_ERROR", message: "검수 반영 중 오류가 발생했습니다." },
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "검수 반영 중 오류가 발생했습니다." },
         { status: 500 },
       );
     }

@@ -1,9 +1,13 @@
 import { z } from "zod";
+import {
+  accidentTypeSchema,
+  SUPPORTED_ACCIDENT_TYPE,
+} from "@/shared/model/accident-type";
 
 /** 손해사정 요청 퍼널 입력 스키마. 도메인 = report (슬러그만 adjust-request). */
 
-/** MVP는 실손 의료비 단일. 그 외는 UNSUPPORTED_OPERATION. */
-export const accidentTypeSchema = z.enum(["MEDICAL_EXPENSE"]);
+/** 사고 유형 enum은 shared 단일 진실 재사용(MVP는 medical_indemnity만 분석). */
+export { accidentTypeSchema };
 
 /** 치료 형태(복수). FE 내부 표현 — 제출 시 additionalInformation으로 직렬화. */
 export const treatmentTypeSchema = z.enum(["ADMISSION", "OUTPATIENT", "MEDICATION", "SURGERY"]);
@@ -150,7 +154,7 @@ export function toCreateReportBody(
   const ends = stays.map((s) => s.end).filter((v): v is string => !!v).sort();
 
   return createReportBodySchema.parse({
-    accidentType: draft.accidentType ?? "MEDICAL_EXPENSE",
+    accidentType: draft.accidentType ?? SUPPORTED_ACCIDENT_TYPE,
     accidentDate: draft.accidentDate,
     diagnosis: draft.diagnosis,
     insuranceOffered: draft.insuranceNotOffered ? null : (draft.insuranceOffered ?? null),
