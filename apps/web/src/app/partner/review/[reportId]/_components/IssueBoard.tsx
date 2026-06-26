@@ -34,12 +34,12 @@ export function IssueBoard({ issues, actions }: IssueBoardProps) {
         <ol className="mt-4 space-y-3">
           {issues.map((issue, index) => (
             <IssueCard
-              key={issue.id}
+              key={issue.issueId}
               issue={issue}
               index={index}
-              onSetStatus={(status) => actions.setStatus(issue.id, status)}
-              onPatch={(patch) => actions.editIssue(issue.id, patch)}
-              onRemove={() => actions.removeIssue(issue.id)}
+              onSetStatus={(status) => actions.setStatus(issue.issueId, status)}
+              onPatch={(patch) => actions.editIssue(issue.issueId, patch)}
+              onRemove={() => actions.removeIssue(issue.issueId)}
             />
           ))}
         </ol>

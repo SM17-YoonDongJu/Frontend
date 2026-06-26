@@ -335,12 +335,12 @@ export const handlers = [
         // ⚠️ 명세 드리프트: 명세 issue는 string[]. 리치 reviewIssues 별도 키로 superset 반환.
         reviewIssues: [
           {
-            id: "issue-1",
+            issueId: "issue-1",
             title: "후유장해 등급 재산정",
             description:
               "AI 초안은 14급으로 추정했으나, 관절 운동범위 제한 정도를 고려하면 12급 적용 여지가 있습니다.",
             impactAmount: 3_500_000,
-            status: "PENDING",
+            reviewStatus: "PENDING",
             modifiedReason: null,
             excludedReason: null,
             adjusterOpinion: null,
@@ -348,11 +348,11 @@ export const handlers = [
             isNew: false,
           },
           {
-            id: "issue-2",
+            issueId: "issue-2",
             title: "입원 일당 미반영분",
             description: "입원 17일 중 초안에 14일만 반영되어 3일분 누락 추정.",
             impactAmount: 600_000,
-            status: "PENDING",
+            reviewStatus: "PENDING",
             modifiedReason: null,
             excludedReason: null,
             adjusterOpinion: null,
@@ -360,12 +360,12 @@ export const handlers = [
             isNew: false,
           },
           {
-            id: "issue-3",
+            issueId: "issue-3",
             title: "외모변형 장해 특약 적용",
             description:
               "수술 흉터 관련 외모변형 장해 특약 청구 가능성 검토 항목.",
             impactAmount: null,
-            status: "PENDING",
+            reviewStatus: "PENDING",
             modifiedReason: null,
             excludedReason: null,
             adjusterOpinion: null,

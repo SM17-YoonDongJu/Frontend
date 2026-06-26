@@ -75,14 +75,14 @@ function reducer(
       return {
         ...state,
         issues: state.issues.map((issue) =>
-          issue.id === action.id ? { ...issue, status: action.status } : issue,
+          issue.issueId === action.id ? { ...issue, reviewStatus: action.status } : issue,
         ),
       };
     case "EDIT_ISSUE":
       return {
         ...state,
         issues: state.issues.map((issue) =>
-          issue.id === action.id ? { ...issue, ...action.patch } : issue,
+          issue.issueId === action.id ? { ...issue, ...action.patch } : issue,
         ),
       };
     case "ADD_ISSUE":
@@ -91,11 +91,11 @@ function reducer(
         issues: [
           ...state.issues,
           {
-            id: crypto.randomUUID(),
+            issueId: crypto.randomUUID(),
             title: action.title,
             description: action.description,
             impactAmount: action.impactAmount,
-            status: "ACCEPTED",
+            reviewStatus: "ACCEPTED",
             modifiedReason: null,
             excludedReason: null,
             adjusterOpinion: null,
@@ -107,7 +107,7 @@ function reducer(
     case "REMOVE_ISSUE":
       return {
         ...state,
-        issues: state.issues.filter((issue) => issue.id !== action.id),
+        issues: state.issues.filter((issue) => issue.issueId !== action.id),
       };
     case "SET_RANGE":
       return { ...state, confirmedMinAmount: action.min, confirmedMaxAmount: action.max };
@@ -168,14 +168,14 @@ export function useReviewDraft(detail: ReviewDetail) {
   );
 
   const derived = useMemo(() => {
-    const reviewed = state.issues.filter((i) => i.status !== "PENDING").length;
+    const reviewed = state.issues.filter((i) => i.reviewStatus !== "PENDING").length;
     const total = state.issues.length;
     return {
       progress: { reviewed, total },
       counts: {
-        accepted: state.issues.filter((i) => i.status === "ACCEPTED").length,
-        modified: state.issues.filter((i) => i.status === "MODIFIED").length,
-        excluded: state.issues.filter((i) => i.status === "EXCLUDED").length,
+        accepted: state.issues.filter((i) => i.reviewStatus === "ACCEPTED").length,
+        modified: state.issues.filter((i) => i.reviewStatus === "MODIFIED").length,
+        excluded: state.issues.filter((i) => i.reviewStatus === "EXCLUDED").length,
       },
       reflectedIssueCount: reviewed,
       hasOpinion: state.review.trim().length > 0,
