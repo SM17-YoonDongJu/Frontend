@@ -1,4 +1,4 @@
-import { ACCIDENT_TYPE_LABELS, type AccidentType } from "@/shared/model/accident-type";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { Chevron } from "@/shared/ui/icons/Chevron";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
 import type { ReviewListItem } from "../_model/types";
@@ -8,9 +8,6 @@ type Tone = NonNullable<StatusBadgeProps["tone"]>;
 const TYPE_TONE: Record<string, Tone> = {
   disability: "gold",
 };
-
-const typeLabel = (value: string) =>
-  ACCIDENT_TYPE_LABELS[value as AccidentType] ?? value;
 
 const toManwon = (won: number) => Math.round(won / 10_000).toLocaleString("ko-KR");
 
@@ -45,7 +42,7 @@ export function ReviewCaseCard({ item, selected, onSelect }: Props) {
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge tone={TYPE_TONE[item.accidentType] ?? "neutral"}>
-            {typeLabel(item.accidentType)}
+            {accidentTypeLabel(item.accidentType)}
           </StatusBadge>
           {held && <StatusBadge tone="neutral">보류</StatusBadge>}
           {!held && isNew(item.createdAt) && <StatusBadge tone="gold">NEW</StatusBadge>}

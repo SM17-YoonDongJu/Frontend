@@ -1,14 +1,14 @@
 "use client";
 
-import { ACCIDENT_TYPE_LABELS } from "@/shared/model/accident-type";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { useReviewFilter } from "../_hooks/use-review-filter";
 
 const TYPE_OPTIONS = [
   { value: "전체", label: "전체" },
-  { value: "disability", label: ACCIDENT_TYPE_LABELS.disability },
-  { value: "traffic", label: ACCIDENT_TYPE_LABELS.traffic },
-  { value: "medical_indemnity", label: ACCIDENT_TYPE_LABELS.medical_indemnity },
+  { value: "disability", label: accidentTypeLabel("disability") },
+  { value: "traffic", label: accidentTypeLabel("traffic") },
+  { value: "medical_indemnity", label: accidentTypeLabel("medical_indemnity") },
 ];
 
 export function ReviewFilterBar({ regions }: { regions: string[] }) {

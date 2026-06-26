@@ -2,7 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import {
-  ACCIDENT_TYPE_LABELS,
+  accidentTypeLabel,
   SUPPORTED_ACCIDENT_TYPE,
 } from "@/shared/model/accident-type";
 import { AccidentTypeCard } from "./AccidentTypeCard";
@@ -31,7 +31,7 @@ export function Step1AccidentType() {
         {ACCIDENT_TYPES.map((type) => (
           <AccidentTypeCard
             key={type.value}
-            title={ACCIDENT_TYPE_LABELS[type.value]}
+            title={accidentTypeLabel(type.value)}
             description={type.description}
             selected={selected === type.value}
             disabled={type.value !== SUPPORTED_ACCIDENT_TYPE}
