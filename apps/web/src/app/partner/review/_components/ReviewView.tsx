@@ -10,17 +10,23 @@ import { ReviewFilterBar } from "./ReviewFilterBar";
 import { ReviewSummaryCards } from "./ReviewSummaryCards";
 
 export function ReviewView() {
-  const { data } = useReviewList({ status: "AWAITING_INSPECTION" });
   const { type, region } = useReviewFilter();
+  const accidentType = type === "전체" ? undefined : type;
+  const regionParam = region === "전체" ? undefined : region;
+
+  // 지역 드롭다운 옵션은 지역 필터를 적용하지 않은 목록에서 파생(지역 선택 시 옵션 붕괴 방지).
+  const { data: optionsData } = useReviewList({ status: "AWAITING_INSPECTION", accidentType });
+  const { data } = useReviewList({
+    status: "AWAITING_INSPECTION",
+    accidentType,
+    region: regionParam,
+  });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const regions = [...new Set(data.list.map((item) => item.region))];
-  const filtered = data.list.filter(
-    (item) =>
-      (type === "전체" || item.accidentType === type) &&
-      (region === "전체" || item.region === region),
-  );
-  const selected = filtered.find((item) => item.reportId === selectedId) ?? null;
+  const regions = [
+    ...new Set(optionsData.list.map((item) => item.region).filter((r): r is string => !!r)),
+  ];
+  const selected = data.list.find((item) => item.reportId === selectedId) ?? null;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
@@ -28,10 +34,10 @@ export function ReviewView() {
         <ReviewSummaryCards />
         <ReviewFilterBar regions={regions} />
 
-        {filtered.length === 0 ? (
+        {data.list.length === 0 ? (
           <ReviewEmpty />
         ) : (
-          <ReviewCaseList items={filtered} selectedId={selectedId} onSelect={setSelectedId} />
+          <ReviewCaseList items={data.list} selectedId={selectedId} onSelect={setSelectedId} />
         )}
       </div>
 

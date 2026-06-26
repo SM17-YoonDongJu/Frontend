@@ -27,9 +27,9 @@ export function IssueModifyForm({ issue, onPatch }: IssueModifyFormProps) {
 
       <div className="grid gap-3 sm:grid-cols-[1fr_160px]">
         <div>
-          <Label htmlFor={`modify-title-${issue.id}`}>쟁점 제목</Label>
+          <Label htmlFor={`modify-title-${issue.issueId}`}>쟁점 제목</Label>
           <Input
-            id={`modify-title-${issue.id}`}
+            id={`modify-title-${issue.issueId}`}
             className="mt-1.5"
             value={issue.title}
             onChange={(e) => onPatch({ title: e.target.value })}
@@ -37,9 +37,9 @@ export function IssueModifyForm({ issue, onPatch }: IssueModifyFormProps) {
         </div>
 
         <div>
-          <Label htmlFor={`modify-amount-${issue.id}`}>영향 금액</Label>
+          <Label htmlFor={`modify-amount-${issue.issueId}`}>영향 금액</Label>
           <Input
-            id={`modify-amount-${issue.id}`}
+            id={`modify-amount-${issue.issueId}`}
             type="number"
             inputMode="numeric"
             className="mt-1.5"
@@ -51,9 +51,9 @@ export function IssueModifyForm({ issue, onPatch }: IssueModifyFormProps) {
       </div>
 
       <div>
-        <Label htmlFor={`modify-reason-${issue.id}`}>수정 사유</Label>
+        <Label htmlFor={`modify-reason-${issue.issueId}`}>수정 사유</Label>
         <Input
-          id={`modify-reason-${issue.id}`}
+          id={`modify-reason-${issue.issueId}`}
           multiline
           rows={2}
           className="mt-1.5"

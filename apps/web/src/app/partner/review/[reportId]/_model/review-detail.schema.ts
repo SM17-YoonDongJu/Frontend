@@ -48,7 +48,7 @@ export const reviewDetailSchema = z.object({
   omittedSpecialContract: z.array(z.string()),
   basisTermsPrecedents: z.array(z.string()),
   question: z.string().nullable(),
-  confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullable(),
+  confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullish(),
   adjusterId: z.uuid().nullable(),
   reviewComment: z.string().nullable(),
   reviewedAt: z.string().nullable(),

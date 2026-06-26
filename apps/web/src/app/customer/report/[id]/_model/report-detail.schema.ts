@@ -32,7 +32,8 @@ export const reportDetailSchema = z.object({
   issue: z.array(issueItemSchema),
   question: z.string().nullable(),
   adjusterId: z.uuid().nullable(),
-  confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullable(),
+  // 명세 GET 응답에 없는 디자인용 필드 — 부재 허용(nullish).
+  confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullish(),
   reviewComment: z.string().nullable(),
   reviewedAt: z.string().nullable(),
   adjuster: z

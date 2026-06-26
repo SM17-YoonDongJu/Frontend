@@ -12,9 +12,9 @@ export interface IssueExcludeFormProps {
 export function IssueExcludeForm({ issue, onPatch }: IssueExcludeFormProps) {
   return (
     <div className="mt-3 rounded-card border border-terra-2 bg-terra-soft/40 p-4">
-      <Label htmlFor={`exclude-reason-${issue.id}`}>제외 사유</Label>
+      <Label htmlFor={`exclude-reason-${issue.issueId}`}>제외 사유</Label>
       <Input
-        id={`exclude-reason-${issue.id}`}
+        id={`exclude-reason-${issue.issueId}`}
         multiline
         rows={2}
         className="mt-1.5"

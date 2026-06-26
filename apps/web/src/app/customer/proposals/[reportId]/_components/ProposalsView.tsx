@@ -21,14 +21,16 @@ export function ProposalsView({ reportId }: { reportId: string }) {
         검수 펼침된 리포트를 본 손해사정사들의 상담 제안입니다.
       </p>
 
-      <div className="mt-6">
-        <AnalysisTargetCard
-          accidentType={target.accidentType}
-          reportNo={target.reportNo}
-          receivedAt={target.receivedAt}
-          proposalCount={proposalCount}
-        />
-      </div>
+      {target && (
+        <div className="mt-6">
+          <AnalysisTargetCard
+            accidentType={target.accidentType}
+            reportNo={target.reportNo}
+            receivedAt={target.receivedAt}
+            proposalCount={proposalCount}
+          />
+        </div>
+      )}
 
       <div className="mt-6">
         <ProposalList reportId={reportId} proposals={proposals} />

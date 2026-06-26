@@ -67,13 +67,13 @@
 - `POST /users/adjuster-applications`: `name`(실명) · `speciality`(신체/교통) · `licenseNo`(N\*) · `licenseImageUrl`(N\*) · `career`(int 연차) · `introduce`(N) — `licenseNo`/`licenseImageUrl` 중 최소 1 필수 → resp `applicationId` · `status`
 
 ### report — `POST /reports` (분석 신청)
-`productId` · `accidentType`(신체/교통/질병…) · `accidentDate` · `diagnosis` · `insuranceOffered`(int, 보험사 제안금액·N) · `hospitalStart`(N) · `hospitalEnd`(N) · `description`(N 사고경위) · `additionalInformation`(N) · `documentUrls`(string[] N) · `question`(N 자연어)
-→ resp: `reportId` · `status`(생성 중)
+`productId` · `accidentType`(영문 enum, §4) · `accidentDate` · `diagnosis` · `offeredAmount`(int, 보험사 제안금액·N) · `hospitalizations`(N, 객체배열 `{hospitalStart, hospitalEnd(N), hospitalReason(N)}`) · `description`(N 사고경위) · `additionalInformation`(N) · `documentUrls`(string[] N) · `question`(N 자연어)
+→ resp(202 비동기): `reportId` · `status`(`AWAITING_INSPECTION`)
 
-- `GET /reports/{reportID}` (상세): `reportId` · `status` · `accidentType` · `diagnosis` · `claimedMinAmount` · `claimedMaxAmount` · `offeredAmount`(보험사 제안금액·§7-1) · `applicableGuarantees`(string[] 적용가능 특약) · `omittedSpecialContract`(string[] 누락 특약) · `basisTermsPrecedents`(string[] 근거 약관·판례) · `issue`(string[] 쟁점) · `question` · `adjusterId`(nullable)
+- `GET /reports/{reportID}` (상세): `reportId` · `status` · `accidentType` · `treatment` · `claimedMinAmount` · `claimedMaxAmount` · `offeredAmount` · `applicableGuarantees`(string[]) · `omittedSpecialContract`(string[]) · `basisTermsPrecedents`(string[]) · `issue`(객체배열 `{title, opinion, status(CONFIRMED/TRUSTED/INFO), tag}`) · `question` · `adjusterId`(nullable) · `reviewComment`(N) · `reviewedAt`(N) · `adjuster`(N `{nickname, career}`)
 - `GET /reports?status={status}&page={page}` (목록/프로세스): items[]{ `reportId` · `status` · `accidentType` · `createdAt` } + `page` · `totalPages` · `totalCount`
-- `GET /reports/pending-review?status&page&size` (검수 대기 목록·활성 사정사 전용·403 FORBIDDEN): `data.list[]{ reportId · accidentType · status · createdAt }` + `data.pagination{ page · size · totalElements · totalPages · hasNext }`
-- `PATCH /reports/{reportID}` (검수 반영): `applicableGuarantees`(N) · `omittedSpecialContract`(N) · `issue`(N) · `review`(string 사정사 의견) · `status`(N)
+- `GET /reports/pending-review?status&accidentType&region&page&size` (검수 대기 목록·활성 사정사 전용·403 FORBIDDEN): `data.list[]{ reportId · accidentType · status · createdAt }` + `data.pagination{ page · size · totalElements · totalPages · hasNext }`. 쿼리 `accidentType`·`region` 필터 지원(page 기본 1)
+- `PATCH /reports/{reportID}` (검수 반영): `applicableGuarantees`(N) · `omittedSpecialContract`(N) · `issues`(N, 객체배열 `{issueId, reviewStatus(ACCEPTED/MODIFIED/EXCLUDED), adjusterOpinion, modifiedReason, excludedReason}`) · `review`(string 사정사 의견) · `status`(N)
 
 ### matching — `POST /matches/{reportID}` (상담 신청)
 body: `adjusterId` → resp: `reportId` · `adjusterId` · `status`(`AWAITING_ADOPTION`)
@@ -88,11 +88,14 @@ items[]{ `paymentId` · `amount`(int) · `type`(`SUBSCRIPTION`) · `status`(`PAI
 ### admin — `/admins/adjuster-applications`
 목록 + `{applicationId}/accept` · `{applicationId}/rejects`
 
-## 4. 상태·enum 값 사전 (모두 UPPER_SNAKE)
+## 4. 상태·enum 값 사전 (상태값은 UPPER_SNAKE, `accidentType`만 lower_snake)
 
 | 분류 | 값 | 출처 |
 |------|----|----|
 | 리포트 프로세스(`status`) | `AWAITING_INSPECTION` 검수대기 · `AWAITING_ADOPTION` 채택대기 · `COUNSELING` 상담중 · `MATCHED` 매칭완료 | `GET /reports` |
+| 사고유형(`accidentType`) | `medical_indemnity` 실손 · `traffic` 교통사고 · `disability` 후유장해 · `cancer_diagnosis` 암·진단비 · `fire` 화재 · `liability` 배상책임 · `other` 기타 (※ lower_snake) | `POST /reports` |
+| 검수 쟁점(`reviewStatus`) | `PENDING` 미검토 · `ACCEPTED` 인정 · `MODIFIED` 수정 · `EXCLUDED` 제외 | `PATCH /reports/{id}` (issues[]) |
+| 받은 제안(`status`) | `COMPLETED` 채택 · `CONSULTATION` 상담중 · `SENT` 발송 (서버 계산값) | `GET /reports/{id}/proposals` |
 | 매칭(`status`) | `AWAITING_ADOPTION` | `POST /matches` |
 | 결제(`status`/`type`) | status `PAID` / type `SUBSCRIPTION` | `GET /payments/history` |
 | 구독(`status`/`tier`) | status `ACTIVE` / tier `BASIC`·`PRO` | `POST /subscriptions` |
@@ -119,13 +122,13 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 | 사정사 이름 | `nickname` | string | 아바타 없음 → 첫 글자 폴백 |
 | 평점 | `rating` | number | 예 4.8 |
 | 제안 요약 | `proposalSummary` | string | 카드 메시지로 표시 |
-| 제안 상태 | `status` | enum | `COMPLETED` 등(영문 enum 기준) |
+| 제안 상태 | `status` | enum | `COMPLETED`·`CONSULTATION`·`SENT` (서버 계산값) |
 | 제출일 | `submittedAt` | iso datetime | |
-| 페이지네이션 | `pagination` | `{page,size,totalElements,totalPages,hasNext}` | |
+| 페이지네이션 | `pagination` | `{page,size,totalElements,totalPages,hasNext}` | page 기본 1 |
 
 - **쿼리키:** `proposal.list(reportId)` — `createQueryKeys('proposal', …)`. staleTime `STALE_TIME_LIST`(0, 폴링) / gcTime `GC_TIME_DEFAULT`.
 - **분석 대상 정보**(사고유형·접수일 등 기능1)는 별도 `GET /reports/{reportId}` 사용.
-- **거절:** 사유 없이 바로 거절. ⚠️ 현 API `PATCH /reports/{reportId}/reject`는 reportId만 키(사정사별 불가) + body 명세 깨짐 → **사정사별 거절 API `PATCH /reports/{reportId}/proposals/{adjusterId}/reject` 백엔드 신규 요청**, 확정 전 MSW mock로 선구현(§7-5).
+- **거절:** 사유 없이 바로 거절. `PATCH /reports/{reportId}/proposals/{adjusterId}/reject`(body 없음) → resp `{reportId, adjusterId, rejected}`. 거절 성공 시 해당 제안은 목록에서 제외 → FE는 `proposal.list` 갱신.
 
 ## 6. 상수
 
@@ -139,18 +142,19 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 
 ## 7. ⚠️ 명세 내 네이밍 드리프트 (백엔드 확인 필요 — data-engineer가 zod 작성 시 플래그)
 
-1. **보험사 제안금액 이름 불일치:** `POST /reports` body는 `insuranceOffered`, `GET /reports/{id}` resp는 `offeredAmount`. 같은 개념. 각 엔드포인트는 명세 그대로 쓰되, 통일 필요성을 백엔드에 제기.
+1. ~~보험사 제안금액 이름 불일치~~ **해소(#24)**: `POST`·`GET` 모두 `offeredAmount`로 통일됨.
 2. **`userId` 타입:** user/auth에선 `number(int)`, 그 외 모든 ID는 `uuid(string)`. zod에서 `z.number()` vs `z.string().uuid()` 구분 — 혼용 금지.
 3. **리포트 status 표기 혼재:** 목록 응답은 영문 enum(`MATCHED`…), 상세 응답 예시는 한글(`"완료"`·`"생성 중"`). **FE는 영문 enum 기준**으로 통일하고 한글은 표시 라벨로 매핑. 상세 status 실제값을 백엔드에 확인.
 4. **`userType` 값 혼재:** `register`는 `insured_person`/`adjuster`, `GET /users/me` 예시는 한글 `"검증 o 손해사정사"`(검증여부+역할 혼합). 코드값은 `insured_person`/`adjuster`, **검증 여부는 별도 필드로 분리** 필요 — 백엔드 확인.
-5. **검수 현황 요약 엔드포인트 미정:** 검수 대기 화면 상단 3카드(검수 대기/내 전문분야 매칭/마감 임박 건수)에 대응하는 API 없음. FE 임시값 `GET /reports/pending-review/summary` → `{ pendingCount, specialtyMatchCount, dueSoonCount }`로 목킹 중. 백엔드에 신설 요청 필요.
-6. **`pending-review` 목록 카드 필드 부족:** 명세 `list[]`는 `reportId·accidentType·status·createdAt` 4필드뿐인데 디자인은 더 요구. FE 임시 추가(목킹): `caseId`(접수번호 `YYYYMMDD-NNN`) · `title`(요약) · `region`(지역) · `matchingScore`(AI 매칭률 int %) · `claimedMinAmount`/`claimedMaxAmount`(예상 보상범위) · `offerHeadroom`(제안 대비 여력 int 원) · `issueCount`(쟁점 건수 int) · `held`(보류 여부 bool). 백엔드에 list 응답 확장 요청 필요.
-7. **검수 보류 엔드포인트 미정:** 사정사가 사건을 보류하는 API 없음. FE 임시값 `PATCH /reports/{reportId}/hold` → `{ reportId, held }`로 목킹 중. 백엔드에 신설 요청 필요(보류 상태 enum 포함).
-8. **거절 API 결함(이슈 #18):** `PATCH /reports/{reportId}/reject`가 (a) reportId만 키라 사정사별 거절 불가, (b) body 명세에 회원가입 내용이 잘못 붙음. **사정사별 거절 엔드포인트 신설** 요청(`PATCH /reports/{reportId}/proposals/{adjusterId}/reject`, body 없음 가정). 확정 전 FE는 MSW mock로 진행.
+5. ~~검수 현황 요약 엔드포인트 미정~~ **해소**: `GET /reports/pending-review/summary` → `{ pendingCount, specialtyMatchCount, dueSoonCount }` 명세 반영(6/23).
+6. **`pending-review` 목록 카드 필드 부족:** 명세 `list[]`는 `reportId·accidentType·status·createdAt` 4필드뿐. `matchingScore`는 제거(#24). 나머지 디자인 필드(`caseId·title·region·claimedMinAmount·claimedMaxAmount·offerHeadroom·issueCount·held`)는 **FE optional**로 두고 MSW가 채움 — 백엔드 list 확장 시 정식화.
+7. ~~검수 보류 엔드포인트 미정~~ **해소**: `PATCH /reports/{reportId}/hold`(body 없음, 사정사별 토글) → `{ reportId, held }` 명세 반영.
+8. ~~거절 API 결함~~ **해소(#24)**: 사정사별 `PATCH /reports/{reportId}/proposals/{adjusterId}/reject`(body 없음) → `{reportId, adjusterId, rejected}` 명세 반영. 거절 시 목록 제외.
+9. **검수 상세(파트너) 응답 확장 미정:** `GET /reports/{id}`에 `client`(의뢰인)·`attachments`·리치 `reviewIssues`·`hospitalizations` 등 명세 미존재. FE `review-detail`은 이를 요구하므로 백엔드 GET 확장 확정 전까지 MSW superset로 유지. (이슈 #24 `client`·`claimed*` 보류 항목과 동근)
 
 ## 8. 손해사정사 검수 화면 (#10 adjusterReview) — 사용자 확정 (2026-06-22)
 
-사진 1·2 기준 리치 검수 모델. 명세 `GET/PATCH /reports/{reportId}`는 빈약(issue=string[]) → 아래는 FE 리치 모델로 **MSW 풀 목킹**, 실제 PATCH 계약 확장은 백엔드 협의 필요(드리프트).
+사진 1·2 기준 리치 검수 모델. `PATCH /reports/{id}`는 `issues` 객체배열(`{issueId, reviewStatus, adjusterOpinion, modifiedReason, excludedReason}`)로 명세 반영됨(#24). `GET /reports/{id}` 상세의 리치 응답(client·attachments 등)은 아직 명세 미존재 → 해당 부분만 **MSW 목킹**(§7-9).
 
 ### 쟁점 상태 enum (UPPER_SNAKE) — 기존 `issue.status`(CONFIRMED/TRUSTED/INFO, 고객 신뢰도용)와 **별개**
 | 한글 | 값 |
@@ -163,11 +167,11 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 ### 리치 쟁점(reviewIssue) 필드
 | 개념 | 필드 | 타입 | 비고 |
 |------|------|------|------|
-| 쟁점 식별자 | `id` | string | 로컬/신규 쟁점 포함 |
-| 제목 | `title` | string | |
-| 설명 | `description` | string | |
-| 영향 금액 | `impactAmount` | number(int) | 사진 '+약 350만', 인정/수정 시 보상범위 반영 |
-| 상태 | `status` | 위 enum | |
+| 쟁점 식별자 | `issueId` | string | 로컬/신규 쟁점 포함. 제출 시 명세 키 |
+| 제목 | `title` | string | FE 표시용(제출 body 미포함) |
+| 설명 | `description` | string | FE 표시용(제출 body 미포함) |
+| 영향 금액 | `impactAmount` | number(int) | 사진 '+약 350만'. FE 표시용(제출 body 미포함) |
+| 상태 | `reviewStatus` | 위 enum | 제출 시 명세 키 |
 | 수정 사유 | `modifiedReason` | string\|null | MODIFIED 시 입력 |
 | 제외 사유 | `excludedReason` | string\|null | EXCLUDED 시 입력 |
 | 사정사 의견 | `adjusterOpinion` | string\|null | 각 쟁점 하단 코멘트 |
@@ -187,6 +191,8 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 | 사정사 확정 최소 | `confirmedMinAmount` | number(int) |
 | 사정사 확정 최대 | `confirmedMaxAmount` | number(int) |
 | 종합 의견 | `review` | string (명세 PATCH 필드 그대로) |
+
+⚠️ `confirmedMin/MaxAmount`는 **명세 PATCH body에 미존재**. 이슈 #24는 `claimedMin/MaxAmount`로의 rename을 제기하나 명세 확정 전까지 현행 유지(백엔드 확인 대기).
 
 ### 입원 (명세 POST /reports 기준 — 배열)
 | 개념 | 필드 | 타입 |

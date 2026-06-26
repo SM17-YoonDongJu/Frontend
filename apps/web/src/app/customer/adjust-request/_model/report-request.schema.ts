@@ -1,9 +1,13 @@
 import { z } from "zod";
+import {
+  accidentTypeSchema,
+  SUPPORTED_ACCIDENT_TYPE,
+} from "@/shared/model/accident-type";
 
 /** 손해사정 요청 퍼널 입력 스키마. 도메인 = report (슬러그만 adjust-request). */
 
-/** MVP는 실손 의료비 단일. 그 외는 UNSUPPORTED_OPERATION. */
-export const accidentTypeSchema = z.enum(["MEDICAL_EXPENSE"]);
+/** 사고 유형 enum은 shared 단일 진실 재사용(MVP는 medical_indemnity만 분석). */
+export { accidentTypeSchema };
 
 /** 치료 형태(복수). FE 내부 표현 — 제출 시 additionalInformation으로 직렬화. */
 export const treatmentTypeSchema = z.enum(["ADMISSION", "OUTPATIENT", "MEDICATION", "SURGERY"]);
@@ -71,9 +75,16 @@ export const createReportBodySchema = z.object({
   accidentType: accidentTypeSchema,
   accidentDate: z.string().date(),
   diagnosis: z.string().min(1),
-  insuranceOffered: z.number().int().nullable(),
-  hospitalStart: z.string().nullable(),
-  hospitalEnd: z.string().nullable(),
+  offeredAmount: z.number().int().nullable(),
+  hospitalizations: z
+    .array(
+      z.object({
+        hospitalStart: z.string(),
+        hospitalEnd: z.string().nullable(),
+        hospitalReason: z.string().nullable(),
+      }),
+    )
+    .nullable(),
   description: z.string().nullable(),
   additionalInformation: z.string().nullable(),
   documentUrls: z.array(z.url()).nullable(),
@@ -127,11 +138,6 @@ function serializeAdditionalInformation(draft: AdjustRequestDraftInput): string 
   if (draft.nonCoveredOption) lines.push(`비급여 포함 여부: ${NON_COVERED_LABELS[draft.nonCoveredOption]}`);
   if (draft.enrolledInsurance) lines.push(`가입보험·특약: ${draft.enrolledInsurance}`);
 
-  const reasons = (draft.hospitalizations ?? [])
-    .map((h, i) => (h.reason ? `입원 ${i + 1} 사유: ${h.reason}` : null))
-    .filter((v): v is string => v !== null);
-  lines.push(...reasons);
-
   return lines.length ? lines.join("\n") : null;
 }
 
@@ -139,23 +145,26 @@ type AdjustRequestDraftInput = z.infer<typeof adjustRequestDraftSchema>;
 
 /**
  * draft를 POST /reports body로 변환.
- * 입원 기록 배열 → hospitalStart(최초 입원일)·hospitalEnd(최종 퇴원일)로 압축,
- * 입원 사유 등 무매핑 입력은 additionalInformation으로.
+ * 입원 기록은 명세 hospitalizations 배열로 그대로 전달(사유 포함),
+ * 치료형태 등 무매핑 입력만 additionalInformation으로.
  */
 export function toCreateReportBody(
   draft: AdjustRequestDraftInput,
 ): z.infer<typeof createReportBodySchema> {
   const stays = draft.hospitalizations ?? [];
-  const starts = stays.map((s) => s.start).filter(Boolean).sort();
-  const ends = stays.map((s) => s.end).filter((v): v is string => !!v).sort();
 
   return createReportBodySchema.parse({
-    accidentType: draft.accidentType ?? "MEDICAL_EXPENSE",
+    accidentType: draft.accidentType ?? SUPPORTED_ACCIDENT_TYPE,
     accidentDate: draft.accidentDate,
     diagnosis: draft.diagnosis,
-    insuranceOffered: draft.insuranceNotOffered ? null : (draft.insuranceOffered ?? null),
-    hospitalStart: starts[0] ?? null,
-    hospitalEnd: ends[ends.length - 1] ?? null,
+    offeredAmount: draft.insuranceNotOffered ? null : (draft.insuranceOffered ?? null),
+    hospitalizations: stays.length
+      ? stays.map((s) => ({
+          hospitalStart: s.start,
+          hospitalEnd: s.end ?? null,
+          hospitalReason: s.reason ?? null,
+        }))
+      : null,
     description: null,
     additionalInformation: serializeAdditionalInformation(draft),
     documentUrls: draft.documentUrls ?? null,

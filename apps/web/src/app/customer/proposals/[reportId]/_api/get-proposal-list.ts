@@ -5,7 +5,7 @@ import type { ProposalList } from "../_model/proposal.schema";
 
 export function getProposalList(
   reportId: string,
-  page = 0,
+  page = 1,
   size = 10,
 ): Promise<ProposalList> {
   const query = new URLSearchParams({ page: String(page), size: String(size) });

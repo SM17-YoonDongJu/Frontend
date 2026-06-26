@@ -5,11 +5,11 @@ import { z } from "zod";
  * 제안 식별자는 별도 proposalId 없이 adjusterId(reportId당 사정사 1제안).
  */
 
-// CONTRACT: status enum 값은 COMPLETED만 확정. 다른 값 불명 → 확장 필요 시 추가.
-export const proposalStatusSchema = z.enum(["COMPLETED"]);
+// 서버 계산 상태: 채택(COMPLETED) / 상담중(CONSULTATION) / 발송(SENT).
+export const proposalStatusSchema = z.enum(["COMPLETED", "CONSULTATION", "SENT"]);
 
-// CONTRACT(목업 선구현): 아래 필드는 현 GET /reports/{reportId}/proposals 응답에 없음.
-// 이미지 #18 풀 디자인용 — 백엔드 응답 확장 요청분(speciality·career·isNew·isVerified·estimate·feeBasis).
+// 명세 필수: adjusterId·nickname·rating·proposalSummary·status·submittedAt.
+// 그 외(speciality·career·isNew·isVerified·estimate·feeBasis)는 디자인용 확장 → 백엔드 확정 전까지 optional.
 export const proposalSchema = z.object({
   adjusterId: z.uuid(),
   nickname: z.string(),
@@ -17,17 +17,16 @@ export const proposalSchema = z.object({
   proposalSummary: z.string(),
   status: proposalStatusSchema,
   submittedAt: z.string(),
-  speciality: z.string(),
-  career: z.number().int(),
-  isNew: z.boolean(),
-  isVerified: z.boolean(),
-  estimateMinAmount: z.number().int().nullable(),
-  estimateMaxAmount: z.number().int().nullable(),
-  feeBasis: z.string(),
+  speciality: z.string().optional(),
+  career: z.number().int().optional(),
+  isNew: z.boolean().optional(),
+  isVerified: z.boolean().optional(),
+  estimateMinAmount: z.number().int().nullish(),
+  estimateMaxAmount: z.number().int().nullish(),
+  feeBasis: z.string().optional(),
 });
 
-// CONTRACT(목업 선구현): 분석 대상 요약. reportNo(사람용 일련번호)·receivedAt(접수일)는
-// 현 GET /reports/{reportId}에 없음 → 백엔드 추가 요청분.
+// 분석 대상 요약(디자인용) — 명세 GET 응답에 없음 → 백엔드 확정 전까지 optional.
 export const proposalTargetSchema = z.object({
   accidentType: z.string(),
   reportNo: z.string(),
@@ -43,7 +42,7 @@ export const paginationSchema = z.object({
 });
 
 export const proposalListSchema = z.object({
-  target: proposalTargetSchema,
+  target: proposalTargetSchema.optional(),
   list: z.array(proposalSchema),
   pagination: paginationSchema,
 });
