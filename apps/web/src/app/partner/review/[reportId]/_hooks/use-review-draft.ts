@@ -123,7 +123,13 @@ export function toSubmitBody(
   options?: { complete?: boolean },
 ): ReviewSubmit {
   return {
-    reviewIssues: state.issues,
+    issues: state.issues.map((issue) => ({
+      issueId: issue.issueId,
+      reviewStatus: issue.reviewStatus,
+      adjusterOpinion: issue.adjusterOpinion,
+      modifiedReason: issue.modifiedReason,
+      excludedReason: issue.excludedReason,
+    })),
     review: state.review,
     confirmedMinAmount: state.confirmedMinAmount,
     confirmedMaxAmount: state.confirmedMaxAmount,
