@@ -31,7 +31,10 @@ function DraftContent({ item }: { item: ReviewListItem }) {
   const hold = useHoldReview();
 
   const offered = data.offeredAmount ?? 0;
-  const fillStart = Math.min(95, Math.max(0, Math.round((offered / data.claimedMaxAmount) * 100)));
+  const fillStart =
+    data.claimedMaxAmount > 0
+      ? Math.min(95, Math.max(0, Math.round((offered / data.claimedMaxAmount) * 100)))
+      : 0;
 
   const tags = [...new Set(data.issue.map((issue) => issue.tag).filter((tag): tag is string => tag !== null))];
 
