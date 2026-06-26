@@ -44,8 +44,8 @@ function DraftContent({ item }: { item: ReviewListItem }) {
             <span className="rounded-pill bg-gold px-2.5 py-1 text-[12.5px] font-semibold">
               {accidentTypeLabel(item.accidentType)}
             </span>
-            <span className="text-xs text-white/70">#{item.caseId}</span>
-            <span className="text-xs text-white/70">· {item.region}</span>
+            {item.caseId && <span className="text-xs text-white/70">#{item.caseId}</span>}
+            {item.region && <span className="text-xs text-white/70">· {item.region}</span>}
           </div>
           <span className="shrink-0 rounded-pill border border-gold/60 px-2.5 py-1 text-[11px] font-semibold text-gold-2">
             AI 초안

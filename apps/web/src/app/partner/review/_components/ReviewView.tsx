@@ -11,15 +11,20 @@ import { ReviewSummaryCards } from "./ReviewSummaryCards";
 
 export function ReviewView() {
   const { type, region } = useReviewFilter();
+  const accidentType = type === "전체" ? undefined : type;
+  const regionParam = region === "전체" ? undefined : region;
+
+  // 지역 드롭다운 옵션은 지역 필터를 적용하지 않은 목록에서 파생(지역 선택 시 옵션 붕괴 방지).
+  const { data: optionsData } = useReviewList({ status: "AWAITING_INSPECTION", accidentType });
   const { data } = useReviewList({
     status: "AWAITING_INSPECTION",
-    accidentType: type === "전체" ? undefined : type,
-    region: region === "전체" ? undefined : region,
+    accidentType,
+    region: regionParam,
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const regions = [
-    ...new Set(data.list.map((item) => item.region).filter((r): r is string => !!r)),
+    ...new Set(optionsData.list.map((item) => item.region).filter((r): r is string => !!r)),
   ];
   const selected = data.list.find((item) => item.reportId === selectedId) ?? null;
 
