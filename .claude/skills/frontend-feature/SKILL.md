@@ -20,10 +20,11 @@ description: 손해사정 플랫폼 프론트엔드 기능을 에이전트 팀(f
 
 ## Phase 1: 설계 (fe-architect 단독)
 1. `TeamCreate`로 팀 구성, 4 에이전트 멤버 등록(모두 `model: "opus"`).
-2. fe-architect에 기능 명세 작성 지시. Notion EPIC/스토리가 출처면 `mcp__notion__notion-fetch`로 읽게 하고, 도메인 의미는 `references/domain-glossary.md`(역할·플로우·상태·용어·컴플라이언스), 코드 식별자(필드·enum·ID타입·훅/쿼리키 이름)는 `references/naming-dictionary.md`를 먼저 읽게 한다.
+2. fe-architect에 기능 명세 작성 지시. Notion EPIC/스토리가 출처면 `mcp__notion__notion-fetch`로 읽게 하고, **API 계약(경로·메서드·응답 봉투·에러코드)은 `references/api-spec.md`**(+ 거기 적힌 조회법으로 API 명세서 Notion DB fetch), 도메인 의미는 `references/domain-glossary.md`(역할·플로우·상태·용어·컴플라이언스), 코드 식별자(필드·enum·ID타입·훅/쿼리키 이름)는 `references/naming-dictionary.md`를 먼저 읽게 한다.
 3. 산출물: `_workspace/01_architect_<feature>.md` (라우트·렌더링·역할·프렉탈 세그먼트 코로케이션 구조·zod 계약·쿼리키·화면명세·검증포인트).
 4. 계약에 `⚠️ 확인필요`가 있으면 리더가 사용자에게 확인 후 진행.
 5. **`⚠️ 작명필요`**(사전에 없는 식별자)가 명세·로그에 있으면 리더가 후보를 모아 `AskUserQuestion`으로 **선택지 제시 → 사용자 확정 → `references/naming-dictionary.md`에 추가** 후 진행. 에이전트가 임의 작명한 채 넘어가지 않게 막는다.
+6. **`⚠️ 명세없음`**(API 명세서 DB에 없는 엔드포인트)이 있으면 리더가 `AskUserQuestion`으로 사용자에게 확인한다(명세 누락인지/다른 경로로 있는지/미정인지). **사용자가 확정·Notion 추가하기 전까지 해당 호출의 zod·훅·MSW 구현 보류** — 가짜 경로로 진행 금지(사용자가 명시적으로 임시 진행을 허락한 경우만 예외).
 
 ## Phase 2: 구현 (ui-builder ∥ data-engineer 병렬)
 **데이터 계약이 병렬의 열쇠.** 명세의 zod 계약·쿼리키가 확정되면 두 에이전트가 동시에 착수:
@@ -33,6 +34,7 @@ description: 손해사정 플랫폼 프론트엔드 기능을 에이전트 팀(f
 - `TaskCreate`로 슬라이스별 작업 등록, 의존성(`addBlockedBy`)으로 순서 관리.
 
 ## Phase 3: 검증 (fe-qa, 점진적)
+fe-qa는 `fe-integration-qa` 스킬 방법론으로 검증한다(경계면 교차검증 절차 + 행동 기반 Playwright).
 - data-engineer 완료 직후 → 데이터 경계(MSW↔zod↔훅) 검증.
 - ui-builder 완료 직후 → UI 경계(훅↔컴포넌트)+3상태 검증.
 - `pnpm typecheck`·`pnpm lint` 실제 실행, 결과 인용.

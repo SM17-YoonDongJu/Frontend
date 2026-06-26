@@ -24,6 +24,9 @@ app/
 - CSR 화면(마이·상세·폼·업로드)도 전체를 클라이언트로 만들지 말고, 데이터 의존 부분만 클라이언트 경계로.
 - `query-provider`·`mock-provider`는 이미 `app/layout.tsx`에 있음 — 페이지에서 다시 감싸지 않는다.
 
+## Next.js 특수 파일 (loading/error/not-found/route…)
+세그먼트 로딩·렌더 예외·404/403/401·API 핸들러는 Next.js 파일 컨벤션으로 처리한다. 특히 **`error.tsx`(렌더 예외 바운더리, `"use client"` 필수)는 현재 repo에 없어 반드시 보강**하고, 404/403/401은 `notFound()`/`forbidden()`/`unauthorized()` + 해당 파일로 api-spec 에러코드와 연결한다. 어떤 파일을 언제 쓰는지·서버/클라 구분·아래 3상태와의 역할 분리는 `references/nextjs-file-conventions.md`(공식 문서 기준)를 읽는다.
+
 ## 데이터 화면 3상태 (필수)
 데이터를 받는 컴포넌트는 세 상태를 빠짐없이 표현. 누락 = 빈 화면 버그.
 ```tsx
