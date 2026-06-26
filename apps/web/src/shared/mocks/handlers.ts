@@ -164,7 +164,7 @@ export const handlers = [
         },
         list,
         pagination: {
-          page: 0,
+          page: 1,
           size: 10,
           totalElements: list.length,
           totalPages: 1,
