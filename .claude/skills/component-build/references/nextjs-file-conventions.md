@@ -10,7 +10,7 @@
 | `loading.tsx` | 서버 기본 | 세그먼트를 **자동 `<Suspense>`** 로 감쌈 |
 | `error.tsx` | **`"use client"` 필수** | 세그먼트를 **에러 바운더리**로 감쌈 |
 | `not-found.tsx` | 서버 기본 | `notFound()` 호출 시 표시 |
-| `forbidden.tsx`/`unauthorized.tsx` | 서버 기본 | `forbidden()`/`unauthorized()` 호출 시(403/401) |
+| `forbidden.tsx`/`unauthorized.tsx` | 서버 기본 | `forbidden()`/`unauthorized()` 호출 시(403/401). **`experimental.authInterrupts` 활성 전제**(현재 `next.config.mjs` 미설정 — 쓰려면 먼저 켜야 함) |
 | `route.ts` | 서버 | API 핸들러. **같은 세그먼트에 `page.tsx`와 공존 불가** |
 | `template.tsx` | 서버 기본 | layout 같지만 **이동마다 새 인스턴스**(상태 리셋) |
 | `default.tsx` | 서버 기본 | 병렬 라우트 `@slot` 미매칭 폴백 |
@@ -63,7 +63,7 @@ export default function ReportError({
 - 카피는 컴플라이언스 주의: 단정적 보상·법률 뉘앙스 금지(domain-glossary).
 
 ## not-found / 403 / 401 = api-spec 에러코드와 연결
-api-spec.md 에러코드를 받으면 화면도 표준 파일로 응답하라:
+api-spec.md 에러코드를 받으면 화면도 표준 파일로 응답하라. 단 **`forbidden()`/`unauthorized()`(403/401)는 `experimental.authInterrupts` 전제** — `apps/web/next.config.mjs`에 아직 없으므로, 쓰기 전에 `experimental: { authInterrupts: true }`를 먼저 켜라(미설정 시 기본 빌드에선 동작 안 함):
 
 | 백엔드 code | 처리 | 파일 |
 |------|------|------|

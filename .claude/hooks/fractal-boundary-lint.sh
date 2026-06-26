@@ -20,9 +20,9 @@ case "$norm" in
   *.ts|*.tsx) : ;;
   *) exit 0 ;;
 esac
-[ -f "$fp" ] || exit 0
+[ -f "$norm" ] || exit 0
 
-content="$(cat "$fp")"
+content="$(cat "$norm")"
 # import / dynamic import / require 의 소스 경로만 추출
 sources="$(printf '%s' "$content" \
   | grep -oE '(from[[:space:]]+|import\(|require\()[[:space:]]*["'"'"'][^"'"'"']+["'"'"']' \

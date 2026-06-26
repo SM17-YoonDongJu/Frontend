@@ -3,7 +3,8 @@
 # 스테이징에 .ts/.tsx 변경이 있을 때만 실행(문서/설정만 바꾼 커밋은 빠르게 통과).
 # 실패 시 커밋 차단 — 타입 깨짐/lint 위반을 커밋에 섞지 않는다.
 
-staged=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' || true)
+staged=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep -E '(\.(ts|tsx)$|^package\.json$|^tsconfig(\..+)?\.json$|^eslint(\..+)?\.(js|mjs|cjs|json)$|^next\.config\.(js|mjs|cjs)$)' || true)
 if [ -z "$staged" ]; then
   exit 0
 fi

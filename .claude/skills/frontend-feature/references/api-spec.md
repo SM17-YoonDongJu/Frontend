@@ -13,6 +13,7 @@
 `mcp__notion__notion-fetch`로 **API 명세서 데이터소스**를 조회한 뒤, 담당 슬라이스의 도메인/기능으로 행을 좁힌다.
 
 API 명세서 DB 스키마:
+
 | 속성 | 타입 | 값 |
 |------|------|----|
 | `API 경로` | title | 엔드포인트 경로 (예: `/reports/{reportId}/proposals`) |
@@ -31,7 +32,7 @@ API 명세서 DB 스키마:
 목 우선 개발이라도 **경로/메서드/필드는 사용자 확정이 단일 진실** — MVP 임시로 진행해야 하면 사용자가 명시적으로 "임시로 가라"고 한 경우에만, `// CONTRACT: 명세없음-임시` 주석을 달고 진행한다.
 
 ## 도메인 enum (쿼리키 factory 도메인과 정렬)
-```
+```text
 auth · user · settings · report · review · matching · chat · payment · admin
 ```
 쿼리키 factory의 최상위 도메인 키와 이 enum을 일치시킨다. 새 도메인을 임의로 만들지 않는다.
@@ -53,6 +54,7 @@ auth · user · settings · report · review · matching · chat · payment · a
 - MSW 핸들러도 반드시 이 봉투 형태로 응답한다(성공은 `data`로 감싸고, 실패는 `code` 포함). 봉투를 빠뜨리면 실제 API와 shape이 어긋난다.
 
 ## 에러코드 enum (실패 응답 `code`)
+
 | HTTP | code | 의미 |
 |------|------|------|
 | 400 | `INVALID_REQUEST` | 요청 형식/구조 이상(깨진 JSON, 타입 불일치) |

@@ -1,6 +1,6 @@
 # E2E 작성 패턴 (Playwright + MSW)
 
-이 repo에서 E2E 스펙을 **실제로 어떻게 짜는지**. 무엇을 E2E로 올릴지(범위·CUJ)는 `SKILL.md`의 "E2E 범위 규칙"을 먼저 보고, 여기선 *올리기로 정한 흐름을 어떻게 쓰는지*만 다룬다. 기존 스펙(`apps/web/e2e/*.spec.ts`)이 단일 진실 — 새 스펙은 이 패턴에 맞춘다.
+이 repo에서 E2E 스펙을 **실제로 어떻게 짜는지**. 무엇을 E2E로 올릴지(범위·CUJ)는 `SKILL.md`의 "무엇을 E2E로 올리나" 섹션을 먼저 보고, 여기선 *올리기로 정한 흐름을 어떻게 쓰는지*만 다룬다. 기존 스펙(`apps/web/e2e/*.spec.ts`)이 단일 진실 — 새 스펙은 이 패턴에 맞춘다.
 
 ## 환경·실행
 - 위치: `apps/web/e2e/<feature>.spec.ts`. import는 `import { expect, test } from "@playwright/test";`

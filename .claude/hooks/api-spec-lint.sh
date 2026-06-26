@@ -20,9 +20,9 @@ case "$norm" in
   *.schema.ts) is_api=1 ;;
 esac
 [ "$is_api" -eq 0 ] && exit 0
-[ -f "$fp" ] || exit 0
+[ -f "$norm" ] || exit 0
 
-content="$(cat "$fp")"
+content="$(cat "$norm")"
 
 # api-spec 에러코드 enum (단일 진실)
 enum="INVALID_REQUEST VALIDATION_ERROR MISSING_REQUIRED_FIELD UNSUPPORTED_OPERATION \
