@@ -20,7 +20,7 @@ export const reviewListItemSchema = z.object({
   held: z.boolean().optional(),
 });
 
-/** 보류 처리 응답. ⚠️ API 명세 미정(드리프트) — 목업. */
+/** 보류 처리 응답(사정사별 토글). */
 export const holdReviewSchema = z.object({
   reportId: z.uuid(),
   held: z.boolean(),
@@ -39,7 +39,7 @@ export const reviewListSchema = z.object({
   pagination: paginationSchema,
 });
 
-/** 검수 현황 요약. ⚠️ API 명세 미정(드리프트) — 목업 사용, 백엔드 확인 필요. */
+/** 검수 현황 요약(집계 카드). */
 export const reviewSummarySchema = z.object({
   pendingCount: z.number().int(),
   specialtyMatchCount: z.number().int(),

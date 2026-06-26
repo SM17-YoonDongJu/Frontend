@@ -84,7 +84,7 @@ export const handlers = [
     });
   }),
 
-  // 검수 보류 처리 (⚠️ API 명세 미정 — 목업)
+  // 검수 보류 처리 (사정사별 토글)
   http.patch(`${API_BASE_URL}/reports/:reportId/hold`, async ({ params }) => {
     await delay(300);
     const reportId = String(params.reportId);
@@ -97,7 +97,7 @@ export const handlers = [
     });
   }),
 
-  // 검수 현황 요약 (⚠️ API 명세 미정 — 목업)
+  // 검수 현황 요약 (집계 카드 3종)
   http.get(`${API_BASE_URL}/reports/pending-review/summary`, async () => {
     await delay(300);
 
