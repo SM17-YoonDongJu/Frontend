@@ -9,6 +9,7 @@
 **트리거:** 화면·페이지·컴포넌트·기능 개발, EPIC/스토리 구현, 또는 "다시 실행/재실행/수정/보완/부분만 다시" 후속 요청 시 `frontend-feature` 스킬을 사용하라. 단순 질문·단일 파일 수정은 직접 응답.
 
 **핵심 규칙 (상세는 .claude/skills/):**
+- **작업 착수 전 디자인 컴포넌트 문서 `component-build/references/design-tokens.md`(색·radius·폰트 단일 진실) 필독** — raw hex·임의값 금지, `@theme` 토큰/유틸로만 표현. Figma 변환은 `figma-design-convert` 스킬
 - 폴더 배치·네이밍·4원칙(가독성·예측가능성·응집성·결합도) → `code-conventions`
 - 쿼리키 factory + staleTime(auth 30분/상세 Infinity/리스트 0폴링)/gcTime(기본 30분/상세 1시간) + zod + MSW → `react-query-data`
 - App Router·라우트그룹((customer)/(partner)/(auth))·Server/Client 경계·3상태 → `component-build`
@@ -39,3 +40,12 @@
 | 2026-06-25 | E2E 작성 레퍼런스 추가 + 드리프트 수정 | fe-integration-qa/references/e2e-authoring.md (+ SKILL 포인터) | 실제 스펙(apps/web/e2e/*)·playwright.config 기준 작성 패턴(파일구조·사용자셀렉터·toPass 하이드레이션 가드·기본 핸들러 MSW·헬퍼) 정리, "Playwright 미설치·pnpm test" 드리프트를 설치됨·test:e2e로 정정 |
 | 2026-06-25 | 테스트 전략 E2E-only 확정 | fe-integration-qa(SKILL·e2e-authoring), commit-style | 단위·통합테스트 안 함(Vitest/RTL/Jest 미도입) 명시, 정적 레이어(TS·zod·api-spec훅·pre-commit)가 하위 대체, 고가치 빈/에러는 E2E 핸들러 override·저가치는 의식적 미테스트, 죽은 "RTL/통합테스트로 내림" 포인터 전수 제거 |
 | 2026-06-25 | 프렉탈 경계 위반 차단 훅 추가 | .claude/hooks/fractal-boundary-lint.sh, .claude/settings.json, code-conventions | app 트리 .ts/.tsx 작성 시 세그먼트 경계 침범(다른 세그먼트 _internal 직접 import)·역방향 의존(_api/_model→_components/_hooks) 감지해 PostToolUse로 차단, 의존 방향 규칙 명문화, 프렉탈을 글이 아닌 기계가 강제 |
+| 2026-06-27 | 피그마 변환 스킬 정의 | skills/figma-design-convert (SKILL + figma-mapping·verification-gate reference) | 이슈 #26: 로컬 Figma Dev Mode MCP 출력을 @theme 토큰·프렉탈·Storybook 컨벤션으로 매핑, 계산스타일 값 대조로 검증(픽셀/비전 비범위) |
+| 2026-06-27 | 디자인 컴포넌트 문서 필독 규칙 추가 | CLAUDE.md, component-build, frontend-feature | 모든 화면·컴포넌트 작업 착수 전 design-tokens.md 선참조 강제(토큰 드리프트 방지) |
+| 2026-06-27 | px→rem 변환 규칙 추가 | figma-design-convert/references/figma-mapping.md §4 | Figma가 px여도 길이값은 rem(16px=1rem) 변환 적용, `[Npx]` 임의값 금지(1px 보더 예외). 변환 검증 중 기존 코드 px 드리프트 확인 |
+| 2026-06-27 | 본문 산세 폰트(Inter) 전역 연결 | layout.tsx(next/font Inter), globals.css(@theme --font-sans), design-tokens.md 폰트표 | Figma 변환 검증 게이트가 본문 폰트 불일치 검출 — 프로젝트에 base 산세 미연결로 전 화면 시스템폰트 렌더. Inter를 body 기본(font-sans)으로 박음(한글은 시스템 폴백=Figma 동일). letter-spacing -0.16px≈tracking-[-0.01rem] 규칙 명시 |
+| 2026-06-27 | 검증 게이트 사각지대 한정 추가 | figma-design-convert/references/verification-gate.md | 값 게이트(13항목)는 요소별 계산스타일만 봄 — 레이아웃/구조 불일치는 못 잡음. 변환 전후 전체 스크린샷 대조 + 구조 다른 변형은 각각 raw 조회 후 게이트 등록 강제(추측 스펙 금지). 추천 카드 가로형 구조 누락 사례 반영 |
+| 2026-06-27 | 정렬축·표시텍스트 규칙 추가 | figma-design-convert/references/figma-mapping.md §4·§7 | §4: auto-layout 정렬축(justify/items/text-center)을 Figma에서 그대로 읽고 기본 좌/상단으로 깔지 말 것(히어로 중앙정렬 누락 사례). §7 신설: 라벨·버튼 문구·수치 표기는 Figma 문자열 그대로(의역·축약 금지, 변형별 문구 보존) |
+| 2026-06-27 | 검증 게이트 스크린샷 대조 우선 재편 + 샷 헬퍼 | verification-gate.md, SKILL.md, apps/web/scripts/figma-shot.mjs, .gitignore | 게이트 1순위를 "구현 샷 ↔ Figma get_screenshot 대조"로(미스 대부분 여기서 잡힘), 값 측정은 폰트 미로드 의심 시 선택. 재사용 샷 헬퍼 추가(값 하드코딩 0, URL+selector→PNG). PNG 일회용(찍고 삭제, gitignore로 커밋 차단). "Playwright 스크립트 추후 커밋" hedge 제거 — 페이지마다 기대값 달라 범용 값-스크립트는 불필요로 판정. 실행 함정(node는 PowerShell·apps/web 모듈해석·dev서버 선행) 명시 |
+| 2026-06-27 | 스타일 추측 차단(색·두께·배경·아이콘) | figma-mapping.md §0·§1·§3·§8, verification-gate.md | 검수 화면 변환 점검서 색(ink vs ink-2)·폰트두께(semibold→medium)·배경 발명·아이콘 미재사용 드리프트 검출. 원인=metadata+산문으로 스타일 추측(metadata엔 색·두께·fill 없음). §0 신설: 색·두께·fill·정렬은 노드별 get_design_context에서 읽고 추측 금지. §1: fill 없으면 bg 금지·텍스트색 hex 그대로. §3: 폰트 weight 매핑표(Bold/Semi_Bold/Medium). §8: shared/ui/icons 재사용 강제(로컬 인라인·Figma svg 금지) |
+| 2026-06-27 | figma-design-convert 동작 흐름 정리 | figma-design-convert/SKILL.md | 동작 흐름을 URL 입력부터 확인·읽기·구현·비교 순서로 재작성, 옛 도구명(get_code·get_image) 교정, frontmatter 설명 갱신 |

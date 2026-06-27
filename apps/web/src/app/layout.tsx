@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Gowun_Batang } from "next/font/google";
+import { Gowun_Batang, Inter } from "next/font/google";
 import { Providers } from "@/shared/providers";
 import "./globals.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap"
+});
 
 const gowunBatang = Gowun_Batang({
   weight: ["400", "700"],
@@ -18,8 +24,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ko" className={gowunBatang.variable}>
-      <body className="min-h-dvh bg-paper text-ink antialiased">
+    <html lang="ko" className={`${inter.variable} ${gowunBatang.variable}`}>
+      <body className="min-h-dvh bg-paper font-sans text-ink antialiased">
         <Providers>{children}</Providers>
       </body>
     </html>

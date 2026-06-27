@@ -5,7 +5,7 @@ description: 손해사정 플랫폼 Next.js App Router UI 구현 패턴. 페이�
 
 # Next.js App Router 컴포넌트 구현 패턴
 
-대상: React 19 + Next.js 16 App Router + Tailwind 4. 코드 컨벤션은 `code-conventions` 스킬과 함께 적용한다(이 스킬은 "어떻게 만드나", 컨벤션 스킬은 "어떻게 잘 쓰나"). 시각 디자인 완성도가 필요한 화면은 `frontend-design` 스킬을 품질 가이드로 참조하되, 아래 프로젝트 규칙(Tailwind 토큰·3상태·접근성)이 항상 우선한다. 색·radius·폰트 토큰은 `references/design-tokens.md`가 단일 진실.
+대상: React 19 + Next.js 16 App Router + Tailwind 4. 코드 컨벤션은 `code-conventions` 스킬과 함께 적용한다(이 스킬은 "어떻게 만드나", 컨벤션 스킬은 "어떻게 잘 쓰나"). 시각 디자인 완성도가 필요한 화면은 `frontend-design` 스킬을 품질 가이드로 참조하되, 아래 프로젝트 규칙(Tailwind 토큰·3상태·접근성)이 항상 우선한다. 색·radius·폰트 토큰은 `references/design-tokens.md`가 단일 진실 — **화면·컴포넌트 작업은 착수 전 이 문서를 먼저 확인**한다. Figma 디자인을 코드로 옮길 때는 `figma-design-convert` 스킬을 사용한다(raw 출력 그대로 쓰지 말고 토큰·프렉탈로 매핑).
 
 ## 라우트그룹 = 역할 경계
 ```
