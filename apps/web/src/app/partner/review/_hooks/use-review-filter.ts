@@ -2,11 +2,13 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
+import { accidentTypeSchema } from "@/shared/model/accident-type";
 
 export type ReviewCategory = "pending" | "specialtyMatch" | "dueSoon";
 
 const reviewCategorySchema = z.enum(["pending", "specialtyMatch", "dueSoon"]);
-const typeSchema = z.enum(["전체", "후유장해", "교통사고", "실손"]);
+// 사고 유형 필터 값은 명세 영문 enum + 전체.
+const typeSchema = z.enum(["전체", ...accidentTypeSchema.options]);
 
 export function useReviewFilter() {
   const router = useRouter();

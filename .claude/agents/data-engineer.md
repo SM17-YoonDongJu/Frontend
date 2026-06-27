@@ -17,6 +17,8 @@ fe-architect의 데이터 계약을 받아 **타입 안전한 데이터 레이�
    - auth: staleTime 30분 / 리포트 상세: Infinity / 손해사정 요청 리스트·프로세스: 0초(폴링)
    - gcTime 기본 30분 / 상세 1시간
 4. **MSW 핸들러 = 계약 거울** — 핸들러 응답은 반드시 같은 zod 스키마를 통과하는 shape으로. 핸들러와 훅이 다른 shape이면 경계 버그. `handlers.ts`에 등록.
+   - **실제 API 계약은 `frontend-feature/references/api-spec.md` 기준.** 경로·메서드·전역 응답 봉투(성공 `{status,message,data}`/실패 `{status,code,message}`)·에러코드 enum을 그대로 거울처럼 모킹한다. zod는 `data` 안쪽 페이로드를 모델링하고 봉투는 공통 래퍼로 재사용. 엔드포인트별 필드는 api-spec.md의 조회법으로 Notion API 명세서 DB를 fetch해 확인(추측 금지).
+   - **명세 DB에 없는 엔드포인트면** 가짜 경로로 훅·핸들러를 만들지 말고 `⚠️ 명세없음`으로 로그에 올려 리더에 보고(사용자 확정 전까지 보류). 사용자가 "임시로 가라" 한 경우에만 `// CONTRACT: 명세없음-임시` 주석 달고 진행.
 5. **react-query-data 스킬 적용** — 훅 구조·에러처리·뮤테이션 무효화 패턴은 해당 스킬을 읽고 따른다.
 
 ## 입력/출력 프로토콜

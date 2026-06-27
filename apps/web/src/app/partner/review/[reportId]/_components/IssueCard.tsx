@@ -27,8 +27,8 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
   const impact = formatImpact(issue.impactAmount);
   const impactTone =
     issue.impactAmount != null && issue.impactAmount < 0 ? "text-terra" : "text-green";
-  const isPending = issue.status === "PENDING";
-  const isModified = issue.status === "MODIFIED";
+  const isPending = issue.reviewStatus === "PENDING";
+  const isModified = issue.reviewStatus === "MODIFIED";
 
   return (
     <li
@@ -53,7 +53,7 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
             </div>
           </div>
         </div>
-        <IssueStatusControl value={issue.status} onChange={onSetStatus} />
+        <IssueStatusControl value={issue.reviewStatus} onChange={onSetStatus} />
       </div>
 
       {!isModified && (
@@ -76,7 +76,7 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
 
       <div className="mt-3 pl-[34px]">
         {isModified && <IssueModifyForm issue={issue} onPatch={onPatch} />}
-        {issue.status === "EXCLUDED" && <IssueExcludeForm issue={issue} onPatch={onPatch} />}
+        {issue.reviewStatus === "EXCLUDED" && <IssueExcludeForm issue={issue} onPatch={onPatch} />}
 
         <div className="mt-3 flex items-start gap-2">
           <span

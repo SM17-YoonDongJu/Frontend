@@ -14,15 +14,15 @@ interface ProposalCardProps {
 
 const manWonFormatter = new Intl.NumberFormat("ko-KR");
 
-function formatEstimateRange(min: number | null, max: number | null) {
-  if (min === null || max === null) return null;
+function formatEstimateRange(min?: number | null, max?: number | null) {
+  if (min == null || max == null) return null;
   const toMan = (value: number) => manWonFormatter.format(Math.round(value / 10_000));
   return `${toMan(min)} – ${toMan(max)}만`;
 }
 
 export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
   const router = useRouter();
-  const { isViewed, markViewed, isRejected, markRejected } = useViewedProposals();
+  const { isViewed, markViewed } = useViewedProposals();
   const rejectProposal = useRejectProposal(reportId);
 
   const {
@@ -37,7 +37,6 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
     estimateMaxAmount,
     feeBasis,
   } = proposal;
-  const rejected = isRejected(adjusterId);
   const viewed = isViewed(adjusterId);
   const avatarLabel = nickname.trim().charAt(0) || "?";
   const estimateRange = formatEstimateRange(estimateMinAmount, estimateMaxAmount);
@@ -52,18 +51,14 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
   };
 
   const handleReject = () => {
-    rejectProposal.mutate(adjusterId, {
-      onSuccess: () => markRejected(adjusterId),
-    });
+    rejectProposal.mutate(adjusterId);
   };
 
   return (
     <article
       className={cn(
-        "rounded-card-lg border bg-card p-5 transition",
-        rejected
-          ? "border-line bg-paper-2 opacity-60"
-          : cn("border-gold-2", viewed && "opacity-60"),
+        "rounded-card-lg border border-gold-2 bg-card p-5 transition",
+        viewed && "opacity-60",
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -86,9 +81,13 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
                 </span>
               )}
             </div>
-            <p className="mt-0.5 text-[13px] text-ink-3">
-              {speciality} · 경력 {career}년
-            </p>
+            {(speciality || career != null) && (
+              <p className="mt-0.5 text-[13px] text-ink-3">
+                {[speciality, career != null ? `경력 ${career}년` : null]
+                  .filter(Boolean)
+                  .join(" · ")}
+              </p>
+            )}
           </div>
         </div>
         <button
@@ -112,32 +111,26 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
           </div>
           <div className="min-w-0">
             <p className="text-[12px] text-ink-3">보수 기준</p>
-            <p className="mt-1 text-[15px] font-semibold text-ink">{feeBasis}</p>
+            <p className="mt-1 text-[15px] font-semibold text-ink">{feeBasis ?? "상담 시 안내"}</p>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          {rejected ? (
-            <span className="text-[13px] font-medium text-ink-3">거절한 제안</span>
-          ) : (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                loading={rejectProposal.isPending}
-                onClick={handleReject}
-              >
-                거절
-              </Button>
-              <Button
-                size="sm"
-                icon={<ArrowRightIcon />}
-                className="bg-gold-soft text-gold-ink"
-                onClick={openReviewReport}
-              >
-                검수 의견 보기
-              </Button>
-            </>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            loading={rejectProposal.isPending}
+            onClick={handleReject}
+          >
+            거절
+          </Button>
+          <Button
+            size="sm"
+            icon={<ArrowRightIcon />}
+            className="bg-gold-soft text-gold-ink"
+            onClick={openReviewReport}
+          >
+            검수 의견 보기
+          </Button>
         </div>
       </div>
     </article>

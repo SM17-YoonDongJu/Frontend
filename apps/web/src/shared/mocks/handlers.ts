@@ -3,14 +3,17 @@ import { API_BASE_URL } from "@/shared/api/config";
 
 // 검수 대기 목 데이터 — 보류 상태 반영 위해 모듈 스코프에 고정(reportId 안정)
 const PENDING_REVIEWS = [
-  { reportId: crypto.randomUUID(), accidentType: "후유장해", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", matchingScore: 96, claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2 },
-  { reportId: crypto.randomUUID(), accidentType: "교통사고", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z", caseId: "20260619-041", title: "다발성 늑골 골절 · 일실수입 과소 산정 의심", region: "경기 성남", matchingScore: 91, claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3 },
-  { reportId: crypto.randomUUID(), accidentType: "후유장해", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "20260618-030", title: "요추 추간판탈출 · 외모추상 특약 청구 누락", region: "서울 송파", matchingScore: 88, claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2 },
-  { reportId: crypto.randomUUID(), accidentType: "실손", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "20260618-019", title: "비급여 도수치료 · 통원 한도 적용 분쟁", region: "인천 연수", matchingScore: 74, claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1 },
-  { reportId: crypto.randomUUID(), accidentType: "교통사고", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z", caseId: "20260517-007", title: "경추 염좌 · 향후 치료비 미반영", region: "경기 수원", matchingScore: 82, claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 1_800_000, issueCount: 1 },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2 },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z", caseId: "20260619-041", title: "다발성 늑골 골절 · 일실수입 과소 산정 의심", region: "경기 성남", claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3 },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "20260618-030", title: "요추 추간판탈출 · 외모추상 특약 청구 누락", region: "서울 송파", claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2 },
+  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "20260618-019", title: "비급여 도수치료 · 통원 한도 적용 분쟁", region: "인천 연수", claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1 },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z", caseId: "20260517-007", title: "경추 염좌 · 향후 치료비 미반영", region: "경기 수원", claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 1_800_000, issueCount: 1 },
 ];
 
 const heldReportIds = new Set<string>();
+
+// 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
+const rejectedProposals = new Set<string>();
 
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
@@ -30,23 +33,26 @@ export const handlers = [
     return HttpResponse.json({ status: "200", message: "업로드 성공", data: { url } });
   }),
 
-  // 분석 신청 생성 — 실손(MEDICAL_EXPENSE)만 허용, 그 외 UNSUPPORTED_OPERATION
+  // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
   http.post(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(600);
     const body = (await request.json()) as { accidentType?: string };
 
-    if (body.accidentType !== "MEDICAL_EXPENSE") {
+    if (body.accidentType !== "medical_indemnity") {
       return HttpResponse.json(
         { status: "400", code: "UNSUPPORTED_OPERATION", message: "현재 실손 의료비만 분석 가능합니다." },
         { status: 400 },
       );
     }
 
-    return HttpResponse.json({
-      status: "200",
-      message: "분석 요청이 접수되었습니다.",
-      data: { reportId: crypto.randomUUID(), status: "AWAITING_INSPECTION" },
-    });
+    return HttpResponse.json(
+      {
+        status: "202",
+        message: "리포트 생성을 시작했습니다.",
+        data: { reportId: crypto.randomUUID(), status: "AWAITING_INSPECTION" },
+      },
+      { status: 202 },
+    );
   }),
 
   // 검수 대기 목록 (활성 손해사정사 전용) — :reportId 라우트보다 먼저 등록
@@ -56,8 +62,14 @@ export const handlers = [
     const url = new URL(request.url, "http://localhost");
     const page = Number(url.searchParams.get("page") ?? "1");
     const size = Number(url.searchParams.get("size") ?? "10");
+    const accidentType = url.searchParams.get("accidentType");
+    const region = url.searchParams.get("region");
 
-    const list = PENDING_REVIEWS.map((review) => ({
+    const list = PENDING_REVIEWS.filter(
+      (review) =>
+        (!accidentType || review.accidentType === accidentType) &&
+        (!region || review.region === region),
+    ).map((review) => ({
       ...review,
       held: heldReportIds.has(review.reportId),
     }));
@@ -72,7 +84,7 @@ export const handlers = [
     });
   }),
 
-  // 검수 보류 처리 (⚠️ API 명세 미정 — 목업)
+  // 검수 보류 처리 (사정사별 토글)
   http.patch(`${API_BASE_URL}/reports/:reportId/hold`, async ({ params }) => {
     await delay(300);
     const reportId = String(params.reportId);
@@ -85,7 +97,7 @@ export const handlers = [
     });
   }),
 
-  // 검수 현황 요약 (⚠️ API 명세 미정 — 목업)
+  // 검수 현황 요약 (집계 카드 3종)
   http.get(`${API_BASE_URL}/reports/pending-review/summary`, async () => {
     await delay(300);
 
@@ -98,10 +110,11 @@ export const handlers = [
     });
   }),
 
-  // 받은 제안 목록 조회 (이슈 #18)
-  http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async () => {
+  // 받은 제안 목록 조회 (이슈 #18) — 거절된 제안은 제외
+  http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async ({ params }) => {
     await delay(500);
 
+    const reportId = typeof params.reportId === "string" ? params.reportId : "";
     const list = [
       {
         adjusterId: "11111111-1111-4111-8111-111111111111",
@@ -150,6 +163,10 @@ export const handlers = [
       },
     ];
 
+    const visible = list.filter(
+      (proposal) => !rejectedProposals.has(`${reportId}:${proposal.adjusterId}`),
+    );
+
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
@@ -159,11 +176,11 @@ export const handlers = [
           reportNo: "20260520-017",
           receivedAt: "2026.05.20",
         },
-        list,
+        list: visible,
         pagination: {
-          page: 0,
+          page: 1,
           size: 10,
-          totalElements: list.length,
+          totalElements: visible.length,
           totalPages: 1,
           hasNext: false,
         },
@@ -171,15 +188,23 @@ export const handlers = [
     });
   }),
 
-  // 제안 거절 (사정사별, 백엔드 신규 요청 — MSW 선구현)
+  // 제안 거절 (사정사별) — 성공 시 해당 제안은 목록에서 제외
   http.patch(
     `${API_BASE_URL}/reports/:reportId/proposals/:adjusterId/reject`,
-    async () => {
+    async ({ params }) => {
       await delay(400);
+      const rawReportId = typeof params.reportId === "string" ? params.reportId : "";
+      const adjusterId =
+        typeof params.adjusterId === "string" ? params.adjusterId : crypto.randomUUID();
+      const isUuid =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawReportId);
+
+      rejectedProposals.add(`${rawReportId}:${adjusterId}`);
+
       return HttpResponse.json({
         status: "200",
         message: "제안을 거절했습니다.",
-        data: null,
+        data: { reportId: isUuid ? rawReportId : crypto.randomUUID(), adjusterId, rejected: true },
       });
     },
   ),
@@ -316,12 +341,12 @@ export const handlers = [
         // ⚠️ 명세 드리프트: 명세 issue는 string[]. 리치 reviewIssues 별도 키로 superset 반환.
         reviewIssues: [
           {
-            id: "issue-1",
+            issueId: "issue-1",
             title: "후유장해 등급 재산정",
             description:
               "AI 초안은 14급으로 추정했으나, 관절 운동범위 제한 정도를 고려하면 12급 적용 여지가 있습니다.",
             impactAmount: 3_500_000,
-            status: "PENDING",
+            reviewStatus: "PENDING",
             modifiedReason: null,
             excludedReason: null,
             adjusterOpinion: null,
@@ -329,11 +354,11 @@ export const handlers = [
             isNew: false,
           },
           {
-            id: "issue-2",
+            issueId: "issue-2",
             title: "입원 일당 미반영분",
             description: "입원 17일 중 초안에 14일만 반영되어 3일분 누락 추정.",
             impactAmount: 600_000,
-            status: "PENDING",
+            reviewStatus: "PENDING",
             modifiedReason: null,
             excludedReason: null,
             adjusterOpinion: null,
@@ -341,12 +366,12 @@ export const handlers = [
             isNew: false,
           },
           {
-            id: "issue-3",
+            issueId: "issue-3",
             title: "외모변형 장해 특약 적용",
             description:
               "수술 흉터 관련 외모변형 장해 특약 청구 가능성 검토 항목.",
             impactAmount: null,
-            status: "PENDING",
+            reviewStatus: "PENDING",
             modifiedReason: null,
             excludedReason: null,
             adjusterOpinion: null,
@@ -364,7 +389,7 @@ export const handlers = [
 
     if (request.headers.get("x-mock-failure") === "submit-review") {
       return HttpResponse.json(
-        { status: "500", code: "INTERNAL_ERROR", message: "검수 반영 중 오류가 발생했습니다." },
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "검수 반영 중 오류가 발생했습니다." },
         { status: 500 },
       );
     }
