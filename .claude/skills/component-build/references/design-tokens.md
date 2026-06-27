@@ -47,10 +47,11 @@ Tailwind v4 주력. 토큰은 `apps/web/src/app/globals.css`의 `@theme`에 정�
 
 | 토큰 | 값 | 용도 |
 |------|-----|------|
-| `font-serif` | Gowun Batang | **Title 계열 전용**(화면·금액 제목). `layout.tsx`의 next/font로 로드(`--font-gowun-batang`) |
+| `font-sans` | Inter | **본문·UI 기본**(Heading·Label·이름·버튼·태그). `layout.tsx`의 next/font로 로드(`--font-inter`), `body`에 `font-sans` 적용 = 전역 기본. 한글은 Inter에 글리프 없어 시스템 한글 산세로 폴백(Figma와 동일 동작) |
+| `font-serif` | Gowun Batang | **Title 계열 전용**(화면·금액 제목·통계 수치). `layout.tsx`의 next/font로 로드(`--font-gowun-batang`) |
 | `font-mono` | ui-monospace 계열 | 코드·수치·스펙 라벨 |
 
-본문(Heading·Label·UI)은 기본 산세(`inherit`). serif를 본문에 쓰지 않는다.
+본문은 `font-sans`(Inter)가 전역 기본. serif를 본문에 쓰지 않는다. letter-spacing은 Figma 본문 기준 `-0.16px`(≈`tracking-[-0.01rem]`)을 컨테이너에 적용해 상속.
 
 ## 유틸 매핑
 
