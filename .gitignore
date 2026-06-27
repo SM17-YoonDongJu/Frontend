@@ -36,5 +36,9 @@ test-results/
 playwright-report/
 playwright/.cache/
 
+# figma 변환 검증 스크린샷(일회용 — 찍고 대조 후 삭제, 커밋 금지)
+*.figma-shot.png
+apps/web/scripts/*.png
+
 # paseo (local worktree tooling)
 paseo.json

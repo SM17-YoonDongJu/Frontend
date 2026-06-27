@@ -21,7 +21,7 @@ description: 로컬 Figma Dev Mode MCP로 선택한 프레임/노드를 프로�
    - auto-layout → Tailwind v4 flex/gap
    - 컴포넌트 → 프렉탈 배치(`_components` vs `src/shared`) + Storybook 스토리 동반
    - 네이밍 → `naming-dictionary` 우선, 없으면 임의결정 금지 → 사용자 질문
-3. **검증** — `references/verification-gate.md`: Storybook 마운트 → Playwright `getComputedStyle` 추출 → Figma 정확값과 항목 대조. 불일치는 해당 항목만 재생성(상한 2회), 초과 시 사용자에 리포트.
+3. **검증** — `references/verification-gate.md`: **1순위 스크린샷 대조**(구현 샷 ↔ Figma `get_screenshot`, 구조·정렬·텍스트). 재사용 헬퍼 `apps/web/scripts/figma-shot.mjs`(PNG는 일회용, 찍고 대조 후 삭제·커밋 X). 값 측정(`getComputedStyle`)은 폰트 미로드 의심 시 선택. 불일치는 해당 부분만 재생성(상한 2회), 초과 시 사용자에 리포트.
 
 ## 참조 (단일 진실)
 

@@ -36,17 +36,22 @@ Figma Dev Mode MCP의 raw 출력(`get_code`/`get_variable_defs`)을 **그대로 
 - Title 계열(화면·금액 제목)만 `font-serif`(Gowun Batang). 본문·Label·UI는 기본 산세(유틸 미지정).
 - 코드·수치·스펙 라벨은 `font-mono`. serif를 본문에 쓰지 않는다.
 
-## 4. auto-layout → Tailwind v4
+## 4. auto-layout → Tailwind v4 (+ px → rem 변환)
+
+**Figma는 px로 표기되지만, 우리는 길이값을 rem으로 변환해 적용한다.** 루트 폰트사이즈 오버라이드 없음 → **기준 16px = 1rem**. 변환식: `rem = px / 16`.
 
 | Figma | Tailwind |
 |-------|----------|
 | auto-layout(가로) | `flex items-center gap-*` |
 | auto-layout(세로) | `flex flex-col gap-*` |
-| item spacing(px) | `gap-[Npx]` 또는 근사 스케일(`gap-2`=8px, `gap-3`=12px…) |
-| padding | `p-*`/`px-*`/`py-*`, 비표준은 `p-[Npx]` |
+| item spacing / padding / size | 스케일 유틸 우선, 안 맞으면 **rem 임의값**(`gap-[0.875rem]`) — `[Npx]` 금지 |
 | 절대좌표(no auto-layout) | 좌표 그대로 복사 금지 → flex/grid로 의미 재구성 |
 
-px는 4의 배수면 스케일 유틸로, 아니면 임의값 유틸(`[Npx]`)로. 절대 위치는 최후수단.
+- **스케일 유틸이 값에 맞으면 그걸 우선**(이미 rem 기반: `gap-4`=1rem, `p-5`=1.25rem, `text-2xl`=1.5rem). 값이 스케일과 어긋나면 **rem 임의값 유틸**(`p-[1.3125rem]`, `text-[0.8rem]`)로. **`[Npx]` 임의값은 쓰지 않는다.**
+- 변환 예: 14px→`0.875rem`, 12.8px→`0.8rem`, 13px→`0.8125rem`, 21px→`1.3125rem`, 46px→`2.875rem`.
+- **예외 — 1px hairline(보더·구분선)은 px 유지**(`border`, `h-px`). rem 환산 시 서브픽셀 반올림으로 선이 흐려진다.
+- 절대 위치는 최후수단.
+- **정렬축을 Figma에서 그대로 읽어라 — 기본 좌/상단으로 깔지 말 것.** auto-layout의 primary/counter axis 정렬을 확인해 매핑: 가운데=`justify-center`/`items-center`/`text-center`, 양끝=`justify-between`, 우측=`justify-end`/`items-end`. `get_design_context` 코드의 `items-*`/`justify-*`/`text-center`를 누락 없이 옮긴다(히어로 통계 등 중앙정렬 자주 놓침).
 
 ## 5. 컴포넌트 → 프렉탈 배치
 
@@ -60,3 +65,11 @@ px는 4의 배수면 스케일 유틸로, 아니면 임의값 유틸(`[Npx]`)로
 - 컴포넌트·prop·필드명은 `naming-dictionary.md`를 먼저 조회.
 - 사전에 없는 식별자는 **임의 결정 금지** → 후보 여러 개로 사용자에게 질문 후 확정·사전 추가.
 - Figma 레이어 이름(예: `Frame 427`)을 식별자로 그대로 쓰지 않는다.
+
+## 7. 표시 텍스트 — Figma 문자열 그대로
+
+화면에 보이는 텍스트(라벨·버튼 문구·수치 표기·접미사)는 **Figma 표시 문자열을 글자 그대로** 옮긴다. 식별자(§6)와 달리 표시 텍스트는 의역·축약·추가 금지.
+
+- 버튼 "상담"을 "상담 신청"으로 늘리거나, 이름 "정우성 사정사"에서 "사정사"를 빼지 말 것. 변형(variant)마다 문구가 다르면(추천=`상담 신청`, 일반=`상담`) 각각 그대로 둔다.
+- 수치 표기도 그대로: `410+`를 `410명+`로 바꾸지 말 것.
+- mock 데이터에 넣을 때도 Figma 원문을 그대로 박는다(컴포넌트에서 접미사 임의 합성 금지).
