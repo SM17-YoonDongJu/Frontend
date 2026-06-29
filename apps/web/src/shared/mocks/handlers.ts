@@ -74,8 +74,80 @@ const heldReportIds = new Set<string>();
 // 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
 const rejectedProposals = new Set<string>();
 
+// 고객 대시보드 — 받은 제안이 연결된 리포트(①)의 안정 uuid.
+export const DASHBOARD_PROPOSABLE_REPORT_ID =
+  "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const DASHBOARD_AWAITING_REPORT_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
+
+  // 본인 정보 조회 (고객 대시보드 인사말)
+  http.get(`${API_BASE_URL}/users/me`, async () => {
+    await delay(300);
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        userId: 1024,
+        nickname: "윤서",
+        email: "yunseo@example.com",
+        userType: "insured_person",
+        createdAt: "2024-03-02T09:00:00Z",
+      },
+    });
+  }),
+
+  // 고객 리포트 목록 (대시보드) — :reportId·pending-review와 충돌 없게 정확 경로.
+  // §9 드리프트 필드 선반영(reportNo·claimedMin/Max·proposalCount·reviewedAt·adjusterNickname).
+  http.get(`${API_BASE_URL}/reports`, async ({ request }) => {
+    await delay(400);
+
+    const url = new URL(request.url, "http://localhost");
+    const page = Number(url.searchParams.get("page") ?? "0");
+
+    const list = [
+      {
+        reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
+        status: "MATCHED",
+        accidentType: "교통사고",
+        createdAt: "2026-05-20T09:00:00Z",
+        reportNo: "20260520-017",
+        claimedMinAmount: 14_000_000,
+        claimedMaxAmount: 17_500_000,
+        proposalCount: 2,
+        reviewedAt: "2026-05-22T10:14:00Z",
+        adjusterNickname: "김도현",
+      },
+      {
+        reportId: DASHBOARD_AWAITING_REPORT_ID,
+        status: "AWAITING_INSPECTION",
+        accidentType: "실손",
+        createdAt: "2026-05-12T09:00:00Z",
+        reportNo: "20260512-009",
+        claimedMinAmount: 3_200_000,
+        claimedMaxAmount: 4_800_000,
+        proposalCount: 0,
+        reviewedAt: null,
+        adjusterNickname: null,
+      },
+    ];
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list,
+        pagination: {
+          page,
+          size: 10,
+          totalElements: list.length,
+          totalPages: 1,
+          hasNext: false,
+        },
+      },
+    });
+  }),
 
   // 증빙 업로드 — 기본 성공(결정적). x-mock-failure 헤더로 실패 주입(재시도 검증용)
   http.post(`${API_BASE_URL}/uploads`, async ({ request }) => {
