@@ -20,6 +20,10 @@ export const reportKeys = createQueryKeys("report", {
   pendingReviewSummary: () => ["summary"],
 });
 
+export const userKeys = createQueryKeys("user", {
+  me: null,
+});
+
 export const proposalKeys = createQueryKeys("proposal", {
   list: (reportId: string) => [reportId],
 });
