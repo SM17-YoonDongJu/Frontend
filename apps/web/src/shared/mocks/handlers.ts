@@ -1,13 +1,20 @@
 import { delay, http, HttpResponse } from "msw";
 import { API_BASE_URL } from "@/shared/api/config";
 
+// 로드 시점 기준 상대 마감일(ISO date) — 대시보드 "오늘 마감/N일 남음" 검증용
+function addDays(base: Date, days: number): string {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
 // 검수 대기 목 데이터 — 보류 상태 반영 위해 모듈 스코프에 고정(reportId 안정)
 const PENDING_REVIEWS = [
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2 },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z", caseId: "20260619-041", title: "다발성 늑골 골절 · 일실수입 과소 산정 의심", region: "경기 성남", claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3 },
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "20260618-030", title: "요추 추간판탈출 · 외모추상 특약 청구 누락", region: "서울 송파", claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2 },
-  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "20260618-019", title: "비급여 도수치료 · 통원 한도 적용 분쟁", region: "인천 연수", claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1 },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z", caseId: "20260517-007", title: "경추 염좌 · 향후 치료비 미반영", region: "경기 수원", claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 1_800_000, issueCount: 1 },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", matchingScore: 96, claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2, reviewDeadline: addDays(new Date(), 0) },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z", caseId: "20260619-041", title: "다발성 늑골 골절 · 일실수입 과소 산정 의심", region: "경기 성남", matchingScore: 91, claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3, reviewDeadline: addDays(new Date(), 1) },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "20260618-030", title: "요추 추간판탈출 · 외모추상 특약 청구 누락", region: "서울 송파", matchingScore: 88, claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2, reviewDeadline: addDays(new Date(), 3) },
+  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "20260618-019", title: "비급여 도수치료 · 통원 한도 적용 분쟁", region: "인천 연수", matchingScore: 74, claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1, reviewDeadline: addDays(new Date(), 2) },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z", caseId: "20260517-007", title: "경추 염좌 · 향후 치료비 미반영", region: "경기 수원", matchingScore: 82, claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 1_800_000, issueCount: 1, reviewDeadline: addDays(new Date(), 5) },
 ];
 
 const heldReportIds = new Set<string>();
@@ -17,6 +24,100 @@ const rejectedProposals = new Set<string>();
 
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
+
+  // 본인 손해사정사 프로필 (대시보드 헤더·인사말) — ⚠️ API 명세 미정(드리프트), MSW 선구현
+  http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-failure") === "profile") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_ERROR", message: "프로필을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        adjusterId: "11111111-1111-4111-8111-111111111111",
+        nickname: "김도현",
+        averageRating: 4.9,
+        reviewCount: 86,
+        pendingReviewCount: 5,
+      },
+    });
+  }),
+
+  // 손해사정사 대시보드 요약·활동통계 (#30) — ⚠️ API 명세 미정(드리프트), MSW 선구현
+  http.get(`${API_BASE_URL}/adjusters/me/dashboard`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "dashboard") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_ERROR", message: "대시보드를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        summary: {
+          pendingCount: 5,
+          pendingNewCount: 2,
+          inProgressCount: 2,
+          monthlyCompletedCount: 14,
+          totalCompletedCount: 240,
+          averageRating: 4.9,
+          reviewCount: 86,
+        },
+        activity: {
+          completedCount: 14,
+          consultConvertedCount: 9,
+          averageRating: 4.9,
+        },
+      },
+    });
+  }),
+
+  // 진행 중 사건 (#30) — ⚠️ API 명세 미정(드리프트), MSW 선구현
+  http.get(`${API_BASE_URL}/adjusters/me/in-progress`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "in-progress") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_ERROR", message: "진행 중 사건을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list: [
+          {
+            reportId: crypto.randomUUID(),
+            accidentType: "후유장해",
+            caseId: "20260528-022",
+            description: "장해등급 재산정 의견 작성 중",
+            status: "REVIEWING",
+            progress: 65,
+          },
+          {
+            reportId: crypto.randomUUID(),
+            accidentType: "교통사고",
+            caseId: "20260527-019",
+            description: "검수 완료 · 고객 상담 대기",
+            status: "CUSTOMER_REVIEW",
+            progress: 100,
+          },
+        ],
+      },
+    });
+  }),
 
   // 증빙 업로드 — 기본 성공(결정적). x-mock-failure 헤더로 실패 주입(재시도 검증용)
   http.post(`${API_BASE_URL}/uploads`, async ({ request }) => {
