@@ -27,3 +27,7 @@ export const proposalKeys = createQueryKeys("proposal", {
 export const reviewKeys = createQueryKeys("review", {
   detail: (reportId: string) => [reportId],
 });
+
+export const adjusterKeys = createQueryKeys("adjuster", {
+  detail: (adjusterId: string) => [adjusterId],
+});
