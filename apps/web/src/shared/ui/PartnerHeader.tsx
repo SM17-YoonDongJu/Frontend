@@ -1,16 +1,21 @@
+"use client";
+
 import Link from "next/link";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { Bell } from "@/shared/ui/icons/Bell";
+import { useProfile } from "@/app/partner/_api/use-profile";
 
 const NAV_ITEMS = [
-  { label: "검수 대기", href: "/partner/review", count: 5 },
+  { label: "홈", href: "/partner" },
+  { label: "검수 대기", href: "/partner/review", showCount: true },
   { label: "진행 중", href: "#" },
-  { label: "이용안내", href: "#" }
+  { label: "완료", href: "#" },
 ] as const;
 
-const PARTNER_NAME = "김도현 사정사";
-
 export function PartnerHeader() {
+  const { data } = useProfile();
+  const pendingCount = data?.pendingReviewCount;
+
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-card">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
@@ -31,9 +36,9 @@ export function PartnerHeader() {
                 className="flex items-center gap-1.5 text-sm text-ink-2 transition hover:text-ink"
               >
                 {item.label}
-                {"count" in item && (
+                {"showCount" in item && pendingCount != null && pendingCount > 0 && (
                   <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1.5 text-xs font-semibold text-white">
-                    {item.count}
+                    {pendingCount}
                   </span>
                 )}
               </Link>
@@ -53,7 +58,11 @@ export function PartnerHeader() {
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-lg text-gold">
               <Scale className="text-base" />
             </span>
-            <span className="hidden text-sm font-medium text-ink-2 sm:inline">{PARTNER_NAME}</span>
+            {data?.nickname && (
+              <span className="hidden text-sm font-medium text-ink-2 sm:inline">
+                {data.nickname} 사정사
+              </span>
+            )}
           </button>
         </div>
       </div>
