@@ -1,6 +1,65 @@
 import { delay, http, HttpResponse } from "msw";
 import { API_BASE_URL } from "@/shared/api/config";
 
+// 손해사정사 프로필 목 데이터 — 진입 adjusterId를 그대로 반영해 응답.
+// 빈 후기·404 검증용 고정 id 분기.
+const ADJUSTER_EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
+const ADJUSTER_NOT_FOUND_ID = "99999999-9999-4999-8999-999999999999";
+
+function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
+  return {
+    adjusterId,
+    nickname: "김도현",
+    avatarUrl: null,
+    headline: "장해등급 재산정 전문 · 근거 중심 검토",
+    activityRegion: "서울 · 경기",
+    introduction:
+      "후유장해 등급 산정과 교통사고 보상을 12년간 다뤄온 독립 손해사정사입니다. 진단 검사 결과를 장해분류표에 정확히 매핑하고, 약관·특약·판례를 근거로 적정 보상 범위를 제시합니다. 의뢰인이 이해할 수 있도록 모든 판단의 근거를 함께 설명드립니다.",
+    specialties: ["후유장해", "교통사고", "장해등급 재산정"],
+    careers: [
+      { period: "2018 – 현재", company: "독립 손해사정 법인 · 대표 사정사" },
+      { period: "2014 – 2018", company: "대형 손해보험사 보상 심사팀" },
+      { period: "2013", company: "손해사정사 자격 취득 (제0000호)" },
+    ],
+    career: 12,
+    averageRating: withReviews ? 4.9 : 0,
+    reviewCount: withReviews ? 86 : 0,
+    recentReviews: withReviews
+      ? [
+          {
+            nickname: "윤O서",
+            score: 5,
+            item: "교통사고 · 후유장해",
+            reviewedAt: "2026-05-12T00:00:00Z",
+            content:
+              "장해등급 재산정으로 처음 제안보다 크게 증액됐어요. 근거를 약관·판례로 짚어주셔서 믿음이 갔습니다.",
+          },
+          {
+            nickname: "이O준",
+            score: 5,
+            item: "실손 의료비",
+            reviewedAt: "2026-04-03T00:00:00Z",
+            content:
+              "복잡한 특약 누락을 찾아주셨고 진행 상황을 매번 설명해 주셨습니다.",
+          },
+        ]
+      : [],
+    completedConsultCount: 240,
+    handledCaseCount: 510,
+    verified: true,
+    consultGuide: {
+      method: "비대면 · 방문",
+      initialConsult: "무료 (리포트 기반)",
+      feeBasis: "성공보수 협의",
+    },
+    certification: {
+      registrationNo: "제0000호",
+      verifiedAt: "2026-01-01T00:00:00Z",
+    },
+  };
+}
+
+
 // 검수 대기 목 데이터 — 보류 상태 반영 위해 모듈 스코프에 고정(reportId 안정)
 const PENDING_REVIEWS = [
   { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2 },
@@ -208,6 +267,35 @@ export const handlers = [
       });
     },
   ),
+
+  // 손해사정사 공개 프로필 조회 (이슈 #32)
+  http.get(`${API_BASE_URL}/adjusters/:adjusterId`, async ({ params }) => {
+    await delay(500);
+
+    const adjusterId =
+      typeof params.adjusterId === "string"
+        ? params.adjusterId
+        : crypto.randomUUID();
+
+    if (adjusterId === ADJUSTER_NOT_FOUND_ID) {
+      return HttpResponse.json(
+        { status: "404", code: "USER_NOT_FOUND", message: "손해사정사를 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    // 응답 adjusterId는 zod uuid 검증을 통과해야 함. 비-uuid 진입은 uuid로 대체.
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adjusterId);
+    const responseAdjusterId = isUuid ? adjusterId : crypto.randomUUID();
+    const withReviews = adjusterId !== ADJUSTER_EMPTY_REVIEWS_ID;
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: buildAdjusterProfile(responseAdjusterId, withReviews),
+    });
+  }),
 
   // 리포트 상세 조회
   // ⚠️ 명세 드리프트: 고객측(issue: CONFIRMED/TRUSTED/INFO)·사정사측(reviewIssues 리치) 동일 URL.
