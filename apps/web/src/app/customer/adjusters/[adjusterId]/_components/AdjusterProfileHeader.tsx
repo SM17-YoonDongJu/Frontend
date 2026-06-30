@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { StarRating } from "@/shared/ui/StarRating";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 
@@ -33,9 +32,7 @@ export function AdjusterProfileHeader({
     <header className="border-b border-line bg-card">
       <div className="mx-auto w-full max-w-[1100px] px-4 py-9">
         <nav className="mb-6 flex items-center gap-1.5 text-xs text-ink-3">
-          <Link href="/customer/proposals" className="transition hover:text-ink">
-            손해사정사
-          </Link>
+          <span>손해사정사</span>
           <span aria-hidden>›</span>
           <span className="text-ink-2">{nickname} 손해사정사</span>
         </nav>
