@@ -1,11 +1,13 @@
 import { delay, http, HttpResponse } from "msw";
 import { API_BASE_URL } from "@/shared/api/config";
 
-// 로드 시점 기준 상대 마감일(ISO date) — 대시보드 "오늘 마감/N일 남음" 검증용
+// 로드 시점 기준 상대 마감일(로컬 달력 날짜) — 대시보드 "오늘 마감/N일 남음" 검증용
 function addDays(base: Date, days: number): string {
   const d = new Date(base);
   d.setDate(d.getDate() + days);
-  return d.toISOString().slice(0, 10);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
 }
 
 // 검수 대기 목 데이터 — 보류 상태 반영 위해 모듈 스코프에 고정(reportId 안정)
@@ -31,7 +33,7 @@ export const handlers = [
 
     if (request.headers.get("x-mock-failure") === "profile") {
       return HttpResponse.json(
-        { status: "500", code: "INTERNAL_ERROR", message: "프로필을 불러오지 못했습니다." },
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "프로필을 불러오지 못했습니다." },
         { status: 500 },
       );
     }
@@ -55,7 +57,7 @@ export const handlers = [
 
     if (request.headers.get("x-mock-failure") === "dashboard") {
       return HttpResponse.json(
-        { status: "500", code: "INTERNAL_ERROR", message: "대시보드를 불러오지 못했습니다." },
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "대시보드를 불러오지 못했습니다." },
         { status: 500 },
       );
     }
@@ -88,7 +90,7 @@ export const handlers = [
 
     if (request.headers.get("x-mock-failure") === "in-progress") {
       return HttpResponse.json(
-        { status: "500", code: "INTERNAL_ERROR", message: "진행 중 사건을 불러오지 못했습니다." },
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "진행 중 사건을 불러오지 못했습니다." },
         { status: 500 },
       );
     }

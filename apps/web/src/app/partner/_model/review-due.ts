@@ -1,17 +1,12 @@
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 function diffInDays(deadlineIso: string, today: Date): number {
-  const deadline = new Date(deadlineIso);
-  const startOfDeadline = Date.UTC(
-    deadline.getFullYear(),
-    deadline.getMonth(),
-    deadline.getDate(),
-  );
-  const startOfToday = Date.UTC(
-    today.getFullYear(),
-    today.getMonth(),
-    today.getDate(),
-  );
+  const parts = deadlineIso.slice(0, 10).split("-");
+  const year = Number(parts[0]);
+  const month = Number(parts[1]);
+  const day = Number(parts[2]);
+  const startOfDeadline = Date.UTC(year, month - 1, day);
+  const startOfToday = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
   return Math.round((startOfDeadline - startOfToday) / MS_PER_DAY);
 }
 
