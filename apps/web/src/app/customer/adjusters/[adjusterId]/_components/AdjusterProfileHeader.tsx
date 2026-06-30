@@ -83,7 +83,7 @@ export function AdjusterProfileHeader({
           </div>
         </div>
 
-        <dl className="mt-8 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:divide-x sm:divide-line">
+        <dl className="mt-8 grid grid-cols-3 divide-x divide-line">
           <Stat
             label="평점"
             value={
@@ -124,9 +124,9 @@ function Stat({
   inset?: boolean;
 }) {
   return (
-    <div className={inset ? "sm:pl-6" : undefined}>
+    <div className={inset ? "pl-3 sm:pl-6" : undefined}>
       <dt className="text-xs text-ink-3">{label}</dt>
-      <dd className="mt-1 text-3xl font-semibold text-ink">{value}</dd>
+      <dd className="mt-1 text-2xl font-semibold text-ink sm:text-3xl">{value}</dd>
       <p className="mt-1 text-xs text-ink-3">{caption}</p>
     </div>
   );
