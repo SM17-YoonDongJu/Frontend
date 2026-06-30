@@ -47,7 +47,7 @@ export function CareerSection({ control, register, errors }: CareerSectionProps)
       <button
         type="button"
         onClick={() => append({ period: "", company: "" })}
-        className="flex w-full items-center justify-center gap-1.5 rounded-input border border-dashed border-line py-3 text-[0.875rem] font-semibold text-ink-2 transition hover:border-gold-2 hover:text-gold-ink"
+        className="flex w-full items-center justify-center gap-1.5 rounded-input border border-dashed border-line bg-paper-2 py-3 text-[0.875rem] font-semibold text-ink-2 transition hover:border-ink/30 hover:bg-paper"
       >
         <span className="text-[1.125rem] leading-none">+</span> 경력 추가
       </button>

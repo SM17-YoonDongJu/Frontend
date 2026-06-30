@@ -90,12 +90,26 @@ export function ProfileEditView() {
     <form onSubmit={onSubmit} className="mx-auto w-full max-w-6xl px-6 py-8">
       <div className="flex items-start justify-between gap-4">
         <div>
+          <nav className="mb-1.5 flex items-center gap-1 text-[0.8125rem] text-ink-3">
+            <span>내 정보</span>
+            <span aria-hidden>›</span>
+            <span className="font-medium text-ink-2">프로필 수정</span>
+          </nav>
           <h1 className="font-serif text-[1.75rem] font-bold text-ink">프로필 수정</h1>
           <p className="mt-1.5 text-[0.875rem] text-ink-3">
             고객에게 보이는 공개 프로필이에요. 저장하면 바로 반영돼요.
           </p>
         </div>
-        <Button type="submit" loading={isSubmitting} disabled={isSaveDisabled}>
+        <Button
+          type="submit"
+          loading={isSubmitting}
+          disabled={isSaveDisabled}
+          icon={
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden>
+              <path d="m5 13 4 4L19 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          }
+        >
           저장하기
         </Button>
       </div>

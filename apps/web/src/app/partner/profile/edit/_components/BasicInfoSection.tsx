@@ -49,11 +49,6 @@ export function BasicInfoSection({
     <section className="space-y-5 rounded-card-lg border border-line bg-card p-6">
       <h2 className="font-serif text-[1.125rem] font-bold text-ink">기본 정보</h2>
 
-      <div className="flex flex-col gap-1">
-        <span className="text-[0.8125rem] font-semibold text-ink-2">활동명</span>
-        <p className="text-[0.9375rem] font-semibold text-ink">{nickname}</p>
-      </div>
-
       <Controller
         control={control}
         name="avatarUrl"
