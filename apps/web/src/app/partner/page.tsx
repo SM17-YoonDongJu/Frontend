@@ -13,7 +13,7 @@ export default function PartnerDashboardPage() {
         <SummaryCardsBoundary />
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 items-start gap-6 md:grid-cols-3">
         <div className="space-y-6 md:col-span-2">
           <PendingReviewBoundary />
           <InProgressBoundary />

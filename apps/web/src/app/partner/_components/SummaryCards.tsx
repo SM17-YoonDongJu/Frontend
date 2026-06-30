@@ -2,8 +2,9 @@
 
 import type { ReactNode } from "react";
 import { FileText } from "@/shared/ui/icons/FileText";
-import { TrendingUp } from "@/shared/ui/icons/TrendingUp";
-import { Scale } from "@/shared/ui/icons/Scale";
+import { Pencil } from "@/shared/ui/icons/Pencil";
+import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
+import { Star } from "@/shared/ui/icons/Star";
 import { useDashboard } from "../_api/use-dashboard";
 
 interface SummaryCard {
@@ -25,21 +26,22 @@ export function SummaryCards() {
       hint: summary.pendingNewCount > 0 ? `신규 ${summary.pendingNewCount}건` : undefined,
     },
     {
-      icon: <Scale className="text-base" />,
+      icon: <Pencil />,
       label: "진행 중",
       value: `${summary.inProgressCount}건`,
+      hint: "검수·상담 대기",
     },
     {
-      icon: <TrendingUp />,
+      icon: <CheckCircle />,
       label: "이번 달 완료",
       value: `${summary.monthlyCompletedCount}건`,
       hint: `누적 ${summary.totalCompletedCount.toLocaleString("ko-KR")}건`,
     },
     {
-      icon: <TrendingUp />,
+      icon: <Star />,
       label: "고객 평점",
       value: summary.averageRating.toFixed(1),
-      hint: `후기 ${summary.reviewCount}개`,
+      hint: `후기 ${summary.reviewCount}건`,
     },
   ];
 
@@ -47,12 +49,14 @@ export function SummaryCards() {
     <>
       {cards.map((card) => (
         <div key={card.label} className="rounded-card-lg border border-line bg-card p-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-chip bg-gold-soft text-gold-ink">
-            {card.icon}
-          </span>
-          <p className="mt-3 text-[13px] text-ink-3">{card.label}</p>
-          <p className="mt-1 font-serif text-2xl font-bold tabular-nums text-ink">{card.value}</p>
-          {card.hint && <p className="mt-0.5 text-[12px] text-gold-ink">{card.hint}</p>}
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-8 w-8 items-center justify-center rounded-chip bg-gold-soft text-[16px] text-gold-ink">
+              {card.icon}
+            </span>
+            <p className="text-[13px] text-ink-3">{card.label}</p>
+          </div>
+          <p className="mt-4 font-serif text-[28px] font-bold tabular-nums text-ink">{card.value}</p>
+          {card.hint && <p className="mt-1 text-[12px] text-ink-3">{card.hint}</p>}
         </div>
       ))}
     </>
