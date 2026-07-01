@@ -10,6 +10,64 @@ function addDays(base: Date, days: number): string {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
+// 손해사정사 프로필 목 데이터 — 진입 adjusterId를 그대로 반영해 응답.
+// 빈 후기·404 검증용 고정 id 분기.
+const ADJUSTER_EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
+const ADJUSTER_NOT_FOUND_ID = "99999999-9999-4999-8999-999999999999";
+
+function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
+  return {
+    adjusterId,
+    nickname: "김도현",
+    avatarUrl: null,
+    headline: "장해등급 재산정 전문 · 근거 중심 검토",
+    activityRegion: "서울 · 경기",
+    introduction:
+      "후유장해 등급 산정과 교통사고 보상을 12년간 다뤄온 독립 손해사정사입니다. 진단 검사 결과를 장해분류표에 정확히 매핑하고, 약관·특약·판례를 근거로 적정 보상 범위를 제시합니다. 의뢰인이 이해할 수 있도록 모든 판단의 근거를 함께 설명드립니다.",
+    specialties: ["후유장해", "교통사고", "장해등급 재산정"],
+    careers: [
+      { period: "2018 – 현재", company: "독립 손해사정 법인 · 대표 사정사" },
+      { period: "2014 – 2018", company: "대형 손해보험사 보상 심사팀" },
+      { period: "2013", company: "손해사정사 자격 취득 (제0000호)" },
+    ],
+    career: 12,
+    averageRating: withReviews ? 4.9 : 0,
+    reviewCount: withReviews ? 86 : 0,
+    recentReviews: withReviews
+      ? [
+          {
+            nickname: "윤O서",
+            score: 5,
+            item: "교통사고 · 후유장해",
+            reviewedAt: "2026-05-12T00:00:00Z",
+            content:
+              "장해등급 재산정으로 처음 제안보다 크게 증액됐어요. 근거를 약관·판례로 짚어주셔서 믿음이 갔습니다.",
+          },
+          {
+            nickname: "이O준",
+            score: 5,
+            item: "실손 의료비",
+            reviewedAt: "2026-04-03T00:00:00Z",
+            content:
+              "복잡한 특약 누락을 찾아주셨고 진행 상황을 매번 설명해 주셨습니다.",
+          },
+        ]
+      : [],
+    completedConsultCount: 240,
+    handledCaseCount: 510,
+    verified: true,
+    consultGuide: {
+      method: "비대면 · 방문",
+      initialConsult: "무료 (리포트 기반)",
+      feeBasis: "성공보수 협의",
+    },
+    certification: {
+      registrationNo: "제0000호",
+      verifiedAt: "2026-01-01T00:00:00Z",
+    },
+  };
+}
+
 // 검수 대기 목 데이터 — 보류 상태 반영 위해 모듈 스코프에 고정(reportId 안정)
 const PENDING_REVIEWS = [
   { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", matchingScore: 96, claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2, reviewDeadline: addDays(new Date(), 0) },
@@ -23,6 +81,11 @@ const heldReportIds = new Set<string>();
 
 // 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
 const rejectedProposals = new Set<string>();
+
+// 고객 대시보드 — 받은 제안이 연결된 리포트(①)의 안정 uuid.
+export const DASHBOARD_PROPOSABLE_REPORT_ID =
+  "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const DASHBOARD_AWAITING_REPORT_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
@@ -117,6 +180,73 @@ export const handlers = [
             progress: 100,
           },
         ],
+      },
+    });
+  }),
+
+  // 본인 정보 조회 (고객 대시보드 인사말)
+  http.get(`${API_BASE_URL}/users/me`, async () => {
+    await delay(300);
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        userId: 1024,
+        nickname: "윤서",
+        email: "yunseo@example.com",
+        userType: "insured_person",
+        createdAt: "2024-03-02T09:00:00Z",
+      },
+    });
+  }),
+
+  // 고객 리포트 목록 (대시보드) — :reportId·pending-review와 충돌 없게 정확 경로.
+  // §9 드리프트 필드 선반영(reportNo·claimedMin/Max·proposalCount·reviewedAt·adjusterNickname).
+  http.get(`${API_BASE_URL}/reports`, async ({ request }) => {
+    await delay(400);
+
+    const url = new URL(request.url, "http://localhost");
+    const page = Number(url.searchParams.get("page") ?? "0");
+
+    const list = [
+      {
+        reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
+        status: "MATCHED",
+        accidentType: "교통사고",
+        createdAt: "2026-05-20T09:00:00Z",
+        reportNo: "20260520-017",
+        claimedMinAmount: 14_000_000,
+        claimedMaxAmount: 17_500_000,
+        proposalCount: 2,
+        reviewedAt: "2026-05-22T10:14:00Z",
+        adjusterNickname: "김도현",
+      },
+      {
+        reportId: DASHBOARD_AWAITING_REPORT_ID,
+        status: "AWAITING_INSPECTION",
+        accidentType: "실손",
+        createdAt: "2026-05-12T09:00:00Z",
+        reportNo: "20260512-009",
+        claimedMinAmount: 3_200_000,
+        claimedMaxAmount: 4_800_000,
+        proposalCount: 0,
+        reviewedAt: null,
+        adjusterNickname: null,
+      },
+    ];
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list,
+        pagination: {
+          page,
+          size: 10,
+          totalElements: list.length,
+          totalPages: 1,
+          hasNext: false,
+        },
       },
     });
   }),
@@ -312,6 +442,35 @@ export const handlers = [
     },
   ),
 
+  // 손해사정사 공개 프로필 조회 (이슈 #32)
+  http.get(`${API_BASE_URL}/adjusters/:adjusterId`, async ({ params }) => {
+    await delay(500);
+
+    const adjusterId =
+      typeof params.adjusterId === "string"
+        ? params.adjusterId
+        : crypto.randomUUID();
+
+    if (adjusterId === ADJUSTER_NOT_FOUND_ID) {
+      return HttpResponse.json(
+        { status: "404", code: "USER_NOT_FOUND", message: "손해사정사를 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    // 응답 adjusterId는 zod uuid 검증을 통과해야 함. 비-uuid 진입은 uuid로 대체.
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(adjusterId);
+    const responseAdjusterId = isUuid ? adjusterId : crypto.randomUUID();
+    const withReviews = adjusterId !== ADJUSTER_EMPTY_REVIEWS_ID;
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: buildAdjusterProfile(responseAdjusterId, withReviews),
+    });
+  }),
+
   // 리포트 상세 조회
   // ⚠️ 명세 드리프트: 고객측(issue: CONFIRMED/TRUSTED/INFO)·사정사측(reviewIssues 리치) 동일 URL.
   //   양측 스키마가 unknown 키를 strip하므로 superset 응답으로 둘 다 통과시킴.
@@ -323,13 +482,8 @@ export const handlers = [
         ? params.reportId
         : crypto.randomUUID();
 
-    // 같은 URL을 고객 리포트 상세와 사정사 검수가 공유.
-    // 고객(test-id-123)은 매칭완료·확정 보상범위·사정사 코멘트가 필요하고,
-    // 사정사 검수(uuid 진입)는 검수대기·미작성 상태가 필요 → 충돌 필드만 분기.
     const isCustomerSample = reportId === "test-id-123";
 
-    // 응답 reportId는 zod uuid 검증을 통과해야 함. uuid 진입(사정사)은 그대로,
-    // 그 외(고객 샘플 등 비-uuid)는 uuid 생성으로 대체.
     const isUuid =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reportId);
     const responseReportId = isUuid ? reportId : crypto.randomUUID();
@@ -352,7 +506,6 @@ export const handlers = [
           "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
           "대법원 2019다○○○○ (후유장해 인과관계 판단)",
         ],
-        // 고객측 호환 필드(superset)
         issue: [
           {
             title: "외모추상 특약 누락",
@@ -382,7 +535,6 @@ export const handlers = [
         reviewedAt: isCustomerSample ? "2026.05.22" : null,
         adjuster: { nickname: "정우성", career: "12년 경력 손해사정사" },
 
-        // 사정사 검수 확장 필드(MSW 전용)
         caseId: "20260531-042",
         accidentDate: "2026.05.01",
         insuranceName: "OO손해보험 · 행복드림",

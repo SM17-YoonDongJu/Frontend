@@ -1,4 +1,4 @@
-import type { Proposal } from "../_model/proposal.schema";
+import type { Proposal } from "../../../_shared/model/proposal.schema";
 import { ProposalCard } from "./ProposalCard";
 
 interface ProposalListProps {
