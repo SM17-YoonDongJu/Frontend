@@ -151,6 +151,7 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 7. ~~검수 보류 엔드포인트 미정~~ **해소**: `PATCH /reports/{reportId}/hold`(body 없음, 사정사별 토글) → `{ reportId, held }` 명세 반영.
 8. ~~거절 API 결함~~ **해소(#24)**: 사정사별 `PATCH /reports/{reportId}/proposals/{adjusterId}/reject`(body 없음) → `{reportId, adjusterId, rejected}` 명세 반영. 거절 시 목록 제외.
 9. **검수 상세(파트너) 응답 확장 미정:** `GET /reports/{id}`에 `client`(의뢰인)·`attachments`·리치 `reviewIssues`·`hospitalizations` 등 명세 미존재. FE `review-detail`은 이를 요구하므로 백엔드 GET 확장 확정 전까지 MSW superset로 유지. (이슈 #24 `client`·`claimed*` 보류 항목과 동근)
+10. **고객 대시보드 목록 필드 부족(이슈 #28):** `GET /reports?status&page` 목록 `list[]`는 `reportId·status·accidentType·createdAt` 4필드뿐인데 메인홈 대시보드 카드/알림은 더 요구. FE 임시 추가(MSW 목킹): `reportNo`(표시번호 YYYYMMDD-NNN) · `claimedMinAmount`/`claimedMaxAmount`(예상 보상범위) · `proposalCount`(제안 건수) · `reviewedAt`(검수완료 일시·nullable) · `adjusterNickname`(검수 사정사명·nullable). 인사말은 `GET /users/me`. Notion `GET /reports` 페이지에 🏷확인필요(FE) 표기로 반영 → 백엔드 list 응답 확장 요청 필요.
 
 ## 8. 손해사정사 검수 화면 (#10 adjusterReview) — 사용자 확정 (2026-06-22)
 

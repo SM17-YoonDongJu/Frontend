@@ -5,7 +5,7 @@ import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/Button";
 import { useRejectProposal } from "../_api/use-reject-proposal";
 import { useViewedProposals } from "../_hooks/use-viewed-proposals";
-import type { Proposal } from "../_model/proposal.schema";
+import type { Proposal } from "../../../_shared/model/proposal.schema";
 
 interface ProposalCardProps {
   reportId: string;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useProposalList } from "../_api/use-proposal-list";
+import { useProposalList } from "../../../_shared/api/use-proposal-list";
 import { AnalysisTargetCard } from "./AnalysisTargetCard";
 import { ProposalList } from "./ProposalList";
 
