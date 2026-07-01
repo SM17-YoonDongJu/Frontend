@@ -31,7 +31,7 @@ export const inProgressCaseSchema = z.object({
   caseId: z.string(),
   description: z.string(),
   status: inProgressStatusSchema,
-  progress: z.number().int(),
+  progress: z.number().int().min(0).max(100),
 });
 
 export const inProgressListSchema = z.object({

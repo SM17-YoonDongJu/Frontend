@@ -101,7 +101,7 @@ export const handlers = [
       data: {
         list: [
           {
-            reportId: crypto.randomUUID(),
+            reportId: "c1000000-0000-4000-8000-000000000022",
             accidentType: "후유장해",
             caseId: "20260528-022",
             description: "장해등급 재산정 의견 작성 중",
@@ -109,7 +109,7 @@ export const handlers = [
             progress: 65,
           },
           {
-            reportId: crypto.randomUUID(),
+            reportId: "c1000000-0000-4000-8000-000000000019",
             accidentType: "교통사고",
             caseId: "20260527-019",
             description: "검수 완료 · 고객 상담 대기",

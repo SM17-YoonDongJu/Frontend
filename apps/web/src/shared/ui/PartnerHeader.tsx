@@ -5,11 +5,12 @@ import { Scale } from "@/shared/ui/icons/Scale";
 import { Bell } from "@/shared/ui/icons/Bell";
 import { useProfile } from "@/app/partner/_api/use-profile";
 
+// href: null → 준비 중(미구현) 탭. 링크 대신 비활성 표시로 렌더.
 const NAV_ITEMS = [
-  { label: "홈", href: "/partner" },
+  { label: "홈", href: "/partner", showCount: false },
   { label: "검수 대기", href: "/partner/review", showCount: true },
-  { label: "진행 중", href: "#" },
-  { label: "완료", href: "#" },
+  { label: "진행 중", href: null, showCount: false },
+  { label: "완료", href: null, showCount: false },
 ] as const;
 
 export function PartnerHeader() {
@@ -29,20 +30,37 @@ export function PartnerHeader() {
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
-            {NAV_ITEMS.map((item) => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className="flex items-center gap-1.5 text-sm text-ink-2 transition hover:text-ink"
-              >
-                {item.label}
-                {"showCount" in item && pendingCount != null && pendingCount > 0 && (
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1.5 text-xs font-semibold text-white">
-                    {pendingCount}
+            {NAV_ITEMS.map((item) => {
+              const badge = item.showCount && pendingCount != null && pendingCount > 0 && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1.5 text-xs font-semibold text-white">
+                  {pendingCount}
+                </span>
+              );
+
+              if (item.href === null) {
+                return (
+                  <span
+                    key={item.label}
+                    aria-disabled
+                    title="준비 중"
+                    className="flex cursor-default items-center gap-1.5 text-sm text-ink-3"
+                  >
+                    {item.label}
                   </span>
-                )}
-              </Link>
-            ))}
+                );
+              }
+
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="flex items-center gap-1.5 text-sm text-ink-2 transition hover:text-ink"
+                >
+                  {item.label}
+                  {badge}
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
