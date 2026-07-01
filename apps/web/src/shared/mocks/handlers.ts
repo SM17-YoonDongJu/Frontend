@@ -1,6 +1,15 @@
 import { delay, http, HttpResponse } from "msw";
 import { API_BASE_URL } from "@/shared/api/config";
 
+// 로드 시점 기준 상대 마감일(로컬 달력 날짜) — 대시보드 "오늘 마감/N일 남음" 검증용
+function addDays(base: Date, days: number): string {
+  const d = new Date(base);
+  d.setDate(d.getDate() + days);
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
 // 손해사정사 프로필 목 데이터 — 진입 adjusterId를 그대로 반영해 응답.
 // 빈 후기·404 검증용 고정 id 분기.
 const ADJUSTER_EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
@@ -59,14 +68,13 @@ function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
   };
 }
 
-
 // 검수 대기 목 데이터 — 보류 상태 반영 위해 모듈 스코프에 고정(reportId 안정)
 const PENDING_REVIEWS = [
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2 },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z", caseId: "20260619-041", title: "다발성 늑골 골절 · 일실수입 과소 산정 의심", region: "경기 성남", claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3 },
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "20260618-030", title: "요추 추간판탈출 · 외모추상 특약 청구 누락", region: "서울 송파", claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2 },
-  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "20260618-019", title: "비급여 도수치료 · 통원 한도 적용 분쟁", region: "인천 연수", claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1 },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z", caseId: "20260517-007", title: "경추 염좌 · 향후 치료비 미반영", region: "경기 수원", claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 1_800_000, issueCount: 1 },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", matchingScore: 96, claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2, reviewDeadline: addDays(new Date(), 0) },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z", caseId: "20260619-041", title: "다발성 늑골 골절 · 일실수입 과소 산정 의심", region: "경기 성남", matchingScore: 91, claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3, reviewDeadline: addDays(new Date(), 1) },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "20260618-030", title: "요추 추간판탈출 · 외모추상 특약 청구 누락", region: "서울 송파", matchingScore: 88, claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2, reviewDeadline: addDays(new Date(), 3) },
+  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "20260618-019", title: "비급여 도수치료 · 통원 한도 적용 분쟁", region: "인천 연수", matchingScore: 74, claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1, reviewDeadline: addDays(new Date(), 2) },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z", caseId: "20260517-007", title: "경추 염좌 · 향후 치료비 미반영", region: "경기 수원", matchingScore: 82, claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 1_800_000, issueCount: 1, reviewDeadline: addDays(new Date(), 5) },
 ];
 
 const heldReportIds = new Set<string>();
@@ -81,6 +89,100 @@ const DASHBOARD_AWAITING_REPORT_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
+
+  // 본인 손해사정사 프로필 (대시보드 헤더·인사말) — ⚠️ API 명세 미정(드리프트), MSW 선구현
+  http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-failure") === "profile") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "프로필을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        adjusterId: "11111111-1111-4111-8111-111111111111",
+        nickname: "김도현",
+        averageRating: 4.9,
+        reviewCount: 86,
+        pendingReviewCount: 5,
+      },
+    });
+  }),
+
+  // 손해사정사 대시보드 요약·활동통계 (#30) — ⚠️ API 명세 미정(드리프트), MSW 선구현
+  http.get(`${API_BASE_URL}/adjusters/me/dashboard`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "dashboard") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "대시보드를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        summary: {
+          pendingCount: 5,
+          pendingNewCount: 2,
+          inProgressCount: 2,
+          monthlyCompletedCount: 14,
+          totalCompletedCount: 240,
+          averageRating: 4.9,
+          reviewCount: 86,
+        },
+        activity: {
+          completedCount: 14,
+          consultConvertedCount: 9,
+          averageRating: 4.9,
+        },
+      },
+    });
+  }),
+
+  // 진행 중 사건 (#30) — ⚠️ API 명세 미정(드리프트), MSW 선구현
+  http.get(`${API_BASE_URL}/adjusters/me/in-progress`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "in-progress") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "진행 중 사건을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list: [
+          {
+            reportId: "c1000000-0000-4000-8000-000000000022",
+            accidentType: "후유장해",
+            caseId: "20260528-022",
+            description: "장해등급 재산정 의견 작성 중",
+            status: "REVIEWING",
+            progress: 65,
+          },
+          {
+            reportId: "c1000000-0000-4000-8000-000000000019",
+            accidentType: "교통사고",
+            caseId: "20260527-019",
+            description: "검수 완료 · 고객 상담 대기",
+            status: "CUSTOMER_REVIEW",
+            progress: 100,
+          },
+        ],
+      },
+    });
+  }),
 
   // 본인 정보 조회 (고객 대시보드 인사말)
   http.get(`${API_BASE_URL}/users/me`, async () => {
@@ -380,13 +482,8 @@ export const handlers = [
         ? params.reportId
         : crypto.randomUUID();
 
-    // 같은 URL을 고객 리포트 상세와 사정사 검수가 공유.
-    // 고객(test-id-123)은 매칭완료·확정 보상범위·사정사 코멘트가 필요하고,
-    // 사정사 검수(uuid 진입)는 검수대기·미작성 상태가 필요 → 충돌 필드만 분기.
     const isCustomerSample = reportId === "test-id-123";
 
-    // 응답 reportId는 zod uuid 검증을 통과해야 함. uuid 진입(사정사)은 그대로,
-    // 그 외(고객 샘플 등 비-uuid)는 uuid 생성으로 대체.
     const isUuid =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reportId);
     const responseReportId = isUuid ? reportId : crypto.randomUUID();
@@ -409,7 +506,6 @@ export const handlers = [
           "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
           "대법원 2019다○○○○ (후유장해 인과관계 판단)",
         ],
-        // 고객측 호환 필드(superset)
         issue: [
           {
             title: "외모추상 특약 누락",
@@ -439,7 +535,6 @@ export const handlers = [
         reviewedAt: isCustomerSample ? "2026.05.22" : null,
         adjuster: { nickname: "정우성", career: "12년 경력 손해사정사" },
 
-        // 사정사 검수 확장 필드(MSW 전용)
         caseId: "20260531-042",
         accidentDate: "2026.05.01",
         insuranceName: "OO손해보험 · 행복드림",

@@ -33,5 +33,8 @@ export const reviewKeys = createQueryKeys("review", {
 });
 
 export const adjusterKeys = createQueryKeys("adjuster", {
+  meProfile: () => ["me", "profile"],
+  dashboard: () => ["dashboard"],
+  inProgress: () => ["in-progress"],
   detail: (adjusterId: string) => [adjusterId],
 });

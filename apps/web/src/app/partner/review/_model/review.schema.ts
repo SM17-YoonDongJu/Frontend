@@ -9,18 +9,21 @@ export const reviewListItemSchema = z.object({
   accidentType: z.string(),
   status: reviewStatusSchema,
   createdAt: z.string(),
-  // 디자인용 카드 확장 필드 — 명세 list 응답에 없음(백엔드 확정 전까지 optional).
-  caseId: z.string().optional(),
-  title: z.string().optional(),
-  region: z.string().optional(),
-  claimedMinAmount: z.number().int().optional(),
-  claimedMaxAmount: z.number().int().optional(),
-  offerHeadroom: z.number().int().optional(),
-  issueCount: z.number().int().optional(),
-  held: z.boolean().optional(),
+  // ⚠️ API 명세 미정(드리프트) — 디자인 요구 카드 필드. 백엔드에 list 확장 요청.
+  caseId: z.string(),
+  title: z.string(),
+  region: z.string(),
+  matchingScore: z.number().int(),
+  claimedMinAmount: z.number().int(),
+  claimedMaxAmount: z.number().int(),
+  offerHeadroom: z.number().int(),
+  issueCount: z.number().int(),
+  held: z.boolean(),
+  // ⚠️ API 명세 미정(드리프트) — 대시보드 검수 마감일(ISO date). 백엔드 list 확장 요청.
+  reviewDeadline: z.string(),
 });
 
-/** 보류 처리 응답(사정사별 토글). */
+/** 보류 처리 응답. ⚠️ API 명세 미정(드리프트) — 목업. */
 export const holdReviewSchema = z.object({
   reportId: z.uuid(),
   held: z.boolean(),
@@ -39,7 +42,7 @@ export const reviewListSchema = z.object({
   pagination: paginationSchema,
 });
 
-/** 검수 현황 요약(집계 카드). */
+/** 검수 현황 요약. ⚠️ API 명세 미정(드리프트) — 목업 사용, 백엔드 확인 필요. */
 export const reviewSummarySchema = z.object({
   pendingCount: z.number().int(),
   specialtyMatchCount: z.number().int(),
