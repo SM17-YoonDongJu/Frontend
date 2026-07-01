@@ -23,8 +23,9 @@ content="$(cat "$norm")"
 # 길이 유틸 프리픽스에 붙은 [Npx] 추출(선행 구분자 필요 → 부분일치 회피)
 prefixes='text|leading|tracking|w|h|min-w|max-w|min-h|max-h|size|basis|p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|gap-x|gap-y|top|right|bottom|left|inset|space-x|space-y'
 
+# 선행 경계에 콜론(`:`) 포함 → variant 스코프(hover:/sm:/dark: 등) 클래스도 탐지
 mapfile -t hits < <(printf '%s' "$content" \
-  | grep -oE "(^|[[:space:]\"'\`(])(${prefixes})-\[[0-9]+(\.[0-9]+)?px\]" \
+  | grep -oE "(^|[[:space:]\"'\`(:])(${prefixes})-\[[0-9]+(\.[0-9]+)?px\]" \
   | grep -oE "(${prefixes})-\[[0-9]+(\.[0-9]+)?px\]" \
   | grep -vE '\[1px\]$' \
   | sort -u || true)

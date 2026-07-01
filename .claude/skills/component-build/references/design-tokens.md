@@ -58,7 +58,7 @@ Tailwind v4 주력. 토큰은 `apps/web/src/app/globals.css`의 `@theme`에 정�
 **폰트 크기·간격·너비 등 모든 길이값은 rem(16px=1rem).** Figma가 px로 줘도 변환해 쓴다. Figma 변환 작업이 아니어도 이 규칙은 항상 적용한다.
 
 - 우선순위: **Tailwind 스케일 유틸**(`text-sm`·`gap-2`·`p-4`·`py-3.5`) > **rem 임의값**(`text-[0.8125rem]`) > ~~`[Npx]` 임의값~~(금지).
-- **예외는 1px 보더뿐**(`border`·`border-b` 등). 그 외 `[Npx]`는 쓰지 않는다.
+- **예외는 1px(보더·헤어라인 `[1px]`)뿐** — `border`·`border-b` 및 `h-[1px]`/`w-[1px]` 구분선. `border`/`ring`/`outline`/`divide` 계열 폭은 애초에 검사 대상 아님. 그 외 `[Npx]`는 쓰지 않는다.
 - 변환: px÷16=rem. 예 `13px→text-[0.8125rem]`, `28px→text-[1.75rem]`, `20px→text-[1.25rem]`.
 - 상세·전체 변환표는 `figma-design-convert/references/figma-mapping.md §4`.
 - ⚠️ 기존 레포에 `[Npx]`가 다수 남아 있어도(드리프트) 따라 하지 말 것. 새 코드는 rem으로.
