@@ -30,13 +30,13 @@ export function ReportCard({ report }: { report: ReportListItem }) {
     <article className="rounded-card border border-line bg-card p-[1.3125rem] shadow-[0px_1px_1px_rgba(21,32,46,0.03)]">
       <div className="flex items-center gap-2">
         <span
-          className={`rounded-pill px-2.5 py-[3px] text-[12.5px] font-semibold ${tone.bg} ${tone.text}`}
+          className={`rounded-pill px-2.5 py-[0.1875rem] text-[0.78125rem] font-semibold ${tone.bg} ${tone.text}`}
         >
           {accidentType}
         </span>
-        <span className="text-[12px] text-ink-3">No.{reportNo}</span>
+        <span className="text-[0.75rem] text-ink-3">No.{reportNo}</span>
         <span
-          className={`ml-auto flex items-center gap-[5px] text-[12px] font-semibold ${meta.className}`}
+          className={`ml-auto flex items-center gap-[0.3125rem] text-[0.75rem] font-semibold ${meta.className}`}
         >
           {meta.showCheck && <Check className="text-[0.8125rem]" />}
           {meta.label}
@@ -45,17 +45,17 @@ export function ReportCard({ report }: { report: ReportListItem }) {
 
       <div className="mt-[0.875rem] flex items-end justify-between">
         <div>
-          <p className="text-[11.5px] text-ink-3">예상 보상 범위</p>
-          <p className="mt-[3px] text-ink">
+          <p className="text-[0.71875rem] text-ink-3">예상 보상 범위</p>
+          <p className="mt-[0.1875rem] text-ink">
             <span className="font-serif text-[1.375rem]">
               {toManwon(claimedMinAmount)} – {toManwon(claimedMaxAmount)}
             </span>
-            <span className="ml-1 text-[13px] font-bold">만원</span>
+            <span className="ml-1 text-[0.8125rem] font-bold">만원</span>
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-[12.5px] text-ink-3">제안 {proposalCount}건</span>
+          <span className="text-[0.78125rem] text-ink-3">제안 {proposalCount}건</span>
           <Link
             href={DASHBOARD_LINKS.report(reportId)}
             className={buttonVariants({ variant: "outline", size: "sm" })}

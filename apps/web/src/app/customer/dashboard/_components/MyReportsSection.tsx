@@ -16,10 +16,10 @@ export function MyReportsSection() {
   return (
     <section>
       <header className="mb-4 flex items-center justify-between">
-        <h2 className="text-[18px] font-bold text-ink">내 분석 리포트</h2>
+        <h2 className="text-[1.125rem] font-bold text-ink">내 분석 리포트</h2>
         <Link
           href={DASHBOARD_LINKS.allReports}
-          className="flex items-center gap-[5px] text-[13.5px] font-semibold text-ink-2 transition hover:text-ink"
+          className="flex items-center gap-[0.3125rem] text-[0.84375rem] font-semibold text-ink-2 transition hover:text-ink"
         >
           전체 보기
           <ChevronRight className="text-[0.9375rem]" />

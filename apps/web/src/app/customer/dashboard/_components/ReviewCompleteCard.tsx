@@ -49,16 +49,16 @@ export function ReviewCompleteCard() {
               {(report.adjusterNickname ?? "담").trim().charAt(0)}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[14px] font-bold text-ink">
+              <p className="text-[0.875rem] font-bold text-ink">
                 {report.adjusterNickname ?? "담당"} 손해사정사님이
               </p>
-              <p className="text-[13px] text-ink-2">검수해주셨어요</p>
+              <p className="text-[0.8125rem] text-ink-2">검수해주셨어요</p>
             </div>
           </div>
           <button
             type="button"
             onClick={() => openReview(report.reportId)}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-button bg-ink py-[0.8125rem] text-[15px] font-semibold text-white transition hover:brightness-110"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-button bg-ink py-[0.8125rem] text-[0.9375rem] font-semibold text-white transition hover:brightness-110"
           >
             검수 리포트 확인
             <ArrowRight className="text-[1.0625rem]" />
@@ -71,7 +71,7 @@ export function ReviewCompleteCard() {
 
 function CardHeader() {
   return (
-    <h2 className="flex items-center gap-[9px] text-[15.5px] font-bold text-ink">
+    <h2 className="flex items-center gap-[0.5625rem] text-[0.96875rem] font-bold text-ink">
       <ShieldCheck className="text-[1.125rem] text-gold" />
       검수 완료 알림
     </h2>

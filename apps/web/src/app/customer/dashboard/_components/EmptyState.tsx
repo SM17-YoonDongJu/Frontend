@@ -12,7 +12,7 @@ export function EmptyState({ icon, message, cta }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center rounded-card border border-dashed border-line bg-paper-2 px-6 py-10 text-center">
       {icon && <div className="mb-2 text-ink-3">{icon}</div>}
-      <p className="text-[14px] text-ink-2">{message}</p>
+      <p className="text-[0.875rem] text-ink-2">{message}</p>
       {cta && (
         <Link
           href={cta.href}

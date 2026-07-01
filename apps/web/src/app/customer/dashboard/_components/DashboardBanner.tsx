@@ -39,7 +39,7 @@ export function DashboardBanner() {
 
       <div className="relative flex flex-wrap items-center justify-between gap-6">
         <div>
-          <p className="text-[13.5px] font-semibold text-gold-2">
+          <p className="text-[0.84375rem] font-semibold text-gold-2">
             {me.nickname} 님, 안녕하세요
           </p>
           <h1 className="mt-2 font-serif text-[2rem] font-bold leading-[2.6rem] text-white">
@@ -47,7 +47,7 @@ export function DashboardBanner() {
             <br />
             적정한지 분석해보세요
           </h1>
-          <p className="mt-2 max-w-[27.5rem] text-[14.5px] leading-[1.45rem] text-white/65">
+          <p className="mt-2 max-w-[27.5rem] text-[0.90625rem] leading-[1.45rem] text-white/65">
             약관·특약·판례를 분석해 예상 보상 범위와 쟁점을 리포트로 정리하고, 검증된
             손해사정사가 검수합니다.
           </p>
@@ -85,7 +85,7 @@ function BannerStat({
       >
         {value}
       </dd>
-      <dt className="mt-2 text-[11.5px] text-white/55">{label}</dt>
+      <dt className="mt-2 text-[0.71875rem] text-white/55">{label}</dt>
     </div>
   );
 }

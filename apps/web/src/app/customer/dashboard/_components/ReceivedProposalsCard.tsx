@@ -51,11 +51,11 @@ function ProposalsPreview({ reportId, count }: { reportId: string; count: number
               {proposal.nickname.trim().charAt(0)}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-[13.5px] font-bold text-ink">
+              <p className="truncate text-[0.84375rem] font-bold text-ink">
                 {proposal.nickname} 사정사
               </p>
               {proposal.speciality && (
-                <p className="truncate text-[11.5px] text-ink-3">{proposal.speciality}</p>
+                <p className="truncate text-[0.71875rem] text-ink-3">{proposal.speciality}</p>
               )}
             </div>
             <ChevronRight className="shrink-0 text-[0.9375rem] text-ink-3" />
@@ -69,9 +69,9 @@ function ProposalsPreview({ reportId, count }: { reportId: string; count: number
 function Header({ count }: { count: number }) {
   return (
     <div className="flex items-center justify-between">
-      <h2 className="text-[15.5px] font-bold text-ink">받은 제안</h2>
+      <h2 className="text-[0.96875rem] font-bold text-ink">받은 제안</h2>
       {count > 0 && (
-        <span className="rounded-full bg-terra px-[9px] py-0.5 text-[11.5px] font-bold text-white">
+        <span className="rounded-full bg-terra px-[0.5625rem] py-0.5 text-[0.71875rem] font-bold text-white">
           {count}
         </span>
       )}
