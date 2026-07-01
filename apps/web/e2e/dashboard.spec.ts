@@ -17,9 +17,13 @@ test("진입하면 인사말·진행현황·리포트·검수완료·받은제�
   await page.goto(PATH);
 
   // 배너 인사말(GET /users/me → nickname 윤서)
-  await expect(page.getByText("윤서 님, 안녕하세요")).toBeVisible();
+  const banner = page.locator("section").filter({ hasText: "님, 안녕하세요" });
+  await expect(banner.getByText("윤서 님, 안녕하세요")).toBeVisible();
 
-  // 진행 현황 통계(진행 중 1건: AWAITING_INSPECTION / 받은 제안 합계 2)
+  // 진행 현황 통계 — 진행 중 1건(AWAITING_INSPECTION) / 받은 제안 합계 2
+  await expect(banner.getByText("진행 중").locator("..")).toContainText("1");
+  await expect(banner.getByText("받은 제안").locator("..")).toContainText("2");
+
   await expect(page.getByRole("heading", { name: "내 분석 리포트" })).toBeVisible();
 
   // 내 리포트 카드(reportNo) — AWAITING 리포트는 이 섹션에만 노출
@@ -40,11 +44,9 @@ test("진입하면 인사말·진행현황·리포트·검수완료·받은제�
 test("새 분석 시작을 누르면 분석 신청 페이지로 이동한다", async ({ page }) => {
   await page.goto(PATH);
 
-  await expect(async () => {
-    await page
-      .getByRole("link", { name: /새 분석 시작/ })
-      .first()
-      .click();
-    await expect(page).toHaveURL(/\/customer\/adjust-request/);
-  }).toPass({ timeout: 10000 });
+  await page
+    .getByRole("link", { name: /새 분석 시작/ })
+    .first()
+    .click();
+  await expect(page).toHaveURL(/\/customer\/adjust-request/, { timeout: 10000 });
 });
