@@ -1,9 +1,17 @@
 import Link from "next/link";
-import { AmountRange } from "@/shared/ui/AmountRange";
-import { StatusBadge } from "@/shared/ui/StatusBadge";
-import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
+import { buttonVariants } from "@/shared/ui/Button";
+import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
+import { Check } from "@/shared/ui/icons/Check";
+import {
+  getAccidentTone,
+  REPORT_STATUS_META,
+} from "@/app/customer/_shared/model/report-status";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
 import type { ReportListItem } from "../_model/types";
+
+function toManwon(won: number): string {
+  return Math.round(won / 10_000).toLocaleString("ko-KR");
+}
 
 export function ReportCard({ report }: { report: ReportListItem }) {
   const {
@@ -16,33 +24,46 @@ export function ReportCard({ report }: { report: ReportListItem }) {
     proposalCount,
   } = report;
   const meta = REPORT_STATUS_META[status];
+  const tone = getAccidentTone(accidentType);
 
   return (
-    <article className="rounded-card border border-line bg-card p-5">
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <div className="flex items-center gap-2">
-            <StatusBadge tone="neutral">{accidentType}</StatusBadge>
-            <span className="text-[13px] text-ink-3">No.{reportNo}</span>
-          </div>
-          <p className="mt-3 text-[12px] text-ink-3">예상 보상범위 · 참고용</p>
-          <AmountRange
-            className="mt-1 block"
-            min={claimedMinAmount}
-            max={claimedMaxAmount}
-          />
-        </div>
-        <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>
+    <article className="rounded-card border border-line bg-card p-[1.3125rem] shadow-[0px_1px_1px_rgba(21,32,46,0.03)]">
+      <div className="flex items-center gap-2">
+        <span
+          className={`rounded-pill px-2.5 py-[3px] text-[12.5px] font-semibold ${tone.bg} ${tone.text}`}
+        >
+          {accidentType}
+        </span>
+        <span className="text-[12px] text-ink-3">No.{reportNo}</span>
+        <span
+          className={`ml-auto flex items-center gap-[5px] text-[12px] font-semibold ${meta.className}`}
+        >
+          {meta.showCheck && <Check className="text-[0.8125rem]" />}
+          {meta.label}
+        </span>
       </div>
 
-      <div className="mt-4 flex items-center justify-between border-t border-line-2 pt-4">
-        <span className="text-[13px] text-ink-2">제안 {proposalCount}건</span>
-        <Link
-          href={DASHBOARD_LINKS.report(reportId)}
-          className="text-[13px] font-semibold text-gold-ink transition hover:brightness-[.96]"
-        >
-          리포트 보기
-        </Link>
+      <div className="mt-[0.875rem] flex items-end justify-between">
+        <div>
+          <p className="text-[11.5px] text-ink-3">예상 보상 범위</p>
+          <p className="mt-[3px] text-ink">
+            <span className="font-serif text-[1.375rem]">
+              {toManwon(claimedMinAmount)} – {toManwon(claimedMaxAmount)}
+            </span>
+            <span className="ml-1 text-[13px] font-bold">만원</span>
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="text-[12.5px] text-ink-3">제안 {proposalCount}건</span>
+          <Link
+            href={DASHBOARD_LINKS.report(reportId)}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            리포트 보기
+            <ArrowRight className="text-[1.0625rem]" />
+          </Link>
+        </div>
       </div>
     </article>
   );

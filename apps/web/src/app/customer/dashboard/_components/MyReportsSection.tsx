@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { useReportList } from "../_api/use-report-list";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
 import { EmptyState } from "./EmptyState";
@@ -15,12 +16,13 @@ export function MyReportsSection() {
   return (
     <section>
       <header className="mb-4 flex items-center justify-between">
-        <h2 className="font-serif text-[20px] font-bold text-ink">내 분석 리포트</h2>
+        <h2 className="text-[18px] font-bold text-ink">내 분석 리포트</h2>
         <Link
           href={DASHBOARD_LINKS.allReports}
-          className="text-[13px] text-ink-3 transition hover:text-ink"
+          className="flex items-center gap-[5px] text-[13.5px] font-semibold text-ink-2 transition hover:text-ink"
         >
           전체 보기
+          <ChevronRight className="text-[0.9375rem]" />
         </Link>
       </header>
 
@@ -30,7 +32,7 @@ export function MyReportsSection() {
           cta={{ label: "새 분석 시작", href: DASHBOARD_LINKS.newAnalysis }}
         />
       ) : (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           {reports.map((report) => (
             <ReportCard key={report.reportId} report={report} />
           ))}
