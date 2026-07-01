@@ -66,6 +66,14 @@
 - `PATCH /users/me`: `nickname`(N) · `email`(N)
 - `POST /users/adjuster-applications`: `name`(실명) · `speciality`(신체/교통) · `licenseNo`(N\*) · `licenseImageUrl`(N\*) · `career`(int 연차) · `introduce`(N) — `licenseNo`/`licenseImageUrl` 중 최소 1 필수 → resp `applicationId` · `status`
 
+### user(사정사 프로필) — `/adjusters/me/profile` (이슈 #31, 명세 6/24·6/26 확정)
+- `GET /adjusters/me/profile` (본인 프로필 조회·수정화면 초기값) · `PATCH /adjusters/me/profile` (수정 항목만 포함) — 둘 다 응답은 **전체 프로필 동일 shape**
+- 수정 가능 필드: `headline`(40자 태그라인·검색카드 노출) · `introduction`(소개) · `career`(int 연차·**수동 입력**) · `activityRegion`(활동지역 "서울·경기") · `avatarUrl`(`POST /uploads` 결과 URL) · `specialties`(string[] 전문분야·enum 고정값 없음) · `careers`(`[{ period, company }]` 주요 경력)
+- 읽기 전용(서버 집계): `averageRating` · `reviewCount` · `completedConsultCount` · `handledCaseCount`. 그 외 응답: `adjusterId` · `nickname` · `recentReviews`(최근 2건 `{nickname,score,item,reviewedAt,content}`) · `updatedAt`
+- 공개 프로필: `GET /adjusters/{adjusterId}`(동일 shape) · `GET /adjusters`(목록) — `verified`·`headline`·`specialties` 등 포함
+- ⚠️ 기존 §3 `speciality`(단일 enum 신체/교통, 자격신청용)와 **별개**. 프로필 노출용은 `specialties`(복수 자유 문자열). 혼용 금지.
+- 사진 업로드: `POST /uploads`(S3 private, JPG/PNG) → 결과 URL을 `avatarUrl`로 PATCH
+
 ### report — `POST /reports` (분석 신청)
 `productId` · `accidentType`(영문 enum, §4) · `accidentDate` · `diagnosis` · `offeredAmount`(int, 보험사 제안금액·N) · `hospitalizations`(N, 객체배열 `{hospitalStart, hospitalEnd(N), hospitalReason(N)}`) · `description`(N 사고경위) · `additionalInformation`(N) · `documentUrls`(string[] N) · `question`(N 자연어)
 → resp(202 비동기): `reportId` · `status`(`AWAITING_INSPECTION`)
@@ -107,10 +115,10 @@ items[]{ `paymentId` · `amount`(int) · `type`(`SUBSCRIPTION`) · `status`(`PAI
 
 ## 5. 함수·훅·쿼리키 네이밍 패턴
 
-- **조회 훅:** `use<Entity><List|Detail>` — `useReportList` · `useReportDetail` · `useMe` · `useChatList` · `usePaymentHistory`
-- **뮤테이션 훅:** `use<Verb><Entity>` — `useCreateReport`(신청) · `useReviewReport`(검수=PATCH) · `useCreateMatch`(상담신청) · `useCreateSubscription` · `useApplyAdjuster`(자격신청) · `useUpdateMe` · `useDeleteMe`(탈퇴) · `useRegister` · `useLogout`
-- **API 함수:** `<verb><Entity>` — `getReport` · `getReportList` · `createReport` · `reviewReport` · `createMatch` · `getMe` …
-- **쿼리키 factory**(`@lukemorales/query-key-factory`): 도메인별 `createQueryKeys('<domain>', …)` → `report.list(params)` · `report.detail(reportId)` · `user.me` · `chat.list` · `payment.history`
+- **조회 훅:** `use<Entity><List|Detail>` — `useReportList` · `useReportDetail` · `useMe` · `useChatList` · `usePaymentHistory` · `useProfile`(사정사 본인 프로필=`GET /adjusters/me/profile`)
+- **뮤테이션 훅:** `use<Verb><Entity>` — `useCreateReport`(신청) · `useReviewReport`(검수=PATCH) · `useCreateMatch`(상담신청) · `useCreateSubscription` · `useApplyAdjuster`(자격신청) · `useUpdateMe` · `useDeleteMe`(탈퇴) · `useRegister` · `useLogout` · `useUpdateProfile`(사정사 프로필 수정=PATCH) · `useUploadAvatar`(`POST /uploads`)
+- **API 함수:** `<verb><Entity>` — `getReport` · `getReportList` · `createReport` · `reviewReport` · `createMatch` · `getMe` · `getProfile` · `updateProfile` · `uploadAvatar` …
+- **쿼리키 factory**(`@lukemorales/query-key-factory`): 도메인별 `createQueryKeys('<domain>', …)` → `report.list(params)` · `report.detail(reportId)` · `user.me` · `chat.list` · `payment.history` · `adjuster.meProfile()`(사정사 본인 프로필)
 
 ## 5b. 받은 제안 목록 (이슈 #18, `GET /reports/{reportId}/proposals`)
 

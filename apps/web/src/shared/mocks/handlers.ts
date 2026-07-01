@@ -1,4 +1,4 @@
-import { delay, http, HttpResponse } from "msw";
+﻿import { delay, http, HttpResponse } from "msw";
 import { API_BASE_URL } from "@/shared/api/config";
 
 // 로드 시점 기준 상대 마감일(로컬 달력 날짜) — 대시보드 "오늘 마감/N일 남음" 검증용
@@ -87,12 +87,35 @@ export const DASHBOARD_PROPOSABLE_REPORT_ID =
   "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const DASHBOARD_AWAITING_REPORT_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
+// 본인 손해사정사 프로필 — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체
+// (프로필 편집 화면 + 대시보드 헤더·인사말 공용 — 집계 필드 포함 superset, 각 소비자 스키마가 잔여 필드 strip)
+const ADJUSTER_PROFILE: Record<string, unknown> = {
+  adjusterId: "11111111-1111-4111-8111-111111111111",
+  nickname: "김상정",
+  headline: "후유장해 전문 12년, 거절 사건을 다시 봅니다",
+  introduction:
+    "교통사고·후유장해 중심으로 장해등급 산정과 약관 해석을 다뤄왔습니다. 의뢰인이 받은 제안을 약관·특약·판례에 비춰 다시 검토하고, 누락된 청구 가능성을 근거와 함께 설명드립니다.",
+  career: 12,
+  activityRegion: "서울·경기",
+  avatarUrl: null,
+  specialties: ["후유장해", "교통사고"],
+  careers: [
+    { period: "2014.03 ~ 2019.02", company: "OO손해사정법인" },
+    { period: "2019.03 ~ 현재", company: "독립 손해사정사" },
+  ],
+  updatedAt: "2026-06-20T08:00:00Z",
+  // 대시보드 헤더·인사말용 집계(읽기 전용)
+  averageRating: 4.9,
+  reviewCount: 86,
+  pendingReviewCount: 5,
+};
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
-  // 본인 손해사정사 프로필 (대시보드 헤더·인사말) — ⚠️ API 명세 미정(드리프트), MSW 선구현
+  // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
-    await delay(400);
+    await delay(500);
 
     if (request.headers.get("x-mock-failure") === "profile") {
       return HttpResponse.json(
@@ -103,14 +126,8 @@ export const handlers = [
 
     return HttpResponse.json({
       status: "200",
-      message: "정상 처리되었습니다.",
-      data: {
-        adjusterId: "11111111-1111-4111-8111-111111111111",
-        nickname: "김도현",
-        averageRating: 4.9,
-        reviewCount: 86,
-        pendingReviewCount: 5,
-      },
+      message: "조회 성공",
+      data: ADJUSTER_PROFILE,
     });
   }),
 
@@ -248,6 +265,42 @@ export const handlers = [
           hasNext: false,
         },
       },
+    });
+  }),
+
+  // 본인 프로필 수정 — 수정 가능 필드만 머지 후 전체 프로필 반환
+  http.patch(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
+    await delay(700);
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    // 수정 가능 필드만 반영(읽기 전용·미지정 필드는 무시)
+    const ADJUSTER_PROFILE_MUTABLE_FIELDS = [
+      "headline",
+      "introduction",
+      "career",
+      "activityRegion",
+      "avatarUrl",
+      "specialties",
+      "careers",
+    ] as const;
+    for (const field of ADJUSTER_PROFILE_MUTABLE_FIELDS) {
+      if (field in body) ADJUSTER_PROFILE[field] = body[field];
+    }
+    ADJUSTER_PROFILE.updatedAt = new Date().toISOString();
+
+    return HttpResponse.json({
+      status: "200",
+      message: "수정 성공",
+      data: ADJUSTER_PROFILE,
     });
   }),
 
