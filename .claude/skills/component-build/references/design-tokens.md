@@ -53,6 +53,16 @@ Tailwind v4 주력. 토큰은 `apps/web/src/app/globals.css`의 `@theme`에 정�
 
 본문은 `font-sans`(Inter)가 전역 기본. serif를 본문에 쓰지 않는다. letter-spacing은 Figma 본문 기준 `-0.16px`(≈`tracking-[-0.01rem]`)을 컨테이너에 적용해 상속.
 
+## 길이값 (px→rem, 임의값 금지)
+
+**폰트 크기·간격·너비 등 모든 길이값은 rem(16px=1rem).** Figma가 px로 줘도 변환해 쓴다. Figma 변환 작업이 아니어도 이 규칙은 항상 적용한다.
+
+- 우선순위: **Tailwind 스케일 유틸**(`text-sm`·`gap-2`·`p-4`·`py-3.5`) > **rem 임의값**(`text-[0.8125rem]`) > ~~`[Npx]` 임의값~~(금지).
+- **예외는 1px 보더뿐**(`border`·`border-b` 등). 그 외 `[Npx]`는 쓰지 않는다.
+- 변환: px÷16=rem. 예 `13px→text-[0.8125rem]`, `28px→text-[1.75rem]`, `20px→text-[1.25rem]`.
+- 상세·전체 변환표는 `figma-design-convert/references/figma-mapping.md §4`.
+- ⚠️ 기존 레포에 `[Npx]`가 다수 남아 있어도(드리프트) 따라 하지 말 것. 새 코드는 rem으로.
+
 ## 유틸 매핑
 
 `@theme` 토큰 1개 → 관련 유틸 자동 생성. 예 `--color-ink`:
@@ -78,5 +88,5 @@ Tailwind v4 주력. 토큰은 `apps/web/src/app/globals.css`의 `@theme`에 정�
 
 ```tsx
 // 예: primary 버튼
-<button className="bg-ink text-white rounded-button px-[18px] py-3 font-semibold transition hover:brightness-[.96] disabled:opacity-[.42] disabled:cursor-not-allowed">
+<button className="bg-ink text-white rounded-button px-[1.125rem] py-3 font-semibold transition hover:brightness-[.96] disabled:opacity-[.42] disabled:cursor-not-allowed">
 ```

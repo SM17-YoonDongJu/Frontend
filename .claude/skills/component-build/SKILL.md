@@ -48,6 +48,7 @@ function ReportList() {
 
 ## Tailwind 스타일
 - **디자인 토큰 따르기** — 색·radius·폰트는 `@theme` 토큰 유틸로(`bg-paper`/`text-ink`/`border-line`/`rounded-card`/`font-serif`). 인라인 hex·임의 색 금지. 전체 토큰표·상태 유틸 레시피는 `references/design-tokens.md`.
+- **길이값은 rem** — 폰트 크기·간격·너비는 rem(16px=1rem), Tailwind 스케일 유틸 우선. **`[Npx]` 임의값 금지(1px 보더만 예외)**. 기존 코드에 px가 있어도 새 코드는 rem. 규칙은 `references/design-tokens.md` 「길이값」 절.
 - **light 전용** — 디자인 시스템은 라이트 테마만. `dark:` 변형 쓰지 않는다.
 - 인라인 long-class는 논리 그룹 순서(layout → spacing → color → state)로 정렬.
 - 모바일 우선: 기본이 모바일, `md:` 이상에서 데스크탑. 기획의 "모바일은 필터칩+카드" 같은 반응형 분기 반영.

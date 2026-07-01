@@ -29,7 +29,7 @@ description: 손해사정 플랫폼 프론트엔드 기능을 에이전트 팀(f
 ## Phase 2: 구현 (ui-builder ∥ data-engineer 병렬)
 **데이터 계약이 병렬의 열쇠.** 명세의 zod 계약·쿼리키가 확정되면 두 에이전트가 동시에 착수:
 - `data-engineer`: zod 스키마 → 쿼리키(factory) → 훅(staleTime 규칙표) → MSW 핸들러. 훅/타입 export 경로를 ui-builder에 `SendMessage`로 통지.
-- `ui-builder`: 페이지·라우트그룹·컴포넌트·3상태(로딩/빈/에러)·Tailwind. 데이터 타입은 data-engineer export를 import(재정의 금지). **착수 전 디자인 컴포넌트 문서 `component-build/references/design-tokens.md`를 먼저 읽고** 색·간격을 토큰/유틸로만 표현(raw hex 금지). Figma 디자인 입력이면 `figma-design-convert` 스킬로 변환.
+- `ui-builder`: 페이지·라우트그룹·컴포넌트·3상태(로딩/빈/에러)·Tailwind. 데이터 타입은 data-engineer export를 import(재정의 금지). **착수 전 디자인 컴포넌트 문서 `component-build/references/design-tokens.md`를 먼저 읽고** 색·간격을 토큰/유틸로만 표현(raw hex 금지). **길이값은 rem(16px=1rem)·`[Npx]` 임의값 금지**(1px 보더 예외) — Figma 변환이 아니어도 항상 적용. Figma 디자인 입력이면 `figma-design-convert` 스킬로 변환.
 - 시그니처 불일치는 두 에이전트가 `SendMessage`로 직접 조율(리더 경유 X).
 - `TaskCreate`로 슬라이스별 작업 등록, 의존성(`addBlockedBy`)으로 순서 관리.
 
