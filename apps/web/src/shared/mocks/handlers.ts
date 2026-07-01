@@ -268,13 +268,35 @@ export const handlers = [
     });
   }),
 
-  // 본인 프로필 수정 — 부분 body 머지 후 전체 프로필 반환
+  // 본인 프로필 수정 — 수정 가능 필드만 머지 후 전체 프로필 반환
   http.patch(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
     await delay(700);
-    const patch = (await request.json().catch(() => ({}))) as Record<string, unknown>;
-    Object.assign(ADJUSTER_PROFILE, patch, {
-      updatedAt: new Date().toISOString(),
-    });
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    // 수정 가능 필드만 반영(읽기 전용·미지정 필드는 무시)
+    const ADJUSTER_PROFILE_MUTABLE_FIELDS = [
+      "headline",
+      "introduction",
+      "career",
+      "activityRegion",
+      "avatarUrl",
+      "specialties",
+      "careers",
+    ] as const;
+    for (const field of ADJUSTER_PROFILE_MUTABLE_FIELDS) {
+      if (field in body) ADJUSTER_PROFILE[field] = body[field];
+    }
+    ADJUSTER_PROFILE.updatedAt = new Date().toISOString();
+
     return HttpResponse.json({
       status: "200",
       message: "수정 성공",
