@@ -45,8 +45,8 @@ function PendingReviewRow({ item }: { item: ReviewListItem }) {
   return (
     <div className="flex items-center gap-4">
       <div className="w-12 shrink-0 text-center">
-        <p className="font-serif text-[20px] font-bold leading-none text-ink">{item.matchingScore}</p>
-        <p className="mt-1 text-[11px] text-ink-3">매칭</p>
+        <p className="font-serif text-[1.25rem] font-bold leading-none text-ink">{item.matchingScore}</p>
+        <p className="mt-1 text-[0.6875rem] text-ink-3">매칭</p>
       </div>
 
       <div className="min-w-0 flex-1">
@@ -55,7 +55,7 @@ function PendingReviewRow({ item }: { item: ReviewListItem }) {
           <span className="text-xs text-ink-3">#{item.caseId}</span>
           <span className="text-xs text-ink-3">· {item.region}</span>
         </div>
-        <p className="mt-1.5 truncate text-[14px] font-semibold text-ink">{item.title}</p>
+        <p className="mt-1.5 truncate text-[0.875rem] font-semibold text-ink">{item.title}</p>
       </div>
 
       <div className="flex shrink-0 items-center gap-3">

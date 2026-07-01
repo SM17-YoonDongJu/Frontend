@@ -19,17 +19,17 @@ export function ActivityStats() {
       <dl className="space-y-3.5">
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between">
-            <dt className="text-[14px] text-ink-2">{row.label}</dt>
-            <dd className="font-serif text-[18px] font-bold tabular-nums text-ink">{row.value}</dd>
+            <dt className="text-[0.875rem] text-ink-2">{row.label}</dt>
+            <dd className="font-serif text-[1.125rem] font-bold tabular-nums text-ink">{row.value}</dd>
           </div>
         ))}
       </dl>
 
       <div className="mt-5 flex gap-2.5 rounded-card bg-paper-2 p-4">
-        <span className="mt-0.5 shrink-0 text-[16px] text-gold-ink">
+        <span className="mt-0.5 shrink-0 text-[1rem] text-gold-ink">
           <Megaphone />
         </span>
-        <p className="text-[13px] leading-relaxed text-ink-2">
+        <p className="text-[0.8125rem] leading-relaxed text-ink-2">
           매칭률이 높은 사건을 먼저 검수하면 상담 전환율이 올라갑니다.
         </p>
       </div>

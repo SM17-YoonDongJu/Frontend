@@ -3,8 +3,8 @@ import { Button } from "@/shared/ui/Button";
 export function SectionError({ onRetry }: { onRetry: () => void }) {
   return (
     <div className="flex flex-col items-center rounded-card-lg border border-line bg-card px-6 py-12 text-center">
-      <h2 className="text-[15px] font-semibold text-ink">정보를 불러오지 못했어요</h2>
-      <p className="mt-1 text-[13px] text-ink-3">잠시 후 다시 시도해 주세요.</p>
+      <h2 className="text-[0.9375rem] font-semibold text-ink">정보를 불러오지 못했어요</h2>
+      <p className="mt-1 text-[0.8125rem] text-ink-3">잠시 후 다시 시도해 주세요.</p>
       <Button size="sm" variant="outline" className="mt-4" onClick={onRetry}>
         다시 시도
       </Button>

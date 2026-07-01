@@ -48,12 +48,12 @@ function InProgressRow({ item }: { item: InProgressCase }) {
           <StatusBadge tone="gold">{item.accidentType}</StatusBadge>
           <span className="text-xs text-ink-3">#{item.caseId}</span>
         </div>
-        <span className={`shrink-0 text-[13px] font-semibold ${STATUS_TEXT[meta.tone]}`}>
+        <span className={`shrink-0 text-[0.8125rem] font-semibold ${STATUS_TEXT[meta.tone]}`}>
           {meta.label}
         </span>
       </div>
 
-      <p className="mt-2 text-[14px] font-medium text-ink">{item.description}</p>
+      <p className="mt-2 text-[0.875rem] font-medium text-ink">{item.description}</p>
 
       <ProgressBar
         value={item.progress}

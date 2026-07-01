@@ -50,13 +50,13 @@ export function SummaryCards() {
       {cards.map((card) => (
         <div key={card.label} className="rounded-card-lg border border-line bg-card p-5">
           <div className="flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-chip bg-gold-soft text-[16px] text-gold-ink">
+            <span className="flex h-8 w-8 items-center justify-center rounded-chip bg-gold-soft text-[1rem] text-gold-ink">
               {card.icon}
             </span>
-            <p className="text-[13px] text-ink-3">{card.label}</p>
+            <p className="text-[0.8125rem] text-ink-3">{card.label}</p>
           </div>
-          <p className="mt-4 font-serif text-[28px] font-bold tabular-nums text-ink">{card.value}</p>
-          {card.hint && <p className="mt-1 text-[12px] text-ink-3">{card.hint}</p>}
+          <p className="mt-4 font-serif text-[1.75rem] font-bold tabular-nums text-ink">{card.value}</p>
+          {card.hint && <p className="mt-1 text-[0.75rem] text-ink-3">{card.hint}</p>}
         </div>
       ))}
     </>
