@@ -113,6 +113,59 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
+  // OAuth 소셜 로그인 콜백 (#40). 기본 성공(기존 회원).
+  //  - code=new            → isNewUser:true (회원가입 플로우 분기)
+  //  - code=fail-invalid   → 400 INVALID_REQUEST     (브라우저 URL 주입 — E2E)
+  //  - code=fail-unsupported → 400 UNSUPPORTED_OPERATION (브라우저 URL 주입 — E2E)
+  //  - code=fail-external  → 500 EXTERNAL_API_ERROR   (브라우저 URL 주입 — E2E)
+  //  - x-mock-failure 헤더 → invalid / unsupported / 그 외: 위와 동일(서버측 주입, 유지)
+  //  콜백 페이지가 URL 쿼리 code를 그대로 전달하므로 E2E는 URL만으로 실패 결정 주입 가능.
+  http.get(`${API_BASE_URL}/auth/oauth2/:provider/callback`, async ({ request, params }) => {
+    await delay(600);
+
+    const provider = String(params.provider);
+    const url = new URL(request.url, "http://localhost");
+    const code = url.searchParams.get("code");
+    const failure = request.headers.get("x-mock-failure");
+
+    if (provider !== "kakao" && provider !== "naver") {
+      return HttpResponse.json(
+        { status: "400", code: "UNSUPPORTED_OPERATION", message: "지원하지 않는 소셜 로그인입니다." },
+        { status: 400 },
+      );
+    }
+
+    if (failure === "invalid" || code === "fail-invalid" || !code) {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "유효하지 않은 인가 코드입니다." },
+        { status: 400 },
+      );
+    }
+    if (failure === "unsupported" || code === "fail-unsupported") {
+      return HttpResponse.json(
+        { status: "400", code: "UNSUPPORTED_OPERATION", message: "지원하지 않는 소셜 로그인입니다." },
+        { status: 400 },
+      );
+    }
+    if (failure || code === "fail-external") {
+      return HttpResponse.json(
+        { status: "500", code: "EXTERNAL_API_ERROR", message: "소셜 로그인 연동에 실패했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "로그인 성공",
+      data: {
+        userId: crypto.randomUUID(),
+        isNewUser: code === "new",
+        accessToken: `mock-access-${crypto.randomUUID()}`,
+        refreshToken: `mock-refresh-${crypto.randomUUID()}`,
+      },
+    });
+  }),
+
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
     await delay(500);
