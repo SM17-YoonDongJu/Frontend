@@ -7,6 +7,8 @@ import { useFocusTrap } from "@/shared/lib/use-focus-trap";
 export interface ModalProps {
   open: boolean;
   title: string;
+  /** 타이틀 위 작은 골드 라벨(예: "내 정보") */
+  kicker?: string;
   /** 배경/Esc로 닫기 허용 여부. 강제 선택 플로우면 false. */
   dismissible?: boolean;
   onClose: () => void;
@@ -19,6 +21,7 @@ export interface ModalProps {
 export function Modal({
   open,
   title,
+  kicker,
   dismissible = true,
   onClose,
   children,
@@ -53,6 +56,9 @@ export function Modal({
           className,
         )}
       >
+        {kicker && (
+          <p className="mb-1 text-[0.75rem] font-semibold text-gold-ink">{kicker}</p>
+        )}
         <h2 className="font-serif text-[1.125rem] font-bold text-ink">{title}</h2>
         <div className="mt-4">{children}</div>
       </div>
