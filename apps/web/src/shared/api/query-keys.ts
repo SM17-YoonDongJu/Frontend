@@ -32,6 +32,10 @@ export const reviewKeys = createQueryKeys("review", {
   detail: (reportId: string) => [reportId],
 });
 
+export const notificationKeys = createQueryKeys("notification", {
+  list: null,
+});
+
 export const adjusterKeys = createQueryKeys("adjuster", {
   meProfile: () => ["me", "profile"],
   dashboard: () => ["dashboard"],
