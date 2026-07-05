@@ -55,22 +55,25 @@ export function ChatRoomListPanel({
       ) : filteredRooms.length === 0 ? (
         <PanelEmpty title="검색 결과가 없어요" description="다른 검색어로 찾아보세요." />
       ) : (
-        <ul className="flex-1 overflow-y-auto">
-          {filteredRooms.map((room) => (
-            <li key={room.chatRoomId} className="border-b border-line-2 last:border-b-0">
-              <ChatRoomListItem
-                name={room.adjusterName}
-                caseNo={room.caseNo}
-                lastMessage={room.lastMessage}
-                lastMessageAt={room.lastMessageAt}
-                avatarUrl={room.avatarUrl}
-                roomStatus={room.roomStatus}
-                href={buildHref(room.chatRoomId)}
-                active={room.chatRoomId === activeChatRoomId}
-              />
-            </li>
-          ))}
-        </ul>
+        /* Figma 663:3663 — 모바일은 방 목록을 흰 카드로 감싸고, 데스크톱(95:4571)은 패널에 바로 얹음 */
+        <div className="flex-1 overflow-y-auto px-5 pb-5 md:px-0 md:pb-0">
+          <ul className="overflow-hidden rounded-card border border-line bg-card shadow-[0px_1px_1px_rgba(21,32,46,0.03)] md:rounded-none md:border-0 md:bg-transparent md:shadow-none">
+            {filteredRooms.map((room) => (
+              <li key={room.chatRoomId} className="border-b border-line-2 last:border-b-0">
+                <ChatRoomListItem
+                  name={room.adjusterName}
+                  caseNo={room.caseNo}
+                  lastMessage={room.lastMessage}
+                  lastMessageAt={room.lastMessageAt}
+                  avatarUrl={room.avatarUrl}
+                  roomStatus={room.roomStatus}
+                  href={buildHref(room.chatRoomId)}
+                  active={room.chatRoomId === activeChatRoomId}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

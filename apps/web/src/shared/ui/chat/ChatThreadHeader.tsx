@@ -40,7 +40,9 @@ export function ChatThreadHeader({
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-[0.85rem] font-bold text-ink">{name}</p>
-        <p className="truncate text-[0.6875rem] text-ink-3">{subtitle}</p>
+        {/* Figma 모바일(663:3796) 헤더는 이름만 — 사건번호·상태는 데스크톱(95:4571) 전용 */}
+        <p className="hidden truncate text-[0.6875rem] text-ink-3 md:block">{subtitle}</p>
+        <span className="sr-only md:hidden">{subtitle}</span>
       </div>
 
       <Link
