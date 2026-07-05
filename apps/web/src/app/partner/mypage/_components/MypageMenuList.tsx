@@ -1,0 +1,42 @@
+import { Bell } from "@/shared/ui/icons/Bell";
+import { FileText } from "@/shared/ui/icons/FileText";
+import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
+import { User } from "@/shared/ui/icons/User";
+import { MenuRow } from "./MenuRow";
+
+interface MypageMenuListProps {
+  reviewCount: number;
+  onNotificationClick?: () => void;
+  onCredentialClick?: () => void;
+}
+
+export function MypageMenuList({
+  reviewCount,
+  onNotificationClick,
+  onCredentialClick,
+}: MypageMenuListProps) {
+  return (
+    <nav className="divide-y divide-line-2 rounded-card-lg border border-line bg-card shadow-sm">
+      <MenuRow
+        icon={<User />}
+        title="프로필 관리"
+        description="공개 프로필 편집"
+        badge="편집"
+        href="/partner/profile/edit"
+      />
+      <MenuRow
+        icon={<FileText />}
+        title="검수 내역"
+        description={`${reviewCount}건`}
+        href="/partner/review"
+      />
+      <MenuRow icon={<Bell />} title="알림 설정" onClick={onNotificationClick} />
+      <MenuRow
+        icon={<ShieldCheck />}
+        title="인증 · 자격 증빙"
+        description="검증 완료"
+        onClick={onCredentialClick}
+      />
+    </nav>
+  );
+}

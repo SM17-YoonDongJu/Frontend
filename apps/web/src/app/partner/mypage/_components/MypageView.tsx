@@ -1,6 +1,7 @@
 "use client";
 
 import { useMypage } from "../_api/use-mypage";
+import { MypageMenuList } from "./MypageMenuList";
 import { ProfileSummaryCard } from "./ProfileSummaryCard";
 import { StatCards } from "./StatCards";
 
@@ -19,6 +20,12 @@ export function MypageView() {
           stats={data.stats}
           monthlyCompletedCount={data.monthlyActivity.completedCount}
         />
+      </div>
+
+      <div className="mt-5.5 grid grid-cols-1 items-start gap-7 md:grid-cols-3">
+        <div className="md:col-span-2">
+          <MypageMenuList reviewCount={data.stats.totalCompletedCount} />
+        </div>
       </div>
     </div>
   );
