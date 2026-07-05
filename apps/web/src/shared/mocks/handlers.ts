@@ -290,6 +290,35 @@ export const handlers = [
     );
   }),
 
+  // 상담 종료 (이슈 #48) — ACTIVE→CLOSED. 이미 CLOSED면 409 DUPLICATE_RESOURCE(Notion 채팅 종료 명세).
+  http.patch(`${API_BASE_URL}/chats/:chatRoomId/close`, async ({ params }) => {
+    await delay(300);
+
+    const chatRoomId = String(params.chatRoomId);
+    const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
+
+    if (!room) {
+      return HttpResponse.json(
+        { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+    if (room.roomStatus === "CLOSED") {
+      return HttpResponse.json(
+        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 종료된 상담입니다." },
+        { status: 409 },
+      );
+    }
+
+    room.roomStatus = "CLOSED";
+
+    return HttpResponse.json({
+      status: "200",
+      message: "상담을 종료했습니다.",
+      data: { chatRoomId, status: "CLOSED" },
+    });
+  }),
+
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
     await delay(500);

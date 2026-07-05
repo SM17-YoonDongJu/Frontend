@@ -49,7 +49,14 @@ export const sendChatMessageResponseSchema = z.object({
   createdAt: z.string(),
 });
 
+// PATCH /chats/{chatRoomId}/close 응답 (Notion 채팅 종료 명세: ACTIVE→CLOSED)
+export const closeChatResponseSchema = z.object({
+  chatRoomId: z.string().uuid(),
+  status: z.literal("CLOSED"),
+});
+
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
+export type CloseChatResponse = z.infer<typeof closeChatResponseSchema>;
 export type ChatRoom = z.infer<typeof chatRoomSchema>;
 export type ChatList = z.infer<typeof chatListSchema>;
 export type ChatMessage = z.infer<typeof chatMessageSchema>;

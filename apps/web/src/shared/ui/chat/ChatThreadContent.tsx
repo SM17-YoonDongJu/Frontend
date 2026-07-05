@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
 import { useChatMessages } from "@/shared/api/chat/use-chat-messages";
+import { useCloseChat } from "@/shared/api/chat/use-close-chat";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
 import { useMe } from "@/shared/api/use-me";
 import { ChatThreadHeader } from "./ChatThreadHeader";
@@ -27,6 +28,7 @@ export function ChatThreadContent({
   const { data: rooms } = useChatList();
   const { data: messages } = useChatMessages(chatRoomId);
   const sendMessage = useSendChatMessage(chatRoomId);
+  const closeChat = useCloseChat(chatRoomId);
 
   const room = rooms.find((item) => item.chatRoomId === chatRoomId);
   const closed = room?.roomStatus === "CLOSED";
@@ -41,6 +43,8 @@ export function ChatThreadContent({
           roomStatus={room.roomStatus}
           reportHref={`${reportBasePath}/${room.reportId}`}
           onBack={() => router.push(chatBasePath)}
+          onClose={() => closeChat.mutate()}
+          closePending={closeChat.isPending}
         />
       )}
 
