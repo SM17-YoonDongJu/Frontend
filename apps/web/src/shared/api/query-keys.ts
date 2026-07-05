@@ -24,6 +24,10 @@ export const userKeys = createQueryKeys("user", {
   me: null,
 });
 
+export const authKeys = createQueryKeys("auth", {
+  oauthCallback: (provider: string, code: string) => [provider, code],
+});
+
 export const proposalKeys = createQueryKeys("proposal", {
   list: (reportId: string) => [reportId],
 });
