@@ -29,6 +29,8 @@ test("목록에 진입하면 최근 대화가 위로 정렬되어 보인다", as
 test("검색어를 입력하면 이름·마지막 메시지로 필터되고 없으면 빈 상태가 보인다", async ({
   page,
 }) => {
+  // 대화 검색은 모바일 전용 UI(Figma 데스크톱 목록엔 검색창 없음)
+  await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(CUSTOMER_LIST);
 
   const search = page.getByRole("searchbox", { name: "대화 검색" });
@@ -136,9 +138,21 @@ test("고객 방에서 공유 리포트를 열면 고객 리포트로 이동한�
   await page.goto(`${CUSTOMER_LIST}/e1000000-0000-4000-8000-000000000001`);
 
   await expect(async () => {
-    await page.getByRole("link", { name: "공유 리포트 열기" }).click();
+    await page.getByRole("link", { name: "리포트 보기" }).click();
     await expect(page).toHaveURL(/\/customer\/report\/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/);
   }).toPass({ timeout: 10000 });
+});
+
+test("상담 종료를 누르면 방이 종료되고 입력이 차단된다", async ({ page }) => {
+  await page.goto(`${CUSTOMER_LIST}/e1000000-0000-4000-8000-000000000001`);
+
+  await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeVisible();
+  await page.getByRole("button", { name: "상담 종료" }).click();
+
+  await expect(
+    page.getByText("종료된 상담이에요. 새 메시지를 보낼 수 없어요."),
+  ).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "메시지 입력" })).toHaveCount(0);
 });
 
 test("파트너 채팅도 목록·스레드가 동작하고 리포트는 파트너 검수로 이동한다", async ({
@@ -151,7 +165,7 @@ test("파트너 채팅도 목록·스레드가 동작하고 리포트는 파트�
   await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeVisible();
 
   await expect(async () => {
-    await page.getByRole("link", { name: "공유 리포트 열기" }).click();
+    await page.getByRole("link", { name: "리포트 보기" }).click();
     await expect(page).toHaveURL(/\/partner\/review\/aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa/);
   }).toPass({ timeout: 10000 });
 });
