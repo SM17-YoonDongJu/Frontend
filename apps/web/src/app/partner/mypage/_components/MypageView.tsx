@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useMypage } from "../_api/use-mypage";
+import { CredentialProofModal } from "./CredentialProofModal";
 import { LogoutButton } from "./LogoutButton";
 import { MonthlyActivityCard } from "./MonthlyActivityCard";
 import { MypageMenuList } from "./MypageMenuList";
@@ -12,6 +13,7 @@ import { StatCards } from "./StatCards";
 export function MypageView() {
   const { data } = useMypage();
   const [notificationOpen, setNotificationOpen] = useState(false);
+  const [credentialOpen, setCredentialOpen] = useState(false);
 
   return (
     <div className="mt-5.5">
@@ -32,6 +34,7 @@ export function MypageView() {
           <MypageMenuList
             reviewCount={data.stats.totalCompletedCount}
             onNotificationClick={() => setNotificationOpen(true)}
+            onCredentialClick={() => setCredentialOpen(true)}
           />
         </div>
         <div className="order-1 md:order-2">
@@ -46,6 +49,11 @@ export function MypageView() {
       <NotificationSettingsModal
         open={notificationOpen}
         onClose={() => setNotificationOpen(false)}
+      />
+      <CredentialProofModal
+        open={credentialOpen}
+        licenseNo={data.certification.licenseNo}
+        onClose={() => setCredentialOpen(false)}
       />
     </div>
   );
