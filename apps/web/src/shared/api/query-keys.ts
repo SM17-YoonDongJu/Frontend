@@ -32,9 +32,19 @@ export const reviewKeys = createQueryKeys("review", {
   detail: (reportId: string) => [reportId],
 });
 
+export interface AdjusterListFilter {
+  keyword?: string;
+  specialty?: string;
+  region?: string;
+  sort?: string;
+  page?: number;
+  size?: number;
+}
+
 export const adjusterKeys = createQueryKeys("adjuster", {
   meProfile: () => ["me", "profile"],
   dashboard: () => ["dashboard"],
   inProgress: () => ["in-progress"],
+  list: (filter?: AdjusterListFilter) => [{ filter: filter ?? {} }],
   detail: (adjusterId: string) => [adjusterId],
 });
