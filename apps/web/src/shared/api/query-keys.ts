@@ -24,6 +24,10 @@ export const userKeys = createQueryKeys("user", {
   me: null,
 });
 
+export const settingsKeys = createQueryKeys("settings", {
+  notification: null,
+});
+
 export const proposalKeys = createQueryKeys("proposal", {
   list: (reportId: string) => [reportId],
 });
