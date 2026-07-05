@@ -36,5 +36,6 @@ export const adjusterKeys = createQueryKeys("adjuster", {
   meProfile: () => ["me", "profile"],
   dashboard: () => ["dashboard"],
   inProgress: () => ["in-progress"],
+  mypage: () => ["me", "mypage"],
   detail: (adjusterId: string) => [adjusterId],
 });

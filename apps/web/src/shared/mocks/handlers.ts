@@ -110,6 +110,35 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
   pendingReviewCount: 5,
 };
 
+// 마이페이지 집계 (이슈 #46) — GET /adjusters/me/mypage, ADJUSTER_PROFILE 페르소나와 수치 일치
+const ADJUSTER_MYPAGE = {
+  profile: {
+    nickname: "김상정",
+    email: "kimsangjeong@example.com",
+    avatarUrl: null,
+    headline: "후유장해 전문 12년, 거절 사건을 다시 봅니다",
+    specialties: ["후유장해", "교통사고"],
+    activityRegion: "서울·경기",
+    role: "CERTIFICATED_ADJUSTER",
+  },
+  stats: {
+    averageRating: 4.9,
+    reviewCount: 86,
+    totalCompletedCount: 240,
+    consultationConversionRate: 62,
+  },
+  monthlyActivity: {
+    completedCount: 14,
+    consultationConvertedCount: 9,
+    averageRating: 4.9,
+  },
+  certification: {
+    licenseNo: "제2014-0087호",
+    activityRegion: "서울·경기",
+    createdAt: "2026-01-01T00:00:00Z",
+  },
+};
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
@@ -157,10 +186,28 @@ export const handlers = [
         },
         activity: {
           completedCount: 14,
-          consultConvertedCount: 9,
+          consultationConvertedCount: 9,
           averageRating: 4.9,
         },
       },
+    });
+  }),
+
+  // 손해사정사 마이페이지 집계 (이슈 #46)
+  http.get(`${API_BASE_URL}/adjusters/me/mypage`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "mypage") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "마이페이지를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: ADJUSTER_MYPAGE,
     });
   }),
 
