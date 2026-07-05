@@ -34,7 +34,7 @@ export function MenuRow({ icon, title, description, badge, href, onClick }: Menu
   );
 
   const rowClassName =
-    "flex w-full items-center gap-4 px-5.5 py-4.5 transition hover:bg-paper-2";
+    "flex w-full items-center gap-4 rounded-card-lg border border-line bg-card px-4.5 py-4 shadow-sm transition hover:bg-paper-2 md:rounded-none md:border-0 md:bg-transparent md:px-5.5 md:py-4.5 md:shadow-none";
 
   if (href) {
     return (

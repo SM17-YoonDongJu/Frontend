@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Star } from "@/shared/ui/icons/Star";
 import type { MypageStats } from "../_model/types";
 
@@ -13,7 +14,7 @@ export function StatCards({ stats, monthlyCompletedCount }: StatCardsProps) {
         label="평점"
         value={
           <span className="inline-flex items-center gap-1.5">
-            <Star className="text-[1.25rem] text-gold" />
+            <Star className="hidden text-[1.25rem] text-gold md:inline" />
             {stats.averageRating?.toFixed(1) ?? "-"}
           </span>
         }
@@ -21,7 +22,12 @@ export function StatCards({ stats, monthlyCompletedCount }: StatCardsProps) {
       />
       <StatCard
         label="누적 검수"
-        value={`${stats.totalCompletedCount}건`}
+        value={
+          <>
+            {stats.totalCompletedCount}
+            <span className="hidden md:inline">건</span>
+          </>
+        }
         caption={`이번 달 ${monthlyCompletedCount}건`}
       />
       <StatCard
@@ -39,14 +45,18 @@ function StatCard({
   caption,
 }: {
   label: string;
-  value: React.ReactNode;
+  value: ReactNode;
   caption: string;
 }) {
   return (
-    <div className="rounded-card-lg border border-line bg-card p-5 shadow-sm">
-      <p className="text-[0.8125rem] text-ink-3">{label}</p>
-      <p className="mt-1 font-serif text-[1.75rem] font-bold tabular-nums text-ink">{value}</p>
-      <p className="mt-1 text-[0.75rem] text-ink-3">{caption}</p>
+    <div className="flex flex-col rounded-card-lg border border-line bg-card p-3.5 text-center md:p-5 md:text-left">
+      <p className="order-2 mt-1 text-[0.75rem] text-ink-3 md:order-none md:mt-0 md:text-[0.8125rem]">
+        {label}
+      </p>
+      <p className="order-1 font-serif text-[1.25rem] font-bold tabular-nums text-ink md:order-none md:mt-1 md:text-[1.75rem]">
+        {value}
+      </p>
+      <p className="order-3 mt-1 hidden text-[0.75rem] text-ink-3 md:block">{caption}</p>
     </div>
   );
 }
