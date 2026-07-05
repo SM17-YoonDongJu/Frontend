@@ -1,6 +1,7 @@
 "use client";
 
 import { useMypage } from "../_api/use-mypage";
+import { MonthlyActivityCard } from "./MonthlyActivityCard";
 import { MypageMenuList } from "./MypageMenuList";
 import { ProfileSummaryCard } from "./ProfileSummaryCard";
 import { StatCards } from "./StatCards";
@@ -26,6 +27,7 @@ export function MypageView() {
         <div className="md:col-span-2">
           <MypageMenuList reviewCount={data.stats.totalCompletedCount} />
         </div>
+        <MonthlyActivityCard activity={data.monthlyActivity} />
       </div>
     </div>
   );
