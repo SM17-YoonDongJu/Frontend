@@ -240,6 +240,56 @@ export const handlers = [
     });
   }),
 
+  // 메시지 전송 (이슈 #48) — CLOSED 방은 409, 그 외 상태 배열 append + 방 갱신.
+  http.post(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ request, params }) => {
+    await delay(300);
+
+    const chatRoomId = String(params.chatRoomId);
+
+    if (request.headers.get("x-mock-failure") === "chat-send") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "메시지를 전송하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
+    if (room?.roomStatus === "CLOSED") {
+      // CONTRACT: CLOSED 명세 코드 — ⚠️ Notion 명세 409 근거·전역 enum 반영 요청.
+      return HttpResponse.json(
+        { status: "409", code: "CLOSED", message: "종료된 상담입니다." },
+        { status: 409 },
+      );
+    }
+
+    const body = (await request.json().catch(() => ({}))) as { content?: string };
+    const content = typeof body.content === "string" ? body.content : "";
+    const createdAt = new Date().toISOString();
+    const messageId = crypto.randomUUID();
+
+    (chatMessages[chatRoomId] ??= []).push({
+      messageId,
+      senderId: MOCK_ME_ID,
+      content,
+      createdAt,
+    });
+
+    if (room) {
+      room.lastMessage = content;
+      room.lastMessageAt = createdAt;
+      room.updatedAt = createdAt;
+    }
+
+    return HttpResponse.json(
+      {
+        status: "201",
+        message: "전송되었습니다.",
+        data: { messageId, chatRoomId, senderId: MOCK_ME_ID, content, createdAt },
+      },
+      { status: 201 },
+    );
+  }),
+
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
     await delay(500);
