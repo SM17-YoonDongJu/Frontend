@@ -79,6 +79,21 @@ const PENDING_REVIEWS = [
 
 const heldReportIds = new Set<string>();
 
+// 알림 목록 목 데이터 (이슈 #49) — ⚠️ 명세없음-초안(.pr-assets/api-spec-draft-notifications.md).
+// createdAt은 로드 시점 기준 상대값 → 오늘/어제/이전 그룹이 모두 나오게 구성.
+// read-all 호출 시 isRead를 모듈 상태로 전부 true 반영.
+function hoursAgo(hours: number): string {
+  return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+}
+
+const NOTIFICATIONS = [
+  { notificationId: "d0000000-0000-4000-8000-000000000001", type: "REVIEW_COMPLETE", title: "검수가 완료됐어요", body: "김도현 사정사님이 리포트를 검수했어요.", isRead: false, createdAt: hoursAgo(2) },
+  { notificationId: "d0000000-0000-4000-8000-000000000002", type: "RECEIVED_PROPOSAL", title: "새 제안 2건 도착", body: "교통사고 리포트에 상담 제안이 왔어요.", isRead: false, createdAt: hoursAgo(5) },
+  { notificationId: "d0000000-0000-4000-8000-000000000003", type: "CONSULT_ACCEPTED", title: "상담이 수락됐어요", body: "정우성 사정사님이 상담을 수락했어요.", isRead: true, createdAt: hoursAgo(24) },
+  { notificationId: "d0000000-0000-4000-8000-000000000004", type: "ANALYSIS_COMPLETE", title: "분석이 완료됐어요", body: "제출하신 서류 분석 리포트가 준비됐어요.", isRead: true, createdAt: hoursAgo(28) },
+  { notificationId: "d0000000-0000-4000-8000-000000000005", type: "IDENTITY_VERIFIED", title: "본인 인증 완료", body: "계정 본인 인증이 완료됐어요.", isRead: true, createdAt: "2026-05-18T09:00:00Z" },
+];
+
 // 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
 const rejectedProposals = new Set<string>();
 
@@ -112,6 +127,44 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
 
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
+
+  // 알림 모두 읽음 처리 (#49) — ⚠️ 명세없음-초안. 구체 경로를 목록 GET보다 먼저 등록.
+  http.patch(`${API_BASE_URL}/users/me/notifications/read-all`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-failure") === "read-all") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "읽음 처리에 실패했습니다." },
+        { status: 500 },
+      );
+    }
+
+    for (const notification of NOTIFICATIONS) notification.isRead = true;
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: null,
+    });
+  }),
+
+  // 내 알림 목록 (#49) — ⚠️ 명세없음-초안. read-all 반영된 isRead 상태 그대로 반환.
+  http.get(`${API_BASE_URL}/users/me/notifications`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-failure") === "notifications") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "알림을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { list: NOTIFICATIONS },
+    });
+  }),
 
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
