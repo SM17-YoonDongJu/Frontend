@@ -12,8 +12,23 @@ const useIsMounted = () =>
     () => false,
   );
 import { ErrorBoundary } from "react-error-boundary";
+import type { FallbackProps } from "react-error-boundary";
 import { SectionError } from "./SectionError";
 import { SectionSkeleton } from "./SectionSkeleton";
+
+function SectionErrorFallback({
+  error,
+  resetErrorBoundary,
+  title,
+}: FallbackProps & { title?: string }) {
+  return (
+    <SectionError
+      title={title}
+      code={(error as Error).name}
+      onRetry={resetErrorBoundary}
+    />
+  );
+}
 
 interface SectionBoundaryProps {
   children: ReactNode;
@@ -36,12 +51,8 @@ export function SectionBoundary({
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <SectionError
-              title={errorTitle}
-              code={(error as Error).name}
-              onRetry={resetErrorBoundary}
-            />
+          fallbackRender={(props) => (
+            <SectionErrorFallback {...props} title={errorTitle} />
           )}
         >
           <Suspense fallback={skeleton}>{children}</Suspense>

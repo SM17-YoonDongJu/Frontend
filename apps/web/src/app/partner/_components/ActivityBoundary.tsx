@@ -7,6 +7,11 @@ import { useHydrated } from "@/shared/lib/use-hydrated";
 import { SectionError } from "./SectionError";
 import { ActivityStats } from "./ActivityStats";
 import { ActivitySkeleton } from "./ActivitySkeleton";
+import type { FallbackProps } from "react-error-boundary";
+
+function ActivityErrorFallback({ resetErrorBoundary }: FallbackProps) {
+  return <SectionError onRetry={resetErrorBoundary} />;
+}
 
 export function ActivityBoundary() {
   if (!useHydrated()) return <ActivitySkeleton />;
@@ -16,9 +21,7 @@ export function ActivityBoundary() {
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ resetErrorBoundary }) => (
-            <SectionError onRetry={resetErrorBoundary} />
-          )}
+          FallbackComponent={ActivityErrorFallback}
         >
           <Suspense fallback={<ActivitySkeleton />}>
             <ActivityStats />

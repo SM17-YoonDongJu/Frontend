@@ -6,6 +6,13 @@ import { ErrorBoundary } from "react-error-boundary";
 import { AdjusterProfileError } from "./AdjusterProfileError";
 import { AdjusterProfileSkeleton } from "./AdjusterProfileSkeleton";
 import { AdjusterProfileView } from "./AdjusterProfileView";
+import type { FallbackProps } from "react-error-boundary";
+
+function AdjusterProfileErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+  return (
+    <AdjusterProfileError code={(error as Error).name} onRetry={resetErrorBoundary} />
+  );
+}
 
 export function AdjusterProfileBoundary({ adjusterId }: { adjusterId: string }) {
   const [mounted, setMounted] = useState(false);
@@ -17,12 +24,7 @@ export function AdjusterProfileBoundary({ adjusterId }: { adjusterId: string }) 
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <AdjusterProfileError
-              code={(error as Error).name}
-              onRetry={resetErrorBoundary}
-            />
-          )}
+          FallbackComponent={AdjusterProfileErrorFallback}
         >
           <Suspense fallback={<AdjusterProfileSkeleton />}>
             <AdjusterProfileView adjusterId={adjusterId} />
