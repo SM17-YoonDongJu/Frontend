@@ -163,7 +163,7 @@ const chatRooms: MockChatRoom[] = [
     updatedAt: "2026-06-30T15:10:00Z",
     adjusterId: CHAT_ADJUSTER_2_ID,
     adjusterName: "정우성 손해사정사",
-    avatarUrl: "https://cdn.example.com/avatars/adjuster-2.png",
+    avatarUrl: null,
     reportId: "f1000000-0000-4000-8000-000000000012",
     caseNo: "#20260512-009",
     roomStatus: "ACTIVE",
