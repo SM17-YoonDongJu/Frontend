@@ -110,8 +110,87 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
   pendingReviewCount: 5,
 };
 
+// ── 채팅(이슈 #48) 모듈 스코프 가변 상태 ─────────────────────────────
+const CHAT_ADJUSTER_1_ID = "d1000000-0000-4000-8000-000000000001";
+const CHAT_ADJUSTER_2_ID = "d1000000-0000-4000-8000-000000000002";
+const CHAT_ADJUSTER_3_ID = "d1000000-0000-4000-8000-000000000003";
+
+const CHAT_ROOM_1_ID = "e1000000-0000-4000-8000-000000000001";
+const CHAT_ROOM_2_ID = "e1000000-0000-4000-8000-000000000002";
+const CHAT_ROOM_3_ID = "e1000000-0000-4000-8000-000000000003";
+
+interface MockChatRoom {
+  chatRoomId: string;
+  lastMessage: string | null;
+  updatedAt: string;
+  adjusterId: string;
+  adjusterName: string;
+  avatarUrl: string | null;
+  reportId: string;
+  caseNo: string;
+  roomStatus: "REQUESTED" | "ACTIVE" | "CLOSED";
+  lastMessageAt: string;
+}
+
+const chatRooms: MockChatRoom[] = [
+  {
+    chatRoomId: CHAT_ROOM_1_ID,
+    lastMessage: "리포트 검토해봤습니다. 상담 가능하세요?",
+    updatedAt: "2026-07-01T10:32:00Z",
+    adjusterId: CHAT_ADJUSTER_1_ID,
+    adjusterName: "김도현 손해사정사",
+    avatarUrl: null,
+    reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
+    caseNo: "#20260520-017",
+    roomStatus: "ACTIVE",
+    lastMessageAt: "2026-07-01T10:32:00Z",
+  },
+  {
+    chatRoomId: CHAT_ROOM_2_ID,
+    lastMessage: "외모추상 특약도 함께 보겠습니다.",
+    updatedAt: "2026-06-30T15:10:00Z",
+    adjusterId: CHAT_ADJUSTER_2_ID,
+    adjusterName: "정우성 손해사정사",
+    avatarUrl: "https://cdn.example.com/avatars/adjuster-2.png",
+    reportId: "f1000000-0000-4000-8000-000000000012",
+    caseNo: "#20260512-009",
+    roomStatus: "ACTIVE",
+    lastMessageAt: "2026-06-30T15:10:00Z",
+  },
+  {
+    chatRoomId: CHAT_ROOM_3_ID,
+    lastMessage: "상담이 종료되었습니다.",
+    updatedAt: "2026-06-20T09:00:00Z",
+    adjusterId: CHAT_ADJUSTER_3_ID,
+    adjusterName: "윤지후 손해사정사",
+    avatarUrl: null,
+    reportId: "f1000000-0000-4000-8000-000000000003",
+    caseNo: "#20260428-003",
+    roomStatus: "CLOSED",
+    lastMessageAt: "2026-06-20T09:00:00Z",
+  },
+];
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
+
+  // 채팅방 목록 (이슈 #48) — 정확 경로. :param 라우트보다 먼저 등록.
+  http.get(`${API_BASE_URL}/chats`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-failure") === "chat-list") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "채팅 목록을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { items: chatRooms },
+    });
+  }),
 
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
