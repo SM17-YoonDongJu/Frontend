@@ -15,6 +15,7 @@ export const mypageProfileSchema = z.object({
   avatarUrl: z.string().nullable(),
   headline: z.string(),
   specialties: z.array(z.string()),
+  career: z.number().int(),
   activityRegion: z.string(),
   role: userRoleSchema,
 });

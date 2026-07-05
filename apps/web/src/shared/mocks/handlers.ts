@@ -128,6 +128,7 @@ const ADJUSTER_MYPAGE = {
     avatarUrl: null,
     headline: "후유장해 전문 12년, 거절 사건을 다시 봅니다",
     specialties: ["후유장해", "교통사고"],
+    career: 12,
     activityRegion: "서울·경기",
     role: "CERTIFICATED_ADJUSTER",
   },
