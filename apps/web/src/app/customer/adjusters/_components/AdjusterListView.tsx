@@ -35,8 +35,7 @@ export function AdjusterListView() {
 
   const handleRegionChange = (region: string) => patch({ region: region || undefined });
 
-  const handleSortChange = (sort: string) =>
-    setFilter((prev) => ({ ...prev, sort: sort === activeSort ? undefined : sort }));
+  const handleSortChange = (sort: string) => patch({ sort });
 
   const adjusters = data.list;
   const totalCount = data.pagination.totalElements;
