@@ -581,7 +581,11 @@ export const handlers = [
   http.get(`${API_BASE_URL}/adjusters`, async ({ request }) => {
     await delay(400);
 
-    if (request.headers.get("x-mock-failure") === "adjusters") {
+    const url = new URL(request.url, "http://localhost");
+    const keyword = (url.searchParams.get("keyword") ?? "").trim();
+
+    // 실패 재현: 헤더 주입(개발용) 또는 검색어 "__error__"(E2E용 — 앱이 헤더를 못 보내므로 URL로 트리거)
+    if (request.headers.get("x-mock-failure") === "adjusters" || keyword === "__error__") {
       return HttpResponse.json(
         {
           status: "500",
@@ -592,8 +596,6 @@ export const handlers = [
       );
     }
 
-    const url = new URL(request.url, "http://localhost");
-    const keyword = (url.searchParams.get("keyword") ?? "").trim();
     const specialty = (url.searchParams.get("specialty") ?? "").trim();
     const region = (url.searchParams.get("region") ?? "").trim();
     const sort = url.searchParams.get("sort") ?? "rating";

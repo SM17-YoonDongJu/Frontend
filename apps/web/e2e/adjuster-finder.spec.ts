@@ -3,12 +3,12 @@ import { expect, test } from "@playwright/test";
 /**
  * 손해사정사 찾기 E2E (happy-path + 필터, 이슈 #47).
  *
- * 원칙: 핵심 사용자 흐름만 — 목록 열람 / 전문분야 필터 / 정렬 / 검색 미스 빈 상태 / 상담·프로필 이동 / 모바일 반응형.
+ * 원칙: 핵심 사용자 흐름만 — 목록 열람 / 전문분야 필터 / 정렬 / 검색 미스 빈 상태 / 상담·프로필 이동 / 모바일 반응형 / 서버 오류.
  * 응답은 기본 MSW 핸들러(GET /adjusters)가 제공(목 6명, meta 통계, keyword·specialty·region·sort 필터·정렬).
  * 필터/정렬 변경은 Suspense 재진입(스켈레톤)을 유발하므로 web-first 단언의 자동 재시도로 흡수한다.
+ * 서버 오류는 핸들러의 E2E 전용 트리거(검색어 "__error__")로 재현한다.
  *
  * 정적 위임(미테스트): 필드 형식·shape은 zod(adjuster-list.schema)·TS가 강제.
- * 보류: x-mock-failure 에러 상태 — 아래 test.fixme 참고(트리거 수단 부재).
  */
 
 const PATH = "/customer/adjusters";
@@ -111,14 +111,18 @@ test("모바일에서는 필터 칩이 보이고 사이드바는 숨는다", asy
   await expect(page.getByRole("article").filter({ hasText: "박준호 사정사" })).toHaveCount(0);
 });
 
-/**
- * 보류: 에러 상태(GET /adjusters 500) E2E.
- * 사유: MSW 핸들러가 에러를 `x-mock-failure: adjusters` 요청 헤더로만 트리거하는데,
- *   앱 fetchJson은 이 헤더를 보내지 않고, 프로필 스펙처럼 URL/고정ID 기반 트리거도 없다.
- *   MSW 서비스워커가 Playwright network layer보다 먼저 fetch를 가로채므로 page.route로
- *   헤더를 주입해도 MSW엔 닿지 않는다(결정적 트리거 수단 부재).
- * 대안(리더/데이터엔지니어 판단): 핸들러에 URL 쿼리(예: ?keyword=__error__) 트리거를 추가하거나,
- *   프로필 에러 플로우와 동일하게 고정 트리거를 두면 override 없이 E2E로 승격 가능.
- * 검증 시나리오: 500 응답 시 "손해사정사 목록을 불러오지 못했어요" + [다시 시도] 노출, 재시도 시 복구.
- */
-test.fixme("서버 오류 시 에러 안내와 재시도가 보인다(트리거 수단 부재로 보류)", async () => {});
+test("서버 오류가 나면 에러 안내와 다시 시도가 보인다", async ({ page }) => {
+  await page.goto(PATH);
+  await expect(page.getByRole("article")).toHaveCount(6);
+
+  // MSW 핸들러의 E2E 전용 실패 트리거 검색어
+  const search = page.getByLabel("손해사정사 검색");
+  await search.fill("__error__");
+
+  await expect(async () => {
+    await search.press("Enter");
+    await expect(page.getByText("손해사정사 목록을 불러오지 못했어요")).toBeVisible();
+  }).toPass({ timeout: 10000 });
+
+  await expect(page.getByRole("button", { name: "다시 시도" })).toBeVisible();
+});
