@@ -80,17 +80,28 @@ const PENDING_REVIEWS = [
 const heldReportIds = new Set<string>();
 
 // 알림 목록 목 데이터 (이슈 #49) — ⚠️ 명세없음-초안(.pr-assets/api-spec-draft-notifications.md).
-// createdAt은 로드 시점 기준 상대값 → 오늘/어제/이전 그룹이 모두 나오게 구성.
+// createdAt은 달력 기준(오늘/어제 고정) → 조회 시각과 무관하게 오늘·어제·이전 세 그룹이 항상 나온다.
 // read-all 호출 시 isRead를 모듈 상태로 전부 true 반영.
-function hoursAgo(hours: number): string {
-  return new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
+// 오늘 항목: 오늘 자정 기준 hoursBack 시간 전, 단 자정을 넘지 않게 클램프(새벽 조회 시에도 오늘 유지).
+function todayAgo(hoursBack: number): string {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const target = Date.now() - hoursBack * 60 * 60 * 1000;
+  return new Date(Math.max(target, startOfToday.getTime() + 60 * 1000)).toISOString();
+}
+
+function yesterdayAt(hour: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  d.setHours(hour, 0, 0, 0);
+  return d.toISOString();
 }
 
 const NOTIFICATIONS = [
-  { notificationId: "d0000000-0000-4000-8000-000000000001", type: "REVIEW_COMPLETE", title: "검수가 완료됐어요", body: "김도현 사정사님이 리포트를 검수했어요.", isRead: false, createdAt: hoursAgo(2) },
-  { notificationId: "d0000000-0000-4000-8000-000000000002", type: "RECEIVED_PROPOSAL", title: "새 제안 2건 도착", body: "교통사고 리포트에 상담 제안이 왔어요.", isRead: false, createdAt: hoursAgo(5) },
-  { notificationId: "d0000000-0000-4000-8000-000000000003", type: "CONSULT_ACCEPTED", title: "상담이 수락됐어요", body: "정우성 사정사님이 상담을 수락했어요.", isRead: true, createdAt: hoursAgo(24) },
-  { notificationId: "d0000000-0000-4000-8000-000000000004", type: "ANALYSIS_COMPLETE", title: "분석이 완료됐어요", body: "제출하신 서류 분석 리포트가 준비됐어요.", isRead: true, createdAt: hoursAgo(28) },
+  { notificationId: "d0000000-0000-4000-8000-000000000001", type: "REVIEW_COMPLETE", title: "검수가 완료됐어요", body: "김도현 사정사님이 리포트를 검수했어요.", isRead: false, createdAt: todayAgo(2) },
+  { notificationId: "d0000000-0000-4000-8000-000000000002", type: "RECEIVED_PROPOSAL", title: "새 제안 2건 도착", body: "교통사고 리포트에 상담 제안이 왔어요.", isRead: false, createdAt: todayAgo(5) },
+  { notificationId: "d0000000-0000-4000-8000-000000000003", type: "CONSULT_ACCEPTED", title: "상담이 수락됐어요", body: "정우성 사정사님이 상담을 수락했어요.", isRead: true, createdAt: yesterdayAt(15) },
+  { notificationId: "d0000000-0000-4000-8000-000000000004", type: "ANALYSIS_COMPLETE", title: "분석이 완료됐어요", body: "제출하신 서류 분석 리포트가 준비됐어요.", isRead: true, createdAt: yesterdayAt(11) },
   { notificationId: "d0000000-0000-4000-8000-000000000005", type: "IDENTITY_VERIFIED", title: "본인 인증 완료", body: "계정 본인 인증이 완료됐어요.", isRead: true, createdAt: "2026-05-18T09:00:00Z" },
 ];
 
