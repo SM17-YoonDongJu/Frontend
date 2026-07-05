@@ -29,11 +29,13 @@ export function ChatRoomListPanel({
 
   return (
     <div className="flex h-full flex-col">
-      <div className="px-5 pb-3 pt-1">
-        <h1 className="font-serif text-[1.4375rem] font-bold text-ink">메시지</h1>
+      {/* Figma — 모바일 제목 23px(663:3655) · 데스크톱 20px + 하단 구분선(95:4574) */}
+      <div className="px-5 pb-3 pt-1 md:border-b md:border-line-2 md:pb-3.5 md:pt-4">
+        <h1 className="font-serif text-[1.4375rem] font-bold text-ink md:text-[1.25rem]">메시지</h1>
       </div>
 
-      <div className="px-5 pb-2">
+      {/* 대화 검색 — Figma 데스크톱(95:4573)엔 검색창 없음 */}
+      <div className="px-5 pb-2 md:hidden">
         <div className="flex items-center gap-2.5 rounded-input border border-line bg-card px-4 py-3 focus-within:border-gold focus-within:ring-[3px] focus-within:ring-gold-soft">
           <Search className="shrink-0 text-[1.125rem] text-ink-3" />
           <input

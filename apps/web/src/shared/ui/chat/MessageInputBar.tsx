@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, useSyncExternalStore, type FormEvent } from "react";
 import { Send } from "@/shared/ui/icons/Send";
 
 export interface MessageInputBarProps {
@@ -11,8 +11,26 @@ export interface MessageInputBarProps {
   closed?: boolean;
 }
 
+const MD_QUERY = "(min-width: 768px)";
+
+function subscribeMd(onChange: () => void) {
+  const mql = window.matchMedia(MD_QUERY);
+  mql.addEventListener("change", onChange);
+  return () => mql.removeEventListener("change", onChange);
+}
+
+/** Figma 문구가 브레이크포인트별로 다름 — 모바일 "메시지 입력…"(663:3842) · 데스크톱 "메시지를 입력하세요"(95:4639) */
+function useIsMdUp() {
+  return useSyncExternalStore(
+    subscribeMd,
+    () => window.matchMedia(MD_QUERY).matches,
+    () => false,
+  );
+}
+
 export function MessageInputBar({ onSend, disabled, closed }: MessageInputBarProps) {
   const [value, setValue] = useState("");
+  const isMdUp = useIsMdUp();
 
   const trimmed = value.trim();
   const blocked = Boolean(disabled) || Boolean(closed);
@@ -36,22 +54,24 @@ export function MessageInputBar({ onSend, disabled, closed }: MessageInputBarPro
   return (
     <form
       onSubmit={submit}
-      className="flex items-center gap-2.5 border-t border-line-2 bg-paper px-4 py-3"
+      className="flex items-center gap-2.5 border-t border-line-2 bg-paper px-4 py-3 md:border-0 md:bg-transparent md:pb-4"
     >
       <input
         type="text"
         value={value}
         onChange={(event) => setValue(event.target.value)}
         disabled={disabled}
-        placeholder="메시지 입력…"
+        placeholder={isMdUp ? "메시지를 입력하세요" : "메시지 입력…"}
+        suppressHydrationWarning
         aria-label="메시지 입력"
-        className="h-11 flex-1 rounded-full border border-line bg-card px-4 text-[0.85rem] text-ink outline-none transition placeholder:text-ink-3 focus:border-gold focus:ring-[3px] focus:ring-gold-soft disabled:opacity-[.42]"
+        className="h-11 flex-1 rounded-full border border-line bg-card px-4 text-[0.85rem] text-ink outline-none transition placeholder:text-ink-3 focus:border-gold focus:ring-[3px] focus:ring-gold-soft disabled:opacity-[.42] md:h-[2.625rem] md:rounded-input"
       />
+      {/* 전송 버튼 — 모바일 골드 원형(663:3843) · 데스크톱 네이비 사각(95:4640) */}
       <button
         type="submit"
         disabled={!canSend}
         aria-label="전송"
-        className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gold text-[1.25rem] text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
+        className="flex size-11 shrink-0 items-center justify-center rounded-full bg-gold text-[1.25rem] text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42] md:size-[2.625rem] md:rounded-input md:bg-navy md:text-[1.0625rem] md:text-gold-2"
       >
         <Send />
       </button>

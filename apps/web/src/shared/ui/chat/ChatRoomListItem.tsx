@@ -36,13 +36,18 @@ export function ChatRoomListItem({
       href={href}
       aria-current={active ? "true" : undefined}
       className={cn(
-        "flex items-center gap-3 border-l-2 px-4 py-3.5 transition",
+        "flex items-center gap-3 border-l-[3px] px-4 py-3.5 transition",
+        // Figma 95:4577 — 활성 행: 골드소프트 배경 + 좌측 3px 골드 바
         active
-          ? "border-gold bg-paper-2"
+          ? "border-gold bg-gold-soft"
           : "border-transparent hover:bg-paper-2",
       )}
     >
-      <Avatar src={avatarUrl} name={name} />
+      <Avatar
+        src={avatarUrl}
+        name={name}
+        className="md:size-[2.625rem] md:text-[1.1rem]"
+      />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
