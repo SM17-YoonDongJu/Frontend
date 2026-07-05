@@ -1,10 +1,10 @@
 import { API_BASE_URL } from "@/shared/api/config";
 import { fetchJson } from "@/shared/api/fetch-json";
-import { notificationSettingsSchema } from "../_model/notification-settings.schema";
+import { notificationSettingsSchema } from "../model/notification-settings.schema";
 import type {
   NotificationSettings,
   UpdateNotificationSettingsBody,
-} from "../_model/types";
+} from "../model/types";
 
 export function updateNotificationSettings(
   body: UpdateNotificationSettingsBody,

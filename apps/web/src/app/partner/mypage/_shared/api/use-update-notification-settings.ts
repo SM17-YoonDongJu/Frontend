@@ -2,7 +2,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { settingsKeys } from "@/shared/api/query-keys";
-import type { UpdateNotificationSettingsBody } from "../_model/types";
+import type { UpdateNotificationSettingsBody } from "../model/types";
 import { updateNotificationSettings } from "./update-notification-settings";
 
 export function useUpdateNotificationSettings() {

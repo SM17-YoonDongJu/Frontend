@@ -1,7 +1,7 @@
 "use client";
 
 import { Modal } from "@/shared/ui/Modal";
-import { NotificationSettingsForm } from "./NotificationSettingsForm";
+import { NotificationSettingsForm } from "../_shared/ui/NotificationSettingsForm";
 
 interface NotificationSettingsModalProps {
   open: boolean;

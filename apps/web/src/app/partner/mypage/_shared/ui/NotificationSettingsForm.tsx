@@ -4,12 +4,12 @@ import { useState } from "react";
 import { Button } from "@/shared/ui/Button";
 import { Toggle } from "@/shared/ui/Toggle";
 import { MessageBubble } from "@/shared/ui/icons/MessageBubble";
-import { useNotificationSettings } from "../_api/use-notification-settings";
-import { useUpdateNotificationSettings } from "../_api/use-update-notification-settings";
+import { useNotificationSettings } from "../api/use-notification-settings";
+import { useUpdateNotificationSettings } from "../api/use-update-notification-settings";
 import type {
   NotificationSettings,
   UpdateNotificationSettingsBody,
-} from "../_model/types";
+} from "../model/types";
 
 // 사정사 노출 토글 — 라벨·설명은 Figma 146-4640 문구 그대로
 const ADJUSTER_ROWS = [
