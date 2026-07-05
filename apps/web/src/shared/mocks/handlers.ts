@@ -111,6 +111,11 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
 };
 
 // ── 채팅(이슈 #48) 모듈 스코프 가변 상태 ─────────────────────────────
+// senderId 정합: 내 메시지는 MOCK_ME_ID(= String(users/me.userId "1024")).
+// 페이지가 넘기는 currentUserId도 String(me.userId)라 문자열 비교로 mine 판별.
+// ⚠️ userId uuid 전환 백엔드 확인 요청 — 명세 senderId는 uuid, use-me.userId는 number.
+const MOCK_ME_ID = "1024";
+
 const CHAT_ADJUSTER_1_ID = "d1000000-0000-4000-8000-000000000001";
 const CHAT_ADJUSTER_2_ID = "d1000000-0000-4000-8000-000000000002";
 const CHAT_ADJUSTER_3_ID = "d1000000-0000-4000-8000-000000000003";
@@ -130,6 +135,13 @@ interface MockChatRoom {
   caseNo: string;
   roomStatus: "REQUESTED" | "ACTIVE" | "CLOSED";
   lastMessageAt: string;
+}
+
+interface MockChatMessage {
+  messageId: string;
+  senderId: string;
+  content: string;
+  createdAt: string;
 }
 
 const chatRooms: MockChatRoom[] = [
@@ -171,6 +183,26 @@ const chatRooms: MockChatRoom[] = [
   },
 ];
 
+// 방별 메시지 히스토리(2일 이상 걸쳐 날짜 구분선 검증, mine/theirs 교차)
+const chatMessages: Record<string, MockChatMessage[]> = {
+  [CHAT_ROOM_1_ID]: [
+    { messageId: "a1000000-0000-4000-8000-000000000001", senderId: CHAT_ADJUSTER_1_ID, content: "안녕하세요, 김도현 손해사정사입니다. 리포트 잘 받았습니다.", createdAt: "2026-06-30T09:00:00Z" },
+    { messageId: "a1000000-0000-4000-8000-000000000002", senderId: MOCK_ME_ID, content: "네, 안녕하세요. 검토 부탁드려요.", createdAt: "2026-06-30T09:05:00Z" },
+    { messageId: "a1000000-0000-4000-8000-000000000003", senderId: CHAT_ADJUSTER_1_ID, content: "장해등급 재산정 여지가 있어 보입니다.", createdAt: "2026-06-30T09:12:00Z" },
+    { messageId: "a1000000-0000-4000-8000-000000000004", senderId: MOCK_ME_ID, content: "그럼 어떻게 진행하면 될까요?", createdAt: "2026-07-01T10:20:00Z" },
+    { messageId: "a1000000-0000-4000-8000-000000000005", senderId: CHAT_ADJUSTER_1_ID, content: "리포트 검토해봤습니다. 상담 가능하세요?", createdAt: "2026-07-01T10:32:00Z" },
+  ],
+  [CHAT_ROOM_2_ID]: [
+    { messageId: "a2000000-0000-4000-8000-000000000001", senderId: MOCK_ME_ID, content: "외모추상 특약도 청구할 수 있나요?", createdAt: "2026-06-29T14:00:00Z" },
+    { messageId: "a2000000-0000-4000-8000-000000000002", senderId: CHAT_ADJUSTER_2_ID, content: "외모추상 특약도 함께 보겠습니다.", createdAt: "2026-06-30T15:10:00Z" },
+  ],
+  [CHAT_ROOM_3_ID]: [
+    { messageId: "a3000000-0000-4000-8000-000000000001", senderId: CHAT_ADJUSTER_3_ID, content: "상담 도와드리겠습니다.", createdAt: "2026-06-18T09:00:00Z" },
+    { messageId: "a3000000-0000-4000-8000-000000000002", senderId: MOCK_ME_ID, content: "감사합니다.", createdAt: "2026-06-19T11:00:00Z" },
+    { messageId: "a3000000-0000-4000-8000-000000000003", senderId: CHAT_ADJUSTER_3_ID, content: "상담이 종료되었습니다.", createdAt: "2026-06-20T09:00:00Z" },
+  ],
+};
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
@@ -189,6 +221,22 @@ export const handlers = [
       status: "200",
       message: "정상 처리되었습니다.",
       data: { items: chatRooms },
+    });
+  }),
+
+  // 메시지 히스토리 (이슈 #48) — 커서 페이지네이션(?cursor&size, 기본 30).
+  // CLOSED 방도 히스토리 조회 가능. 정확 경로(/chats)를 위에서 먼저 등록함.
+  http.get(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ params }) => {
+    await delay(400);
+
+    const chatRoomId = String(params.chatRoomId);
+    const list = chatMessages[chatRoomId] ?? [];
+
+    // MVP: 단일 페이지 반환(cursor 무시), 다음 페이지 없음.
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { list, nextCursor: null },
     });
   }),
 
