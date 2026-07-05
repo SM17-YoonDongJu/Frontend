@@ -30,7 +30,12 @@ export function MypageMenuList({
         description={`${reviewCount}건`}
         href="/partner/review"
       />
-      <MenuRow icon={<Bell />} title="알림 설정" onClick={onNotificationClick} />
+      <div className="md:hidden">
+        <MenuRow icon={<Bell />} title="알림 설정" href="/partner/mypage/notifications" />
+      </div>
+      <div className="hidden md:block">
+        <MenuRow icon={<Bell />} title="알림 설정" onClick={onNotificationClick} />
+      </div>
       <MenuRow
         icon={<ShieldCheck />}
         title="인증 · 자격 증빙"
