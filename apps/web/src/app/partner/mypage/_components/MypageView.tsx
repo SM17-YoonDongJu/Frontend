@@ -29,8 +29,8 @@ export function MypageView() {
         />
       </div>
 
-      <div className="mt-5.5 grid grid-cols-1 items-start gap-5.5 md:grid-cols-3 md:gap-7">
-        <div className="order-2 md:order-1 md:col-span-2">
+      <div className="mt-5.5 grid grid-cols-1 items-start gap-5.5 md:grid-cols-[minmax(0,1fr)_21.25rem] md:gap-7">
+        <div className="order-2 md:order-1">
           <MypageMenuList
             reviewCount={data.stats.totalCompletedCount}
             onNotificationClick={() => setNotificationOpen(true)}

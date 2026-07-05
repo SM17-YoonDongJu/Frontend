@@ -52,14 +52,14 @@ export function Modal({
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-card-lg border border-line bg-card p-6 shadow-lg outline-none",
+          "max-h-[85dvh] w-full max-w-[31.25rem] overflow-y-auto rounded-[1.25rem] bg-card px-8 pb-6.5 pt-7.5 shadow-[0_2rem_5rem_-1.5rem_rgba(21,32,46,0.5)] outline-none",
           className,
         )}
       >
         {kicker && (
-          <p className="mb-1 text-[0.75rem] font-semibold text-gold-ink">{kicker}</p>
+          <p className="mb-1 text-[0.75rem] font-bold text-gold-ink">{kicker}</p>
         )}
-        <h2 className="font-serif text-[1.125rem] font-bold text-ink">{title}</h2>
+        <h2 className="font-serif text-[1.4375rem] font-bold text-ink">{title}</h2>
         <div className="mt-4">{children}</div>
       </div>
     </div>

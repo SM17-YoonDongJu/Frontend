@@ -16,7 +16,7 @@ export function MypageMenuList({
   onCredentialClick,
 }: MypageMenuListProps) {
   return (
-    <nav className="flex flex-col gap-3 md:block md:divide-y md:divide-line-2 md:rounded-card-lg md:border md:border-line md:bg-card md:shadow-sm">
+    <nav className="flex flex-col gap-3 md:block md:divide-y md:divide-line-2 md:rounded-card md:border md:border-line md:bg-card md:shadow-sm">
       <MenuRow
         icon={<User />}
         title="프로필 관리"
