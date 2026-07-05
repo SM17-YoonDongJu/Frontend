@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { RoomStatus } from "@/shared/api/chat/chat.schema";
 import { Avatar } from "@/shared/ui/Avatar";
-import { ArrowLeft } from "@/shared/ui/icons/ArrowLeft";
+import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { ROOM_STATUS_META } from "./room-status";
 
@@ -32,7 +32,8 @@ export function ChatThreadHeader({
           aria-label="목록으로"
           className="-ml-1 flex size-8 items-center justify-center rounded-full text-[1.25rem] text-ink transition hover:bg-paper-2 md:hidden"
         >
-          <ArrowLeft />
+          {/* Figma 663:3801 — 얇은 좌측 셰브런 */}
+          <ChevronRight className="rotate-180" />
         </button>
       )}
 
@@ -48,7 +49,7 @@ export function ChatThreadHeader({
       <Link
         href={reportHref}
         aria-label="공유 리포트 열기"
-        className="flex size-9 items-center justify-center rounded-button border border-line text-[1.125rem] text-ink transition hover:bg-paper-2"
+        className="flex size-9 items-center justify-center rounded-button text-[1.1875rem] text-ink transition hover:bg-paper-2"
       >
         <FileText />
       </Link>

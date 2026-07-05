@@ -42,15 +42,13 @@ export function ChatRoomListItem({
           : "border-transparent hover:bg-paper-2",
       )}
     >
-      <Avatar src={avatarUrl} name={name} className={cn(closed && "opacity-70")} />
+      <Avatar src={avatarUrl} name={name} />
 
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
           <span className="truncate text-[0.8625rem] font-bold text-ink">{name}</span>
           {closed && (
-            <span className="shrink-0 text-[0.6875rem] text-ink-3">
-              {ROOM_STATUS_META.CLOSED.label}
-            </span>
+            <span className="sr-only">{ROOM_STATUS_META.CLOSED.label}</span>
           )}
           <time className="ml-auto shrink-0 text-[0.6875rem] text-ink-3">
             {formatRoomListTime(lastMessageAt)}

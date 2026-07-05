@@ -21,7 +21,8 @@ export function MessageBubble({ content, createdAt, mine }: MessageBubbleProps) 
       >
         {content}
       </div>
-      <time className="px-1 text-[0.6875rem] text-ink-3">
+      {/* Figma 모바일(663:3796)엔 말풍선 시각 없음 — 데스크톱(95:4571)만 표시 */}
+      <time className="hidden px-1 text-[0.6875rem] text-ink-3 md:block">
         {formatMessageTime(createdAt)}
       </time>
     </div>
