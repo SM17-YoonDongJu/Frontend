@@ -16,7 +16,7 @@ interface AdjusterReviewsProps {
 }
 
 export function AdjusterReviews({ reviews, averageRating, reviewCount }: AdjusterReviewsProps) {
-  const sorted = [...reviews].sort(
+  const sorted = reviews.toSorted(
     (a, b) => new Date(b.reviewedAt).getTime() - new Date(a.reviewedAt).getTime(),
   );
 
