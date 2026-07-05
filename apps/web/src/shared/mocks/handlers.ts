@@ -16,6 +16,36 @@ const ADJUSTER_EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
 const ADJUSTER_NOT_FOUND_ID = "99999999-9999-4999-8999-999999999999";
 
 // 손해사정사 목록 목 데이터 (이슈 #47) — GET /adjusters. verified 전부 true, avatarUrl null 섞음.
+// 상위 6명은 Figma 카드 그대로, 나머지 20명은 페이지네이션(더보기) 확인용 생성분(총 26명 = 20 + 6, 2페이지).
+const EXTRA_ADJUSTER_NAMES = [
+  "김하늘", "박서준", "이도현", "최지우", "정다은",
+  "한지민", "오세훈", "서예린", "임태양", "황보라",
+  "신우재", "문가영", "배성호", "노유진", "권민혁",
+  "송이레", "양지원", "구본우", "차수아", "홍재이",
+] as const;
+
+const EXTRA_SPECIALTIES = ["후유장해", "교통사고", "실손 의료비", "암·진단비", "배상책임", "산재 연계"] as const;
+const EXTRA_REGIONS = ["서울", "경기", "인천", "대구 · 경북", "광주 · 전남"] as const;
+
+// 결정적 생성(랜덤 없음) — E2E가 개수·정렬을 단언할 수 있게 경력≤16(정우성 18 최고), 평점≤4.8(정우성 4.9 최고) 유지.
+const EXTRA_ADJUSTER_MOCK = EXTRA_ADJUSTER_NAMES.map((name, i) => {
+  const specialty: string = EXTRA_SPECIALTIES[i % EXTRA_SPECIALTIES.length] ?? "후유장해";
+  const region: string = EXTRA_REGIONS[i % EXTRA_REGIONS.length] ?? "서울";
+  return {
+    adjusterId: `77777777-0000-4000-8000-${String(i).padStart(12, "0")}`,
+    name: `${name} 사정사`,
+    avatarUrl: null,
+    verified: true,
+    specialties: [specialty],
+    headline: `${specialty} 청구 근거 정리 전문`,
+    averageRating: Math.round((4.3 + (i % 6) * 0.1) * 10) / 10,
+    reviewCount: 30 + i * 5,
+    career: 5 + (i % 12),
+    completedConsultCount: 60 + i * 7,
+    activityRegion: region,
+  };
+});
+
 const ADJUSTER_LIST_MOCK = [
   {
     adjusterId: "11111111-1111-4111-8111-111111111111",
@@ -95,6 +125,7 @@ const ADJUSTER_LIST_MOCK = [
     completedConsultCount: 95,
     activityRegion: "대전 · 충청",
   },
+  ...EXTRA_ADJUSTER_MOCK,
 ];
 
 function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {

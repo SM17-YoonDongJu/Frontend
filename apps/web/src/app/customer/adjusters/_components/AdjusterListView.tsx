@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { AdjusterListFilter } from "@/shared/api/query-keys";
+import { Button } from "@/shared/ui/Button";
 import { useAdjusters } from "../_api/use-adjusters";
 import type { SortKey } from "../_model/types";
 import { AdjusterCard } from "./AdjusterCard";
@@ -17,14 +18,15 @@ const ALL_SPECIALTY = "전체";
 
 export function AdjusterListView() {
   const [filter, setFilter] = useState<AdjusterListFilter>({});
-  const { data } = useAdjusters(filter);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useAdjusters(filter);
 
   const activeSpecialty = filter.specialty ?? "";
   const activeRegion = filter.region ?? "";
   const activeSort = (filter.sort as SortKey | undefined) ?? DEFAULT_SORT;
 
+  // page는 infinite 쿼리의 pageParam이 관리 — 필터가 바뀌면 쿼리키 교체로 1페이지부터 다시 쌓인다
   const patch = (next: Partial<AdjusterListFilter>) =>
-    setFilter((prev) => ({ ...prev, ...next, page: 1 }));
+    setFilter((prev) => ({ ...prev, ...next }));
 
   const handleSearch = (keyword: string) => patch({ keyword: keyword || undefined });
 
@@ -37,8 +39,10 @@ export function AdjusterListView() {
 
   const handleSortChange = (sort: string) => patch({ sort });
 
-  const adjusters = data.list;
-  const totalCount = data.pagination.totalElements;
+  const adjusters = data.pages.flatMap((page) => page.list);
+  const [firstPage] = data.pages;
+  const totalCount = firstPage?.pagination.totalElements ?? adjusters.length;
+  const meta = firstPage?.meta;
 
   return (
     <div className="mx-auto w-full max-w-6xl px-4 py-8 md:px-6 md:py-10">
@@ -58,9 +62,11 @@ export function AdjusterListView() {
         </p>
       </header>
 
-      <div className="mt-6">
-        <StatsBand meta={data.meta} />
-      </div>
+      {meta && (
+        <div className="mt-6">
+          <StatsBand meta={meta} />
+        </div>
+      )}
 
       <div className="mt-6">
         <SearchBar
@@ -106,6 +112,18 @@ export function AdjusterListView() {
               ))
             )}
           </div>
+
+          {hasNextPage && (
+            <div className="mt-6 flex justify-center">
+              <Button
+                variant="outline"
+                loading={isFetchingNextPage}
+                onClick={() => fetchNextPage()}
+              >
+                더보기
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
