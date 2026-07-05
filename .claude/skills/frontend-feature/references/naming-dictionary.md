@@ -223,6 +223,31 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 | 로컬 검수 상태 | `useReviewDraft`(useReducer) |
 | 사건 표시 ID | `caseId`(YYYYMMDD-NNN) / 라우팅 키 `reportId`(uuid) |
 
+## 알림 (이슈 #49, 초안 `.pr-assets/api-spec-draft-notifications.md` — 명세없음, 도메인 settings 확정 2026-07-05)
+
+### 알림 항목
+| 개념 | 필드 | 타입 | 비고 |
+|------|------|------|------|
+| 알림 ID | `notificationId` | string(uuid) | |
+| 알림 유형 | `type` | enum `NotificationType` | 아래 enum |
+| 제목 | `title` | string | 카드 굵은 글씨 |
+| 본문 | `body` | string | 카드 1줄 설명 |
+| 읽음 여부 | `isRead` | boolean | false → 안읽음 도트 |
+| 발생 시각 | `createdAt` | string(ISO 8601) | 그룹핑·상대시간은 클라이언트 계산 |
+
+### NotificationType enum (알림 설정 토글 키 어근 정합)
+`REVIEW_COMPLETE`(검수 완료 ↔ 설정 reviewComplete) · `RECEIVED_PROPOSAL`(새 제안 ↔ 설정 receivedProposal) · `CONSULT_ACCEPTED`(상담 수락) · `ANALYSIS_COMPLETE`(분석 완료) · `IDENTITY_VERIFIED`(본인 인증)
+
+⚠️ 뒤 3개는 설정 토글 카테고리 부재 — 차단 매핑 보류(초안 문서 참조).
+
+### 알림 쿼리키 / 훅
+| 개념 | 식별자 |
+|------|--------|
+| 쿼리키 factory | `notificationKeys`(`list`) |
+| 목록 훅 | `useNotificationList` |
+| 모두 읽음 뮤테이션 | `useReadAllNotifications` |
+| 날짜 그룹 | `NotificationGroup`(`TODAY`/`YESTERDAY`/`EARLIER`, 라벨 오늘/어제/이전) |
+
 ## 출처
 
 - API 명세서 DB: `collection://7ce30798-f08f-82ee-81bb-875a29ed96bd` (필드·enum 단일 진실)
