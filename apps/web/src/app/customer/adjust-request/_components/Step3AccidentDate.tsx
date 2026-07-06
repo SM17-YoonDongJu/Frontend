@@ -7,7 +7,7 @@ import { Input } from "@/shared/ui/Input";
 import type { AdjustRequestDraft } from "../_model/types";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <span className="mb-2 block text-[13px] font-semibold text-ink-2">{children}</span>;
+  return <span className="mb-2 block text-[0.8125rem] font-semibold text-ink-2">{children}</span>;
 }
 
 export function Step3AccidentDate() {
@@ -18,8 +18,10 @@ export function Step3AccidentDate() {
   return (
     <section className="flex flex-col gap-6">
       <div>
-        <h2 className="font-serif text-[22px] font-bold text-ink">언제 있었던 일인가요?</h2>
-        <p className="mt-1.5 text-[13.5px] text-ink-3">
+        <h2 className="font-serif text-[1.5625rem] font-bold text-ink sm:text-[1.375rem]">
+          언제 있었던 일인가요?
+        </h2>
+        <p className="mt-1.5 text-[0.84375rem] text-ink-3">
           사고 발생일을 입력하고, 입원했다면 입원 기록을 추가해 주세요.
         </p>
       </div>
@@ -31,7 +33,7 @@ export function Step3AccidentDate() {
           name="accidentDate"
           render={({ field }) => (
             <DatePicker
-              className="max-w-[220px]"
+              className="max-w-[13.75rem]"
               value={field.value}
               onChange={field.onChange}
               placeholder="사고 발생일 선택"
@@ -54,7 +56,7 @@ export function Step3AccidentDate() {
         </div>
 
         {fields.length === 0 ? (
-          <p className="rounded-card border border-dashed border-line py-6 text-center text-[13px] text-ink-3">
+          <p className="rounded-card border border-dashed border-line py-6 text-center text-[0.8125rem] text-ink-3">
             입원 기록이 없으면 건너뛰어도 됩니다.
           </p>
         ) : (
@@ -62,17 +64,17 @@ export function Step3AccidentDate() {
             {fields.map((field, index) => (
               <div key={field.id} className="rounded-card border border-line p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-[13px] font-semibold text-ink-2">입원 {index + 1}</span>
+                  <span className="text-[0.75rem] font-bold text-gold-ink">입원 {index + 1}차</span>
                   <button
                     type="button"
                     onClick={() => remove(index)}
-                    className="text-[12.5px] text-ink-3 hover:text-terra"
+                    className="text-[0.78125rem] text-ink-3 transition hover:text-terra"
                   >
                     삭제
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <FieldLabel>입원일</FieldLabel>
                     <Controller
