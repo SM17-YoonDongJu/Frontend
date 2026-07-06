@@ -4,7 +4,7 @@
 # 실패 시 커밋 차단 — 타입 깨짐/lint 위반을 커밋에 섞지 않는다.
 
 staged=$(git diff --cached --name-only --diff-filter=ACMR \
-  | grep -E '(\.(ts|tsx)$|(^|/)package\.json$|(^|/)tsconfig(\..+)?\.json$|(^|/)eslint(\..+)?\.(js|mjs|cjs|json)$|(^|/)next\.config\.(js|mjs|cjs)$)' || true)
+  | grep -E '(\.(ts|tsx)$|(^|/)package\.json$|(^|/)tsconfig(\..+)?\.json$|(^|/)\.oxlintrc\.json$|(^|/)next\.config\.(js|mjs|cjs)$)' || true)
 if [ -z "$staged" ]; then
   exit 0
 fi
@@ -20,10 +20,9 @@ if ! $PNPM typecheck; then
 fi
 
 echo "▶ pre-commit: lint (스테이징된 파일만)..."
-# next lint는 Next 16에서 제거됨 → eslint 직접 실행. 레거시 전수 검사 대신 변경분만 검사.
 web_ts=$(printf '%s\n' "$staged" | grep -E '^apps/web/.*\.(ts|tsx)$' | sed 's#^apps/web/##' || true)
 if [ -n "$web_ts" ]; then
-  if ! (cd apps/web && pnpm --config.verify-deps-before-run=false exec eslint --max-warnings=0 $web_ts); then
+  if ! (cd apps/web && pnpm --config.verify-deps-before-run=false exec oxlint --max-warnings=0 $web_ts); then
     echo "✘ lint 실패 — 커밋 중단. lint 오류를 고치고 다시 커밋하라."
     echo "  (의도적으로 건너뛰려면: git commit --no-verify)"
     exit 1

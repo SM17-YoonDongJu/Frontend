@@ -40,10 +40,10 @@ function AdjustRequestFunnel() {
   }, [funnel.currentStep]);
 
   const validateStep = () => {
-    const result = step.schema.safeParse(form.getValues());
+    const parsed = step.schema.safeParse(form.getValues());
     form.clearErrors();
-    if (!result.success) {
-      for (const issue of result.error.issues) {
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
         const name = issue.path.join(".");
         if (name) form.setError(name as FieldPath<AdjustRequestDraft>, { message: issue.message });
       }
@@ -86,7 +86,7 @@ function AdjustRequestFunnel() {
   }
 
   return (
-    <div className="mx-auto min-h-[100dvh] w-full max-w-[760px] px-4 pb-12 pt-8">
+    <div className="mx-auto min-h-[100dvh] w-full max-w-[47.5rem] px-4 pb-12 pt-8">
       <FunnelProgress current={funnel.currentStep} total={funnel.total} title={step.title} />
 
       <FormProvider {...form}>
@@ -101,7 +101,7 @@ function AdjustRequestFunnel() {
       </FormProvider>
 
       {submitError && (
-        <p className="mt-3 text-[13px] font-medium text-terra">{submitError}</p>
+        <p className="mt-3 text-[0.8125rem] font-medium text-terra">{submitError}</p>
       )}
 
       <FunnelFooter

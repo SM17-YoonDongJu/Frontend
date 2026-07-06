@@ -25,8 +25,8 @@ test("진입하면 프로필 초기값이 모두 보인다", async ({ page }) =>
     await expect(page.getByRole("heading", { name: section })).toBeVisible();
   }
 
-  // 활동명(읽기전용) + headline 초기값
-  await expect(page.getByText("김상정")).toBeVisible();
+  // 활동명(읽기전용) + headline 초기값 — 헤더의 "김상정 사정사" 버튼과 겹치지 않게 본문 문구로
+  await expect(page.getByText("김상정 손해사정사")).toBeVisible();
   await expect(page.getByPlaceholder(HEADLINE_PLACEHOLDER)).toHaveValue(
     "후유장해 전문 12년, 거절 사건을 다시 봅니다",
   );

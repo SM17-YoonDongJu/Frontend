@@ -7,6 +7,13 @@ import { ProposalsError } from "./ProposalsError";
 import { ProposalsSkeleton } from "./ProposalsSkeleton";
 import { ProposalsView } from "./ProposalsView";
 import { ViewedProposalsProvider } from "../_hooks/use-viewed-proposals";
+import type { FallbackProps } from "react-error-boundary";
+
+function ProposalsErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+  return (
+    <ProposalsError code={(error as Error).name} onRetry={resetErrorBoundary} />
+  );
+}
 
 export function ProposalsBoundary({ reportId }: { reportId: string }) {
   const [mounted, setMounted] = useState(false);
@@ -19,12 +26,7 @@ export function ProposalsBoundary({ reportId }: { reportId: string }) {
         {({ reset }) => (
           <ErrorBoundary
             onReset={reset}
-            fallbackRender={({ error, resetErrorBoundary }) => (
-              <ProposalsError
-                code={(error as Error).name}
-                onRetry={resetErrorBoundary}
-              />
-            )}
+            FallbackComponent={ProposalsErrorFallback}
           >
             <Suspense fallback={<ProposalsSkeleton />}>
               <ProposalsView reportId={reportId} />
