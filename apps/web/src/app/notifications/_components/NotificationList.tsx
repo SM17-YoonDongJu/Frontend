@@ -1,21 +1,16 @@
 "use client";
 
-import { Bell } from "@/shared/ui/icons/Bell";
 import { useNotificationList } from "../_api/use-notification-list";
 import { groupNotificationsByDate } from "../_model/notification-group";
 import { NotificationCard } from "./NotificationCard";
+import { NotificationEmpty } from "./NotificationEmpty";
 
 export function NotificationList() {
   const { data } = useNotificationList();
   const notifications = data.list;
 
   if (notifications.length === 0) {
-    return (
-      <div className="flex flex-col items-center px-6 pt-24 text-center">
-        <Bell className="text-[1.75rem] text-ink-3" />
-        <p className="mt-3 text-[0.875rem] text-ink-2">아직 받은 알림이 없어요</p>
-      </div>
-    );
+    return <NotificationEmpty />;
   }
 
   const sections = groupNotificationsByDate(notifications);
