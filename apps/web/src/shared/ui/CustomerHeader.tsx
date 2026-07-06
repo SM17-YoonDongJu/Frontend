@@ -7,7 +7,7 @@ import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 /** 고객 페이지 상단 네비게이션 항목 (경로는 placeholder — 실 라우팅은 후속). */
 const NAV_ITEMS = [
   { label: "보상 분석 신청", href: "#" },
-  { label: "손해사정사 찾기", href: "#" },
+  { label: "손해사정사 찾기", href: "/customer/adjusters" },
   { label: "내 리포트", href: "#" },
   { label: "이용 방법", href: "#" }
 ] as const;

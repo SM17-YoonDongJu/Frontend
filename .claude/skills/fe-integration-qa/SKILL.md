@@ -24,7 +24,7 @@ description: 손해사정 플랫폼 프론트 통합 QA·E2E 테스트 방법론
 추측하지 말고 실제 실행:
 ```
 pnpm typecheck     # tsc --noEmit — 경계 타입 불일치 다수 여기서 잡힘
-pnpm lint          # eslint — prefer-const, eqeqeq, no-console
+pnpm lint          # oxlint — prefer-const, eqeqeq, no-console
 ```
 - 실패 시 **에러 전문 인용** + 원인 레이어 지목. "통과했을 것"이라 쓰지 않는다.
 - `noUncheckedIndexedAccess` 위반(배열 인덱스 undefined 미처리)은 흔하니 우선 확인.

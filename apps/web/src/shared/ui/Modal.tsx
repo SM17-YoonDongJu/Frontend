@@ -1,0 +1,61 @@
+"use client";
+
+import { useEffect, useRef, type ReactNode } from "react";
+import { cn } from "@/shared/lib/utils";
+import { useFocusTrap } from "@/shared/lib/use-focus-trap";
+
+export interface ModalProps {
+  open: boolean;
+  title: string;
+  /** 배경/Esc로 닫기 허용 여부. 강제 선택 플로우면 false. */
+  dismissible?: boolean;
+  onClose: () => void;
+  children: ReactNode;
+  /** 카드 오버라이드(예: max-w-sm) */
+  className?: string;
+}
+
+/** 오버레이 + 카드 모달 셸. 포커스 트랩·Esc·overlay 클릭 닫기 내장, 본문은 children 슬롯. */
+export function Modal({
+  open,
+  title,
+  dismissible = true,
+  onClose,
+  children,
+  className,
+}: ModalProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(cardRef, open);
+
+  useEffect(() => {
+    if (!open || !dismissible) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, dismissible, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onClick={dismissible ? onClose : undefined}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-ink/60 p-4"
+    >
+      <div
+        ref={cardRef}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        className={cn(
+          "max-h-[85dvh] w-full max-w-md overflow-y-auto rounded-card-lg border border-line bg-card p-6 shadow-lg outline-none",
+          className,
+        )}
+      >
+        <h2 className="font-serif text-[1.125rem] font-bold text-ink">{title}</h2>
+        <div className="mt-4">{children}</div>
+      </div>
+    </div>
+  );
+}
