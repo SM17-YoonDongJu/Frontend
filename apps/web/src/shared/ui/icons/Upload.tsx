@@ -2,7 +2,7 @@ interface UploadProps {
   className?: string;
 }
 
-/** 업로드 아이콘. 크기·색은 className으로(currentColor). */
+/** 업로드(위 화살표+트레이) 아이콘. 크기·색은 className으로(currentColor). */
 export function Upload({ className }: UploadProps) {
   return (
     <svg
@@ -12,14 +12,13 @@ export function Upload({ className }: UploadProps) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="1.7"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
     >
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <path d="M17 8l-5-5-5 5" />
-      <path d="M12 3v12" />
+      <path d="M12 16V4m0 0 4 4m-4-4-4 4" />
+      <path d="M5 18v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1" />
     </svg>
   );
 }

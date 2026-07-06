@@ -1,13 +1,12 @@
 "use client";
 
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
-import { Button } from "@/shared/ui/Button";
 import { DatePicker } from "@/shared/ui/DatePicker";
 import { Input } from "@/shared/ui/Input";
 import type { AdjustRequestDraft } from "../_model/types";
 
 function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <span className="mb-2 block text-[13px] font-semibold text-ink-2">{children}</span>;
+  return <span className="mb-2 block text-[0.8125rem] font-semibold text-ink-2">{children}</span>;
 }
 
 export function Step3AccidentDate() {
@@ -18,8 +17,10 @@ export function Step3AccidentDate() {
   return (
     <section className="flex flex-col gap-6">
       <div>
-        <h2 className="font-serif text-[22px] font-bold text-ink">언제 있었던 일인가요?</h2>
-        <p className="mt-1.5 text-[13.5px] text-ink-3">
+        <h2 className="font-serif text-[1.5625rem] font-bold text-ink sm:text-[1.375rem]">
+          언제 있었던 일인가요?
+        </h2>
+        <p className="mt-1.5 text-[0.84375rem] text-ink-3">
           사고 발생일을 입력하고, 입원했다면 입원 기록을 추가해 주세요.
         </p>
       </div>
@@ -31,7 +32,7 @@ export function Step3AccidentDate() {
           name="accidentDate"
           render={({ field }) => (
             <DatePicker
-              className="max-w-[220px]"
+              className="max-w-[13.75rem]"
               value={field.value}
               onChange={field.onChange}
               placeholder="사고 발생일 선택"
@@ -42,37 +43,24 @@ export function Step3AccidentDate() {
       </div>
 
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <FieldLabel>입원 기록</FieldLabel>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => append({ start: "", end: null, reason: null })}
-          >
-            + 입원 추가하기
-          </Button>
-        </div>
+        <FieldLabel>입원 기록</FieldLabel>
 
-        {fields.length === 0 ? (
-          <p className="rounded-card border border-dashed border-line py-6 text-center text-[13px] text-ink-3">
-            입원 기록이 없으면 건너뛰어도 됩니다.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-3">
+        {fields.length > 0 && (
+          <div className="mb-3 flex flex-col gap-3">
             {fields.map((field, index) => (
               <div key={field.id} className="rounded-card border border-line p-4">
                 <div className="mb-3 flex items-center justify-between">
-                  <span className="text-[13px] font-semibold text-ink-2">입원 {index + 1}</span>
+                  <span className="text-[0.75rem] font-bold text-gold-ink">입원 {index + 1}차</span>
                   <button
                     type="button"
                     onClick={() => remove(index)}
-                    className="text-[12.5px] text-ink-3 hover:text-terra"
+                    className="text-[0.78125rem] text-ink-3 transition hover:text-terra"
                   >
                     삭제
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
                     <FieldLabel>입원일</FieldLabel>
                     <Controller
@@ -123,6 +111,19 @@ export function Step3AccidentDate() {
             ))}
           </div>
         )}
+
+        <button
+          type="button"
+          onClick={() => append({ start: "", end: null, reason: null })}
+          className="flex h-11 w-full items-center justify-center gap-1.5 rounded-input border border-line bg-paper-2 text-[0.875rem] font-bold text-ink-2 transition hover:border-ink/40"
+        >
+          <span className="text-[1.0625rem] leading-none">+</span>
+          입원 기록 추가
+        </button>
+
+        <p className="mt-2 rounded-input border border-line-2 bg-paper-2 px-3.5 py-3 text-[0.8125rem] text-ink-3">
+          입원하지 않았다면 비워두고 다음으로 넘어가세요.
+        </p>
       </div>
     </section>
   );
