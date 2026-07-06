@@ -32,7 +32,7 @@ export function Step1AccidentType() {
         어떤 사고인가요?
       </h2>
       <p className="mt-1.5 text-[0.84375rem] text-ink-3">
-        유형을 고르면 적용 가능한 약관·특약을 좁혀 분석합니다.
+        유형에 맞춰 약관·특약을 분석해드려요.
       </p>
 
       <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup">
