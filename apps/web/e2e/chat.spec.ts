@@ -46,6 +46,18 @@ test("검색어를 입력하면 이름·마지막 메시지로 필터되고 없�
   await expect(page.getByText("검색 결과가 없어요")).toBeVisible();
 });
 
+test("대화가 하나도 없으면 안내와 손해사정사 찾기 CTA가 보인다", async ({ page }) => {
+  await page.setExtraHTTPHeaders({ "x-mock-empty": "chat-list" });
+  await page.goto(CUSTOMER_LIST);
+
+  await expect(page.getByText("아직 진행 중인 대화가 없어요")).toBeVisible();
+
+  await expect(async () => {
+    await page.getByRole("link", { name: "손해사정사 찾아보기" }).click();
+    await expect(page).toHaveURL(/\/customer\/adjusters/);
+  }).toPass({ timeout: 10000 });
+});
+
 test("대화방에 들어가면 히스토리·날짜 구분선·양쪽 말풍선이 보인다", async ({
   page,
 }) => {

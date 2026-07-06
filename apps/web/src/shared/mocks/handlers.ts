@@ -330,10 +330,14 @@ export const handlers = [
       );
     }
 
+    // 빈 상태(대화 없음) 검증용 — E2E override
+    const items =
+      request.headers.get("x-mock-empty") === "chat-list" ? [] : chatRooms;
+
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { items: chatRooms },
+      data: { items },
     });
   }),
 

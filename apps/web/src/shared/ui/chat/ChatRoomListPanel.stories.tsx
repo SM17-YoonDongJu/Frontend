@@ -48,7 +48,7 @@ const meta: Meta<typeof ChatRoomListPanel> = {
   args: { rooms, buildHref: (id: string) => `/customer/chat/${id}` },
   decorators: [
     (Story) => (
-      <div style={{ maxWidth: 420, height: 560, border: "1px solid #e6e0d4" }}>
+      <div className="h-[35rem] max-w-[26.25rem] border border-line">
         <Story />
       </div>
     ),
@@ -65,3 +65,10 @@ export const ActiveRow: Story = {
 };
 
 export const Empty: Story = { args: { rooms: [] } };
+
+export const EmptyWithAction: Story = {
+  args: {
+    rooms: [],
+    emptyAction: { href: "/customer/adjusters", label: "손해사정사 찾아보기" },
+  },
+};

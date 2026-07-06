@@ -7,6 +7,7 @@ import { ChatThreadSkeleton } from "@/shared/ui/chat/ChatThreadSkeleton";
 
 const CHAT_BASE_PATH = "/customer/chat";
 const REPORT_BASE_PATH = "/customer/report";
+const EMPTY_ACTION = { href: "/customer/adjusters", label: "손해사정사 찾아보기" };
 
 export default async function CustomerChatThreadPage({
   params,
@@ -23,7 +24,11 @@ export default async function CustomerChatThreadPage({
           fallback={<ChatListSkeleton />}
           errorTitle="대화 목록을 불러오지 못했어요"
         >
-          <ChatListContent chatBasePath={CHAT_BASE_PATH} activeChatRoomId={chatRoomId} />
+          <ChatListContent
+            chatBasePath={CHAT_BASE_PATH}
+            activeChatRoomId={chatRoomId}
+            emptyAction={EMPTY_ACTION}
+          />
         </ChatSectionBoundary>
       }
       main={
