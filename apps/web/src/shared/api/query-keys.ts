@@ -13,11 +13,19 @@ export interface ReviewListFilter {
   size?: number;
 }
 
+// 검수 내역(이슈 #59). page는 useInfiniteQuery의 pageParam이 관리 → 키에서 제외.
+export interface ReviewedReportsFilter {
+  status?: string;
+  month?: string;
+  size?: number;
+}
+
 export const reportKeys = createQueryKeys("report", {
   list: (filter?: ReportListFilter) => [{ filter: filter ?? {} }],
   detail: (reportId: string) => [reportId],
   pendingReview: (filter?: ReviewListFilter) => [{ filter: filter ?? {} }],
   pendingReviewSummary: () => ["summary"],
+  reviewedReports: (filter?: ReviewedReportsFilter) => [{ filter: filter ?? {} }],
 });
 
 export const userKeys = createQueryKeys("user", {
