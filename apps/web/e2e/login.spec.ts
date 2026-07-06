@@ -13,6 +13,13 @@ import { expect, test } from "@playwright/test";
 const LOGIN_PATH = "/login";
 const RECENT_LOGIN_KEY = "bb.recentLogin";
 
+// 재로그인 화면 카피는 뷰포트별로 다르다(데스크톱 "다시 만나서 반가워요" / 모바일 "다시 오신 걸 환영해요").
+// 최근 로그인 카드는 데스크톱 전용(모바일 시안엔 없음).
+const MOBILE_MAX_WIDTH = 640;
+function returningHeading(width: number): string {
+  return width < MOBILE_MAX_WIDTH ? "다시 오신 걸 환영해요" : "다시 만나서 반가워요";
+}
+
 test("흔적이 없으면 첫 로그인 화면과 시작하기 버튼·약관 문구가 보인다", async ({ page }) => {
   await page.goto(LOGIN_PATH);
 
@@ -40,10 +47,15 @@ test("최근 로그인 흔적이 있으면 재로그인 화면과 최근 로그�
 
   await page.goto(LOGIN_PATH);
 
-  await expect(page.getByRole("heading", { name: "다시 만나서 반가워요" })).toBeVisible();
-  await expect(page.getByText("카카오 · yun***@example.com")).toBeVisible();
-  await expect(page.getByText("마지막 로그인 2026.05.20")).toBeVisible();
+  const width = page.viewportSize()?.width ?? 0;
+  await expect(page.getByRole("heading", { name: returningHeading(width) })).toBeVisible();
   await expect(page.getByRole("button", { name: "카카오로 계속하기" })).toBeVisible();
+
+  // 최근 로그인 카드(플랫폼·마스킹 계정·일자)는 데스크톱 화면에만 노출된다.
+  if (width >= MOBILE_MAX_WIDTH) {
+    await expect(page.getByText("카카오 · yun***@example.com")).toBeVisible();
+    await expect(page.getByText("마지막 로그인 2026.05.20")).toBeVisible();
+  }
 });
 
 test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저장된다", async ({ page }) => {
@@ -53,7 +65,8 @@ test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저�
 
   // 흔적 저장은 사용자 관찰 기준으로 검증 — 로그인 화면 재진입 시 재로그인 화면이 보인다.
   await page.goto(LOGIN_PATH);
-  await expect(page.getByRole("heading", { name: "다시 만나서 반가워요" })).toBeVisible();
+  const width = page.viewportSize()?.width ?? 0;
+  await expect(page.getByRole("heading", { name: returningHeading(width) })).toBeVisible();
   await expect(page.getByRole("button", { name: "카카오로 계속하기" })).toBeVisible();
 });
 
