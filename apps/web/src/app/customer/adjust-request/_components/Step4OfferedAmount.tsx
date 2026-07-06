@@ -53,6 +53,25 @@ export function Step4OfferedAmount() {
         label="아직 제안받지 않았어요"
         className="w-full rounded-input border border-line bg-card px-4 py-3.5 text-ink-2"
       />
+
+      <div className="border-t border-line-2 pt-5">
+        <h3 className="font-serif text-[1.25rem] font-bold text-ink">가입한 보험을 알려주세요</h3>
+        <p className="mb-3 mt-1 text-[0.84375rem] text-ink-3">
+          증권을 올리면 특약이 다음 단계에서 자동으로 인식돼요.
+        </p>
+        <span className="mb-2 block text-[0.8125rem] font-semibold text-ink-2">가입 보험 · 특약</span>
+        <Controller
+          control={control}
+          name="enrolledInsurance"
+          render={({ field }) => (
+            <Input
+              placeholder="예) OO손해보험 · 행복드림 종합보험"
+              value={field.value ?? ""}
+              onChange={field.onChange}
+            />
+          )}
+        />
+      </div>
     </section>
   );
 }
