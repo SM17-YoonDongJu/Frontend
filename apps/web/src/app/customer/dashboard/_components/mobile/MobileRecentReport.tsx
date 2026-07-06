@@ -49,14 +49,22 @@ export function MobileRecentReport() {
 }
 
 function RecentReportCard({ report }: { report: ReportListItem }) {
-  const { reportId, accidentType, claimedMinAmount, claimedMaxAmount, offeredAmount, createdAt } =
-    report;
+  const {
+    reportId,
+    accidentType,
+    treatment,
+    claimedMinAmount,
+    claimedMaxAmount,
+    offeredAmount,
+    createdAt,
+  } = report;
 
   return (
     <article className="rounded-card border border-line bg-card p-[1.125rem] shadow-[0px_1px_1px_rgba(21,32,46,0.03)]">
       <div className="flex items-center justify-between">
         <span className="text-[0.8125rem] font-bold text-ink-2">
           {accidentTypeLabel(accidentType)}
+          {treatment && ` · ${treatment}`}
         </span>
         <span className="flex items-center gap-1.5 rounded-tag bg-terra-soft px-2.5 py-1 text-[0.75rem] font-bold text-terra">
           <AlertTriangle className="text-[0.8125rem]" />
