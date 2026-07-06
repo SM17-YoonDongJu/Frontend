@@ -10,12 +10,14 @@ interface ProfileCardProps {
 
 export function ProfileCard({ title, titleExtra, children, className }: ProfileCardProps) {
   return (
-    <section className={cn("rounded-card-lg border border-line bg-card p-7", className)}>
+    <section
+      className={cn("rounded-card border border-line bg-card p-5 lg:rounded-card-lg lg:p-7", className)}
+    >
       <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold text-ink">{title}</h2>
+        <h2 className="text-[0.9375rem] font-semibold text-ink lg:text-lg">{title}</h2>
         {titleExtra}
       </div>
-      <div className="mt-5">{children}</div>
+      <div className="mt-3 lg:mt-5">{children}</div>
     </section>
   );
 }

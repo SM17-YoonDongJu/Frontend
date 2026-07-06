@@ -445,8 +445,12 @@ export const handlers = [
   }),
 
   // 본인 정보 조회 (고객 대시보드 인사말)
+  // E2E 역할 게이팅 검증용: localStorage["mock:userType"]="adjuster"면 사정사로 응답(기본 insured_person).
   http.get(`${API_BASE_URL}/users/me`, async () => {
     await delay(300);
+    const override =
+      typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
+    const userType = override === "adjuster" ? "adjuster" : "insured_person";
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
@@ -454,7 +458,7 @@ export const handlers = [
         userId: 1024,
         nickname: "윤서",
         email: "yunseo@example.com",
-        userType: "insured_person",
+        userType,
         createdAt: "2024-03-02T09:00:00Z",
       },
     });
@@ -960,16 +964,20 @@ export const handlers = [
         ],
         issue: [
           {
-            title: "외모추상 특약 누락",
-            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
-            status: "CONFIRMED",
-            tag: "특약 제5조",
-          },
-          {
-            title: "장해등급 적용",
+            title: "장해등급 과소 산정 가능",
             opinion: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
             status: "TRUSTED",
             tag: "약관 제12조",
+            impactAmount: 350,
+            tags: ["약관 제12조", "분쟁조정 2023-1456"],
+          },
+          {
+            title: "외모추상 특약 청구 누락",
+            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
+            status: "CONFIRMED",
+            tag: "특약 제5조",
+            impactAmount: 200,
+            tags: ["특약 약관 §4", "유사사례 1456"],
           },
           {
             title: "진행 방향",
@@ -980,6 +988,7 @@ export const handlers = [
         ],
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
+        reportNo: "20260520-017",
         adjusterId: crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
