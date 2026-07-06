@@ -6,14 +6,19 @@ import type { ReviewListItem } from "../_model/types";
 
 type Tone = NonNullable<StatusBadgeProps["tone"]>;
 
+// Figma 시안 기준 유형별 뱃지 톤 — traffic은 회색(neutral)이 정답값(누락 아님).
 const TYPE_TONE: Record<string, Tone> = {
   disability: "gold",
+  traffic: "neutral",
   medical_indemnity: "green",
 };
 
 const NEW_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000;
 
 const toManwon = (won: number) => Math.round(won / 10_000).toLocaleString("ko-KR");
+
+// 제안 대비 금액 — 부호를 값에서 분리해 음수여도 "+-N만"으로 깨지지 않게 표기.
+const formatHeadroom = (won: number) => `${won < 0 ? "−" : "+"}${toManwon(Math.abs(won))}만`;
 
 function isNew(createdAt: string) {
   return Date.now() - new Date(createdAt).getTime() < NEW_THRESHOLD_MS;
@@ -55,7 +60,7 @@ export function ReviewCaseCard({ item }: Props) {
             <div className="flex-1 rounded-[0.625rem] border border-line-2 px-3 py-2.5">
               <p className="text-[0.61rem] text-ink-3">제안 대비</p>
               <p className="mt-0.5 text-[0.85rem] font-bold tabular-nums text-gold-ink">
-                +{toManwon(item.offerHeadroom!)}만
+                {formatHeadroom(item.offerHeadroom!)}
               </p>
             </div>
           )}
