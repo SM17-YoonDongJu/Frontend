@@ -9,7 +9,7 @@ import type { SocialProvider } from "./_components/SocialLoginButtons";
 import { useSocialLogin } from "./_hooks/use-social-login";
 
 export default function LoginPage() {
-  const { recentLogin, saveRecentLogin } = useRecentLogin();
+  const { recentLogin } = useRecentLogin();
   const { startLogin } = useSocialLogin();
   const isMobile = useIsMobile();
   const [pendingProvider, setPendingProvider] = useState<SocialProvider | null>(null);
@@ -17,11 +17,6 @@ export default function LoginPage() {
   const handleSelect = (provider: SocialProvider) => {
     setPendingProvider(provider);
     startLogin(provider);
-  };
-
-  const handleRecentSelect = (provider: SocialProvider) => {
-    if (recentLogin) saveRecentLogin({ ...recentLogin, lastLoginAt: new Date().toISOString() });
-    handleSelect(provider);
   };
 
   const mode = recentLogin ? "returning" : "first";
@@ -35,7 +30,7 @@ export default function LoginPage() {
       mode={mode}
       recentLogin={recentLogin}
       onSelect={handleSelect}
-      onRecentSelect={handleRecentSelect}
+      onRecentSelect={handleSelect}
       pendingProvider={pendingProvider}
     />
   );
