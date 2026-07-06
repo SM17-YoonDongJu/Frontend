@@ -37,7 +37,7 @@ export function ConsultGuideCard({ adjusterId, consultGuide }: ConsultGuideCardP
 
       <Button
         full
-        className="mt-5"
+        className="mt-5 hidden lg:inline-flex"
         onClick={startConsult}
         icon={
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -47,7 +47,7 @@ export function ConsultGuideCard({ adjusterId, consultGuide }: ConsultGuideCardP
       >
         상담 신청
       </Button>
-      <p className="mt-3 text-center text-xs text-ink-3">분석 리포트를 첨부해 요청합니다</p>
+      <p className="mt-3 hidden text-center text-xs text-ink-3 lg:block">분석 리포트를 첨부해 요청합니다</p>
     </section>
   );
 }

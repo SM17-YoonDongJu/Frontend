@@ -27,7 +27,7 @@ export function AdjusterReviews({ reviews, averageRating, reviewCount }: Adjuste
         reviewCount > 0 ? (
           <span className="flex items-center gap-1.5 text-sm text-ink-3">
             <StarRating score={averageRating} max={1} />
-            <span className="font-semibold text-ink">{averageRating.toFixed(1)}</span>
+            <span className="font-bold text-gold-ink">{averageRating.toFixed(1)}</span>
             <span>· {reviewCount}건</span>
           </span>
         ) : undefined
@@ -36,9 +36,12 @@ export function AdjusterReviews({ reviews, averageRating, reviewCount }: Adjuste
       {sorted.length === 0 ? (
         <p className="py-8 text-center text-sm text-ink-3">아직 등록된 후기가 없습니다.</p>
       ) : (
-        <ul className="divide-y divide-line">
+        <ul className="space-y-3">
           {sorted.map((review) => (
-            <li key={`${review.nickname}-${review.reviewedAt}`} className="py-5 first:pt-0 last:pb-0">
+            <li
+              key={`${review.nickname}-${review.reviewedAt}`}
+              className="rounded-card border border-line bg-card p-4 shadow-xs lg:p-5"
+            >
               <div className="flex items-center gap-3">
                 <span
                   aria-hidden

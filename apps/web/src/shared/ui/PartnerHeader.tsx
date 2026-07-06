@@ -65,14 +65,14 @@ export function PartnerHeader() {
         </div>
 
         <div className="flex items-center gap-3">
-          <button
-            type="button"
+          <Link
+            href="/notifications"
             aria-label="알림"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-ink-2 transition hover:bg-paper hover:text-ink"
           >
             <Bell />
-          </button>
-          <button type="button" className="flex items-center gap-2">
+          </Link>
+          <Link href="/partner/mypage" className="flex items-center gap-2">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-lg text-gold">
               <Scale className="text-base" />
             </span>
@@ -81,7 +81,7 @@ export function PartnerHeader() {
                 {data.nickname} 사정사
               </span>
             )}
-          </button>
+          </Link>
         </div>
       </div>
     </header>

@@ -7,7 +7,7 @@ import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 /** 고객 페이지 상단 네비게이션 항목 (경로는 placeholder — 실 라우팅은 후속). */
 const NAV_ITEMS = [
   { label: "보상 분석 신청", href: "#" },
-  { label: "손해사정사 찾기", href: "#" },
+  { label: "손해사정사 찾기", href: "/customer/adjusters" },
   { label: "내 리포트", href: "#" },
   { label: "이용 방법", href: "#" }
 ] as const;
@@ -40,13 +40,13 @@ export function CustomerHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          <Link
+            href="/notifications"
             aria-label="알림"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-ink-2 transition hover:bg-paper hover:text-ink"
           >
             <Bell />
-          </button>
+          </Link>
           {/* 계정 메뉴 트리거 — 드롭다운 토글은 후속(클라이언트 컴포넌트) */}
           <button
             type="button"
