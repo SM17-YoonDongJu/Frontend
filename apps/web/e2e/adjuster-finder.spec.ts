@@ -13,6 +13,10 @@ import { expect, test } from "@playwright/test";
 
 const PATH = "/customer/adjusters";
 const MOBILE = { width: 390, height: 844 };
+
+// PC 레이아웃(통계 밴드·사이드바) 전제 테스트가 모바일 디바이스 프로젝트에서도 돌며 깨지지 않게
+// 데스크톱 뷰포트 고정. 모바일 검증은 아래 전용 테스트가 setViewportSize로 직접 지정한다.
+test.use({ viewport: { width: 1280, height: 900 } });
 const PAGE_SIZE = 20;
 const TOTAL = 26;
 const DISABILITY_COUNT = 7; // 후유장해 보유: 정우성·윤지후·한도윤 + 생성분 4명
