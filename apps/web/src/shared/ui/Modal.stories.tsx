@@ -11,7 +11,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function Demo({ dismissible }: { dismissible?: boolean }) {
+function Demo({ dismissible, kicker }: { dismissible?: boolean; kicker?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -19,6 +19,7 @@ function Demo({ dismissible }: { dismissible?: boolean }) {
       <Modal
         open={open}
         title="알림 설정"
+        kicker={kicker}
         dismissible={dismissible}
         onClose={() => setOpen(false)}
       >
@@ -46,4 +47,9 @@ export const Default: Story = {
 export const NonDismissible: Story = {
   args: { open: false, title: "알림 설정", onClose: () => {}, children: null },
   render: () => <Demo dismissible={false} />,
+};
+
+export const WithKicker: Story = {
+  args: { open: false, title: "알림 설정", onClose: () => {}, children: null },
+  render: () => <Demo kicker="내 정보" />,
 };

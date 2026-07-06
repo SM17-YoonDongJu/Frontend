@@ -14,7 +14,7 @@ export const dashboardSummarySchema = z.object({
 
 export const dashboardActivitySchema = z.object({
   completedCount: z.number().int(),
-  consultConvertedCount: z.number().int(),
+  consultationConvertedCount: z.number().int(),
   averageRating: z.number(),
 });
 

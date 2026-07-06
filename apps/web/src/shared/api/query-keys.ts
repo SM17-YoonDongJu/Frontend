@@ -35,6 +35,10 @@ export const authKeys = createQueryKeys("auth", {
   oauthCallback: (provider: string, code: string) => [provider, code],
 });
 
+export const settingsKeys = createQueryKeys("settings", {
+  notification: null,
+});
+
 export const proposalKeys = createQueryKeys("proposal", {
   list: (reportId: string) => [reportId],
 });
@@ -58,6 +62,7 @@ export const adjusterKeys = createQueryKeys("adjuster", {
   meProfileSummary: () => ["me", "profile", "summary"],
   dashboard: () => ["dashboard"],
   inProgress: () => ["in-progress"],
+  mypage: () => ["me", "mypage"],
   list: (filter?: AdjusterListFilter) => [{ filter: filter ?? {} }],
   detail: (adjusterId: string) => [adjusterId],
 });
