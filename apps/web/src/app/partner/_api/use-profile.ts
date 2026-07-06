@@ -7,7 +7,7 @@ import { getProfile } from "./get-profile";
 
 export function useProfile() {
   return useQuery({
-    queryKey: adjusterKeys.meProfile().queryKey,
+    queryKey: adjusterKeys.meProfileSummary().queryKey,
     queryFn: getProfile,
     staleTime: STALE_TIME_AUTH,
     gcTime: GC_TIME_DEFAULT,
