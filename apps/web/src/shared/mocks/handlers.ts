@@ -593,6 +593,18 @@ export const handlers = [
     const url = new URL(request.url, "http://localhost");
     const page = Number(url.searchParams.get("page") ?? "0");
 
+    // 빈 상태(0건) 주입 — E2E 빈 상태 검증용(x-mock-failure 패턴 미러)
+    if (request.headers.get("x-mock-scenario") === "reports-empty") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: {
+          list: [],
+          pagination: { page, size: 10, totalElements: 0, totalPages: 0, hasNext: false },
+        },
+      });
+    }
+
     const list = [
       {
         reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
@@ -605,6 +617,8 @@ export const handlers = [
         proposalCount: 2,
         reviewedAt: "2026-05-22T10:14:00Z",
         adjusterNickname: "김도현",
+        offeredAmount: 8_500_000,
+        treatment: "후유장해",
       },
       {
         reportId: DASHBOARD_AWAITING_REPORT_ID,
@@ -617,6 +631,8 @@ export const handlers = [
         proposalCount: 0,
         reviewedAt: null,
         adjusterNickname: null,
+        offeredAmount: null,
+        treatment: null,
       },
     ];
 
