@@ -56,7 +56,7 @@ export function MultiInputList({
               onClick={() => removeRow(index)}
               disabled={rows.length <= minRows}
               aria-label={`${label} ${index + 1} 삭제`}
-              className="flex h-[2.875rem] w-[2.375rem] shrink-0 items-center justify-center rounded-input border border-line bg-card text-[1.0625rem] leading-none text-ink-3 transition hover:border-ink/40 hover:text-terra disabled:opacity-[.4] disabled:hover:border-line disabled:hover:text-ink-3"
+              className="flex h-[2.875rem] w-[2.375rem] shrink-0 items-center justify-center rounded-input border border-line bg-card text-[1.0625rem] leading-none text-ink-3 transition hover:border-ink/40 hover:text-terra disabled:opacity-40 disabled:hover:border-line disabled:hover:text-ink-3"
             >
               −
             </button>

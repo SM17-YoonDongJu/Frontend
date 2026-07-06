@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { cn } from "@/shared/lib/utils";
+import { Upload } from "@/shared/ui/icons/Upload";
 
 interface FileDropzoneProps {
   onFiles: (files: File[]) => void;
@@ -36,15 +37,7 @@ export function FileDropzone({ onFiles, accept }: FileDropzoneProps) {
       )}
     >
       <span className="flex h-12 w-12 items-center justify-center rounded-input border border-line bg-card text-ink-3">
-        <svg width="23" height="23" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M12 16V4m0 0 4 4m-4-4-4 4M5 18v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1"
-            stroke="currentColor"
-            strokeWidth="1.7"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        <Upload className="text-[1.4375rem]" />
       </span>
       <p className="text-[0.875rem] font-bold text-ink">파일 추가</p>
       <p className="text-[0.75rem] text-ink-3">

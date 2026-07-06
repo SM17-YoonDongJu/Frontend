@@ -15,7 +15,7 @@ interface FunnelFooterProps {
  */
 export function FunnelFooter({ isFirst, isLast, loading, onPrev, onNext }: FunnelFooterProps) {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-paper/95 px-4 py-3 backdrop-blur sm:static sm:mt-6 sm:flex sm:items-center sm:justify-between sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+    <div className="fixed inset-x-0 bottom-0 z-10 border-t border-line bg-paper/95 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur sm:static sm:mt-6 sm:flex sm:items-center sm:justify-between sm:border-0 sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
       <Button
         variant="ghost"
         onClick={onPrev}

@@ -5,6 +5,7 @@ import { useFormContext } from "react-hook-form";
 import {
   accidentTypeLabel,
   SUPPORTED_ACCIDENT_TYPE,
+  type AccidentType,
 } from "@/shared/model/accident-type";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { Pencil } from "@/shared/ui/icons/Pencil";
@@ -14,7 +15,7 @@ import { TrendingUp } from "@/shared/ui/icons/TrendingUp";
 import { AccidentTypeCard } from "./AccidentTypeCard";
 import type { AdjustRequestDraft } from "../_model/types";
 
-const ACCIDENT_TYPES: { value: string; description: string; icon: ReactNode }[] = [
+const ACCIDENT_TYPES: { value: AccidentType; description: string; icon: ReactNode }[] = [
   { value: "traffic", description: "자동차·이륜차 사고 보상", icon: <TrendingUp /> },
   { value: "disability", description: "장해등급·후유증 보상", icon: <Scale /> },
   { value: "medical_indemnity", description: "치료비·통원 보상", icon: <FileText /> },

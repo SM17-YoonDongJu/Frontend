@@ -31,7 +31,7 @@ export function FunnelProgress({ current, total, title, isFirst, onBack }: Funne
           onClick={onBack}
           disabled={isFirst}
           aria-label="이전 단계"
-          className="-ml-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink transition hover:bg-paper-2 disabled:opacity-[.35]"
+          className="-ml-1.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-ink transition hover:bg-paper-2 disabled:opacity-35"
         >
           <ChevronRight className="rotate-180 text-[1.375rem]" />
         </button>
