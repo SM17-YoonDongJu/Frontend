@@ -284,6 +284,65 @@ const ADJUSTER_MYPAGE = {
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
+  // 회원가입 (#43) — 전역 봉투 거울. 성공 201 + data(토큰 포함).
+  // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 2자 미만→400 VALIDATION_ERROR,
+  //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD, x-mock-failure:social→500 EXTERNAL_API_ERROR.
+  http.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {
+    await delay(600);
+
+    const body = (await request.json().catch(() => ({}))) as {
+      provider?: string;
+      socialToken?: string;
+      nickname?: string;
+      userType?: string;
+      email?: string;
+    };
+
+    if (request.headers.get("x-mock-failure") === "social") {
+      return HttpResponse.json(
+        { status: "500", code: "EXTERNAL_API_ERROR", message: "소셜 인증에 실패했습니다. 다시 시도해 주세요." },
+        { status: 500 },
+      );
+    }
+
+    if (!body.provider || !body.socialToken || !body.userType) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
+        { status: 400 },
+      );
+    }
+
+    if (!body.nickname || body.nickname.length < 2 || body.nickname.length > 20) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "닉네임은 2~20자로 입력해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    if (body.nickname === "중복닉네임") {
+      return HttpResponse.json(
+        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 사용 중인 닉네임이에요." },
+        { status: 409 },
+      );
+    }
+
+    return HttpResponse.json(
+      {
+        status: "201",
+        message: "회원가입이 완료되었습니다.",
+        data: {
+          userId: crypto.randomUUID(),
+          nickname: body.nickname,
+          // 응답 역할은 명세대로 role(요청 userType 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
+          role: body.userType === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
+          accessToken: `mock-access-${crypto.randomUUID()}`,
+          refreshToken: `mock-refresh-${crypto.randomUUID()}`,
+        },
+      },
+      { status: 201 },
+    );
+  }),
+
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
     await delay(500);
@@ -453,7 +512,7 @@ export const handlers = [
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
-        userId: 1024,
+        userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
         nickname: "윤서",
         email: "yunseo@example.com",
         userType,
