@@ -8,7 +8,6 @@ import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { Spinner } from "@/shared/ui/icons/Spinner";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
 import type { ReviewListItem } from "../review/_model/types";
-import { formatReviewDue } from "../_model/review-due";
 
 interface MobilePendingCardProps {
   item: ReviewListItem;
@@ -17,7 +16,6 @@ interface MobilePendingCardProps {
 }
 
 export function MobilePendingCard({ item, navigatingId, onNavigate }: MobilePendingCardProps) {
-  const due = formatReviewDue(item.reviewDeadline, new Date());
   const isNavigating = navigatingId === item.reportId;
   const isBlocked = navigatingId !== null;
 
@@ -33,18 +31,20 @@ export function MobilePendingCard({ item, navigatingId, onNavigate }: MobilePend
     <div className="rounded-card border border-line bg-card p-4">
       <div className="flex items-center gap-2">
         <StatusBadge tone="gold">{accidentTypeLabel(item.accidentType)}</StatusBadge>
-        <span className="flex items-center gap-1 text-[0.6875rem] text-ink-3">
-          <span className="size-[0.3125rem] rounded-full bg-gold" />
-          {item.region}
-        </span>
+        {item.region && (
+          <span className="flex items-center gap-1 text-[0.6875rem] text-ink-3">
+            <span className="size-[0.3125rem] rounded-full bg-gold" />
+            {item.region}
+          </span>
+        )}
       </div>
 
-      <p className="mt-2 truncate text-[0.8125rem] font-semibold text-ink">{item.title}</p>
+      <p className="mt-2 truncate text-[0.8125rem] font-semibold text-ink">
+        {item.title ?? accidentTypeLabel(item.accidentType)}
+      </p>
 
       <div className="mt-2 flex items-center justify-between">
-        <span className={`text-[0.75rem] font-bold ${due.urgent ? "text-terra" : "text-ink-3"}`}>
-          {due.label}
-        </span>
+        <span className="text-[0.75rem] text-ink-3">{item.caseId ? `#${item.caseId}` : ""}</span>
         <Link
           href={`/partner/review/${item.reportId}`}
           onClick={handleClick}

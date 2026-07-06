@@ -1,8 +1,10 @@
+const SKELETON_CARD_COUNT = 3;
+
 export function ReviewSkeleton() {
   return (
-    <div className="space-y-4">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="h-28 animate-pulse rounded-card-lg bg-line-2" />
+    <div className="flex flex-col gap-3 px-5 pt-3">
+      {Array.from({ length: SKELETON_CARD_COUNT }).map((_, i) => (
+        <div key={i} className="h-[11.5rem] animate-pulse rounded-card bg-line-2" />
       ))}
     </div>
   );
