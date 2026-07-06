@@ -17,6 +17,7 @@ interface BasicInfoSectionProps {
   control: Control<ProfileFormValues>;
   errors: FieldErrors<ProfileFormValues>;
   nickname: string;
+  registrationNo?: string | null;
   headlineLength: number;
   introductionLength: number;
   onUploadingChange?: (uploading: boolean) => void;
@@ -42,6 +43,7 @@ export function BasicInfoSection({
   control,
   errors,
   nickname,
+  registrationNo,
   headlineLength,
   introductionLength,
   onUploadingChange,
@@ -66,7 +68,7 @@ export function BasicInfoSection({
       <div className="flex justify-center lg:hidden">
         <span className="inline-flex items-center gap-1.5 rounded-chip bg-green-soft px-2.5 py-1 text-[0.75rem] font-bold text-green">
           <ShieldCheck className="text-[0.8125rem]" />
-          자격 인증 완료 · 등록번호 제0000호
+          자격 인증 완료{registrationNo ? ` · 등록번호 ${registrationNo}` : ""}
         </span>
       </div>
 

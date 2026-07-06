@@ -132,6 +132,7 @@ export function ProfileEditView() {
               control={control}
               errors={errors}
               nickname={profile.nickname}
+              registrationNo={profile.registrationNo}
               headlineLength={values.headline?.length ?? 0}
               introductionLength={values.introduction?.length ?? 0}
               onUploadingChange={setIsUploading}

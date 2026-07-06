@@ -260,6 +260,7 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
     { period: "2014.03 ~ 2019.02", company: "OO손해사정법인" },
     { period: "2019.03 ~ 현재", company: "독립 손해사정사" },
   ],
+  registrationNo: "제0000호",
   updatedAt: "2026-06-20T08:00:00Z",
   // 대시보드 헤더·인사말용 집계(읽기 전용)
   averageRating: 4.9,
