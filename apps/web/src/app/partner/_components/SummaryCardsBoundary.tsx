@@ -7,6 +7,15 @@ import { useHydrated } from "@/shared/lib/use-hydrated";
 import { SectionError } from "./SectionError";
 import { SummaryCards } from "./SummaryCards";
 import { SummaryCardsSkeleton } from "./SummaryCardsSkeleton";
+import type { FallbackProps } from "react-error-boundary";
+
+function SummaryCardsErrorFallback({ resetErrorBoundary }: FallbackProps) {
+  return (
+    <div className="md:col-span-4">
+      <SectionError onRetry={resetErrorBoundary} />
+    </div>
+  );
+}
 
 export function SummaryCardsBoundary() {
   if (!useHydrated()) return <SummaryCardsSkeleton />;
@@ -16,11 +25,7 @@ export function SummaryCardsBoundary() {
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ resetErrorBoundary }) => (
-            <div className="md:col-span-4">
-              <SectionError onRetry={resetErrorBoundary} />
-            </div>
-          )}
+          FallbackComponent={SummaryCardsErrorFallback}
         >
           <Suspense fallback={<SummaryCardsSkeleton />}>
             <SummaryCards />

@@ -15,7 +15,7 @@ const PREVIEW_LIMIT = 3;
 export function PendingReviewPreview() {
   const { data } = useReviewList({ status: "AWAITING_INSPECTION" });
 
-  const sorted = [...data.list].sort((a, b) => b.matchingScore - a.matchingScore);
+  const sorted = data.list.toSorted((a, b) => b.matchingScore - a.matchingScore);
   const top = sorted.slice(0, PREVIEW_LIMIT);
 
   return (

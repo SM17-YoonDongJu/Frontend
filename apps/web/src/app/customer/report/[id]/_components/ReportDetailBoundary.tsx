@@ -6,6 +6,13 @@ import { ErrorBoundary } from "react-error-boundary";
 import { ReportDetailError } from "./ReportDetailError";
 import { ReportDetailSkeleton } from "./ReportDetailSkeleton";
 import { ReportDetailView } from "./ReportDetailView";
+import type { FallbackProps } from "react-error-boundary";
+
+function ReportDetailErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+  return (
+    <ReportDetailError code={(error as Error).name} onRetry={resetErrorBoundary} />
+  );
+}
 
 export function ReportDetailBoundary({ reportId }: { reportId: string }) {
   const [mounted, setMounted] = useState(false);
@@ -17,12 +24,7 @@ export function ReportDetailBoundary({ reportId }: { reportId: string }) {
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <ReportDetailError
-              code={(error as Error).name}
-              onRetry={resetErrorBoundary}
-            />
-          )}
+          FallbackComponent={ReportDetailErrorFallback}
         >
           <Suspense fallback={<ReportDetailSkeleton />}>
             <ReportDetailView reportId={reportId} />

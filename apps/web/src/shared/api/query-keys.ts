@@ -34,6 +34,8 @@ export const reviewKeys = createQueryKeys("review", {
 
 export const adjusterKeys = createQueryKeys("adjuster", {
   meProfile: () => ["me", "profile"],
+  // 헤더/인사말용 축약 프로필 — meProfile(전체 프로필)과 응답 shape가 달라 키 분리
+  meProfileSummary: () => ["me", "profile", "summary"],
   dashboard: () => ["dashboard"],
   inProgress: () => ["in-progress"],
   detail: (adjusterId: string) => [adjusterId],
