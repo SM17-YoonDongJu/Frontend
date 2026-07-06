@@ -46,7 +46,9 @@ export function Step6Confirm() {
   return (
     <section className="flex flex-col gap-5">
       <div>
-        <h2 className="font-serif text-[1.375rem] font-bold text-ink">분석 준비가 끝났어요</h2>
+        <h2 className="font-serif text-[1.5625rem] font-bold text-ink sm:text-[1.375rem]">
+          분석 준비가 끝났어요
+        </h2>
         <p className="mt-1.5 text-[0.84375rem] text-ink-3">
           입력하신 정보로 약관·특약·판례를 분석해 리포트를 만들어 드릴게요.
         </p>

@@ -1,10 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { FileText } from "@/shared/ui/icons/FileText";
 import { AccidentTypeCard } from "./AccidentTypeCard";
 
 const meta: Meta<typeof AccidentTypeCard> = {
   title: "adjust-request/AccidentTypeCard",
   component: AccidentTypeCard,
   args: {
+    icon: <FileText />,
     title: "실손 의료비",
     description: "치료비·통원 보상",
     selected: false,
@@ -12,7 +14,7 @@ const meta: Meta<typeof AccidentTypeCard> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[320px]">
+      <div className="w-[20rem]">
         <Story />
       </div>
     ),
