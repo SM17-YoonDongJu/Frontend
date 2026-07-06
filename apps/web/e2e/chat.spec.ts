@@ -104,8 +104,11 @@ test("전송이 실패하면 낙관적으로 추가된 메시지가 롤백된다
   await input.fill(failing);
   await page.getByRole("button", { name: "전송" }).click();
 
-  // onError 롤백 → temp 메시지 제거
+  // onError 롤백 → temp 메시지 제거 + 실패 안내 노출
   await expect(page.getByText(failing)).toHaveCount(0);
+  await expect(
+    page.getByText("메시지를 보내지 못했어요. 다시 시도해 주세요."),
+  ).toBeVisible();
 });
 
 test("종료된 상담방은 입력이 비활성화된다", async ({ page }) => {

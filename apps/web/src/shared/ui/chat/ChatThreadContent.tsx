@@ -54,6 +54,7 @@ export function ChatThreadContent({
         onSend={(content) => sendMessage.mutate({ content })}
         disabled={sendMessage.isPending}
         closed={closed}
+        sendFailed={sendMessage.isError}
       />
     </div>
   );

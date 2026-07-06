@@ -17,7 +17,8 @@ export function ChatThreadView({ messages, currentUserId }: ChatThreadViewProps)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [messages.length]);
+    // 배열 참조 기준 — 개수가 같아도 방 전환 시 하단 스크롤이 다시 실행되도록
+  }, [messages]);
 
   if (messages.length === 0) {
     return (

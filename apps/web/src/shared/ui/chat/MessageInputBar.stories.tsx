@@ -16,3 +16,5 @@ export const Default: Story = {};
 export const Disabled: Story = { args: { disabled: true } };
 
 export const Closed: Story = { args: { closed: true } };
+
+export const SendFailed: Story = { args: { sendFailed: true } };

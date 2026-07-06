@@ -22,7 +22,7 @@ export const Image: Story = {
 
 export const Sizes: Story = {
   render: () => (
-    <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+    <div className="flex items-center gap-4">
       <Avatar name="김도현" size="sm" />
       <Avatar name="정우성" size="md" />
       <Avatar name="윤지후" size="lg" />

@@ -9,6 +9,8 @@ export interface MessageInputBarProps {
   disabled?: boolean;
   /** CLOSED 방 — 입력·전송 차단 + 안내 문구 */
   closed?: boolean;
+  /** 직전 전송 실패 — 롤백 후 재시도 안내 노출 */
+  sendFailed?: boolean;
 }
 
 const MD_QUERY = "(min-width: 768px)";
@@ -28,7 +30,7 @@ function useIsMdUp() {
   );
 }
 
-export function MessageInputBar({ onSend, disabled, closed }: MessageInputBarProps) {
+export function MessageInputBar({ onSend, disabled, closed, sendFailed }: MessageInputBarProps) {
   const [value, setValue] = useState("");
   const isMdUp = useIsMdUp();
 
@@ -52,9 +54,15 @@ export function MessageInputBar({ onSend, disabled, closed }: MessageInputBarPro
   }
 
   return (
+    <div className="border-t border-line-2 bg-paper md:border-0 md:bg-transparent">
+      {sendFailed && (
+        <p role="alert" className="px-4 pt-2 text-[0.75rem] text-terra">
+          메시지를 보내지 못했어요. 다시 시도해 주세요.
+        </p>
+      )}
     <form
       onSubmit={submit}
-      className="flex items-center gap-2.5 border-t border-line-2 bg-paper px-4 py-3 md:border-0 md:bg-transparent md:pb-4"
+      className="flex items-center gap-2.5 px-4 py-3 md:pb-4"
     >
       <input
         type="text"
@@ -76,5 +84,6 @@ export function MessageInputBar({ onSend, disabled, closed }: MessageInputBarPro
         <Send />
       </button>
     </form>
+    </div>
   );
 }
