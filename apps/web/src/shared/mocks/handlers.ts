@@ -225,6 +225,18 @@ export const handlers = [
     const url = new URL(request.url, "http://localhost");
     const page = Number(url.searchParams.get("page") ?? "0");
 
+    // 빈 상태(0건) 주입 — E2E 빈 상태 검증용(x-mock-failure 패턴 미러)
+    if (request.headers.get("x-mock-scenario") === "reports-empty") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: {
+          list: [],
+          pagination: { page, size: 10, totalElements: 0, totalPages: 0, hasNext: false },
+        },
+      });
+    }
+
     const list = [
       {
         reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
