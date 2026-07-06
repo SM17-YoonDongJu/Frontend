@@ -57,10 +57,10 @@ export function ChatThreadHeader({
         <span className="sr-only md:hidden">{subtitle}</span>
       </div>
 
-      {/* 모바일 — 맨 아이콘(Figma 663:3811) */}
+      {/* 모바일 — 맨 아이콘(Figma 663:3811). 접근성 이름은 데스크톱 버튼과 동일("리포트 보기") */}
       <Link
         href={reportHref}
-        aria-label="공유 리포트 열기"
+        aria-label="리포트 보기"
         className="flex size-9 items-center justify-center rounded-button text-[1.1875rem] text-ink transition hover:bg-paper-2 md:hidden"
       >
         <FileText />

@@ -125,8 +125,10 @@ test("종료된 상담방은 입력이 비활성화된다", async ({ page }) => 
 
 test("데스크톱에서는 목록과 스레드가 분할 뷰로 함께 보이고 활성 행이 강조된다", async ({
   page,
+  isMobile,
 }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
+  // 분할 뷰는 md+ 전용 — 모바일 프로젝트에선 실제로 노출되지 않으므로 데스크톱에서만 검증
+  test.skip(isMobile, "분할 뷰는 데스크톱(md+) 전용 레이아웃");
   await page.goto(`${CUSTOMER_LIST}/e1000000-0000-4000-8000-000000000001`);
 
   // 좌측 목록 패널(활성 행) + 우측 스레드가 동시에 렌더
@@ -147,6 +149,8 @@ test("고객 방에서 공유 리포트를 열면 고객 리포트로 이동한�
 });
 
 test("상담 종료를 누르면 방이 종료되고 입력이 차단된다", async ({ page }) => {
+  // 상담 종료 버튼은 데스크톱 헤더 전용(Figma 모바일 스레드엔 없음)
+  await page.setViewportSize({ width: 1280, height: 900 });
   await page.goto(`${CUSTOMER_LIST}/e1000000-0000-4000-8000-000000000001`);
 
   await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeVisible();
