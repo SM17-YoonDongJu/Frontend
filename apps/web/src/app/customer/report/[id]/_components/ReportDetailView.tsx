@@ -36,15 +36,17 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
       <div className="mt-[1.125rem] lg:mt-6 lg:grid lg:grid-cols-[1fr_20rem] lg:gap-6">
         <div className="space-y-[1.125rem] lg:space-y-6">
           {/* 모바일 메타 행 */}
-          <div className="flex items-center justify-between gap-2 lg:hidden">
-            <div className="flex items-center gap-2">
-              <span className="rounded-pill bg-paper px-2.5 py-1 text-[0.75rem] font-semibold text-ink-2">
-                {data.accidentType} · {data.treatment}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 lg:hidden">
+            <span className="break-keep rounded-pill bg-paper px-2.5 py-1 text-[0.75rem] font-semibold text-ink-2">
+              {data.accidentType}
+            </span>
+            {data.reportNo && (
+              <span className="shrink-0 whitespace-nowrap text-[0.75rem] text-ink-3">
+                No.{data.reportNo}
               </span>
-              {data.reportNo && <span className="text-[0.75rem] text-ink-3">No.{data.reportNo}</span>}
-            </div>
+            )}
             {data.reviewedAt != null && (
-              <span className="flex items-center gap-1 rounded-tag bg-green-soft px-2 py-1 text-[0.6875rem] font-semibold text-green">
+              <span className="ml-auto flex shrink-0 items-center gap-1 whitespace-nowrap rounded-tag bg-green-soft px-2 py-1 text-[0.6875rem] font-semibold text-green">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
                   <path
                     d="M5 13l4 4L19 7"
