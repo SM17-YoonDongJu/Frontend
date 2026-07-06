@@ -7,7 +7,8 @@ import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { useReportList } from "@/app/customer/dashboard/_api/use-report-list";
 import { DASHBOARD_LINKS } from "@/app/customer/dashboard/_model/dashboard-links";
 import type { ReportListItem } from "@/app/customer/dashboard/_model/types";
-import { EmptyState } from "../EmptyState";
+import { FileText } from "@/shared/ui/icons/FileText";
+import { Plus } from "@/shared/ui/icons/Plus";
 import { OfferRangeBar, toManwon } from "./OfferRangeBar";
 
 function formatCreatedAt(iso: string): string {
@@ -26,25 +27,41 @@ export function MobileRecentReport() {
     <section>
       <header className="flex items-center justify-between">
         <h2 className="text-base font-bold text-ink">최근 리포트</h2>
-        <Link
-          href={DASHBOARD_LINKS.allReports}
-          className="text-[0.8125rem] font-medium text-ink-3 transition hover:text-ink-2"
-        >
-          전체보기
-        </Link>
+        {latestReport && (
+          <Link
+            href={DASHBOARD_LINKS.allReports}
+            className="text-[0.8125rem] font-medium text-ink-3 transition hover:text-ink-2"
+          >
+            전체보기
+          </Link>
+        )}
       </header>
 
       <div className="mt-3.5">
-        {latestReport ? (
-          <RecentReportCard report={latestReport} />
-        ) : (
-          <EmptyState
-            message="아직 분석한 리포트가 없어요"
-            cta={{ label: "새 분석 시작", href: DASHBOARD_LINKS.newAnalysis }}
-          />
-        )}
+        {latestReport ? <RecentReportCard report={latestReport} /> : <RecentReportEmpty />}
       </div>
     </section>
+  );
+}
+
+function RecentReportEmpty() {
+  return (
+    <div className="flex flex-col items-center rounded-card border border-line bg-paper-2 px-7 py-8 text-center">
+      <div className="relative">
+        <span className="flex size-[3.25rem] items-center justify-center rounded-card border border-line bg-white text-ink shadow-[0px_4px_6px_rgba(21,32,46,0.06)]">
+          <FileText className="text-[1.5rem]" />
+        </span>
+        <span className="absolute -bottom-1.5 -right-1.5 flex size-[1.375rem] items-center justify-center rounded-full border border-white bg-gold-soft text-gold-ink">
+          <Plus className="text-[0.75rem]" />
+        </span>
+      </div>
+      <p className="mt-4 text-[0.9375rem] font-bold text-ink">아직 분석한 리포트가 없어요</p>
+      <p className="mt-1.5 text-[0.75rem] leading-[0.9375rem] text-ink-2">
+        새 분석을 시작하면 예상 보상 범위와 쟁점을 여기서
+        <br />
+        바로 확인할 수 있어요.
+      </p>
+    </div>
   );
 }
 
