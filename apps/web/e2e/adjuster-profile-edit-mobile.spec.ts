@@ -41,10 +41,8 @@ test("sticky 저장 CTA로 변경 내용을 저장하면 성공 안내가 보인
   await page.getByPlaceholder(HEADLINE_PLACEHOLDER).fill("후유장해 재산정 전문 검토");
   await expect(save).toBeEnabled();
 
-  await expect(async () => {
-    await save.click();
-    await expect(page.getByText("프로필을 저장했어요.")).toBeVisible();
-  }).toPass({ timeout: 10000 });
+  await save.click();
+  await expect(page.getByText("프로필을 저장했어요.")).toBeVisible({ timeout: 10000 });
 });
 
 test("전문분야 chip을 눌러 선택·해제한다", async ({ page }) => {
@@ -53,11 +51,8 @@ test("전문분야 chip을 눌러 선택·해제한다", async ({ page }) => {
   // 모바일 전용 라벨 노출
   await expect(page.getByText("(중복 선택)")).toBeVisible();
 
-  const chip = page.getByRole("button", { name: "실손 의료비", pressed: false });
-  await expect(async () => {
-    await chip.click();
-    await expect(page.getByRole("button", { name: "실손 의료비", pressed: true })).toBeVisible();
-  }).toPass({ timeout: 10000 });
+  await page.getByRole("button", { name: "실손 의료비", pressed: false }).click();
+  await expect(page.getByRole("button", { name: "실손 의료비", pressed: true })).toBeVisible();
 
   // 다시 눌러 해제
   await page.getByRole("button", { name: "실손 의료비", pressed: true }).click();
@@ -67,10 +62,8 @@ test("전문분야 chip을 눌러 선택·해제한다", async ({ page }) => {
 test("대표 이력을 추가했다가 확인 절차로 삭제한다", async ({ page }) => {
   await page.goto(PATH);
 
-  await expect(async () => {
-    await page.getByRole("button", { name: "경력 추가" }).click();
-    await expect(page.getByRole("textbox", { name: "경력 3 기간" })).toBeVisible();
-  }).toPass({ timeout: 10000 });
+  await page.getByRole("button", { name: "경력 추가" }).click();
+  await expect(page.getByRole("textbox", { name: "경력 3 기간" })).toBeVisible();
 
   await page.getByRole("textbox", { name: "경력 3 기간" }).fill("2024 ~ 현재");
   await page.getByRole("textbox", { name: "경력 3 내용" }).fill("테스트 법인");
