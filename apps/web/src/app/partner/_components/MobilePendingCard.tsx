@@ -49,7 +49,10 @@ export function MobilePendingCard({ item, navigatingId, onNavigate }: MobilePend
           href={`/partner/review/${item.reportId}`}
           onClick={handleClick}
           aria-disabled={isBlocked}
-          className={buttonVariants({ variant: "outline", size: "sm" })}
+          tabIndex={isBlocked ? -1 : undefined}
+          className={`${buttonVariants({ variant: "outline", size: "sm" })}${
+            isBlocked && !isNavigating ? " pointer-events-none opacity-50" : ""
+          }`}
         >
           검수 시작
           {isNavigating ? <Spinner /> : <ArrowRight className="text-[0.9375rem]" />}

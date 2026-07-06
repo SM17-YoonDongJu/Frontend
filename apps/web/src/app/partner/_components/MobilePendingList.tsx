@@ -18,6 +18,12 @@ export function MobilePendingList() {
     return () => window.removeEventListener("pageshow", handlePageShow);
   }, []);
 
+  useEffect(() => {
+    if (navigatingId === null) return;
+    const timeout = setTimeout(() => setNavigatingId(null), 5000);
+    return () => clearTimeout(timeout);
+  }, [navigatingId]);
+
   const sorted = data.list.toSorted(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );

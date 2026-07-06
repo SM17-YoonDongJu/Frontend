@@ -27,7 +27,7 @@ export function MobileSummaryGrid() {
     },
     {
       icon: <Pencil />,
-      chipClass: "bg-ink/[0.08] text-ink-2",
+      chipClass: "bg-ink/10 text-ink-2",
       label: "진행 중",
       value: `${summary.inProgressCount}건`,
     },
