@@ -97,9 +97,14 @@ test.describe("모바일 홈 빈 상태", () => {
     await expect(
       page.getByText("아직 분석한 리포트가 없어요").filter({ visible: true }),
     ).toBeVisible();
-    // 보이는 CTA = 히어로(1) + 빈 상태(1) = 2. 빈 상태 CTA 존재를 증명한다.
+    await expect(page.getByText(/새 분석을 시작하면 예상 보상 범위와 쟁점을/)).toBeVisible();
+    // 빈 상태 카드에는 CTA가 없고(시안 916-23766) 진입은 히어로 버튼 하나만 보인다.
     await expect(
       page.getByRole("link", { name: "새 분석 시작" }).filter({ visible: true }),
-    ).toHaveCount(2);
+    ).toHaveCount(1);
+    // 리포트가 없으면 전체보기도 숨긴다.
+    await expect(
+      page.getByRole("link", { name: "전체보기" }).filter({ visible: true }),
+    ).toHaveCount(0);
   });
 });
