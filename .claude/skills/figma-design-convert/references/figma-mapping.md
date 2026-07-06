@@ -9,6 +9,7 @@ Figma Dev Mode MCP의 raw 출력(`get_code`/`get_variable_defs`)을 **그대로 
 - `get_metadata`는 **구조·좌표·크기·텍스트만** 준다 — **색·폰트두께·fill 정보가 없다.** metadata만 보고 색/두께/배경을 채우면 전부 추측이 된다(가장 흔한 드리프트 원인).
 - 큰 페이지는 한 번에 못 읽으니 **섹션(카드/패널) 단위로 `get_design_context`를 뽑고, 그 출력의 실제 값으로 그 섹션을 작성**한 뒤 다음 섹션으로. 산문 브리프가 "navy 강조/serif 금액"이라 해도 **실제 hex·폰트명을 design_context에서 확인**해 토큰을 정한다.
 - 스크린샷 게이트는 구조·정렬은 잡지만 **색/두께/배경 미세 오류는 잘 안 잡힌다** → design_context 값과 직접 대조가 유일한 방어.
+- **도구 장애 시에도 이 규칙은 우회 불가.** `get_design_context`가 불능이면 "스크린샷+토큰 근사" 폴백으로 정밀값을 채우지 말고 `verification-gate.md` 「도구 장애 시 절차」를 따른다(구조·문구까지만 구현 + ⚠️ 실측 보류 플래그).
 
 ## 1. 색 → `@theme` 토큰
 
@@ -40,7 +41,7 @@ Figma Dev Mode MCP의 raw 출력(`get_code`/`get_variable_defs`)을 **그대로 
 | 11 / 13px | `rounded-button` / `rounded-input` |
 | 16 / 22px | `rounded-card` / `rounded-card-lg` |
 
-가까운 토큰으로 스냅. 임의 `rounded-[5px]` 지양.
+**노드의 radius 값과 정확히 일치하는 토큰만** 쓴다(16↔22처럼 다른 값으로 스냅 금지 — #46 카드 radius 미스 원인). 표에 없는 값이면 rem 임의값(`rounded-[1.25rem]`)으로 정확히 옮기고, 반복되면 토큰 추가를 제안한다.
 
 ## 3. 폰트 → 토큰 (family + **weight**)
 
@@ -67,10 +68,19 @@ Figma Dev Mode MCP의 raw 출력(`get_code`/`get_variable_defs`)을 **그대로 
 |-------|----------|
 | auto-layout(가로) | `flex items-center gap-*` |
 | auto-layout(세로) | `flex flex-col gap-*` |
-| item spacing / padding / size | 스케일 유틸 우선, 안 맞으면 **rem 임의값**(`gap-[0.875rem]`) — `[Npx]` 금지 |
+| item spacing / padding / size | **노드 px 먼저 확정** → 정확히 같은 유틸 있으면 사용, 없으면 **rem 임의값**(`gap-[0.875rem]`) — `[Npx]` 금지 |
 | 절대좌표(no auto-layout) | 좌표 그대로 복사 금지 → flex/grid로 의미 재구성 |
 
-- **스케일 유틸이 값에 맞으면 그걸 우선**(이미 rem 기반: `gap-4`=1rem, `p-5`=1.25rem, `text-2xl`=1.5rem). 값이 스케일과 어긋나면 **rem 임의값 유틸**(`p-[1.3125rem]`, `text-[0.8rem]`)로. **`[Npx]` 임의값은 쓰지 않는다.**
+- **순서가 중요하다: ① design_context에서 노드 px를 확정 → ② 그 px와 정확히 같은 스케일 유틸이 있으면 사용 → ③ 없으면 rem 임의값 유틸**(`p-[1.3125rem]`, `text-[0.8rem]`). **`[Npx]` 임의값은 쓰지 않는다.**
+- **가까운 유틸로 반올림 금지.** "14px ≈ mt-4(16px)"식 4px 그리드 근사가 #49 간격 미스 4건의 원인. 스케일 유틸은 노드 px와 **정확히 일치할 때만** 쓴다 — 측정 없이 예쁜 유틸을 먼저 고르는 것이 곧 추측(§0 위반).
+- 자주 나오는 Figma값 ↔ 유틸 치트표:
+
+  | px | 유틸 | px | 유틸 |
+  |----|------|----|------|
+  | 9 | `gap-[0.5625rem]` | 18 | `gap-[1.125rem]` |
+  | 14 | `gap-3.5` / `mt-3.5` | 22 | `p-[1.375rem]` |
+  | 28 | `pb-7` | 36 | `p-9` |
+
 - 변환 예: 14px→`0.875rem`, 12.8px→`0.8rem`, 13px→`0.8125rem`, 21px→`1.3125rem`, 46px→`2.875rem`.
 - **예외 — 1px hairline(보더·구분선)은 px 유지**(`border`, `h-px`). rem 환산 시 서브픽셀 반올림으로 선이 흐려진다.
 - 절대 위치는 최후수단.
