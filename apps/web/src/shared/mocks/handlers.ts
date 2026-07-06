@@ -241,6 +241,46 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
   pendingReviewCount: 4,
 };
 
+// 알림 설정 (이슈 #46) — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체
+const NOTIFICATION_SETTINGS: Record<string, boolean> = {
+  newReviewRequest: true,
+  consultMessage: true,
+  settlementNotice: false,
+  reviewComplete: true,
+  receivedProposal: true,
+  marketing: false,
+};
+
+// 마이페이지 집계 (이슈 #46) — GET /adjusters/me/mypage, ADJUSTER_PROFILE 페르소나와 수치 일치
+const ADJUSTER_MYPAGE = {
+  profile: {
+    nickname: "김상정",
+    email: "kimsangjeong@example.com",
+    avatarUrl: null,
+    headline: "후유장해 전문 12년, 거절 사건을 다시 봅니다",
+    specialties: ["후유장해", "교통사고"],
+    career: 12,
+    activityRegion: "서울·경기",
+    role: "CERTIFICATED_ADJUSTER",
+  },
+  stats: {
+    averageRating: 4.9,
+    reviewCount: 86,
+    totalCompletedCount: 240,
+    consultationConversionRate: 62,
+  },
+  monthlyActivity: {
+    completedCount: 14,
+    consultationConvertedCount: 9,
+    averageRating: 4.9,
+  },
+  certification: {
+    licenseNo: "제2014-0087호",
+    activityRegion: "서울·경기",
+    createdAt: "2026-01-01T00:00:00Z",
+  },
+};
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
@@ -288,10 +328,80 @@ export const handlers = [
         },
         activity: {
           completedCount: 14,
-          consultConvertedCount: 9,
+          consultationConvertedCount: 9,
           averageRating: 4.9,
         },
       },
+    });
+  }),
+
+  // 손해사정사 마이페이지 집계 (이슈 #46)
+  http.get(`${API_BASE_URL}/adjusters/me/mypage`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "mypage") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "마이페이지를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: ADJUSTER_MYPAGE,
+    });
+  }),
+
+  // 알림 설정 조회 (이슈 #46)
+  http.get(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "notification-settings") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "알림 설정을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...NOTIFICATION_SETTINGS },
+    });
+  }),
+
+  // 알림 설정 저장 (이슈 #46) — 수정한 항목만 머지, 전체 설정 반환
+  http.patch(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "notification-settings") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "알림 설정을 저장하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    for (const key of Object.keys(NOTIFICATION_SETTINGS)) {
+      if (typeof body[key] === "boolean") {
+        NOTIFICATION_SETTINGS[key] = body[key];
+      }
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...NOTIFICATION_SETTINGS },
     });
   }),
 
