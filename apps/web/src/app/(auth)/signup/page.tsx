@@ -87,7 +87,7 @@ function SignupFunnel() {
   };
 
   return (
-    <div className="w-full">
+    <div className="flex min-h-dvh w-full flex-col pb-8 pt-6 sm:pt-10">
       {funnel.step !== "done" && (
         <SignupProgress
           current={funnel.stepNumber}
@@ -96,7 +96,8 @@ function SignupFunnel() {
         />
       )}
 
-      <div className="mt-6 rounded-card-lg border border-line bg-card p-6 sm:p-8">
+      <div className="mt-6 flex flex-1 flex-col justify-center">
+        <div className="rounded-card-lg border border-line bg-card p-6 sm:p-8">
         {funnel.step === "role" && (
           <RoleSelectStep
             selected={selectedUserType}
@@ -123,6 +124,7 @@ function SignupFunnel() {
             onStartAnalysis={() => router.push(CUSTOMER_DASHBOARD_PATH)}
           />
         )}
+        </div>
       </div>
 
       {showAdjusterNotice && (
