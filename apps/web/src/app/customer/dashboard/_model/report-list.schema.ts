@@ -22,6 +22,8 @@ export const reportListItemSchema = z.object({
   adjusterNickname: z.string().nullable(),
   // CONTRACT(naming-dictionary §확정 #24 / list 응답 미포함, FE 임시 추가 — 드리프트 항목 10): offeredAmount 보험사 제안금액.
   offeredAmount: z.number().int().nonnegative().nullable(),
+  // CONTRACT(상세 GET /reports/{id}의 정식 필드 treatment / list 응답 미포함, FE 임시 추가 — 드리프트 항목 10): 진료 항목.
+  treatment: z.string().nullable(),
 });
 
 export const paginationSchema = z.object({
