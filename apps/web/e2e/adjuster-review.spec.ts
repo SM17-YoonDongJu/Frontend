@@ -21,7 +21,7 @@ test("대기 목록에서 카드의 검수 버튼을 누르면 상세로 진입�
   // #62 재설계: 카드는 <article> + 검수 링크(상세로 직접 이동, 중간 선택 패널 제거)
   const firstCard = page
     .getByRole("listitem")
-    .filter({ hasText: /우측 슬관절 후방십자인대 파열/ });
+    .filter({ hasText: /우측 슬관절 인대 파열/ });
   await expect(firstCard).toBeVisible();
 
   await expect(async () => {
