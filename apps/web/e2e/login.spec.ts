@@ -51,11 +51,10 @@ test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저�
 
   await expect(page).toHaveURL(/\/$/, { timeout: 15000 });
 
-  const stored = await page.evaluate(
-    (key) => window.localStorage.getItem(key),
-    RECENT_LOGIN_KEY,
-  );
-  expect(stored).toContain("kakao");
+  // 흔적 저장은 사용자 관찰 기준으로 검증 — 로그인 화면 재진입 시 재로그인 화면이 보인다.
+  await page.goto(LOGIN_PATH);
+  await expect(page.getByRole("heading", { name: "다시 만나서 반가워요" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "카카오로 계속하기" })).toBeVisible();
 });
 
 test("신규 회원 콜백이면 회원가입으로 이동한다", async ({ page }) => {
