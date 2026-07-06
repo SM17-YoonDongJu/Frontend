@@ -59,6 +59,7 @@ test("모바일 폭에서 진단명 여러 개와 가입보험을 입력해 끝�
   // step6 확인 — 복수 진단명과 이동한 가입보험이 요약에 반영됨
   await expect(page.getByRole("heading", { name: "분석 준비가 끝났어요" })).toBeVisible();
   await expect(page.getByText("우측 슬관절 골절")).toBeVisible();
+  await expect(page.getByText("전방십자인대 파열")).toBeVisible();
   await expect(page.getByText("OO손해보험 · 행복드림 종합보험")).toBeVisible();
 
   // 동의 2개 체크 후 제출 → 완료 화면
