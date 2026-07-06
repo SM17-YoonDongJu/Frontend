@@ -15,18 +15,19 @@ const LIST_PATH = "/partner/review";
 // MSW 상세 핸들러는 어떤 reportId든 동일 리치 데이터를 반환 → 상세 직접 진입에 사용.
 const DETAIL_PATH = "/partner/review/11111111-1111-4111-8111-111111111111";
 
-test("대기 목록에서 카드를 선택해 검수를 시작하면 상세로 진입한다", async ({ page }) => {
+test("대기 목록에서 카드의 검수 버튼을 누르면 상세로 진입한다", async ({ page }) => {
   await page.goto(LIST_PATH);
 
-  // dev 검수 대기 목록 카드(MSW) 선택
-  const firstCard = page.getByRole("button", {
-    name: /우측 슬관절 후방십자인대 파열/,
-  });
+  // #62 재설계: 카드는 <article> + 검수 링크(상세로 직접 이동, 중간 선택 패널 제거)
+  const firstCard = page
+    .getByRole("listitem")
+    .filter({ hasText: /우측 슬관절 후방십자인대 파열/ });
   await expect(firstCard).toBeVisible();
-  await firstCard.click();
 
-  // 선택 패널 → 검수 시작 → 상세 라우트 진입
-  await page.getByRole("button", { name: "검수 시작" }).click();
+  await expect(async () => {
+    await firstCard.getByRole("link", { name: /검수/ }).click();
+    await expect(page).toHaveURL(/\/partner\/review\/[0-9a-f-]{36}/);
+  }).toPass({ timeout: 10000 });
 
   await expect(page.getByRole("heading", { name: /쟁점별 검수/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "후유장해 등급 재산정" })).toBeVisible();
