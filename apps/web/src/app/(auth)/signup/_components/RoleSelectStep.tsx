@@ -15,7 +15,7 @@ interface RoleSelectStepProps {
 export function RoleSelectStep({ selected, onSelect, onStart }: RoleSelectStepProps) {
   return (
     <div>
-      <h1 className="font-serif text-[1.625rem] font-bold leading-tight text-ink">
+      <h1 className="break-keep font-serif text-[1.625rem] font-bold leading-tight text-ink">
         어떤 역할로 시작하시겠어요?
       </h1>
       <p className="mt-2 text-sm text-ink-3">

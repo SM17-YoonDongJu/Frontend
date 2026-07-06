@@ -25,7 +25,7 @@ export function AdjusterNotice({ onClose, onProceed }: AdjusterNoticeProps) {
         <h2 id="adjuster-notice-title" className="mt-4 font-serif text-xl font-bold text-ink">
           자격 인증이 필요해요
         </h2>
-        <p className="mt-2 text-sm leading-relaxed text-ink-2">
+        <p className="mt-2 break-keep text-sm leading-relaxed text-ink-2">
           손해사정사로 활동하려면 자격 인증을 먼저 완료해야 해요. 자격 인증 페이지로 이동해
           진행할 수 있어요.
         </p>

@@ -38,18 +38,18 @@ export function RoleCard({ icon, title, description, hint, badge, selected, onSe
 
       <span className="min-w-0 flex-1">
         <span className="flex items-center gap-2">
-          <span className={cn("text-base font-bold", selected ? "text-white" : "text-ink")}>
+          <span className={cn("shrink-0 text-base font-bold", selected ? "text-white" : "text-ink")}>
             {title}
           </span>
           {badge && (
-            <span className="rounded-pill bg-gold-soft px-2 py-0.5 text-[0.6875rem] font-bold text-gold-ink">
+            <span className="whitespace-nowrap rounded-pill bg-gold-soft px-2 py-0.5 text-[0.6875rem] font-bold text-gold-ink">
               {badge}
             </span>
           )}
         </span>
         <span
           className={cn(
-            "mt-1 block text-[0.8125rem]",
+            "mt-1 block break-keep text-[0.8125rem]",
             selected ? "text-white/65" : "text-ink-3",
           )}
         >
