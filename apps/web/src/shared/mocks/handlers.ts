@@ -192,6 +192,26 @@ const PENDING_REVIEWS = [
 
 const heldReportIds = new Set<string>();
 
+// 검수 내역 목 데이터 (이슈 #59) — GET /adjusters/me/reviewed-reports.
+// 명세 6필드(caseId·title·sentDate·status·statusLabel·hasOpinion) + ⚠️명세없음-1 4필드
+// (accidentType·confirmedMin/MaxAmount·rating: FE optional, 백엔드 list 확장 대기)를 채움.
+const REVIEWED_REPORTS = [
+  { caseId: "20260605-021", title: "후유장해 · 십자인대 파열 등급 재산정", sentDate: "2026-06-05", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 14_000_000, confirmedMaxAmount: 17_500_000, rating: 4.9 },
+  { caseId: "20260603-018", title: "교통사고 · 일실수입 과소 산정", sentDate: "2026-06-03", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "traffic", confirmedMinAmount: 24_000_000, confirmedMaxAmount: 30_000_000, rating: 5.0 },
+  { caseId: "20260530-014", title: "실손 의료비 · 비급여 도수치료 한도 분쟁", sentDate: "2026-05-30", status: "SENT", statusLabel: "전송 완료", hasOpinion: false, accidentType: "medical_indemnity", confirmedMinAmount: 3_200_000, confirmedMaxAmount: 4_800_000, rating: null },
+  { caseId: "20260528-009", title: "후유장해 · 요추 추간판탈출 특약 누락", sentDate: "2026-05-28", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 9_000_000, confirmedMaxAmount: 14_000_000, rating: 4.7 },
+  { caseId: "20260525-006", title: "암·진단비 · 유사암 분류 쟁점", sentDate: "2026-05-25", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "cancer_diagnosis", confirmedMinAmount: 20_000_000, confirmedMaxAmount: 20_000_000, rating: 4.8 },
+  { caseId: "20260522-003", title: "교통사고 · 경추 염좌 향후 치료비 미반영", sentDate: "2026-05-22", status: "NOT_SELECTED", statusLabel: "미선정", hasOpinion: false, accidentType: "traffic", confirmedMinAmount: 6_000_000, confirmedMaxAmount: 9_000_000, rating: null },
+  { caseId: "20260520-017", title: "후유장해 · 견관절 회전근개 파열", sentDate: "2026-05-20", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 11_000_000, confirmedMaxAmount: 15_500_000, rating: 4.9 },
+  { caseId: "20260518-011", title: "화재 · 가재도구 손해액 산정", sentDate: "2026-05-18", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "fire", confirmedMinAmount: 8_500_000, confirmedMaxAmount: 12_000_000, rating: 4.6 },
+  { caseId: "20260515-008", title: "배상책임 · 대인 사고 위자료 쟁점", sentDate: "2026-05-15", status: "SENT", statusLabel: "전송 완료", hasOpinion: false, accidentType: "liability", confirmedMinAmount: 5_000_000, confirmedMaxAmount: 7_000_000, rating: null },
+  { caseId: "20260512-004", title: "실손 의료비 · 통원 한도 적용", sentDate: "2026-05-12", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "medical_indemnity", confirmedMinAmount: 2_800_000, confirmedMaxAmount: 3_600_000, rating: 4.5 },
+  { caseId: "20260509-002", title: "후유장해 · 안면부 외모추상 장해", sentDate: "2026-05-09", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 16_000_000, confirmedMaxAmount: 22_000_000, rating: 5.0 },
+  { caseId: "20260506-015", title: "교통사고 · 다발성 늑골 골절", sentDate: "2026-05-06", status: "NOT_SELECTED", statusLabel: "미선정", hasOpinion: false, accidentType: "traffic", confirmedMinAmount: 18_000_000, confirmedMaxAmount: 24_000_000, rating: null },
+  { caseId: "20260503-010", title: "암·진단비 · 재진단암 인정 범위", sentDate: "2026-05-03", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "cancer_diagnosis", confirmedMinAmount: 30_000_000, confirmedMaxAmount: 30_000_000, rating: 4.8 },
+  { caseId: "20260430-005", title: "실손 의료비 · 비급여 주사료 분쟁", sentDate: "2026-04-30", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "medical_indemnity", confirmedMinAmount: 1_400_000, confirmedMaxAmount: 1_750_000, rating: 4.4 },
+] as const;
+
 // 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
 const rejectedProposals = new Set<string>();
 
@@ -506,6 +526,68 @@ export const handlers = [
       status: "200",
       message: "정상 처리되었습니다.",
       data: { pendingCount, specialtyMatchCount: 3, dueSoonCount: 1 },
+    });
+  }),
+
+  // 사정사 검수 내역 조회 (이슈 #59) — 명세 봉투 거울. status 서버 필터 + page 페이지네이션.
+  // 실패/빈 시나리오는 x-mock-* 헤더로 주입(E2E override용).
+  http.get(`${API_BASE_URL}/adjusters/me/reviewed-reports`, async ({ request }) => {
+    await delay(400);
+
+    const failure = request.headers.get("x-mock-failure");
+    if (failure === "reviewed-forbidden") {
+      return HttpResponse.json(
+        { status: "403", code: "FORBIDDEN", message: "손해사정사만 접근할 수 있습니다." },
+        { status: 403 },
+      );
+    }
+    if (failure === "reviewed-unauthorized") {
+      return HttpResponse.json(
+        { status: "401", code: "LOGIN_REQUIRED", message: "로그인이 필요합니다." },
+        { status: 401 },
+      );
+    }
+
+    const url = new URL(request.url, "http://localhost");
+    const status = url.searchParams.get("status"); // 없거나 ALL이면 전체
+    const month = url.searchParams.get("month") ?? "";
+    const page = Number(url.searchParams.get("page") ?? "1");
+    const size = Number(url.searchParams.get("size") ?? "10");
+
+    // 검수 이력 자체 없음(no-data) 시나리오
+    const emptyAll = request.headers.get("x-mock-reviewed") === "empty";
+    const source = emptyAll ? [] : REVIEWED_REPORTS;
+
+    const filtered =
+      !status || status === "ALL"
+        ? source
+        : source.filter((r) => r.status === status);
+
+    const start = (page - 1) * size;
+    const paged = filtered.slice(start, start + size);
+    const totalPages = Math.max(1, Math.ceil(filtered.length / size));
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        summary: {
+          monthlyReviewCount: emptyAll ? 0 : 18,
+          previousMonthReviewCount: emptyAll ? 0 : 15,
+          consultationConversionRate: emptyAll ? 0 : 62,
+          consultationConvertedCount: emptyAll ? 0 : 9,
+          totalCount: source.length,
+        },
+        filter: { status: status ?? "ALL", month },
+        list: paged,
+        pagination: {
+          page,
+          size,
+          totalElements: filtered.length,
+          totalPages,
+          hasNext: start + size < filtered.length,
+        },
+      },
     });
   }),
 
