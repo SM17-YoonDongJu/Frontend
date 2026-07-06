@@ -10,7 +10,7 @@ export default function ReviewRouteError({
   reset: () => void;
 }) {
   return (
-    <div className="mx-auto min-h-dvh w-full max-w-[24.375rem] bg-paper">
+    <div className="mx-auto min-h-dvh w-full max-w-[25.125rem] bg-paper">
       <ReviewError code={error.name} onRetry={reset} />
     </div>
   );

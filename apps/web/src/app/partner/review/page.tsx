@@ -4,7 +4,7 @@ import { ReviewView } from "./_components/ReviewView";
 
 export default function ReviewPage() {
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[24.375rem] flex-col bg-paper pb-8">
+    <div className="mx-auto flex min-h-dvh w-full max-w-[25.125rem] flex-col bg-paper pb-8">
       <Suspense fallback={<ReviewSkeleton />}>
         <ReviewView />
       </Suspense>
