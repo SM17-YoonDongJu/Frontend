@@ -210,6 +210,32 @@ const REVIEWED_REPORTS = [
   { caseId: "20260430-005", title: "실손 의료비 · 비급여 주사료 분쟁", sentDate: "2026-04-30", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "medical_indemnity", confirmedMinAmount: 1_400_000, confirmedMaxAmount: 1_750_000, rating: 4.4 },
 ] as const;
 
+// 알림 목록 목 데이터 (이슈 #49) — ⚠️ 명세없음-초안(.pr-assets/api-spec-draft-notifications.md).
+// createdAt은 달력 기준(오늘/어제 고정) → 조회 시각과 무관하게 오늘·어제·이전 세 그룹이 항상 나온다.
+// read-all 호출 시 isRead를 모듈 상태로 전부 true 반영.
+// 오늘 항목: 오늘 자정 기준 hoursBack 시간 전, 단 자정을 넘지 않게 클램프(새벽 조회 시에도 오늘 유지).
+function todayAgo(hoursBack: number): string {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const target = Date.now() - hoursBack * 60 * 60 * 1000;
+  return new Date(Math.max(target, startOfToday.getTime() + 60 * 1000)).toISOString();
+}
+
+function yesterdayAt(hour: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  d.setHours(hour, 0, 0, 0);
+  return d.toISOString();
+}
+
+const NOTIFICATIONS = [
+  { notificationId: "d0000000-0000-4000-8000-000000000001", type: "REVIEW_COMPLETE", title: "검수가 완료됐어요", body: "김도현 사정사님이 리포트를 검수했어요.", isRead: false, createdAt: todayAgo(2) },
+  { notificationId: "d0000000-0000-4000-8000-000000000002", type: "RECEIVED_PROPOSAL", title: "새 제안 2건 도착", body: "교통사고 리포트에 상담 제안이 왔어요.", isRead: false, createdAt: todayAgo(5) },
+  { notificationId: "d0000000-0000-4000-8000-000000000003", type: "CONSULT_ACCEPTED", title: "상담이 수락됐어요", body: "정우성 사정사님이 상담을 수락했어요.", isRead: true, createdAt: yesterdayAt(15) },
+  { notificationId: "d0000000-0000-4000-8000-000000000004", type: "ANALYSIS_COMPLETE", title: "분석이 완료됐어요", body: "제출하신 서류 분석 리포트가 준비됐어요.", isRead: true, createdAt: yesterdayAt(11) },
+  { notificationId: "d0000000-0000-4000-8000-000000000005", type: "IDENTITY_VERIFIED", title: "본인 인증 완료", body: "계정 본인 인증이 완료됐어요.", isRead: true, createdAt: "2026-05-18T09:00:00Z" },
+];
+
 // 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
 const rejectedProposals = new Set<string>();
 
@@ -283,6 +309,44 @@ const ADJUSTER_MYPAGE = {
 
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
+
+  // 알림 모두 읽음 처리 (#49) — ⚠️ 명세없음-초안. 구체 경로를 목록 GET보다 먼저 등록.
+  http.patch(`${API_BASE_URL}/users/me/notifications/read-all`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-failure") === "read-all") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "읽음 처리에 실패했습니다." },
+        { status: 500 },
+      );
+    }
+
+    for (const notification of NOTIFICATIONS) notification.isRead = true;
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: null,
+    });
+  }),
+
+  // 내 알림 목록 (#49) — ⚠️ 명세없음-초안. read-all 반영된 isRead 상태 그대로 반환.
+  http.get(`${API_BASE_URL}/users/me/notifications`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-failure") === "notifications") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "알림을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { list: NOTIFICATIONS },
+    });
+  }),
 
   // 회원가입 (#43) — 전역 봉투 거울. 성공 201 + data(토큰 포함).
   // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 2자 미만→400 VALIDATION_ERROR,

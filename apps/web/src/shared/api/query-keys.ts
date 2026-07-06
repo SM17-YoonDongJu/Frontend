@@ -43,6 +43,10 @@ export const reviewKeys = createQueryKeys("review", {
   detail: (reportId: string) => [reportId],
 });
 
+export const notificationKeys = createQueryKeys("notification", {
+  list: null,
+});
+
 export interface AdjusterListFilter {
   keyword?: string;
   specialty?: string;
