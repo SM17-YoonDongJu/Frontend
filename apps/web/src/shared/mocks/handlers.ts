@@ -250,6 +250,7 @@ export const handlers = [
         reviewedAt: "2026-05-22T10:14:00Z",
         adjusterNickname: "김도현",
         offeredAmount: 8_500_000,
+        treatment: "후유장해",
       },
       {
         reportId: DASHBOARD_AWAITING_REPORT_ID,
@@ -263,6 +264,7 @@ export const handlers = [
         reviewedAt: null,
         adjusterNickname: null,
         offeredAmount: null,
+        treatment: null,
       },
     ];
 
