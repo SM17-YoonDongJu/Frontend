@@ -8,7 +8,6 @@ export function getReviewList(filter?: ReviewListFilter): Promise<ReviewList> {
   const params = new URLSearchParams();
   if (filter?.status) params.set("status", filter.status);
   if (filter?.accidentType) params.set("accidentType", filter.accidentType);
-  if (filter?.region) params.set("region", filter.region);
   if (filter?.page != null) params.set("page", String(filter.page));
   if (filter?.size != null) params.set("size", String(filter.size));
 

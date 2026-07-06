@@ -5,7 +5,7 @@ import { z } from "zod";
 export const userTypeSchema = z.enum(["insured_person", "adjuster"]);
 
 export const meSchema = z.object({
-  userId: z.number().int(), // CONTRACT(§7-2): user/auth만 number. uuid 아님.
+  userId: z.string(), // §7-2 해소(#43, 2026-07-05): 전역 uuid(string) 통일.
   nickname: z.string(),
   email: z.string().nullable(),
   userType: userTypeSchema,

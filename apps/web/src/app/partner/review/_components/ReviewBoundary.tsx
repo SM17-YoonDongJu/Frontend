@@ -4,8 +4,13 @@ import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { Suspense, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { ReviewError } from "./ReviewError";
+import { ReviewResults } from "./ReviewResults";
 import { ReviewSkeleton } from "./ReviewSkeleton";
-import { ReviewView } from "./ReviewView";
+import type { FallbackProps } from "react-error-boundary";
+
+function ReviewErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+  return <ReviewError code={(error as Error).name} onRetry={resetErrorBoundary} />;
+}
 
 export function ReviewBoundary() {
   const [mounted, setMounted] = useState(false);
@@ -15,14 +20,9 @@ export function ReviewBoundary() {
   return (
     <QueryErrorResetBoundary>
       {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <ReviewError code={(error as Error).name} onRetry={resetErrorBoundary} />
-          )}
-        >
+        <ErrorBoundary onReset={reset} FallbackComponent={ReviewErrorFallback}>
           <Suspense fallback={<ReviewSkeleton />}>
-            <ReviewView />
+            <ReviewResults />
           </Suspense>
         </ErrorBoundary>
       )}

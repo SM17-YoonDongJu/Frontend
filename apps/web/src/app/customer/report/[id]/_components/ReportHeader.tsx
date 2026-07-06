@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { REPORT_TITLE } from "../_model/report-meta";
 
@@ -5,27 +8,69 @@ export interface ReportHeaderProps {
   accidentType: string;
   treatment: string;
   issueCount: number;
+  /** 데스크톱 우측 액션 블록(PDF·공유) */
   actions?: ReactNode;
+  /** 모바일 상단 바 우측 공유 아이콘 버튼 */
+  mobileShare?: ReactNode;
 }
 
-export function ReportHeader({ accidentType, treatment, issueCount, actions }: ReportHeaderProps) {
+export function ReportHeader({
+  accidentType,
+  treatment,
+  issueCount,
+  actions,
+  mobileShare,
+}: ReportHeaderProps) {
+  const router = useRouter();
+
   return (
-    <header className="flex flex-wrap items-start justify-between gap-4">
-      <div>
-        <div className="flex flex-wrap items-center gap-1.5 text-[12.5px] text-ink-3">
-          <span className="rounded-pill bg-paper-2 px-2.5 py-1">{accidentType}</span>
-          <span className="rounded-pill bg-paper-2 px-2.5 py-1">{treatment}</span>
-          <span className="flex items-center gap-1 rounded-pill bg-green-soft px-2.5 py-1 text-green">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
-              <path d="M5 13l4 4L19 7" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            검수 의견 {issueCount}건
-          </span>
-        </div>
-        <h1 className="mt-2 font-serif text-[26px] font-bold text-ink">{REPORT_TITLE}</h1>
+    <>
+      {/* 모바일: 얇은 back 바 */}
+      <div className="sticky top-0 z-10 -mx-5 flex h-[3.6875rem] items-center justify-between border-b border-line-2 bg-paper px-4 lg:hidden">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          aria-label="뒤로 가기"
+          className="flex size-[2.375rem] items-center justify-center rounded-full text-ink transition hover:bg-paper-2"
+        >
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+            <path
+              d="M15 6l-6 6 6 6"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+        <h1 className="text-[0.9375rem] font-bold text-ink">분석 리포트</h1>
+        <div className="flex size-[2.375rem] items-center justify-center">{mobileShare}</div>
       </div>
 
-      {actions}
-    </header>
+      {/* 데스크톱: 기존 메타 pill + serif 타이틀 + actions */}
+      <header className="hidden flex-wrap items-start justify-between gap-4 lg:flex">
+        <div>
+          <div className="flex flex-wrap items-center gap-1.5 text-[0.78rem] text-ink-3">
+            <span className="rounded-pill bg-paper-2 px-2.5 py-1">{accidentType}</span>
+            <span className="rounded-pill bg-paper-2 px-2.5 py-1">{treatment}</span>
+            <span className="flex items-center gap-1 rounded-pill bg-green-soft px-2.5 py-1 text-green">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
+                <path
+                  d="M5 13l4 4L19 7"
+                  stroke="currentColor"
+                  strokeWidth="2.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+              검수 의견 {issueCount}건
+            </span>
+          </div>
+          <h1 className="mt-2 font-serif text-[1.625rem] font-bold text-ink">{REPORT_TITLE}</h1>
+        </div>
+
+        {actions}
+      </header>
+    </>
   );
 }

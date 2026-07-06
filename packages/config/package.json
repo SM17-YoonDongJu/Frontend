@@ -3,13 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "description": "공유 eslint / prettier 프리셋 (web + RN)",
+  "description": "공유 prettier 프리셋 (web + RN)",
   "exports": {
-    "./eslint/base": "./eslint/base.js",
-    "./eslint/next": "./eslint/next.js",
     "./prettier": "./prettier/index.js"
-  },
-  "dependencies": {
-    "eslint-config-next": "^16.2.7"
   }
 }

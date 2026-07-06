@@ -16,6 +16,9 @@ export const issueItemSchema = z.object({
   opinion: z.string(),
   status: issueStatusSchema,
   tag: z.string().nullable(),
+  // 명세 GET 응답에 없는 디자인용 필드 — 부재 허용(nullish).
+  impactAmount: z.number().int().nullish(),
+  tags: z.array(z.string()).nullish(),
 });
 
 export const reportDetailSchema = z.object({
@@ -34,6 +37,7 @@ export const reportDetailSchema = z.object({
   adjusterId: z.uuid().nullable(),
   // 명세 GET 응답에 없는 디자인용 필드 — 부재 허용(nullish).
   confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullish(),
+  reportNo: z.string().nullish(),
   reviewComment: z.string().nullable(),
   reviewedAt: z.string().nullable(),
   adjuster: z

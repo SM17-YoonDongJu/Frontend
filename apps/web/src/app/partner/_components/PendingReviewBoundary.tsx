@@ -7,6 +7,11 @@ import { useHydrated } from "@/shared/lib/use-hydrated";
 import { SectionError } from "./SectionError";
 import { PendingReviewPreview } from "./PendingReviewPreview";
 import { PendingReviewSkeleton } from "./PendingReviewSkeleton";
+import type { FallbackProps } from "react-error-boundary";
+
+function PendingReviewErrorFallback({ resetErrorBoundary }: FallbackProps) {
+  return <SectionError onRetry={resetErrorBoundary} />;
+}
 
 export function PendingReviewBoundary() {
   if (!useHydrated()) return <PendingReviewSkeleton />;
@@ -16,9 +21,7 @@ export function PendingReviewBoundary() {
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ resetErrorBoundary }) => (
-            <SectionError onRetry={resetErrorBoundary} />
-          )}
+          FallbackComponent={PendingReviewErrorFallback}
         >
           <Suspense fallback={<PendingReviewSkeleton />}>
             <PendingReviewPreview />

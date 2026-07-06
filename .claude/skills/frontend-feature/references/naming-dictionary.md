@@ -248,6 +248,15 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 | 모두 읽음 뮤테이션 | `useReadAllNotifications` |
 | 날짜 그룹 | `NotificationGroup`(`TODAY`/`YESTERDAY`/`EARLIER`, 라벨 오늘/어제/이전) |
 
+### 검수 내역 (이슈 #59, GET /adjusters/me/reviewed-reports — 사용자 확정 2026-07-06)
+| 개념 | 식별자 |
+|------|--------|
+| 검수 내역 훅 | `useReviewedReports` |
+| 쿼리키 | `reportKeys.reviewedReports(status, page)` |
+| 상태 필터 파라미터 | `status`(`ALL`/`SENT`/`CONSULTATION`/`NOT_SELECTED`/`CLOSED`) |
+
+⚠️ 카드용 사고유형·`confirmedMin/MaxAmount`·평점(`rating`)은 명세 list[]에 미존재 → zod optional + MSW 목킹, 백엔드 확장 요청. 상세 이동 키(reportId) 미존재 → placeholder 보류.
+
 ## 출처
 
 - API 명세서 DB: `collection://7ce30798-f08f-82ee-81bb-875a29ed96bd` (필드·enum 단일 진실)
