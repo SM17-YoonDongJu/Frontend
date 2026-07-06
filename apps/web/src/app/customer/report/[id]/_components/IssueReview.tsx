@@ -44,7 +44,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
 
           return (
             <li
-              key={i}
+              key={issue.title}
               className={cn(
                 "pt-4 [&:not(:first-child)]:border-t [&:not(:first-child)]:border-line-2",
                 "first:pt-0 lg:mt-3 lg:rounded-card lg:border lg:border-line-2 lg:bg-paper-2 lg:p-4 lg:pt-4 lg:first:mt-0",

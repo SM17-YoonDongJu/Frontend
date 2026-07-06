@@ -16,9 +16,9 @@ export function CoveragePotentialMissing({ contracts }: CoveragePotentialMissing
         <span className="text-[0.78rem] text-gold-ink">{contracts.length}건</span>
       </div>
       <ul className="mt-2 lg:mt-4 lg:space-y-2">
-        {contracts.map((contract, i) => (
+        {contracts.map((contract) => (
           <li
-            key={i}
+            key={contract}
             className="flex items-center gap-3 py-[0.6875rem] text-[0.79rem] font-medium text-ink-2 [&:not(:first-child)]:border-t [&:not(:first-child)]:border-line-2 lg:items-start lg:gap-2 lg:border-none lg:py-0 lg:text-[0.875rem] lg:font-normal"
           >
             <span className="flex size-6 shrink-0 items-center justify-center rounded-pill bg-terra-soft text-terra lg:mt-0.5 lg:size-4 lg:rounded-none lg:bg-transparent">

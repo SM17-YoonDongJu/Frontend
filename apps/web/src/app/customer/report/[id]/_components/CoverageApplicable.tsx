@@ -16,9 +16,9 @@ export function CoverageApplicable({ guarantees }: CoverageApplicableProps) {
         <span className="text-[0.78rem] text-gold-ink">{guarantees.length}건</span>
       </div>
       <ul className="mt-2 lg:mt-4 lg:space-y-2">
-        {guarantees.map((guarantee, i) => (
+        {guarantees.map((guarantee) => (
           <li
-            key={i}
+            key={guarantee}
             className="flex items-center gap-3 py-[0.6875rem] text-[0.79rem] font-medium text-ink-2 [&:not(:first-child)]:border-t [&:not(:first-child)]:border-line-2 lg:gap-2 lg:border-none lg:py-0 lg:text-[0.875rem] lg:font-normal"
           >
             <span className="flex size-6 shrink-0 items-center justify-center rounded-pill bg-green-soft text-green lg:size-4 lg:rounded-none lg:bg-transparent">
