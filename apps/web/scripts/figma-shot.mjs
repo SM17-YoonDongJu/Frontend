@@ -49,7 +49,7 @@ await page.waitForTimeout(1200);
 
 if (selector) {
   // 한글/중복 텍스트 함정: 부분매칭 권장, 카드 단위 비교는 --closest article
-  let target = page.locator(selector).first();
+  const target = page.locator(selector).first();
   if (closest) {
     const box = await target.evaluate((el, sel) => {
       const r = (el.closest(sel) ?? el).getBoundingClientRect();

@@ -6,6 +6,13 @@ import { ErrorBoundary } from "react-error-boundary";
 import { ReviewDetailError } from "./ReviewDetailError";
 import { ReviewDetailSkeleton } from "./ReviewDetailSkeleton";
 import { ReviewDetailView } from "./ReviewDetailView";
+import type { FallbackProps } from "react-error-boundary";
+
+function ReviewDetailErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
+  return (
+    <ReviewDetailError code={(error as Error).name} onRetry={resetErrorBoundary} />
+  );
+}
 
 export function ReviewDetailBoundary({ reportId }: { reportId: string }) {
   const [mounted, setMounted] = useState(false);
@@ -17,12 +24,7 @@ export function ReviewDetailBoundary({ reportId }: { reportId: string }) {
       {({ reset }) => (
         <ErrorBoundary
           onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <ReviewDetailError
-              code={(error as Error).name}
-              onRetry={resetErrorBoundary}
-            />
-          )}
+          FallbackComponent={ReviewDetailErrorFallback}
         >
           <Suspense fallback={<ReviewDetailSkeleton />}>
             <ReviewDetailView reportId={reportId} />

@@ -66,4 +66,4 @@ async function fillThroughConsent(page: import("@playwright/test").Page) {
 - `waitForTimeout`·고정 sleep — web-first 단언으로 대체.
 - 통제 못 하는 서드파티(외부 사이트/PG/OAuth 실호출) 테스트 — 계약은 MSW로 고정.
 - 저가치 필드 검증·드문 엣지를 E2E에 욱여넣기 — zod·TS에 위임(의식적 미테스트). 고가치 에러만 override로 E2E.
-- `await` 누락 — `@typescript-eslint/no-floating-promises`로 잡는다.
+- `await` 누락 — typecheck·리뷰에서 잡는다(oxlint 기본 세트에 no-floating-promises 없음).
