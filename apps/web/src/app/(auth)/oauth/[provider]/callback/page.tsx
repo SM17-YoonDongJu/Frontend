@@ -13,12 +13,10 @@ import {
   type RecentLogin,
 } from "../../../_shared/hooks/use-recent-login";
 import { useOauthCallback } from "./_api/use-oauth-callback";
+import { oauthProviderSchema, type OauthProvider } from "./_model/oauth-callback.schema";
 
-const SUPPORTED_PROVIDERS = ["kakao", "naver"] as const;
-type SupportedProvider = (typeof SUPPORTED_PROVIDERS)[number];
-
-function isSupportedProvider(value: string): value is SupportedProvider {
-  return (SUPPORTED_PROVIDERS as readonly string[]).includes(value);
+function isSupportedProvider(value: string): value is OauthProvider {
+  return oauthProviderSchema.safeParse(value).success;
 }
 
 const ERROR_MESSAGE: Record<string, string> = {
@@ -63,23 +61,26 @@ export default function OauthCallbackPage() {
     if (!data || handledRef.current || !isSupportedProvider(provider)) return;
     handledRef.current = true;
 
-    setTokens(data.accessToken, data.refreshToken);
-
     void (async () => {
-      let maskedEmail = "";
+      // 스토리지 실패(사생활 모드·quota 초과)나 프로필 조회 실패가 나도 로그인 이동은 항상 진행한다.
       try {
-        const me = await getMe();
-        if (me.email) maskedEmail = maskEmail(me.email);
-      } catch {
-        // 프로필 조회 실패는 로그인을 막지 않는다 — 흔적은 계정 라벨 없이 기록.
-      }
+        setTokens(data.accessToken, data.refreshToken);
+      } catch {}
 
-      const recent: RecentLogin = {
-        provider,
-        maskedEmail,
-        lastLoginAt: new Date().toISOString(),
-      };
-      saveRecentLogin(recent);
+      try {
+        let maskedEmail = "";
+        try {
+          const me = await getMe();
+          if (me.email) maskedEmail = maskEmail(me.email);
+        } catch {}
+
+        const recent: RecentLogin = {
+          provider,
+          maskedEmail,
+          lastLoginAt: new Date().toISOString(),
+        };
+        saveRecentLogin(recent);
+      } catch {}
 
       router.replace(data.isNewUser ? "/signup" : "/");
     })();
