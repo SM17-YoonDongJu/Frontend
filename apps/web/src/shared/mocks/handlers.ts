@@ -561,16 +561,20 @@ export const handlers = [
         ],
         issue: [
           {
-            title: "외모추상 특약 누락",
-            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
-            status: "CONFIRMED",
-            tag: "특약 제5조",
-          },
-          {
-            title: "장해등급 적용",
+            title: "장해등급 과소 산정 가능",
             opinion: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
             status: "TRUSTED",
             tag: "약관 제12조",
+            impactAmount: 350,
+            tags: ["약관 제12조", "분쟁조정 2023-1456"],
+          },
+          {
+            title: "외모추상 특약 청구 누락",
+            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
+            status: "CONFIRMED",
+            tag: "특약 제5조",
+            impactAmount: 200,
+            tags: ["특약 약관 §4", "유사사례 1456"],
           },
           {
             title: "진행 방향",
@@ -581,6 +585,7 @@ export const handlers = [
         ],
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
+        reportNo: "20260520-017",
         adjusterId: crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
