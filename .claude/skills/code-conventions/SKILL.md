@@ -75,7 +75,7 @@ src/
 - zod 스키마: `<domain>Schema`, 타입은 `z.infer`로 도출한 PascalCase
 - **도메인 식별자(필드·enum·ID·훅/쿼리키 이름)는 `frontend-feature/references/naming-dictionary.md`가 단일 진실.** 같은 개념엔 같은 이름 — API 명세 필드명을 그대로 쓰고 임의 별칭 금지.
 
-## 코드 스타일 (eslint/prettier 프리셋 준수)
+## 코드 스타일 (oxlint/prettier 프리셋 준수)
 - `prefer-const`, `eqeqeq: smart`, `no-console`(warn/error만 허용)
 - TS strict + `noUncheckedIndexedAccess` — 배열 인덱스 접근은 undefined 가능성 처리
 - **`as` 타입 단언 지양 → 타입 가드/zod로 narrow**: 외부 데이터(`unknown`, API 응답 등)는 `as`로 모양을 가정하지 말고 타입 가드 함수(`value is T` 술어)나 zod 스키마로 좁힌다. `as`는 런타임 검증이 없어 단언이 거짓이면 조용히 깨진다. 특히 `(json as { code?: string }).code` 같은 응답 캐스트 금지 — 공용 fetch 헬퍼(`shared/api/fetch-json`)로 봉투 해제 + 검증을 일원화한다. (불가피한 단언은 사유 주석 필수.)

@@ -1,39 +1,76 @@
-import { Button } from "@/shared/ui/Button";
+import Link from "next/link";
+import { cn } from "@/shared/lib/utils";
+import { buttonVariants } from "@/shared/ui/Button";
+import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 
 export interface AdjusterContactProps {
   nickname?: string | null;
+  adjusterId?: string | null;
+  variant?: "mobile" | "desktop";
 }
 
-export function AdjusterContact({ nickname }: AdjusterContactProps) {
+export function AdjusterContact({
+  nickname,
+  adjusterId,
+  variant = "desktop",
+}: AdjusterContactProps) {
   if (!nickname) return null;
+
+  const chatHref = adjusterId ? `/customer/chat?adjusterId=${adjusterId}` : null;
+  const avatarChar = nickname.slice(0, 1);
+
+  if (variant === "mobile") {
+    return (
+      <div className="rounded-card-lg border border-line bg-paper-2 p-[1.3125rem]">
+        <div className="flex items-center gap-3">
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-[1.5rem] bg-navy font-serif text-[1.26rem] text-white">
+            {avatarChar}
+          </div>
+          <div>
+            <p className="text-[0.86rem] font-bold text-ink">{nickname} 손해사정사</p>
+            <p className="text-[0.73rem] text-ink-3">이 리포트를 검수한 전문가</p>
+          </div>
+        </div>
+
+        <p className="mt-[0.8125rem] text-[0.73rem] leading-[1.21rem] text-ink-2">
+          검수해주신 사정사님께 바로 상담을 이어가세요. 사건을 이미 파악하고 있어 더 빠릅니다.
+        </p>
+
+        {chatHref && (
+          <Link
+            href={chatHref}
+            className={cn(buttonVariants({ full: true }), "mt-[0.8125rem] py-4 text-[0.94rem]")}
+          >
+            {nickname} 사정사님께 연결하기
+            <ArrowRight className="text-[1.1875rem]" />
+          </Link>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="rounded-card-lg border border-line bg-card p-6">
       <div className="flex items-center gap-3">
-        <div className="flex size-11 items-center justify-center rounded-full bg-gold-soft text-[15px] font-semibold text-gold-ink">
-          {nickname.slice(0, 1)}
+        <div className="flex size-11 items-center justify-center rounded-full bg-gold-soft text-[0.9375rem] font-semibold text-gold-ink">
+          {avatarChar}
         </div>
         <div>
-          <p className="text-[15px] font-semibold text-ink">{nickname} 손해사정사</p>
-          <p className="text-[12.5px] text-ink-3">이 의견을 작성한 전문가</p>
+          <p className="text-[0.9375rem] font-semibold text-ink">{nickname} 손해사정사</p>
+          <p className="text-[0.78rem] text-ink-3">이 의견을 작성한 전문가</p>
         </div>
       </div>
 
-      <p className="mt-3 text-[13px] leading-relaxed text-ink-2">
+      <p className="mt-3 text-[0.8125rem] leading-relaxed text-ink-2">
         이 의견으로 상담을 시작하세요. 사건 맥락을 이미 파악하고 있어 더 빠르게 진행됩니다.
       </p>
 
-      <Button
-        full
-        className="mt-4"
-        icon={
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        }
-      >
-        이 의견으로 상담하기
-      </Button>
+      {chatHref && (
+        <Link href={chatHref} className={cn(buttonVariants({ full: true }), "mt-4")}>
+          이 의견으로 상담하기
+          <ArrowRight className="text-[1rem]" />
+        </Link>
+      )}
     </div>
   );
 }

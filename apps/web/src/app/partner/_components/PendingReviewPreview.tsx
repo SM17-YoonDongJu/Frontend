@@ -6,7 +6,6 @@ import { buttonVariants } from "@/shared/ui/Button";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { useReviewList } from "../review/_api/use-review-list";
 import type { ReviewListItem } from "../review/_model/types";
-import { formatReviewDue } from "../_model/review-due";
 import { SectionCard } from "./SectionCard";
 import { PendingReviewEmpty } from "./PendingReviewEmpty";
 
@@ -15,8 +14,7 @@ const PREVIEW_LIMIT = 3;
 export function PendingReviewPreview() {
   const { data } = useReviewList({ status: "AWAITING_INSPECTION" });
 
-  const sorted = [...data.list].sort((a, b) => b.matchingScore - a.matchingScore);
-  const top = sorted.slice(0, PREVIEW_LIMIT);
+  const top = data.list.slice(0, PREVIEW_LIMIT);
 
   return (
     <SectionCard
@@ -40,35 +38,25 @@ export function PendingReviewPreview() {
 }
 
 function PendingReviewRow({ item }: { item: ReviewListItem }) {
-  const due = formatReviewDue(item.reviewDeadline, new Date());
-
   return (
     <div className="flex items-center gap-4">
-      <div className="w-12 shrink-0 text-center">
-        <p className="font-serif text-[1.25rem] font-bold leading-none text-ink">{item.matchingScore}</p>
-        <p className="mt-1 text-[0.6875rem] text-ink-3">매칭</p>
-      </div>
-
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <StatusBadge tone="gold">{accidentTypeLabel(item.accidentType)}</StatusBadge>
-          <span className="text-xs text-ink-3">#{item.caseId}</span>
-          <span className="text-xs text-ink-3">· {item.region}</span>
+          {item.caseId && <span className="text-xs text-ink-3">#{item.caseId}</span>}
+          {item.region && <span className="text-xs text-ink-3">· {item.region}</span>}
         </div>
-        <p className="mt-1.5 truncate text-[0.875rem] font-semibold text-ink">{item.title}</p>
+        <p className="mt-1.5 truncate text-[0.875rem] font-semibold text-ink">
+          {item.title ?? accidentTypeLabel(item.accidentType)}
+        </p>
       </div>
 
-      <div className="flex shrink-0 items-center gap-3">
-        <span className={`text-xs font-medium ${due.urgent ? "text-terra" : "text-ink-3"}`}>
-          {due.label}
-        </span>
-        <Link
-          href={`/partner/review/${item.reportId}`}
-          className={buttonVariants({ variant: "outline", size: "sm" })}
-        >
-          검수
-        </Link>
-      </div>
+      <Link
+        href={`/partner/review/${item.reportId}`}
+        className={buttonVariants({ variant: "outline", size: "sm" })}
+      >
+        검수
+      </Link>
     </div>
   );
 }

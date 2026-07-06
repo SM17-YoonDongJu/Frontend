@@ -84,16 +84,18 @@ export function Step5Documents() {
   return (
     <section className="flex flex-col gap-5">
       <div>
-        <h2 className="font-serif text-[22px] font-bold text-ink">관련 서류를 올려주세요</h2>
-        <p className="mt-1.5 text-[13.5px] text-ink-3">
-          진단서·보험증권·지급결과서 (PDF 또는 이미지, 최대 20MB)
+        <h2 className="font-serif text-[1.5625rem] font-bold text-ink sm:text-[1.375rem]">
+          관련 서류를 올려주세요
+        </h2>
+        <p className="mt-1.5 text-[0.84375rem] text-ink-3">
+          진단서·보험증권·지급결과서 (사진/PDF, 최대 20MB)
         </p>
       </div>
 
       <FileDropzone onFiles={addFiles} accept={ACCEPT} />
 
       {rejected.length > 0 && (
-        <p className="text-[12.5px] text-terra">
+        <p className="text-[0.78125rem] text-terra">
           업로드 불가(형식·용량): {rejected.join(", ")}
         </p>
       )}

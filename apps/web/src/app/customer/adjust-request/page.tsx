@@ -40,10 +40,10 @@ function AdjustRequestFunnel() {
   }, [funnel.currentStep]);
 
   const validateStep = () => {
-    const result = step.schema.safeParse(form.getValues());
+    const parsed = step.schema.safeParse(form.getValues());
     form.clearErrors();
-    if (!result.success) {
-      for (const issue of result.error.issues) {
+    if (!parsed.success) {
+      for (const issue of parsed.error.issues) {
         const name = issue.path.join(".");
         if (name) form.setError(name as FieldPath<AdjustRequestDraft>, { message: issue.message });
       }
@@ -86,11 +86,17 @@ function AdjustRequestFunnel() {
   }
 
   return (
-    <div className="mx-auto min-h-[100dvh] w-full max-w-[760px] px-4 pb-12 pt-8">
-      <FunnelProgress current={funnel.currentStep} total={funnel.total} title={step.title} />
+    <div className="mx-auto min-h-[100dvh] w-full max-w-[47.5rem] px-4 pb-28 pt-5 sm:pb-12 sm:pt-8">
+      <FunnelProgress
+        current={funnel.currentStep}
+        total={funnel.total}
+        title={step.title}
+        isFirst={funnel.isFirst}
+        onBack={funnel.prev}
+      />
 
       <FormProvider {...form}>
-        <div className="mt-6 rounded-card-lg border border-line bg-card p-6">
+        <div className="mt-6 sm:rounded-card-lg sm:border sm:border-line sm:bg-card sm:p-6">
           {funnel.currentStep === 1 && <Step1AccidentType />}
           {funnel.currentStep === 2 && <Step2TreatmentDetail />}
           {funnel.currentStep === 3 && <Step3AccidentDate />}
@@ -101,7 +107,7 @@ function AdjustRequestFunnel() {
       </FormProvider>
 
       {submitError && (
-        <p className="mt-3 text-[13px] font-medium text-terra">{submitError}</p>
+        <p className="mt-3 text-[0.8125rem] font-medium text-terra">{submitError}</p>
       )}
 
       <FunnelFooter
