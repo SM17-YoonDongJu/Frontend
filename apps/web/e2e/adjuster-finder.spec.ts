@@ -17,6 +17,11 @@ const PAGE_SIZE = 20;
 const TOTAL = 26;
 const DISABILITY_COUNT = 7; // 후유장해 보유: 정우성·윤지후·한도윤 + 생성분 4명
 
+// 이 파일 시나리오는 PC 레이아웃(h1 "검색"·통계 밴드·사이드바 정렬·프로필 링크) 기준.
+// 모바일 프로젝트(Pixel 7 등)에서도 데스크톱 뷰포트로 고정해 돌리고,
+// 모바일 레이아웃은 아래 "모바일에서는 필터 칩…" 테스트가 뷰포트를 직접 좁혀 검증한다.
+test.use({ viewport: { width: 1280, height: 900 } });
+
 test("진입하면 헤딩·통계 밴드·카드 한 페이지가 보인다", async ({ page }) => {
   await page.goto(PATH);
 

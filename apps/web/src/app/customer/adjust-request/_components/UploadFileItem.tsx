@@ -1,4 +1,6 @@
 import { cn } from "@/shared/lib/utils";
+import { Check } from "@/shared/ui/icons/Check";
+import { FileText } from "@/shared/ui/icons/FileText";
 import { Spinner } from "@/shared/ui/icons/Spinner";
 
 export type UploadStatus = "uploading" | "done" | "error";
@@ -19,6 +21,12 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`;
 }
 
+const ICON_BOX_STYLE: Record<UploadStatus, string> = {
+  uploading: "bg-gold-soft text-gold-ink",
+  done: "bg-green-soft text-green",
+  error: "bg-terra-soft text-terra",
+};
+
 export function UploadFileItem({
   name,
   size,
@@ -31,45 +39,41 @@ export function UploadFileItem({
   return (
     <div
       className={cn(
-        "flex items-center gap-3 rounded-card border bg-card px-3.5 py-3",
+        "flex items-center gap-3 rounded-input border bg-card px-3.5 py-3",
         status === "error" ? "border-terra" : "border-line",
       )}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-paper-2">
+      <div
+        className={cn(
+          "flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-chip text-[1.125rem]",
+          ICON_BOX_STYLE[status],
+        )}
+      >
         {previewUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={previewUrl} alt="" className="h-full w-full object-cover" />
         ) : (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-ink-3">
-            <path d="M6 2h8l4 4v16a0 0 0 0 1 0 0H6a0 0 0 0 1 0 0V2Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-            <path d="M14 2v4h4" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-          </svg>
+          <FileText />
         )}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[14px] font-medium text-ink">{name}</p>
-        <p className="text-[12px] text-ink-3">
-          {status === "uploading" && "업로드 중…"}
-          {status === "done" && formatBytes(size)}
-          {status === "error" && (
-            <span className="text-terra">{errorMessage ?? "업로드 실패"}</span>
-          )}
+        <p className="truncate text-[0.8125rem] font-bold text-ink">{name}</p>
+        <p className="text-[0.6875rem]">
+          {status === "uploading" && <span className="text-gold-ink">분석 중</span>}
+          {status === "done" && <span className="text-ink-3">{formatBytes(size)}</span>}
+          {status === "error" && <span className="text-terra">{errorMessage ?? "업로드 실패"}</span>}
         </p>
       </div>
 
       <div className="flex shrink-0 items-center gap-2">
         {status === "uploading" && <Spinner />}
-        {status === "done" && (
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-green">
-            <path d="m5 12.5 4 4 10-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
+        {status === "done" && <Check className="text-[1.125rem] text-green" />}
         {status === "error" && (
           <button
             type="button"
             onClick={onRetry}
-            className="rounded-pill border border-line px-2.5 py-1 text-[12.5px] text-ink-2 hover:border-ink/40"
+            className="rounded-pill border border-line px-2.5 py-1 text-[0.78125rem] text-ink-2 transition hover:border-ink/40"
           >
             재시도
           </button>
@@ -78,7 +82,7 @@ export function UploadFileItem({
           type="button"
           onClick={onRemove}
           aria-label="삭제"
-          className="text-ink-3 hover:text-terra"
+          className="text-ink-3 transition hover:text-terra"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path d="M6 6l12 12M18 6 6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />

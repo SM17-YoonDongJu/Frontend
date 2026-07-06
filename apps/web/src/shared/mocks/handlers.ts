@@ -181,16 +181,34 @@ function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
   };
 }
 
-// 검수 대기 목 데이터 — 보류 상태 반영 위해 모듈 스코프에 고정(reportId 안정)
+// 검수 대기 목 데이터 — reportId 안정 위해 모듈 스코프에 고정.
+// CONTRACT: 명세없음-임시 — caseId·title·region·claimedMin/Max·offerHeadroom은 list 미확장 필드(MSW 목킹).
 const PENDING_REVIEWS = [
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", matchingScore: 96, claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2, reviewDeadline: addDays(new Date(), 0) },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z", caseId: "20260619-041", title: "다발성 늑골 골절 · 일실수입 과소 산정 의심", region: "경기 성남", matchingScore: 91, claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3, reviewDeadline: addDays(new Date(), 1) },
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "20260618-030", title: "요추 추간판탈출 · 외모추상 특약 청구 누락", region: "서울 송파", matchingScore: 88, claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2, reviewDeadline: addDays(new Date(), 3) },
-  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "20260618-019", title: "비급여 도수치료 · 통원 한도 적용 분쟁", region: "인천 연수", matchingScore: 74, claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1, reviewDeadline: addDays(new Date(), 2) },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z", caseId: "20260517-007", title: "경추 염좌 · 향후 치료비 미반영", region: "경기 수원", matchingScore: 82, claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 1_800_000, issueCount: 1, reviewDeadline: addDays(new Date(), 5) },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), 0)}T09:00:00Z`, caseId: "042", title: "우측 슬관절 인대 파열 · 등급 재산정", region: "서울 강남", claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000 },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), -1)}T08:10:00Z`, caseId: "041", title: "다발성 늑골 골절 · 일실수입 과소", region: "경기 성남", claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000 },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "038", title: "요추 추간판탈출 · 특약 누락", region: "서울 송파", claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000 },
+  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "036", title: "비급여 도수치료 · 한도 분쟁", region: "인천 연수", claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000 },
 ];
 
-const heldReportIds = new Set<string>();
+// 검수 내역 목 데이터 (이슈 #59) — GET /adjusters/me/reviewed-reports.
+// 명세 6필드(caseId·title·sentDate·status·statusLabel·hasOpinion) + ⚠️명세없음-1 4필드
+// (accidentType·confirmedMin/MaxAmount·rating: FE optional, 백엔드 list 확장 대기)를 채움.
+const REVIEWED_REPORTS = [
+  { caseId: "20260605-021", title: "후유장해 · 십자인대 파열 등급 재산정", sentDate: "2026-06-05", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 14_000_000, confirmedMaxAmount: 17_500_000, rating: 4.9 },
+  { caseId: "20260603-018", title: "교통사고 · 일실수입 과소 산정", sentDate: "2026-06-03", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "traffic", confirmedMinAmount: 24_000_000, confirmedMaxAmount: 30_000_000, rating: 5.0 },
+  { caseId: "20260530-014", title: "실손 의료비 · 비급여 도수치료 한도 분쟁", sentDate: "2026-05-30", status: "SENT", statusLabel: "전송 완료", hasOpinion: false, accidentType: "medical_indemnity", confirmedMinAmount: 3_200_000, confirmedMaxAmount: 4_800_000, rating: null },
+  { caseId: "20260528-009", title: "후유장해 · 요추 추간판탈출 특약 누락", sentDate: "2026-05-28", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 9_000_000, confirmedMaxAmount: 14_000_000, rating: 4.7 },
+  { caseId: "20260525-006", title: "암·진단비 · 유사암 분류 쟁점", sentDate: "2026-05-25", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "cancer_diagnosis", confirmedMinAmount: 20_000_000, confirmedMaxAmount: 20_000_000, rating: 4.8 },
+  { caseId: "20260522-003", title: "교통사고 · 경추 염좌 향후 치료비 미반영", sentDate: "2026-05-22", status: "NOT_SELECTED", statusLabel: "미선정", hasOpinion: false, accidentType: "traffic", confirmedMinAmount: 6_000_000, confirmedMaxAmount: 9_000_000, rating: null },
+  { caseId: "20260520-017", title: "후유장해 · 견관절 회전근개 파열", sentDate: "2026-05-20", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 11_000_000, confirmedMaxAmount: 15_500_000, rating: 4.9 },
+  { caseId: "20260518-011", title: "화재 · 가재도구 손해액 산정", sentDate: "2026-05-18", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "fire", confirmedMinAmount: 8_500_000, confirmedMaxAmount: 12_000_000, rating: 4.6 },
+  { caseId: "20260515-008", title: "배상책임 · 대인 사고 위자료 쟁점", sentDate: "2026-05-15", status: "SENT", statusLabel: "전송 완료", hasOpinion: false, accidentType: "liability", confirmedMinAmount: 5_000_000, confirmedMaxAmount: 7_000_000, rating: null },
+  { caseId: "20260512-004", title: "실손 의료비 · 통원 한도 적용", sentDate: "2026-05-12", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "medical_indemnity", confirmedMinAmount: 2_800_000, confirmedMaxAmount: 3_600_000, rating: 4.5 },
+  { caseId: "20260509-002", title: "후유장해 · 안면부 외모추상 장해", sentDate: "2026-05-09", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 16_000_000, confirmedMaxAmount: 22_000_000, rating: 5.0 },
+  { caseId: "20260506-015", title: "교통사고 · 다발성 늑골 골절", sentDate: "2026-05-06", status: "NOT_SELECTED", statusLabel: "미선정", hasOpinion: false, accidentType: "traffic", confirmedMinAmount: 18_000_000, confirmedMaxAmount: 24_000_000, rating: null },
+  { caseId: "20260503-010", title: "암·진단비 · 재진단암 인정 범위", sentDate: "2026-05-03", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "cancer_diagnosis", confirmedMinAmount: 30_000_000, confirmedMaxAmount: 30_000_000, rating: 4.8 },
+  { caseId: "20260430-005", title: "실손 의료비 · 비급여 주사료 분쟁", sentDate: "2026-04-30", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "medical_indemnity", confirmedMinAmount: 1_400_000, confirmedMaxAmount: 1_750_000, rating: 4.4 },
+] as const;
 
 // 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
 const rejectedProposals = new Set<string>();
@@ -220,7 +238,47 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
   // 대시보드 헤더·인사말용 집계(읽기 전용)
   averageRating: 4.9,
   reviewCount: 86,
-  pendingReviewCount: 5,
+  pendingReviewCount: 4,
+};
+
+// 알림 설정 (이슈 #46) — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체
+const NOTIFICATION_SETTINGS: Record<string, boolean> = {
+  newReviewRequest: true,
+  consultMessage: true,
+  settlementNotice: false,
+  reviewComplete: true,
+  receivedProposal: true,
+  marketing: false,
+};
+
+// 마이페이지 집계 (이슈 #46) — GET /adjusters/me/mypage, ADJUSTER_PROFILE 페르소나와 수치 일치
+const ADJUSTER_MYPAGE = {
+  profile: {
+    nickname: "김상정",
+    email: "kimsangjeong@example.com",
+    avatarUrl: null,
+    headline: "후유장해 전문 12년, 거절 사건을 다시 봅니다",
+    specialties: ["후유장해", "교통사고"],
+    career: 12,
+    activityRegion: "서울·경기",
+    role: "CERTIFICATED_ADJUSTER",
+  },
+  stats: {
+    averageRating: 4.9,
+    reviewCount: 86,
+    totalCompletedCount: 240,
+    consultationConversionRate: 62,
+  },
+  monthlyActivity: {
+    completedCount: 14,
+    consultationConvertedCount: 9,
+    averageRating: 4.9,
+  },
+  certification: {
+    licenseNo: "제2014-0087호",
+    activityRegion: "서울·경기",
+    createdAt: "2026-01-01T00:00:00Z",
+  },
 };
 
 // ── 채팅(이슈 #48) 모듈 스코프 가변 상태 ─────────────────────────────
@@ -436,6 +494,65 @@ export const handlers = [
     });
   }),
 
+  // 회원가입 (#43) — 전역 봉투 거울. 성공 201 + data(토큰 포함).
+  // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 2자 미만→400 VALIDATION_ERROR,
+  //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD, x-mock-failure:social→500 EXTERNAL_API_ERROR.
+  http.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {
+    await delay(600);
+
+    const body = (await request.json().catch(() => ({}))) as {
+      provider?: string;
+      socialToken?: string;
+      nickname?: string;
+      userType?: string;
+      email?: string;
+    };
+
+    if (request.headers.get("x-mock-failure") === "social") {
+      return HttpResponse.json(
+        { status: "500", code: "EXTERNAL_API_ERROR", message: "소셜 인증에 실패했습니다. 다시 시도해 주세요." },
+        { status: 500 },
+      );
+    }
+
+    if (!body.provider || !body.socialToken || !body.userType) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
+        { status: 400 },
+      );
+    }
+
+    if (!body.nickname || body.nickname.length < 2 || body.nickname.length > 20) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "닉네임은 2~20자로 입력해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    if (body.nickname === "중복닉네임") {
+      return HttpResponse.json(
+        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 사용 중인 닉네임이에요." },
+        { status: 409 },
+      );
+    }
+
+    return HttpResponse.json(
+      {
+        status: "201",
+        message: "회원가입이 완료되었습니다.",
+        data: {
+          userId: crypto.randomUUID(),
+          nickname: body.nickname,
+          // 응답 역할은 명세대로 role(요청 userType 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
+          role: body.userType === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
+          accessToken: `mock-access-${crypto.randomUUID()}`,
+          refreshToken: `mock-refresh-${crypto.randomUUID()}`,
+        },
+      },
+      { status: 201 },
+    );
+  }),
+
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
     await delay(500);
@@ -470,7 +587,7 @@ export const handlers = [
       message: "정상 처리되었습니다.",
       data: {
         summary: {
-          pendingCount: 5,
+          pendingCount: 4,
           pendingNewCount: 2,
           inProgressCount: 2,
           monthlyCompletedCount: 14,
@@ -480,10 +597,80 @@ export const handlers = [
         },
         activity: {
           completedCount: 14,
-          consultConvertedCount: 9,
+          consultationConvertedCount: 9,
           averageRating: 4.9,
         },
       },
+    });
+  }),
+
+  // 손해사정사 마이페이지 집계 (이슈 #46)
+  http.get(`${API_BASE_URL}/adjusters/me/mypage`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "mypage") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "마이페이지를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: ADJUSTER_MYPAGE,
+    });
+  }),
+
+  // 알림 설정 조회 (이슈 #46)
+  http.get(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "notification-settings") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "알림 설정을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...NOTIFICATION_SETTINGS },
+    });
+  }),
+
+  // 알림 설정 저장 (이슈 #46) — 수정한 항목만 머지, 전체 설정 반환
+  http.patch(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "notification-settings") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "알림 설정을 저장하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    for (const key of Object.keys(NOTIFICATION_SETTINGS)) {
+      if (typeof body[key] === "boolean") {
+        NOTIFICATION_SETTINGS[key] = body[key];
+      }
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...NOTIFICATION_SETTINGS },
     });
   }),
 
@@ -525,16 +712,20 @@ export const handlers = [
   }),
 
   // 본인 정보 조회 (고객 대시보드 인사말)
+  // E2E 역할 게이팅 검증용: localStorage["mock:userType"]="adjuster"면 사정사로 응답(기본 insured_person).
   http.get(`${API_BASE_URL}/users/me`, async () => {
     await delay(300);
+    const override =
+      typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
+    const userType = override === "adjuster" ? "adjuster" : "insured_person";
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
-        userId: 1024,
+        userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
         nickname: "윤서",
         email: "yunseo@example.com",
-        userType: "insured_person",
+        userType,
         createdAt: "2024-03-02T09:00:00Z",
       },
     });
@@ -672,16 +863,10 @@ export const handlers = [
     const page = Number(url.searchParams.get("page") ?? "1");
     const size = Number(url.searchParams.get("size") ?? "10");
     const accidentType = url.searchParams.get("accidentType");
-    const region = url.searchParams.get("region");
 
     const list = PENDING_REVIEWS.filter(
-      (review) =>
-        (!accidentType || review.accidentType === accidentType) &&
-        (!region || review.region === region),
-    ).map((review) => ({
-      ...review,
-      held: heldReportIds.has(review.reportId),
-    }));
+      (review) => !accidentType || review.accidentType === accidentType,
+    );
 
     return HttpResponse.json({
       status: "200",
@@ -693,29 +878,78 @@ export const handlers = [
     });
   }),
 
-  // 검수 보류 처리 (사정사별 토글)
-  http.patch(`${API_BASE_URL}/reports/:reportId/hold`, async ({ params }) => {
-    await delay(300);
-    const reportId = String(params.reportId);
-    heldReportIds.add(reportId);
-
-    return HttpResponse.json({
-      status: "200",
-      message: "보류 처리되었습니다.",
-      data: { reportId, held: true },
-    });
-  }),
-
-  // 검수 현황 요약 (집계 카드 3종)
+  // 검수 현황 요약 (하단 탭바 뱃지 카운트용)
   http.get(`${API_BASE_URL}/reports/pending-review/summary`, async () => {
     await delay(300);
 
-    const pendingCount = PENDING_REVIEWS.filter((r) => !heldReportIds.has(r.reportId)).length;
+    const pendingCount = PENDING_REVIEWS.length;
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: { pendingCount, specialtyMatchCount: 3, dueSoonCount: 1 },
+    });
+  }),
+
+  // 사정사 검수 내역 조회 (이슈 #59) — 명세 봉투 거울. status 서버 필터 + page 페이지네이션.
+  // 실패/빈 시나리오는 x-mock-* 헤더로 주입(E2E override용).
+  http.get(`${API_BASE_URL}/adjusters/me/reviewed-reports`, async ({ request }) => {
+    await delay(400);
+
+    const failure = request.headers.get("x-mock-failure");
+    if (failure === "reviewed-forbidden") {
+      return HttpResponse.json(
+        { status: "403", code: "FORBIDDEN", message: "손해사정사만 접근할 수 있습니다." },
+        { status: 403 },
+      );
+    }
+    if (failure === "reviewed-unauthorized") {
+      return HttpResponse.json(
+        { status: "401", code: "LOGIN_REQUIRED", message: "로그인이 필요합니다." },
+        { status: 401 },
+      );
+    }
+
+    const url = new URL(request.url, "http://localhost");
+    const status = url.searchParams.get("status"); // 없거나 ALL이면 전체
+    const month = url.searchParams.get("month") ?? "";
+    const page = Number(url.searchParams.get("page") ?? "1");
+    const size = Number(url.searchParams.get("size") ?? "10");
+
+    // 검수 이력 자체 없음(no-data) 시나리오
+    const emptyAll = request.headers.get("x-mock-reviewed") === "empty";
+    const source = emptyAll ? [] : REVIEWED_REPORTS;
+
+    const filtered =
+      !status || status === "ALL"
+        ? source
+        : source.filter((r) => r.status === status);
+
+    const start = (page - 1) * size;
+    const paged = filtered.slice(start, start + size);
+    const totalPages = Math.max(1, Math.ceil(filtered.length / size));
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        summary: {
+          monthlyReviewCount: emptyAll ? 0 : 18,
+          previousMonthReviewCount: emptyAll ? 0 : 15,
+          consultationConversionRate: emptyAll ? 0 : 62,
+          consultationConvertedCount: emptyAll ? 0 : 9,
+          totalCount: source.length,
+        },
+        filter: { status: status ?? "ALL", month },
+        list: paged,
+        pagination: {
+          page,
+          size,
+          totalElements: filtered.length,
+          totalPages,
+          hasNext: start + size < filtered.length,
+        },
+      },
     });
   }),
 
@@ -978,16 +1212,20 @@ export const handlers = [
         ],
         issue: [
           {
-            title: "외모추상 특약 누락",
-            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
-            status: "CONFIRMED",
-            tag: "특약 제5조",
-          },
-          {
-            title: "장해등급 적용",
+            title: "장해등급 과소 산정 가능",
             opinion: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
             status: "TRUSTED",
             tag: "약관 제12조",
+            impactAmount: 350,
+            tags: ["약관 제12조", "분쟁조정 2023-1456"],
+          },
+          {
+            title: "외모추상 특약 청구 누락",
+            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
+            status: "CONFIRMED",
+            tag: "특약 제5조",
+            impactAmount: 200,
+            tags: ["특약 약관 §4", "유사사례 1456"],
           },
           {
             title: "진행 방향",
@@ -998,6 +1236,7 @@ export const handlers = [
         ],
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
+        reportNo: "20260520-017",
         adjusterId: crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."

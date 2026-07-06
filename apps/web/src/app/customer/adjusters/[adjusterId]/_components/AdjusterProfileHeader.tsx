@@ -29,18 +29,18 @@ export function AdjusterProfileHeader({
   const subtitle = [`경력 ${career}년`, ...specialties.slice(0, 2)].join(" · ") + " 전문";
 
   return (
-    <header className="border-b border-line bg-card">
-      <div className="mx-auto w-full max-w-[1100px] px-4 py-9">
-        <nav className="mb-6 flex items-center gap-1.5 text-xs text-ink-3">
+    <header className="lg:border-b lg:border-line lg:bg-card">
+      <div className="mx-auto w-full max-w-[68.75rem] px-5 pb-6 pt-2 lg:px-4 lg:py-9">
+        <nav className="mb-6 hidden items-center gap-1.5 text-xs text-ink-3 lg:flex">
           <span>손해사정사</span>
           <span aria-hidden>›</span>
           <span className="text-ink-2">{nickname} 손해사정사</span>
         </nav>
 
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-7">
+        <div className="flex flex-col items-center gap-2 text-center lg:flex-row lg:items-center lg:gap-7 lg:text-left">
           <span
             aria-hidden
-            className="flex size-24 shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy text-3xl font-semibold text-white"
+            className="flex size-[5.25rem] shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy text-3xl font-semibold text-white lg:size-24"
           >
             {avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -50,9 +50,11 @@ export function AdjusterProfileHeader({
             )}
           </span>
 
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-3xl font-semibold text-ink">{nickname} 손해사정사</h1>
+          <div className="flex min-w-0 flex-col items-center lg:items-start">
+            <div className="flex flex-wrap items-center justify-center gap-2 pt-1.5 lg:justify-start lg:gap-3 lg:pt-0">
+              <h1 className="font-serif text-2xl font-bold text-ink lg:font-sans lg:text-3xl lg:font-semibold">
+                {nickname} 손해사정사
+              </h1>
               {verified && (
                 <StatusBadge
                   tone="green"
@@ -62,16 +64,17 @@ export function AdjusterProfileHeader({
                     </svg>
                   }
                 >
-                  자격 인증
+                  <span className="lg:hidden">인증</span>
+                  <span className="hidden lg:inline">자격 인증</span>
                 </StatusBadge>
               )}
             </div>
             <p className="mt-2 text-sm text-ink-2">{subtitle}</p>
-            <ul className="mt-3 flex flex-wrap gap-2">
+            <ul className="mt-3 flex flex-wrap justify-center gap-2 lg:justify-start">
               {specialties.map((tag) => (
                 <li
                   key={tag}
-                  className="rounded-tag bg-gold-soft px-2.5 py-1 text-xs font-medium text-gold-ink"
+                  className="rounded-pill bg-gold-soft px-2.5 py-1 text-xs font-semibold text-gold-ink"
                 >
                   {tag}
                 </li>
@@ -80,7 +83,7 @@ export function AdjusterProfileHeader({
           </div>
         </div>
 
-        <dl className="mt-8 grid grid-cols-3 divide-x divide-line">
+        <dl className="mt-8 hidden grid-cols-3 divide-x divide-line lg:grid">
           <Stat
             label="평점"
             value={

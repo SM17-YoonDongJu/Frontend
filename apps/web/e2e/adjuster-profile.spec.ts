@@ -13,7 +13,7 @@ const PATH = `/customer/adjusters/${ADJUSTER_ID}`;
 const EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
 const NOT_FOUND_ID = "99999999-9999-4999-8999-999999999999";
 
-test("진입하면 프로필 모든 영역이 보인다", async ({ page }) => {
+test("진입하면 프로필 모든 영역이 보인다", async ({ page, isMobile }) => {
   await page.goto(PATH);
 
   await expect(
@@ -25,10 +25,14 @@ test("진입하면 프로필 모든 영역이 보인다", async ({ page }) => {
     await expect(page.getByRole("heading", { name: section })).toBeVisible();
   }
 
-  // 통계(평점·상담 완료·처리 사건)
-  await expect(page.getByText("240+")).toBeVisible();
-  await expect(page.getByText("510건")).toBeVisible();
-  await expect(page.getByText("자격 인증")).toBeVisible();
+  // 통계 — 데스크톱은 3열 지표(처리 사건 포함), 모바일은 2셀 지표 스트립
+  await expect(page.getByText("240+").filter({ visible: true })).toBeVisible();
+  if (isMobile) {
+    await expect(page.getByText("인증", { exact: true })).toBeVisible();
+  } else {
+    await expect(page.getByText("510건")).toBeVisible();
+    await expect(page.getByText("자격 인증")).toBeVisible();
+  }
 });
 
 test("후기가 최신순으로 정렬돼 보인다", async ({ page }) => {
@@ -62,4 +66,47 @@ test("없는 손해사정사는 에러 안내가 보인다", async ({ page }) =>
   await page.goto(`/customer/adjusters/${NOT_FOUND_ID}`);
 
   await expect(page.getByText("손해사정사를 찾을 수 없어요")).toBeVisible();
+});
+
+test.describe("모바일 뷰포트 (이슈 #64)", () => {
+  test.use({ viewport: { width: 402, height: 874 } });
+
+  test("앱바와 하단 고정 상담 신청 CTA가 보인다", async ({ page }) => {
+    await page.goto(PATH);
+
+    await expect(page.getByText("손해사정사 프로필")).toBeVisible();
+    await expect(page.getByRole("button", { name: "뒤로 가기" })).toBeVisible();
+
+    const cta = page.getByRole("button", { name: "상담 신청" });
+    await expect(cta).toBeVisible();
+    await page.evaluate(() => window.scrollBy(0, 1500));
+    await expect(cta).toBeVisible();
+
+    await expect(async () => {
+      await cta.click();
+      await expect(page).toHaveURL(/\/customer\/chat\?adjusterId=/);
+    }).toPass({ timeout: 10000 });
+  });
+
+  test("지표 스트립의 평점을 누르면 후기 섹션으로 스크롤된다", async ({ page }) => {
+    await page.goto(PATH);
+
+    await page.getByRole("button", { name: /평점/ }).click();
+
+    await expect(async () => {
+      const reviews = page.getByRole("heading", { name: "의뢰인 후기" });
+      await expect(reviews).toBeInViewport();
+    }).toPass({ timeout: 10000 });
+  });
+
+  test("소개가 길면 더보기로 접혀 있고 눌러 펼칠 수 있다", async ({ page }) => {
+    await page.goto(PATH);
+
+    const toggle = page.getByRole("button", { name: "더보기" });
+    await expect(toggle).toBeVisible();
+
+    await toggle.click();
+    await expect(page.getByRole("button", { name: "접기" })).toBeVisible();
+    await expect(page.getByText("모든 판단의 근거를 함께 설명드립니다", { exact: false })).toBeVisible();
+  });
 });

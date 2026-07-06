@@ -14,8 +14,8 @@ async function fillThroughConsent(page: import("@playwright/test").Page) {
   }).toPass({ timeout: 10000 });
   await page.getByRole("button", { name: /다음/ }).click();
 
-  // step2 치료 정보
-  await expect(page.getByRole("heading", { name: "어떤 치료를 받으셨나요?" })).toBeVisible();
+  // step2 치료 정보 — 진단명(복수 입력) + 치료 형태 + 비급여
+  await expect(page.getByRole("heading", { name: "어떤 진단을 받으셨나요?" })).toBeVisible();
   await page.getByRole("button", { name: "통원", exact: true }).click();
   await page.getByPlaceholder("예) 우측 슬관절 골절").fill("우측 슬관절 골절");
   await page.getByRole("button", { name: "포함", exact: true }).click();
@@ -82,7 +82,7 @@ test("필수값 미입력 시 다음 단계로 진행되지 않는다", async ({
   await page.getByRole("button", { name: /다음/ }).click();
   // 여전히 step1
   await expect(page.getByRole("heading", { name: "어떤 사고인가요?" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "어떤 치료를 받으셨나요?" })).toBeHidden();
+  await expect(page.getByRole("heading", { name: "어떤 진단을 받으셨나요?" })).toBeHidden();
 });
 
 test("새로고침하면 임시저장된 입력이 복원된다", async ({ page }) => {
@@ -93,10 +93,10 @@ test("새로고침하면 임시저장된 입력이 복원된다", async ({ page 
     await expect(medicalCard).toHaveAttribute("aria-checked", "true");
   }).toPass({ timeout: 10000 });
   await page.getByRole("button", { name: /다음/ }).click();
-  await expect(page.getByRole("heading", { name: "어떤 치료를 받으셨나요?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "어떤 진단을 받으셨나요?" })).toBeVisible();
 
   await page.reload();
 
   // draft 복원 + 가드 통과로 step2 유지
-  await expect(page.getByRole("heading", { name: "어떤 치료를 받으셨나요?" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "어떤 진단을 받으셨나요?" })).toBeVisible();
 });
