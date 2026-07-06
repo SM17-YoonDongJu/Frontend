@@ -15,6 +15,119 @@ function addDays(base: Date, days: number): string {
 const ADJUSTER_EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
 const ADJUSTER_NOT_FOUND_ID = "99999999-9999-4999-8999-999999999999";
 
+// 손해사정사 목록 목 데이터 (이슈 #47) — GET /adjusters. verified 전부 true, avatarUrl null 섞음.
+// 상위 6명은 Figma 카드 그대로, 나머지 20명은 페이지네이션(더보기) 확인용 생성분(총 26명 = 20 + 6, 2페이지).
+const EXTRA_ADJUSTER_NAMES = [
+  "김하늘", "박서준", "이도현", "최지우", "정다은",
+  "한지민", "오세훈", "서예린", "임태양", "황보라",
+  "신우재", "문가영", "배성호", "노유진", "권민혁",
+  "송이레", "양지원", "구본우", "차수아", "홍재이",
+] as const;
+
+const EXTRA_SPECIALTIES = ["후유장해", "교통사고", "실손 의료비", "암·진단비", "배상책임", "산재 연계"] as const;
+const EXTRA_REGIONS = ["서울", "경기", "인천", "대구 · 경북", "광주 · 전남"] as const;
+
+// 결정적 생성(랜덤 없음) — E2E가 개수·정렬을 단언할 수 있게 경력≤16(정우성 18 최고), 평점≤4.8(정우성 4.9 최고) 유지.
+const EXTRA_ADJUSTER_MOCK = EXTRA_ADJUSTER_NAMES.map((name, i) => {
+  const specialty: string = EXTRA_SPECIALTIES[i % EXTRA_SPECIALTIES.length] ?? "후유장해";
+  const region: string = EXTRA_REGIONS[i % EXTRA_REGIONS.length] ?? "서울";
+  return {
+    adjusterId: `77777777-0000-4000-8000-${String(i).padStart(12, "0")}`,
+    name: `${name} 사정사`,
+    avatarUrl: null,
+    verified: true,
+    specialties: [specialty],
+    headline: `${specialty} 청구 근거 정리 전문`,
+    averageRating: Math.round((4.3 + (i % 6) * 0.1) * 10) / 10,
+    reviewCount: 30 + i * 5,
+    career: 5 + (i % 12),
+    completedConsultCount: 60 + i * 7,
+    activityRegion: region,
+  };
+});
+
+const ADJUSTER_LIST_MOCK = [
+  {
+    adjusterId: "11111111-1111-4111-8111-111111111111",
+    name: "정우성 사정사",
+    avatarUrl: null,
+    verified: true,
+    specialties: ["후유장해", "교통사고"],
+    headline: "18년 경력, 고액 분쟁사건 해결 다수",
+    averageRating: 4.9,
+    reviewCount: 214,
+    career: 18,
+    completedConsultCount: 410,
+    activityRegion: "서울 · 경기",
+  },
+  {
+    adjusterId: "22222222-2222-4222-8222-222222222222",
+    name: "이서연 사정사",
+    avatarUrl: "https://picsum.photos/seed/adjuster-2/160",
+    verified: true,
+    specialties: ["실손 의료비", "암·진단비"],
+    headline: "실손·진단비 부지급 뒤집은 협상 전문",
+    averageRating: 4.8,
+    reviewCount: 176,
+    career: 12,
+    completedConsultCount: 320,
+    activityRegion: "서울",
+  },
+  {
+    adjusterId: "33333333-3333-4333-8333-333333333333",
+    name: "윤지후 사정사",
+    avatarUrl: null,
+    verified: true,
+    specialties: ["산재 연계", "후유장해"],
+    headline: "산재·자보 동시 청구 근거 설계",
+    averageRating: 4.7,
+    reviewCount: 132,
+    career: 15,
+    completedConsultCount: 268,
+    activityRegion: "인천 · 경기",
+  },
+  {
+    adjusterId: "44444444-4444-4444-8444-444444444444",
+    name: "박준호 사정사",
+    avatarUrl: "https://picsum.photos/seed/adjuster-4/160",
+    verified: true,
+    specialties: ["배상책임", "교통사고"],
+    headline: "10년 경력, 대인·대물 배상 산정 밀착",
+    averageRating: 4.6,
+    reviewCount: 98,
+    career: 9,
+    completedConsultCount: 152,
+    activityRegion: "경기",
+  },
+  {
+    adjusterId: "55555555-5555-4555-8555-555555555555",
+    name: "최민서 사정사",
+    avatarUrl: null,
+    verified: true,
+    specialties: ["암·진단비", "실손 의료비"],
+    headline: "진단비 특약 해석·약관 분쟁 전담",
+    averageRating: 4.8,
+    reviewCount: 145,
+    career: 11,
+    completedConsultCount: 205,
+    activityRegion: "부산 · 경남",
+  },
+  {
+    adjusterId: "66666666-6666-4666-8666-666666666666",
+    name: "한도윤 사정사",
+    avatarUrl: null,
+    verified: true,
+    specialties: ["후유장해", "산재 연계", "배상책임"],
+    headline: "6년 경력, 장해등급 재산정 근거 중심",
+    averageRating: 4.7,
+    reviewCount: 87,
+    career: 6,
+    completedConsultCount: 95,
+    activityRegion: "대전 · 충청",
+  },
+  ...EXTRA_ADJUSTER_MOCK,
+];
+
 function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
   return {
     adjusterId,
@@ -494,6 +607,100 @@ export const handlers = [
       });
     },
   ),
+
+  // 손해사정사 목록 조회 (이슈 #47) — 반드시 :adjusterId 핸들러보다 앞에 등록
+  http.get(`${API_BASE_URL}/adjusters`, async ({ request }) => {
+    await delay(400);
+
+    const url = new URL(request.url, "http://localhost");
+    const keyword = (url.searchParams.get("keyword") ?? "").trim();
+
+    // 실패 재현: 헤더 주입(개발용) 또는 검색어 "__error__"(E2E용 — 앱이 헤더를 못 보내므로 URL로 트리거)
+    if (request.headers.get("x-mock-failure") === "adjusters" || keyword === "__error__") {
+      return HttpResponse.json(
+        {
+          status: "500",
+          code: "INTERNAL_SERVER_ERROR",
+          message: "손해사정사 목록을 불러오지 못했습니다.",
+        },
+        { status: 500 },
+      );
+    }
+
+    const specialty = (url.searchParams.get("specialty") ?? "").trim();
+    const region = (url.searchParams.get("region") ?? "").trim();
+    const sort = url.searchParams.get("sort") ?? "rating";
+    const page = Number(url.searchParams.get("page") ?? "1") || 1;
+    const size = Number(url.searchParams.get("size") ?? "20") || 20;
+
+    let result = ADJUSTER_LIST_MOCK.slice();
+
+    if (keyword) {
+      const kw = keyword.toLowerCase();
+      result = result.filter(
+        (a) =>
+          a.name.toLowerCase().includes(kw) ||
+          a.headline.toLowerCase().includes(kw) ||
+          a.activityRegion.toLowerCase().includes(kw) ||
+          a.specialties.some((s) => s.toLowerCase().includes(kw)),
+      );
+    }
+
+    if (specialty && specialty !== "전체") {
+      result = result.filter((a) => a.specialties.includes(specialty));
+    }
+
+    if (region) {
+      if (region === "그 외 지역") {
+        result = result.filter(
+          (a) =>
+            !["서울", "경기", "인천"].some((r) => a.activityRegion.includes(r)),
+        );
+      } else {
+        result = result.filter((a) => a.activityRegion.includes(region));
+      }
+    }
+
+    result.sort((a, b) => {
+      switch (sort) {
+        case "review":
+          return b.reviewCount - a.reviewCount;
+        case "career":
+          return b.career - a.career;
+        case "consultCount":
+          return b.completedConsultCount - a.completedConsultCount;
+        case "rating":
+        default:
+          return b.averageRating - a.averageRating;
+      }
+    });
+
+    const totalElements = result.length;
+    const totalPages = Math.max(1, Math.ceil(totalElements / size));
+    const start = (page - 1) * size;
+    const pageItems = result.slice(start, start + size);
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list: pageItems,
+        pagination: {
+          page,
+          size,
+          totalElements,
+          totalPages,
+          hasNext: page < totalPages,
+        },
+        meta: {
+          totalAdjusterCount: 320,
+          averageRating: 4.8,
+          totalConsultCount: 12_400,
+          averageCareer: 11,
+        },
+      },
+    });
+  }),
 
   // 손해사정사 공개 프로필 조회 (이슈 #32)
   http.get(`${API_BASE_URL}/adjusters/:adjusterId`, async ({ params }) => {
