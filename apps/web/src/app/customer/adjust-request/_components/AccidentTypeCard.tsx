@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/utils";
+import { Check } from "@/shared/ui/icons/Check";
 
 interface AccidentTypeCardProps {
   icon: ReactNode;
@@ -53,10 +54,12 @@ export function AccidentTypeCard({
 
       <span
         className={cn(
-          "h-[1.375rem] w-[1.375rem] shrink-0 rounded-full border",
-          selected ? "border-gold-2 bg-gold-2" : "border-line",
+          "flex h-[1.375rem] w-[1.375rem] shrink-0 items-center justify-center rounded-full border",
+          selected ? "border-gold-2 bg-gold-2 text-white" : "border-line",
         )}
-      />
+      >
+        {selected && <Check className="text-[0.8125rem]" />}
+      </span>
     </button>
   );
 }

@@ -50,6 +50,11 @@ export function Step1AccidentType() {
           />
         ))}
       </div>
+
+      <p className="mt-4 rounded-input bg-paper-2 px-4 py-3 text-[0.78125rem] leading-relaxed text-ink-3">
+        현재는 <span className="font-semibold text-ink-2">{accidentTypeLabel(SUPPORTED_ACCIDENT_TYPE)}</span> 유형만
+        분석할 수 있어요. 다른 유형은 순차적으로 지원할 예정입니다.
+      </p>
     </section>
   );
 }
