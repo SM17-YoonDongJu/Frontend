@@ -11,6 +11,11 @@ import { expect, test } from "@playwright/test";
 
 const PATH = "/partner/profile/edit";
 
+// 데스크톱(≥lg) 레이아웃 전용 스펙. 프로젝트 device(Pixel 7·iPhone 14)와 무관하게
+// 뷰포트를 데스크톱으로 고정한다 — #75 반응형 도입으로 breadcrumb·저장하기·섹션 헤딩·카운터가
+// lg 미만에서 hidden 처리되므로, 뷰포트를 고정하지 않으면 모바일 프로젝트에서 오검출된다.
+test.use({ viewport: { width: 1280, height: 900 } });
+
 // MSW ADJUSTER_PROFILE 고정값
 const HEADLINE_PLACEHOLDER = "예) 후유장해 재산정 전문 · 근거 중심 검토";
 const DEFAULT_SPECIALTIES = ["후유장해", "교통사고"]; // 초기 선택 2개
