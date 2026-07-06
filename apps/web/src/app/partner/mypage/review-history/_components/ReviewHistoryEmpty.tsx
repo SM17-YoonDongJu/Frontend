@@ -1,4 +1,13 @@
+import Link from "next/link";
+import { cn } from "@/shared/lib/utils";
+import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
+import { FileText } from "@/shared/ui/icons/FileText";
+import { buttonVariants } from "@/shared/ui/Button";
+
 export type ReviewHistoryEmptyVariant = "no-data" | "no-filter-result";
+
+/** 검수 대기 목록 라우트(검수 시작 진입). */
+const REVIEW_PENDING_HREF = "/partner/review";
 
 const EMPTY_COPY: Record<ReviewHistoryEmptyVariant, { title: string; desc: string }> = {
   "no-data": {
@@ -11,6 +20,11 @@ const EMPTY_COPY: Record<ReviewHistoryEmptyVariant, { title: string; desc: strin
   },
 };
 
+const goldCtaClassName = cn(
+  buttonVariants({ variant: "gold" }),
+  "px-[1.4375rem] py-4 text-[0.94375rem]",
+);
+
 interface Props {
   variant: ReviewHistoryEmptyVariant;
   onResetFilter?: () => void;
@@ -19,19 +33,33 @@ interface Props {
 export function ReviewHistoryEmpty({ variant, onResetFilter }: Props) {
   const copy = EMPTY_COPY[variant];
 
+  const cta =
+    variant === "no-filter-result" ? (
+      <button type="button" onClick={onResetFilter} className={goldCtaClassName}>
+        전체 내역 보기
+      </button>
+    ) : (
+      <Link href={REVIEW_PENDING_HREF} className={goldCtaClassName}>
+        검수 대기 보러가기
+        <ArrowRight className="size-[1.1875rem]" />
+      </Link>
+    );
+
   return (
-    <div className="flex flex-col items-center px-6 py-20 text-center">
-      <h2 className="text-[0.9375rem] font-semibold text-ink">{copy.title}</h2>
-      <p className="mt-2 text-[0.8125rem] text-ink-3">{copy.desc}</p>
-      {variant === "no-filter-result" && onResetFilter && (
-        <button
-          type="button"
-          onClick={onResetFilter}
-          className="mt-5 rounded-button border border-line bg-card px-4 py-2 text-[0.8125rem] font-semibold text-ink-2 transition hover:brightness-[.98]"
-        >
-          전체 내역 보기
-        </button>
-      )}
+    <div className="flex flex-col items-center px-10 pt-13 pb-16 text-center">
+      <span className="flex size-[4.875rem] items-center justify-center rounded-full border border-line bg-paper-2">
+        <FileText className="size-9 text-ink-2" />
+      </span>
+
+      <h2 className="mt-5 font-serif text-[1.4375rem] font-bold leading-[1.32] tracking-[-0.0144rem] text-ink">
+        {copy.title}
+      </h2>
+
+      <p className="mb-6 mt-2.5 max-w-[16rem] text-[0.83125rem] leading-[1.4rem] text-ink-3">
+        {copy.desc}
+      </p>
+
+      {cta}
     </div>
   );
 }
