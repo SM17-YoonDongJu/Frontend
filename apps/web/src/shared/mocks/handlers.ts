@@ -237,6 +237,7 @@ export const handlers = [
         proposalCount: 2,
         reviewedAt: "2026-05-22T10:14:00Z",
         adjusterNickname: "김도현",
+        offeredAmount: 8_500_000,
       },
       {
         reportId: DASHBOARD_AWAITING_REPORT_ID,
@@ -249,6 +250,7 @@ export const handlers = [
         proposalCount: 0,
         reviewedAt: null,
         adjusterNickname: null,
+        offeredAmount: null,
       },
     ];
 
