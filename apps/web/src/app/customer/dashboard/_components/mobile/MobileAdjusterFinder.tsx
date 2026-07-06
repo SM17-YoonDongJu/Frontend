@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { buttonVariants } from "@/shared/ui/Button";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
-import { Scale } from "@/shared/ui/icons/Scale";
 import { Search } from "@/shared/ui/icons/Search";
 import { DASHBOARD_LINKS } from "@/app/customer/dashboard/_model/dashboard-links";
 
@@ -28,8 +27,8 @@ export function MobileAdjusterFinder() {
         </Link>
 
         <div className="flex items-center gap-3.5 rounded-card border border-line bg-paper-2 p-4 shadow-[0px_1px_1px_rgba(21,32,46,0.03)]">
-          <span className="flex size-[2.375rem] shrink-0 items-center justify-center rounded-button bg-navy text-white">
-            <Scale className="text-[1.1875rem]" />
+          <span className="flex size-[2.375rem] shrink-0 items-center justify-center rounded-full bg-navy font-serif text-[1.0625rem] font-bold text-gold-2">
+            金
           </span>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-bold text-ink">전문가 검토를 권장해요</p>
