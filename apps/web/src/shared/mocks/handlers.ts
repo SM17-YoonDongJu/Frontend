@@ -202,8 +202,12 @@ export const handlers = [
   }),
 
   // 본인 정보 조회 (고객 대시보드 인사말)
+  // E2E 역할 게이팅 검증용: localStorage["mock:userType"]="adjuster"면 사정사로 응답(기본 insured_person).
   http.get(`${API_BASE_URL}/users/me`, async () => {
     await delay(300);
+    const override =
+      typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
+    const userType = override === "adjuster" ? "adjuster" : "insured_person";
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
@@ -211,7 +215,7 @@ export const handlers = [
         userId: 1024,
         nickname: "윤서",
         email: "yunseo@example.com",
-        userType: "insured_person",
+        userType,
         createdAt: "2024-03-02T09:00:00Z",
       },
     });
