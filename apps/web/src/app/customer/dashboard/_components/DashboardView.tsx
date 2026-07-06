@@ -7,8 +7,20 @@ import { ReceivedProposalsCard } from "./ReceivedProposalsCard";
 import { ReviewCompleteCard } from "./ReviewCompleteCard";
 import { SectionBoundary } from "./SectionBoundary";
 import { SectionSkeleton } from "./SectionSkeleton";
+import { MobileHomeView } from "./mobile/MobileHomeView";
 
 export function DashboardView() {
+  return (
+    <>
+      <div className="hidden md:block">
+        <DashboardDesktopView />
+      </div>
+      <MobileHomeView />
+    </>
+  );
+}
+
+function DashboardDesktopView() {
   return (
     <ViewedReviewsProvider>
       <div className="flex flex-col gap-8">
