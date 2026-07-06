@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useReviewList } from "../review/_api/use-review-list";
 import { PendingReviewEmpty } from "./PendingReviewEmpty";
@@ -9,6 +9,14 @@ import { MobilePendingCard } from "./MobilePendingCard";
 export function MobilePendingList() {
   const { data } = useReviewList({ status: "AWAITING_INSPECTION" });
   const [navigatingId, setNavigatingId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) setNavigatingId(null);
+    };
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
 
   const sorted = data.list.toSorted(
     (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
