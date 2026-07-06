@@ -1,7 +1,6 @@
 "use client";
 
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
-import { Button } from "@/shared/ui/Button";
 import { DatePicker } from "@/shared/ui/DatePicker";
 import { Input } from "@/shared/ui/Input";
 import type { AdjustRequestDraft } from "../_model/types";
@@ -44,23 +43,10 @@ export function Step3AccidentDate() {
       </div>
 
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <FieldLabel>입원 기록</FieldLabel>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => append({ start: "", end: null, reason: null })}
-          >
-            + 입원 추가하기
-          </Button>
-        </div>
+        <FieldLabel>입원 기록</FieldLabel>
 
-        {fields.length === 0 ? (
-          <p className="rounded-card border border-dashed border-line py-6 text-center text-[0.8125rem] text-ink-3">
-            입원 기록이 없으면 건너뛰어도 됩니다.
-          </p>
-        ) : (
-          <div className="flex flex-col gap-3">
+        {fields.length > 0 && (
+          <div className="mb-3 flex flex-col gap-3">
             {fields.map((field, index) => (
               <div key={field.id} className="rounded-card border border-line p-4">
                 <div className="mb-3 flex items-center justify-between">
@@ -125,6 +111,19 @@ export function Step3AccidentDate() {
             ))}
           </div>
         )}
+
+        <button
+          type="button"
+          onClick={() => append({ start: "", end: null, reason: null })}
+          className="flex h-11 w-full items-center justify-center gap-1.5 rounded-input border border-line bg-paper-2 text-[0.875rem] font-bold text-ink-2 transition hover:border-ink/40"
+        >
+          <span className="text-[1.0625rem] leading-none">+</span>
+          입원 기록 추가
+        </button>
+
+        <p className="mt-2 rounded-input border border-line-2 bg-paper-2 px-3.5 py-3 text-[0.8125rem] text-ink-3">
+          입원하지 않았다면 비워두고 다음으로 넘어가세요.
+        </p>
       </div>
     </section>
   );
