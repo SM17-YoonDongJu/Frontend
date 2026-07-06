@@ -37,6 +37,29 @@ test("모두 읽음을 누르면 안읽음 표시가 사라진다", async ({ pag
   }).toPass({ timeout: 10000 });
 });
 
+test("알림이 없으면 빈 상태 안내가 보인다", async ({ page }) => {
+  // 빈 목록은 MSW 기본 핸들러가 못 만들므로 fetch를 감싸 빈 응답을 직접 반환(SW 우회).
+  await page.addInitScript(() => {
+    const originalFetch = window.fetch;
+    window.fetch = (input, init) => {
+      const url = typeof input === "string" ? input : input instanceof Request ? input.url : String(input);
+      if (url.includes("/users/me/notifications") && !url.includes("read-all")) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({ status: "200", message: "정상 처리되었습니다.", data: { list: [] } }),
+            { status: 200, headers: { "Content-Type": "application/json" } },
+          ),
+        );
+      }
+      return originalFetch(input, init);
+    };
+  });
+  await page.goto(PATH);
+
+  await expect(page.getByText("새 알림이 없어요")).toBeVisible();
+  await expect(page.getByRole("button", { name: "알림 설정 확인하기" })).toBeVisible();
+});
+
 test("불러오기에 실패하면 에러 안내가 보인다", async ({ page }) => {
   // MSW는 브라우저 서비스워커라 page.route/CDP 헤더로는 못 가로챈다.
   // 페이지 컨텍스트에서 fetch를 감싸 x-mock-failure 헤더를 실어야 SW가 본다.
