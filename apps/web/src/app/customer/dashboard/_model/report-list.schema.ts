@@ -20,6 +20,8 @@ export const reportListItemSchema = z.object({
   proposalCount: z.number().int(),
   reviewedAt: z.string().nullable(),
   adjusterNickname: z.string().nullable(),
+  // CONTRACT(naming-dictionary §확정 #24 / list 응답 미포함, FE 임시 추가 — 드리프트 항목 10): offeredAmount 보험사 제안금액.
+  offeredAmount: z.number().int().nonnegative().nullable(),
 });
 
 export const paginationSchema = z.object({
