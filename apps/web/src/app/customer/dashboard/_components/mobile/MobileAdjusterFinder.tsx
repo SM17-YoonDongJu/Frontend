@@ -6,7 +6,7 @@ import { DASHBOARD_LINKS } from "@/app/customer/dashboard/_model/dashboard-links
 export function MobileAdjusterFinder() {
   return (
     <section>
-      <h2 className="text-base font-bold text-ink">손해사정사 검색</h2>
+      <h2 className="text-base font-bold text-ink">손해사정사 찾기</h2>
 
       <div className="mt-3.5 flex flex-col gap-3">
         <Link
