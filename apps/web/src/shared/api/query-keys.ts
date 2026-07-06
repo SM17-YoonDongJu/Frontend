@@ -8,7 +8,6 @@ export interface ReportListFilter {
 export interface ReviewListFilter {
   status?: string;
   accidentType?: string;
-  region?: string;
   page?: number;
   size?: number;
 }
