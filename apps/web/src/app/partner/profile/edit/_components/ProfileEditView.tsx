@@ -90,7 +90,7 @@ export function ProfileEditView() {
 
   return (
     <form onSubmit={onSubmit} className="mx-auto w-full max-w-6xl">
-      <ProfileEditAppBar onPreview={() => {}} />
+      <ProfileEditAppBar />
 
       <div className="px-5 pb-28 lg:px-6 lg:py-8 lg:pb-8">
         <div className="hidden items-start justify-between gap-4 lg:flex">
@@ -174,7 +174,7 @@ export function ProfileEditView() {
         </div>
       </div>
 
-      <div className="sticky bottom-0 z-10 border-t border-line-2 bg-paper-2/95 px-5 py-3 backdrop-blur lg:hidden">
+      <div className="sticky bottom-0 z-10 border-t border-line-2 bg-paper px-5 py-3 lg:hidden">
         <Button
           type="submit"
           full

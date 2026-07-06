@@ -21,7 +21,6 @@ test("모바일로 진입하면 앱바가 보이고 데스크톱 미리보기·�
   // 모바일 앱바
   await expect(page.getByRole("button", { name: "뒤로 가기" })).toBeVisible();
   await expect(page.getByText("프로필 관리")).toBeVisible();
-  await expect(page.getByRole("button", { name: "미리보기" })).toBeVisible();
 
   // 데스크톱 전용은 숨김: breadcrumb h1 "프로필 수정" 헤딩, "저장하기" 버튼, 우측 PreviewCard
   await expect(page.getByRole("heading", { level: 1, name: "프로필 수정" })).toBeHidden();
