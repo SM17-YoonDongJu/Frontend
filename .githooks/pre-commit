@@ -9,6 +9,13 @@ if [ -z "$staged" ]; then
   exit 0
 fi
 
+# Windows: git의 sh가 자식 프로세스에 넘기는 PATH가 잘려 node를 못 찾는 경우 대응 — node 디렉터리를 PATH 맨 앞에 고정.
+node_dir=$(dirname "$(command -v node 2>/dev/null)" 2>/dev/null)
+if [ -n "$node_dir" ]; then
+  PATH="$node_dir:$PATH"
+  export PATH
+fi
+
 # 커밋 시점에 의존성을 멋대로 재설치하지 않도록 실행 전 검사를 끈다(설치된 deps로 검사).
 PNPM="pnpm --filter @insurance/web --config.verify-deps-before-run=false"
 
