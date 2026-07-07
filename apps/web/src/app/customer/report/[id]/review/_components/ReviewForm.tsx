@@ -16,7 +16,7 @@ import { ReviewContentField } from "./ReviewContentField";
 import { ReviewFormSkeleton } from "./ReviewFormSkeleton";
 import { ReviewHeader } from "./ReviewHeader";
 
-const REDIRECT_ERROR_CODES = new Set(["FORBIDDEN", "POST_NOT_FOUND", "NOT_FOUND"]);
+const REDIRECT_ERROR_CODES = new Set(["FORBIDDEN", "POST_NOT_FOUND"]);
 
 function resolveErrorMessage(error: Error): string {
   if (error.name === "DUPLICATE_RESOURCE") return "이미 등록된 리뷰입니다.";
@@ -34,7 +34,7 @@ function ReviewFormInner({ reportId }: { reportId: string }) {
   const isEligible = report.status === "MATCHED" && adjusterId != null;
   const adjusterName = report.adjuster?.nickname ? `${report.adjuster.nickname} 손해사정사` : "손해사정사";
 
-  const mutation = useCreateReview(reportId, adjusterId ?? "");
+  const mutation = useCreateReview(adjusterId ?? "");
 
   useEffect(() => {
     if (!isEligible) router.replace(detailHref);
