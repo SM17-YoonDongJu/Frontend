@@ -9,13 +9,13 @@ export interface LabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
 export function Label({ kicker, className, children, ...props }: LabelProps) {
   if (kicker) {
     return (
-      <div className={cn("text-[12.5px] font-semibold uppercase tracking-[0.12em] text-gold-ink", className)}>
+      <div className={cn("text-[0.78125rem] font-semibold uppercase tracking-[0.12em] text-gold-ink", className)}>
         {children}
       </div>
     );
   }
   return (
-    <label className={cn("text-[13.5px] font-semibold text-ink-2", className)} {...props}>
+    <label className={cn("text-[0.84375rem] font-semibold text-ink-2", className)} {...props}>
       {children}
     </label>
   );
