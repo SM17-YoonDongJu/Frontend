@@ -592,7 +592,10 @@ export const handlers = [
     await delay(400);
 
     const url = new URL(request.url, "http://localhost");
-    const page = Number(url.searchParams.get("page") ?? "0");
+    const status = url.searchParams.get("status");
+    // 무한쿼리 pageParam은 1부터. 대시보드(page 미지정)는 1페이지에 전부 담겨 hasNext=false 유지.
+    const page = Number(url.searchParams.get("page") ?? "1");
+    const size = 10;
 
     // 빈 상태(0건) 주입 — E2E 빈 상태 검증용(x-mock-failure 패턴 미러)
     if (request.headers.get("x-mock-scenario") === "reports-empty") {
@@ -606,7 +609,8 @@ export const handlers = [
       });
     }
 
-    const list = [
+    // 두 대시보드 ID(status·createdAt 유지)를 맨 앞에 두고, 확장 필드만 추가.
+    const allReports = [
       {
         reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
         status: "MATCHED",
@@ -620,6 +624,10 @@ export const handlers = [
         adjusterNickname: "김도현",
         offeredAmount: 8_500_000,
         treatment: "후유장해",
+        title: "우측 슬관절 인대 파열 · 등급 재산정",
+        confirmedMinAmount: 14_000_000,
+        confirmedMaxAmount: 17_500_000,
+        rating: 4.9,
       },
       {
         reportId: DASHBOARD_AWAITING_REPORT_ID,
@@ -634,20 +642,141 @@ export const handlers = [
         adjusterNickname: null,
         offeredAmount: null,
         treatment: null,
+        title: "비급여 주사료 삭감 · 실손 청구 분쟁",
+        confirmedMinAmount: null,
+        confirmedMaxAmount: null,
+        rating: null,
+      },
+      {
+        reportId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+        status: "AWAITING_ADOPTION",
+        accidentType: "질병",
+        createdAt: "2026-05-08T09:00:00Z",
+        reportNo: "20260508-031",
+        claimedMinAmount: 9_000_000,
+        claimedMaxAmount: 12_000_000,
+        proposalCount: 3,
+        reviewedAt: "2026-05-09T11:00:00Z",
+        adjusterNickname: "최민호",
+        offeredAmount: null,
+        treatment: null,
+        title: "급성 심근경색 · 진단비 지급 분쟁",
+        confirmedMinAmount: null,
+        confirmedMaxAmount: null,
+        rating: null,
+      },
+      {
+        reportId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
+        status: "COUNSELING",
+        accidentType: "후유장해",
+        createdAt: "2026-05-04T09:00:00Z",
+        reportNo: "20260504-022",
+        claimedMinAmount: 21_000_000,
+        claimedMaxAmount: 26_000_000,
+        proposalCount: 1,
+        reviewedAt: "2026-05-05T14:20:00Z",
+        adjusterNickname: "박서준",
+        offeredAmount: null,
+        treatment: null,
+        title: "다발성 늑골 골절 · 일실수입 산정",
+        confirmedMinAmount: 21_000_000,
+        confirmedMaxAmount: 26_000_000,
+        rating: 5.0,
+      },
+      {
+        reportId: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
+        status: "CLOSED",
+        accidentType: "교통사고",
+        createdAt: "2026-04-28T09:00:00Z",
+        reportNo: "20260428-014",
+        claimedMinAmount: 3_500_000,
+        claimedMaxAmount: 5_000_000,
+        proposalCount: 2,
+        reviewedAt: "2026-04-30T10:00:00Z",
+        adjusterNickname: "김하늘",
+        offeredAmount: null,
+        treatment: null,
+        title: "경추 염좌 · 향후 치료비 분쟁",
+        confirmedMinAmount: 3_500_000,
+        confirmedMaxAmount: 5_000_000,
+        rating: 4.8,
+      },
+      {
+        reportId: "ffffffff-ffff-4fff-8fff-ffffffffffff",
+        status: "MATCHED",
+        accidentType: "상해",
+        createdAt: "2026-04-22T09:00:00Z",
+        reportNo: "20260422-008",
+        claimedMinAmount: 8_000_000,
+        claimedMaxAmount: 11_000_000,
+        proposalCount: 1,
+        reviewedAt: "2026-04-24T09:30:00Z",
+        adjusterNickname: "정우성",
+        offeredAmount: null,
+        treatment: null,
+        title: "손목 골절 · 후유장해 평가",
+        confirmedMinAmount: 8_000_000,
+        confirmedMaxAmount: 11_000_000,
+        rating: 4.7,
+      },
+      {
+        reportId: "a1a1a1a1-a1a1-4a1a-8a1a-a1a1a1a1a1a1",
+        status: "COUNSELING",
+        accidentType: "실손",
+        createdAt: "2026-04-16T09:00:00Z",
+        reportNo: "20260416-003",
+        claimedMinAmount: 2_400_000,
+        claimedMaxAmount: 3_100_000,
+        proposalCount: 1,
+        reviewedAt: "2026-04-17T13:00:00Z",
+        adjusterNickname: "한소희",
+        offeredAmount: null,
+        treatment: null,
+        title: "비급여 도수치료 과잉 삭감",
+        confirmedMinAmount: null,
+        confirmedMaxAmount: null,
+        rating: null,
+      },
+      {
+        reportId: "b2b2b2b2-b2b2-4b2b-8b2b-b2b2b2b2b2b2",
+        status: "CLOSED",
+        accidentType: "질병",
+        createdAt: "2026-04-08T09:00:00Z",
+        reportNo: "20260408-019",
+        claimedMinAmount: 12_000_000,
+        claimedMaxAmount: 15_000_000,
+        proposalCount: 2,
+        reviewedAt: "2026-04-10T16:40:00Z",
+        adjusterNickname: "이지은",
+        offeredAmount: null,
+        treatment: null,
+        title: "갑상선암 · 진단비 재산정",
+        confirmedMinAmount: 12_000_000,
+        confirmedMaxAmount: 15_000_000,
+        rating: 4.6,
       },
     ];
+
+    const filtered = status
+      ? allReports.filter((report) => report.status === status)
+      : allReports;
+
+    const totalElements = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalElements / size));
+    const start = (page - 1) * size;
+    const pageItems = filtered.slice(start, start + size);
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
-        list,
+        list: pageItems,
         pagination: {
           page,
-          size: 10,
-          totalElements: list.length,
-          totalPages: 1,
-          hasNext: false,
+          size,
+          totalElements,
+          totalPages,
+          hasNext: start + size < totalElements,
         },
       },
     });

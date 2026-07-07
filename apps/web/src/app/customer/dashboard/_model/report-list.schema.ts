@@ -5,6 +5,7 @@ export const reportStatusSchema = z.enum([
   "AWAITING_ADOPTION",
   "COUNSELING",
   "MATCHED",
+  "CLOSED",
 ]);
 
 // CONTRACT(naming-dictionary §9 드리프트, MSW 선반영 / 백엔드 list 응답 확장 요청):
