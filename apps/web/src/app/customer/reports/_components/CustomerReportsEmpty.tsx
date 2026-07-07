@@ -25,10 +25,9 @@ const goldCtaClassName = cn(
   "px-[1.4375rem] py-4 text-[0.94375rem]",
 );
 
-interface Props {
-  variant: CustomerReportsEmptyVariant;
-  onResetFilter?: () => void;
-}
+type Props =
+  | { variant: "no-filter-result"; onResetFilter: () => void }
+  | { variant: "no-data"; onResetFilter?: never };
 
 export function CustomerReportsEmpty({ variant, onResetFilter }: Props) {
   const copy = EMPTY_COPY[variant];

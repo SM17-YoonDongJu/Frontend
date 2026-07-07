@@ -13,12 +13,12 @@ interface Props {
 export function CustomerReportsList({ items, totalCount, hasActiveFilter, onResetFilter }: Props) {
   if (items.length === 0) {
     if (totalCount === 0 && !hasActiveFilter) return <CustomerReportsEmpty variant="no-data" />;
-    return (
-      <CustomerReportsEmpty
-        variant={hasActiveFilter ? "no-filter-result" : "no-data"}
-        onResetFilter={onResetFilter}
-      />
-    );
+    if (hasActiveFilter) {
+      return (
+        <CustomerReportsEmpty variant="no-filter-result" onResetFilter={onResetFilter} />
+      );
+    }
+    return <CustomerReportsEmpty variant="no-data" />;
   }
 
   return (
