@@ -50,7 +50,7 @@ esac
 while IFS= read -r s; do
   [ -z "$s" ] && continue
   printf '%s' "$s" | grep -q '/_shared/' && continue
-  if printf '%s' "$s" | grep -qE "(\.\./)+([^_./][^/]*/)+${priv}/"; then
+  if printf '%s' "$s" | grep -qE "(\.\./)+([^_./][^/]*/)+${priv}(/|\$)"; then
     violations+=("세그먼트 경계 침범: 다른 세그먼트의 내부 폴더(_components/_hooks/_api/_model/_pdf)를 직접 import — '$s' (형제 공유면 가장 가까운 _shared 로 승격)")
   fi
   # 절대경로 @/app/<세그먼트>/…/_priv — 첫 프라이빗 앞까지를 세그먼트로 보고, 현재 파일이 그 밖이면 위반
@@ -58,6 +58,7 @@ while IFS= read -r s; do
     @/app/*/_*)
       ap="${s#@/app/}"
       segpref="${ap%%/_*}"
+      # "$segpref" 따옴표 필수 — [id]·(group) 등 글로브 문자를 리터럴로 비교(제거 시 오탐)
       if [ "${rel#"$segpref"/}" = "$rel" ]; then
         violations+=("세그먼트 경계 침범: 다른 세그먼트의 내부 폴더를 절대경로(@/app)로 직접 import — '$s' (형제 공유면 가장 가까운 _shared 로 승격)")
       fi
