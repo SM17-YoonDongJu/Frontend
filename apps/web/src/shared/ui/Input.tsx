@@ -9,7 +9,7 @@ import { cn } from "@/shared/lib/utils";
 import { Chevron } from "@/shared/ui/icons/Chevron";
 
 const control =
-  "w-full rounded-input border bg-card text-[14.5px] text-ink outline-none transition placeholder:text-ink-3 focus:border-gold focus:ring-[3px] focus:ring-gold-soft";
+  "w-full rounded-input border bg-card text-[0.90625rem] text-ink outline-none transition placeholder:text-ink-3 focus:border-gold focus:ring-[3px] focus:ring-gold-soft";
 
 /** 네이티브 input 속성(required·autoComplete·maxLength·aria-*·data-* 등)을 모두 상속.
  *  우리가 직접 다루는 키만 Omit 후 커스텀 정의로 대체한다. */
@@ -56,7 +56,7 @@ export function Input({
         {...(shared as TextareaHTMLAttributes<HTMLTextAreaElement>)}
         rows={rows}
         onChange={onChange as ChangeEventHandler<HTMLTextAreaElement>}
-        className={cn(control, border, "resize-y px-[14px] py-3 leading-relaxed")}
+        className={cn(control, border, "resize-y px-3.5 py-3 leading-relaxed")}
       />
     );
   } else if (type === "select") {
@@ -65,7 +65,7 @@ export function Input({
         <select
           {...(shared as SelectHTMLAttributes<HTMLSelectElement>)}
           onChange={onChange as ChangeEventHandler<HTMLSelectElement>}
-          className={cn(control, border, "h-[46px] cursor-pointer appearance-none pl-[14px] pr-[38px]")}
+          className={cn(control, border, "h-[2.875rem] cursor-pointer appearance-none pl-3.5 pr-[2.375rem]")}
         >
           {children}
         </select>
@@ -79,11 +79,11 @@ export function Input({
           {...shared}
           type={type}
           onChange={onChange as ChangeEventHandler<HTMLInputElement>}
-          className={cn(control, border, "h-[46px]", suffix ? "pl-[14px] pr-[90px]" : "px-[14px]")}
+          className={cn(control, border, "h-[2.875rem]", suffix ? "pl-3.5 pr-[5.625rem]" : "px-3.5")}
         />
         {suffix && (
-          <div className="absolute right-[6px] flex items-center">
-            {typeof suffix === "string" ? <span className="pr-2 text-[13px] text-ink-3">{suffix}</span> : suffix}
+          <div className="absolute right-1.5 flex items-center">
+            {typeof suffix === "string" ? <span className="pr-2 text-[0.8125rem] text-ink-3">{suffix}</span> : suffix}
           </div>
         )}
       </div>
@@ -91,12 +91,12 @@ export function Input({
   }
 
   return (
-    <div className={cn("flex flex-col gap-[7px]", className)}>
+    <div className={cn("flex flex-col gap-[0.4375rem]", className)}>
       {field}
       {error ? (
-        <span className="text-[12px] font-medium text-terra">{error}</span>
+        <span className="text-[0.75rem] font-medium text-terra">{error}</span>
       ) : hint ? (
-        <span className="text-[12px] text-ink-3">{hint}</span>
+        <span className="text-[0.75rem] text-ink-3">{hint}</span>
       ) : null}
     </div>
   );
