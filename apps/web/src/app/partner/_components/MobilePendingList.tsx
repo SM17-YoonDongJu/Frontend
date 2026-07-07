@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useReviewList } from "../review/_api/use-review-list";
+import { useReviewList } from "../_shared/api/use-review-list";
 import { PendingReviewEmpty } from "./PendingReviewEmpty";
 import { MobilePendingCard } from "./MobilePendingCard";
 

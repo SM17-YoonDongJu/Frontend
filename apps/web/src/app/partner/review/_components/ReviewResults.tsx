@@ -1,6 +1,6 @@
 "use client";
 
-import { useReviewList } from "../_api/use-review-list";
+import { useReviewList } from "../../_shared/api/use-review-list";
 import { useReviewFilter } from "../_hooks/use-review-filter";
 import { ReviewCaseList } from "./ReviewCaseList";
 import { ReviewEmpty } from "./ReviewEmpty";
