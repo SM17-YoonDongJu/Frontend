@@ -30,6 +30,7 @@ sources="$(printf '%s' "$content" \
 
 violations=()
 priv='_(components|hooks|api|model|pdf)'
+rel="${norm##*/apps/web/src/app/}"   # 현재 파일의 app 기준 상대경로 (세그먼트 판별용)
 
 # A) 역방향 의존: 이 파일이 _api/ 또는 _model/ 이고 _components/·_hooks/ 를 import
 case "$norm" in
@@ -43,13 +44,25 @@ case "$norm" in
     ;;
 esac
 
-# B) 세그먼트 경계 침범: ../ 로 다른 세그먼트의 프라이빗을 직접 import (_shared 제외, 자기 세그먼트 ../_api 는 허용)
+# B) 세그먼트 경계 침범: 다른 세그먼트의 프라이빗을 직접 import (_shared 제외)
+#    - 상대경로: ../ 로 일반 디렉터리를 거쳐 프라이빗에 닿음 (자기 세그먼트 ../_api 는 허용)
+#    - 절대경로: @/app/<세그먼트>/…/_priv 인데 현재 파일이 그 세그먼트 밖
 while IFS= read -r s; do
   [ -z "$s" ] && continue
   printf '%s' "$s" | grep -q '/_shared/' && continue
   if printf '%s' "$s" | grep -qE "(\.\./)+([^_./][^/]*/)+${priv}/"; then
     violations+=("세그먼트 경계 침범: 다른 세그먼트의 내부 폴더(_components/_hooks/_api/_model/_pdf)를 직접 import — '$s' (형제 공유면 가장 가까운 _shared 로 승격)")
   fi
+  # 절대경로 @/app/<세그먼트>/…/_priv — 첫 프라이빗 앞까지를 세그먼트로 보고, 현재 파일이 그 밖이면 위반
+  case "$s" in
+    @/app/*/_*)
+      ap="${s#@/app/}"
+      segpref="${ap%%/_*}"
+      if [ "${rel#"$segpref"/}" = "$rel" ]; then
+        violations+=("세그먼트 경계 침범: 다른 세그먼트의 내부 폴더를 절대경로(@/app)로 직접 import — '$s' (형제 공유면 가장 가까운 _shared 로 승격)")
+      fi
+      ;;
+  esac
 done <<< "$sources"
 
 [ ${#violations[@]} -eq 0 ] && exit 0
