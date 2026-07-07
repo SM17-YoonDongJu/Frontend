@@ -42,7 +42,7 @@ export function IssueAddForm({ onAdd }: IssueAddFormProps) {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="w-full rounded-card border border-dashed border-gold-2 bg-gold-soft/30 py-3 text-[14px] font-semibold text-gold-ink transition hover:bg-gold-soft/60"
+        className="w-full rounded-card border border-dashed border-gold-2 bg-gold-soft/30 py-3 text-[0.875rem] font-semibold text-gold-ink transition hover:bg-gold-soft/60"
       >
         + 쟁점 추가
       </button>
@@ -51,7 +51,7 @@ export function IssueAddForm({ onAdd }: IssueAddFormProps) {
 
   return (
     <div className="space-y-3 rounded-card border border-gold-2 bg-gold-soft/40 p-4">
-      <p className="text-[13.5px] font-semibold text-ink">신규 쟁점 추가</p>
+      <p className="text-[0.84375rem] font-semibold text-ink">신규 쟁점 추가</p>
 
       <div>
         <Label htmlFor="add-issue-title">쟁점 제목</Label>

@@ -11,8 +11,8 @@ export function ReviewDetailError({ code, onRetry }: { code?: string; onRetry: (
 
   return (
     <div className="mx-auto flex max-w-md flex-col items-center px-6 py-24 text-center">
-      <h2 className="text-[18px] font-semibold text-ink">{message.title}</h2>
-      <p className="mt-2 text-[14px] text-ink-3">{message.desc}</p>
+      <h2 className="text-[1.125rem] font-semibold text-ink">{message.title}</h2>
+      <p className="mt-2 text-[0.875rem] text-ink-3">{message.desc}</p>
       {!known && (
         <Button className="mt-5" onClick={onRetry}>
           다시 시도
