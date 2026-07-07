@@ -16,6 +16,8 @@ export const adjusterProfileSchema = z.object({
   avatarUrl: z.string().url().nullable(),
   specialties: z.array(z.string()),
   careers: z.array(careerItemSchema),
+  // 실 API 미정 필드(MSW 선제공) — 명세 확정 시 필수로 승격
+  registrationNo: z.string().nullish(),
   updatedAt: z.string(),
 });
 

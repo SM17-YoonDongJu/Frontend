@@ -28,6 +28,11 @@ fi
 
 echo "▶ pre-commit: lint (스테이징된 파일만)..."
 web_ts=$(printf '%s\n' "$staged" | grep -E '^apps/web/.*\.(ts|tsx)$' | sed 's#^apps/web/##' || true)
+# Windows: 대량 스테이징(머지 등)은 인자 목록이 명령줄 한계를 넘으므로 전체 lint로 폴백.
+if [ -n "$web_ts" ] && [ "$(printf '%s\n' "$web_ts" | wc -l)" -gt 50 ]; then
+  echo "  (스테이징 파일 다수 — apps/web 전체 lint로 폴백)"
+  web_ts="."
+fi
 if [ -n "$web_ts" ]; then
   if ! (cd apps/web && pnpm --config.verify-deps-before-run=false exec oxlint --max-warnings=0 $web_ts); then
     echo "✘ lint 실패 — 커밋 중단. lint 오류를 고치고 다시 커밋하라."
