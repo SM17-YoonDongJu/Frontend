@@ -58,12 +58,12 @@ export function DatePicker({
   const selected = fromISO(value);
 
   return (
-    <div className={cn("relative flex flex-col gap-[7px]", className)} ref={ref}>
+    <div className={cn("relative flex flex-col gap-[0.4375rem]", className)} ref={ref}>
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex h-[46px] items-center justify-between rounded-input border bg-card px-[14px] text-[14.5px] outline-none transition focus:border-gold focus:ring-[3px] focus:ring-gold-soft",
+          "flex h-[2.875rem] items-center justify-between rounded-input border bg-card px-3.5 text-[0.90625rem] outline-none transition focus:border-gold focus:ring-[3px] focus:ring-gold-soft",
           error ? "border-terra" : "border-line",
           value ? "text-ink" : "text-ink-3",
         )}
@@ -73,7 +73,7 @@ export function DatePicker({
       </button>
 
       {open && (
-        <div className="absolute top-[52px] z-20 rounded-card border border-line bg-card p-2 shadow-lg">
+        <div className="absolute top-[3.25rem] z-20 rounded-card border border-line bg-card p-2 shadow-lg">
           <DayPicker
             mode="single"
             locale={ko}
@@ -96,7 +96,7 @@ export function DatePicker({
         </div>
       )}
 
-      {error && <span className="text-[12px] font-medium text-terra">{error}</span>}
+      {error && <span className="text-[0.75rem] font-medium text-terra">{error}</span>}
     </div>
   );
 }
