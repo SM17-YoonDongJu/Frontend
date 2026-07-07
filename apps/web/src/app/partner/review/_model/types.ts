@@ -4,8 +4,8 @@ import type {
   reviewListItemSchema,
   paginationSchema,
   reviewListSchema,
-  reviewSummarySchema,
-} from "./review.schema";
+} from "../../_shared/model/review-list.schema";
+import type { reviewSummarySchema } from "./review.schema";
 
 export type ReviewStatus = z.infer<typeof reviewStatusSchema>;
 export type ReviewListItem = z.infer<typeof reviewListItemSchema>;
