@@ -1,4 +1,4 @@
-import type { ReviewListItem } from "../_model/types";
+import type { ReviewListItem } from "../../_shared/model/types";
 import { ReviewCaseCard } from "./ReviewCaseCard";
 
 interface Props {
