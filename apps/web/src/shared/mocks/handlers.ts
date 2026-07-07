@@ -14,6 +14,8 @@ function addDays(base: Date, days: number): string {
 // 빈 후기·404 검증용 고정 id 분기.
 const ADJUSTER_EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
 const ADJUSTER_NOT_FOUND_ID = "99999999-9999-4999-8999-999999999999";
+// 클릭스루 샘플 리포트의 담당 사정사 — 고정값이라야 리뷰 등록분이 프로필에 반영되고 중복 등록 409가 동작.
+const CUSTOMER_SAMPLE_ADJUSTER_ID = "11111111-1111-4111-8111-111111111111";
 
 // 손해사정사 목록 목 데이터 (이슈 #47) — GET /adjusters. verified 전부 true, avatarUrl null 섞음.
 // 상위 6명은 Figma 카드 그대로, 나머지 20명은 페이지네이션(더보기) 확인용 생성분(총 26명 = 20 + 6, 2페이지).
@@ -971,7 +973,7 @@ export const handlers = [
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
         reportNo: "20260520-017",
-        adjusterId: crypto.randomUUID(),
+        adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
           : null,
