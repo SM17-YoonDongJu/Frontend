@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PartnerHeader } from "./PartnerHeader";
 
 const meta = {
-  title: "UI/PartnerHeader",
+  title: "Partner/PartnerHeader",
   component: PartnerHeader,
   parameters: { layout: "fullscreen" }
 } satisfies Meta<typeof PartnerHeader>;

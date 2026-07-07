@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { Bell } from "@/shared/ui/icons/Bell";
-import { useProfile } from "@/app/partner/_api/use-profile";
+import { useProfile } from "../_api/use-profile";
 
 // href: null → 준비 중(미구현) 탭. 링크 대신 비활성 표시로 렌더.
 const NAV_ITEMS = [
