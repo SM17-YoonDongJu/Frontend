@@ -23,9 +23,9 @@ export interface IssueModifyFormProps {
 export function IssueModifyForm({ issue, onPatch }: IssueModifyFormProps) {
   return (
     <div className="mt-3 space-y-3 rounded-card border border-gold-2 bg-gold-soft/40 p-4">
-      <p className="text-[12.5px] font-semibold text-gold-ink">AI 초안 수정 중 — 제목·금액·설명을 고치세요</p>
+      <p className="text-[0.78125rem] font-semibold text-gold-ink">AI 초안 수정 중 — 제목·금액·설명을 고치세요</p>
 
-      <div className="grid gap-3 sm:grid-cols-[1fr_160px]">
+      <div className="grid gap-3 sm:grid-cols-[1fr_10rem]">
         <div>
           <Label htmlFor={`modify-title-${issue.issueId}`}>쟁점 제목</Label>
           <Input

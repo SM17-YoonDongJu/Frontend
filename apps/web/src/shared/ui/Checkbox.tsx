@@ -14,7 +14,7 @@ export function Checkbox({ checked, onChange, label, disabled, className }: Chec
   return (
     <label
       className={cn(
-        "relative inline-flex cursor-pointer select-none items-center gap-2.5 text-[14px] text-ink",
+        "relative inline-flex cursor-pointer select-none items-center gap-2.5 text-[0.875rem] text-ink",
         disabled && "cursor-not-allowed opacity-60",
         className,
       )}
@@ -29,7 +29,7 @@ export function Checkbox({ checked, onChange, label, disabled, className }: Chec
       <span
         aria-hidden
         className={cn(
-          "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[5px] border transition",
+          "flex h-[1.125rem] w-[1.125rem] shrink-0 items-center justify-center rounded-[0.3125rem] border transition",
           checked ? "border-ink bg-ink text-white" : "border-line bg-card",
         )}
       >

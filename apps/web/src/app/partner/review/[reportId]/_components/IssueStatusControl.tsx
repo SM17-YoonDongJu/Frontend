@@ -33,7 +33,7 @@ export function IssueStatusControl({ value, onChange }: IssueStatusControlProps)
             aria-checked={selected}
             onClick={() => onChange(option.value)}
             className={cn(
-              "rounded-pill px-3 py-1.5 text-[12.5px] font-semibold transition",
+              "rounded-pill px-3 py-1.5 text-[0.78125rem] font-semibold transition",
               selected ? ACTIVE_CLASS[option.value] : "bg-transparent text-ink-3 hover:text-ink",
             )}
           >

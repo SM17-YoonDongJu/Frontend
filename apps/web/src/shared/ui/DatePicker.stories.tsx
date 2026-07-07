@@ -13,7 +13,7 @@ type Story = StoryObj<typeof meta>;
 function Demo({ error }: { error?: string }) {
   const [value, setValue] = useState<string | undefined>();
   return (
-    <div className="w-[260px]">
+    <div className="w-[16.25rem]">
       <DatePicker value={value} onChange={(v) => setValue(v ?? undefined)} error={error} />
     </div>
   );

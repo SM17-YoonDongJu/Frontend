@@ -42,8 +42,8 @@ export function ReviewSidebar({
   return (
     <div className="space-y-5">
       <section className="rounded-card-lg border border-line bg-card p-5">
-        <h2 className="font-serif text-[16px] font-bold text-ink">검수 진행</h2>
-        <div className="mt-3 flex items-center justify-between text-[13.5px]">
+        <h2 className="font-serif text-[1rem] font-bold text-ink">검수 진행</h2>
+        <div className="mt-3 flex items-center justify-between text-[0.84375rem]">
           <span className="text-ink-3">쟁점 검토</span>
           <span className="font-semibold tabular-nums text-ink">
             {progress.reviewed}/{progress.total}
@@ -55,7 +55,7 @@ export function ReviewSidebar({
           max={progress.total}
           label="쟁점 검토 진행"
         />
-        <dl className="mt-4 space-y-2.5 border-t border-line-2 pt-4 text-[14px]">
+        <dl className="mt-4 space-y-2.5 border-t border-line-2 pt-4 text-[0.875rem]">
           {COUNT_ROWS.map((row) => (
             <div key={row.key} className="flex items-center justify-between">
               <dt className="text-ink-2">{row.label}</dt>
@@ -68,15 +68,15 @@ export function ReviewSidebar({
       </section>
 
       <section className="rounded-card-lg border border-line bg-card p-5">
-        <h2 className="font-serif text-[16px] font-bold text-ink">고객 전송 요약</h2>
-        <dl className="mt-3 space-y-2.5 text-[14px]">
+        <h2 className="font-serif text-[1rem] font-bold text-ink">고객 전송 요약</h2>
+        <dl className="mt-3 space-y-2.5 text-[0.875rem]">
           <div className="flex items-center justify-between gap-2">
             <dt className="text-ink-2">확정 보상 범위</dt>
             <dd>
               {confirmedMin != null ? (
                 <AmountRange min={confirmedMin} max={confirmedMax} />
               ) : (
-                <span className="text-[13px] text-ink-3">미입력</span>
+                <span className="text-[0.8125rem] text-ink-3">미입력</span>
               )}
             </dd>
           </div>
@@ -110,13 +110,13 @@ export function ReviewSidebar({
       {errorMessage && (
         <p
           role="alert"
-          className="rounded-card border border-terra-2 bg-terra-soft px-4 py-3 text-[12.5px] leading-relaxed text-terra"
+          className="rounded-card border border-terra-2 bg-terra-soft px-4 py-3 text-[0.78125rem] leading-relaxed text-terra"
         >
           {errorMessage}
         </p>
       )}
 
-      <p className="rounded-card bg-green-soft px-4 py-3 text-[12.5px] leading-relaxed text-green">
+      <p className="rounded-card bg-green-soft px-4 py-3 text-[0.78125rem] leading-relaxed text-green">
         전송 시 손해사정사 검수 완료 배지가 부착되어 고객에게 발송됩니다.
       </p>
     </div>
