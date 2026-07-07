@@ -29,7 +29,7 @@ export function ReportHistoryCard({ item }: { item: ReportListItem }) {
   return (
     <Link
       href={`/customer/report/${item.reportId}`}
-      className="block rounded-card border border-line bg-card p-[1.0625rem] shadow-[0_1px_1px_rgba(21,32,46,0.03)] transition hover:brightness-[.99]"
+      className="block rounded-card border border-line bg-card p-[1.0625rem] shadow-card transition hover:brightness-[.99]"
     >
       <div className="flex items-center gap-2">
         <span
