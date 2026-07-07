@@ -7,12 +7,12 @@ export interface ReviewDonePreview {
 
 const storageKey = (reportId: string) => `review-done:${reportId}`;
 
-/** 이름 첫 글자만 남기고 마스킹("윤성호" → "윤**"). */
+/** 이름 첫 글자만 남기고 마스킹("윤성호" → "윤**"). 한 글자 이하는 서버 규칙과 동일하게 원문 유지. */
 export function maskNickname(name: string): string {
   const chars = [...name.trim()];
-  if (chars.length === 0) return "";
+  if (chars.length <= 1) return chars.join("");
   const [first, ...rest] = chars;
-  return first + "*".repeat(Math.max(rest.length, 1));
+  return first + "*".repeat(rest.length);
 }
 
 export function saveReviewDonePreview(reportId: string, preview: ReviewDonePreview) {

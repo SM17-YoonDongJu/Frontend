@@ -1,26 +1,34 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/Button";
 import { Check } from "@/shared/ui/icons/Check";
-import { readReviewDonePreview, type ReviewDonePreview } from "../_hooks/done-preview";
+import {
+  clearReviewDonePreview,
+  readReviewDonePreview,
+  type ReviewDonePreview,
+} from "../_hooks/done-preview";
 import { SubmittedReviewCard } from "./SubmittedReviewCard";
 
 export function ReviewDone({ reportId }: { reportId: string }) {
   const router = useRouter();
   const detailHref = `/customer/report/${reportId}`;
   const [preview, setPreview] = useState<ReviewDonePreview | null>(null);
+  const consumedRef = useRef(false);
 
   useEffect(() => {
+    if (consumedRef.current) return;
     const stored = readReviewDonePreview(reportId);
     if (!stored) {
       router.replace(detailHref);
       return;
     }
+    consumedRef.current = true;
     setPreview(stored);
+    return () => clearReviewDonePreview(reportId);
   }, [reportId, detailHref, router]);
 
   if (!preview) return null;
