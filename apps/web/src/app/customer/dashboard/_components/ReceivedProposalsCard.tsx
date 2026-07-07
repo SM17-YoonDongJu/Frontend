@@ -42,7 +42,7 @@ function ProposalsPreview({ reportId, count }: { reportId: string; count: number
           <Link
             key={proposal.adjusterId}
             href={DASHBOARD_LINKS.proposals(reportId)}
-            className={`flex items-center gap-[11px] py-[0.8125rem] transition hover:opacity-80 ${index > 0 ? "border-t border-line-2" : ""}`}
+            className={`flex items-center gap-[0.6875rem] py-[0.8125rem] transition hover:opacity-80 ${index > 0 ? "border-t border-line-2" : ""}`}
           >
             <span
               aria-hidden
