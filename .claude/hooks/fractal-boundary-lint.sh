@@ -3,7 +3,7 @@
 # 대상: apps/web/src/app/ 아래 .ts/.tsx
 # 검사(고신뢰 항목만):
 #  A) 역방향 의존 — _api/·_model/ 파일이 _components/·_hooks/ 를 import (데이터층이 UI에 의존)
-#  B) 세그먼트 경계 침범 — ../../ 이상 올라가 다른 위치의 프라이빗(_components/_hooks/_api/_model/_pdf)을 직접 import
+#  B) 세그먼트 경계 침범 — ../ 로 다른 세그먼트의 프라이빗(_components/_hooks/_api/_model/_pdf)을 직접 import
 #     (형제 공유는 _shared 를 거쳐야 함 — _shared 는 허용)
 set -euo pipefail
 
@@ -43,11 +43,11 @@ case "$norm" in
     ;;
 esac
 
-# B) 세그먼트 경계 침범: ../../ 이상 올라가 다른 위치의 프라이빗을 직접 import (_shared 제외)
+# B) 세그먼트 경계 침범: ../ 로 다른 세그먼트의 프라이빗을 직접 import (_shared 제외, 자기 세그먼트 ../_api 는 허용)
 while IFS= read -r s; do
   [ -z "$s" ] && continue
   printf '%s' "$s" | grep -q '/_shared/' && continue
-  if printf '%s' "$s" | grep -qE '(\.\./){2,}' && printf '%s' "$s" | grep -qE "/${priv}/"; then
+  if printf '%s' "$s" | grep -qE "(\.\./)+([^_./][^/]*/)+${priv}/"; then
     violations+=("세그먼트 경계 침범: 다른 세그먼트의 내부 폴더(_components/_hooks/_api/_model/_pdf)를 직접 import — '$s' (형제 공유면 가장 가까운 _shared 로 승격)")
   fi
 done <<< "$sources"
