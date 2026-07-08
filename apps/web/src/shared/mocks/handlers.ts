@@ -14,6 +14,8 @@ function addDays(base: Date, days: number): string {
 // 빈 후기·404 검증용 고정 id 분기.
 const ADJUSTER_EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
 const ADJUSTER_NOT_FOUND_ID = "99999999-9999-4999-8999-999999999999";
+// 클릭스루 샘플 리포트의 담당 사정사 — 고정값이라야 리뷰 등록분이 프로필에 반영되고 중복 등록 409가 동작.
+const CUSTOMER_SAMPLE_ADJUSTER_ID = "11111111-1111-4111-8111-111111111111";
 
 // 손해사정사 목록 목 데이터 (이슈 #47) — GET /adjusters. verified 전부 true, avatarUrl null 섞음.
 // 상위 6명은 Figma 카드 그대로, 나머지 20명은 페이지네이션(더보기) 확인용 생성분(총 26명 = 20 + 6, 2페이지).
@@ -128,7 +130,33 @@ const ADJUSTER_LIST_MOCK = [
   ...EXTRA_ADJUSTER_MOCK,
 ];
 
+interface SubmittedReview {
+  nickname: string;
+  score: number;
+  item: string;
+  reviewedAt: string;
+  content: string;
+}
+
+// 등록된 후기 저장소 (이슈 #76) — adjusterId별 누적. 목 로그인 유저당 1회 제한(중복 등록 409).
+const submittedReviews = new Map<string, SubmittedReview[]>();
+
+function maskNickname(nickname: string): string {
+  const chars = Array.from(nickname);
+  if (chars.length <= 1) return nickname;
+  return `${chars[0]}${"*".repeat(chars.length - 1)}`;
+}
+
 function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
+  const baseCount = withReviews ? 86 : 0;
+  const baseAverage = withReviews ? 4.9 : 0;
+  const submitted = submittedReviews.get(adjusterId) ?? [];
+
+  const reviewCount = baseCount + submitted.length;
+  const scoreSum = baseAverage * baseCount + submitted.reduce((s, r) => s + r.score, 0);
+  const averageRating =
+    reviewCount === 0 ? 0 : Math.round((scoreSum / reviewCount) * 10) / 10;
+
   return {
     adjusterId,
     nickname: "김도현",
@@ -144,10 +172,18 @@ function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
       { period: "2013", company: "손해사정사 자격 취득 (제0000호)" },
     ],
     career: 12,
-    averageRating: withReviews ? 4.9 : 0,
-    reviewCount: withReviews ? 86 : 0,
-    recentReviews: withReviews
-      ? [
+    averageRating,
+    reviewCount,
+    recentReviews: [
+      ...submitted.map((r) => ({
+        nickname: r.nickname,
+        score: r.score,
+        item: r.item,
+        reviewedAt: r.reviewedAt,
+        content: r.content,
+      })),
+      ...(withReviews
+        ? [
           {
             nickname: "윤O서",
             score: 5,
@@ -165,7 +201,8 @@ function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
               "복잡한 특약 누락을 찾아주셨고 진행 상황을 매번 설명해 주셨습니다.",
           },
         ]
-      : [],
+        : []),
+    ],
     completedConsultCount: 240,
     handledCaseCount: 510,
     verified: true,
@@ -1017,6 +1054,61 @@ export const handlers = [
     });
   }),
 
+  // 사정사 후기 등록 (이슈 #76) — 성공 201, 같은 adjusterId 재등록 시 409 DUPLICATE_RESOURCE.
+  // 등록분은 buildAdjusterProfile.recentReviews에 합류(score→score, createdAt→reviewedAt) + 집계 재계산.
+  http.post(`${API_BASE_URL}/adjusters/:adjusterId/reviews`, async ({ request, params }) => {
+    await delay(500);
+
+    const rawAdjusterId = typeof params.adjusterId === "string" ? params.adjusterId : "";
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawAdjusterId);
+    const adjusterId = isUuid ? rawAdjusterId : crypto.randomUUID();
+
+    const body = (await request.json().catch(() => ({}))) as {
+      score?: number;
+      content?: string;
+    };
+
+    if (typeof body.score !== "number" || body.score < 1 || body.score > 5) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "별점을 선택해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    if (submittedReviews.has(adjusterId)) {
+      return HttpResponse.json(
+        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 등록된 리뷰입니다." },
+        { status: 409 },
+      );
+    }
+
+    const createdAt = new Date().toISOString();
+    submittedReviews.set(adjusterId, [
+      {
+        nickname: maskNickname("윤서"),
+        score: body.score,
+        item: "",
+        reviewedAt: createdAt,
+        content: body.content ?? "",
+      },
+    ]);
+
+    return HttpResponse.json(
+      {
+        status: "201",
+        message: "리뷰가 등록되었습니다.",
+        data: {
+          reviewId: crypto.randomUUID(),
+          adjusterId,
+          score: body.score,
+          createdAt,
+        },
+      },
+      { status: 201 },
+    );
+  }),
+
   // 손해사정사 공개 프로필 조회 (이슈 #32)
   http.get(`${API_BASE_URL}/adjusters/:adjusterId`, async ({ params }) => {
     await delay(500);
@@ -1057,7 +1149,9 @@ export const handlers = [
         ? params.reportId
         : crypto.randomUUID();
 
-    const isCustomerSample = reportId === "test-id-123";
+    // MATCHED 클릭스루용 안정 uuid — 상세→리뷰 작성 왕복 시 동일 MATCHED 응답 보장.
+    const isCustomerSample =
+      reportId === "test-id-123" || reportId === DASHBOARD_PROPOSABLE_REPORT_ID;
 
     const isUuid =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reportId);
@@ -1108,7 +1202,7 @@ export const handlers = [
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
         reportNo: "20260520-017",
-        adjusterId: crypto.randomUUID(),
+        adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
           : null,
