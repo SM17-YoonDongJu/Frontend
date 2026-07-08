@@ -16,9 +16,7 @@ export function ReviewHeader({ reportId }: { reportId: string }) {
           <ChevronLeft className="size-5" />
         </Link>
         <span className="text-[0.9375rem] font-bold text-ink">리뷰 작성</span>
-        <Link href={detailHref} className="text-[0.875rem] font-medium text-ink-3 transition hover:text-ink">
-          나중에
-        </Link>
+        <span className="-mr-1 size-9" aria-hidden />
       </header>
 
       <nav aria-label="위치" className="hidden items-center gap-1 text-[0.8125rem] lg:flex">
