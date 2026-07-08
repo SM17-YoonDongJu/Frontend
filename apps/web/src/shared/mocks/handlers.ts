@@ -14,6 +14,8 @@ function addDays(base: Date, days: number): string {
 // 빈 후기·404 검증용 고정 id 분기.
 const ADJUSTER_EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
 const ADJUSTER_NOT_FOUND_ID = "99999999-9999-4999-8999-999999999999";
+// 클릭스루 샘플 리포트의 담당 사정사 — 고정값이라야 리뷰 등록분이 프로필에 반영되고 중복 등록 409가 동작.
+const CUSTOMER_SAMPLE_ADJUSTER_ID = "11111111-1111-4111-8111-111111111111";
 
 // 손해사정사 목록 목 데이터 (이슈 #47) — GET /adjusters. verified 전부 true, avatarUrl null 섞음.
 // 상위 6명은 Figma 카드 그대로, 나머지 20명은 페이지네이션(더보기) 확인용 생성분(총 26명 = 20 + 6, 2페이지).
@@ -128,7 +130,33 @@ const ADJUSTER_LIST_MOCK = [
   ...EXTRA_ADJUSTER_MOCK,
 ];
 
+interface SubmittedReview {
+  nickname: string;
+  score: number;
+  item: string;
+  reviewedAt: string;
+  content: string;
+}
+
+// 등록된 후기 저장소 (이슈 #76) — adjusterId별 누적. 목 로그인 유저당 1회 제한(중복 등록 409).
+const submittedReviews = new Map<string, SubmittedReview[]>();
+
+function maskNickname(nickname: string): string {
+  const chars = Array.from(nickname);
+  if (chars.length <= 1) return nickname;
+  return `${chars[0]}${"*".repeat(chars.length - 1)}`;
+}
+
 function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
+  const baseCount = withReviews ? 86 : 0;
+  const baseAverage = withReviews ? 4.9 : 0;
+  const submitted = submittedReviews.get(adjusterId) ?? [];
+
+  const reviewCount = baseCount + submitted.length;
+  const scoreSum = baseAverage * baseCount + submitted.reduce((s, r) => s + r.score, 0);
+  const averageRating =
+    reviewCount === 0 ? 0 : Math.round((scoreSum / reviewCount) * 10) / 10;
+
   return {
     adjusterId,
     nickname: "김도현",
@@ -144,10 +172,18 @@ function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
       { period: "2013", company: "손해사정사 자격 취득 (제0000호)" },
     ],
     career: 12,
-    averageRating: withReviews ? 4.9 : 0,
-    reviewCount: withReviews ? 86 : 0,
-    recentReviews: withReviews
-      ? [
+    averageRating,
+    reviewCount,
+    recentReviews: [
+      ...submitted.map((r) => ({
+        nickname: r.nickname,
+        score: r.score,
+        item: r.item,
+        reviewedAt: r.reviewedAt,
+        content: r.content,
+      })),
+      ...(withReviews
+        ? [
           {
             nickname: "윤O서",
             score: 5,
@@ -165,7 +201,8 @@ function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
               "복잡한 특약 누락을 찾아주셨고 진행 상황을 매번 설명해 주셨습니다.",
           },
         ]
-      : [],
+        : []),
+    ],
     completedConsultCount: 240,
     handledCaseCount: 510,
     verified: true,
@@ -586,16 +623,86 @@ export const handlers = [
     });
   }),
 
+  // 고객이 요청건별로 받은 제안 목록 (이슈 #78) — 대시보드 /reports와 분리된 전용 목.
+  // 🏷 API 스펙 협의 필요: GET /me/received-proposals. 상태별 표현(제안 도착/검수 대기 중/종결)·NEW 배지.
+  http.get(`${API_BASE_URL}/me/received-proposals`, async () => {
+    await delay(400);
+    const now = Date.now();
+    const hoursAgo = (h: number) => new Date(now - h * 60 * 60 * 1000).toISOString();
+
+    const list = [
+      {
+        reportId: "a1000000-0000-4000-8000-000000000001",
+        status: "AWAITING_ADOPTION",
+        accidentType: "교통사고",
+        title: "교통사고 · 후유장해",
+        createdAt: hoursAgo(2),
+        reviewedAt: hoursAgo(2),
+        reportNo: "20260520-017",
+        claimedMinAmount: 14_000_000,
+        claimedMaxAmount: 17_500_000,
+        proposalCount: 3,
+        newProposalCount: 2,
+        adjusterNickname: "김도현",
+      },
+      {
+        reportId: "a1000000-0000-4000-8000-000000000002",
+        status: "CLOSED",
+        accidentType: "실손",
+        title: "실손 · 도수치료 한도",
+        createdAt: "2026-04-28T09:00:00Z",
+        reviewedAt: "2026-04-28T09:00:00Z",
+        reportNo: "20260415-031",
+        claimedMinAmount: 3_200_000,
+        claimedMaxAmount: 4_800_000,
+        proposalCount: 2,
+        adjusterNickname: "박준호",
+      },
+      {
+        reportId: "a1000000-0000-4000-8000-000000000003",
+        status: "CLOSED",
+        accidentType: "질병",
+        title: "질병 · 암진단비",
+        createdAt: "2026-03-10T09:00:00Z",
+        reviewedAt: "2026-03-10T09:00:00Z",
+        reportNo: "20260302-008",
+        claimedMinAmount: 9_000_000,
+        claimedMaxAmount: 12_000_000,
+        proposalCount: 1,
+        adjusterNickname: null,
+      },
+      {
+        reportId: "a1000000-0000-4000-8000-000000000004",
+        status: "AWAITING_INSPECTION",
+        accidentType: "상해",
+        title: "상해 · 외모추상 특약",
+        createdAt: "2026-06-01T09:00:00Z",
+        reviewedAt: null,
+        reportNo: "20260601-042",
+        claimedMinAmount: 2_400_000,
+        claimedMaxAmount: 3_100_000,
+        proposalCount: 0,
+        adjusterNickname: null,
+      },
+    ];
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list,
+        pagination: { page: 1, size: 10, totalElements: list.length, totalPages: 1, hasNext: false },
+      },
+    });
+  }),
+
   // 고객 리포트 목록 (대시보드) — :reportId·pending-review와 충돌 없게 정확 경로.
   // §9 드리프트 필드 선반영(reportNo·claimedMin/Max·proposalCount·reviewedAt·adjusterNickname).
   http.get(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(400);
 
     const url = new URL(request.url, "http://localhost");
-    const status = url.searchParams.get("status");
-    // 무한쿼리 pageParam은 1부터. 대시보드(page 미지정)는 1페이지에 전부 담겨 hasNext=false 유지.
-    const page = Number(url.searchParams.get("page") ?? "1");
-    const size = 10;
+    const page = Number(url.searchParams.get("page") ?? "0");
 
     // 빈 상태(0건) 주입 — E2E 빈 상태 검증용(x-mock-failure 패턴 미러)
     if (request.headers.get("x-mock-scenario") === "reports-empty") {
@@ -609,8 +716,7 @@ export const handlers = [
       });
     }
 
-    // 두 대시보드 ID(status·createdAt 유지)를 맨 앞에 두고, 확장 필드만 추가.
-    const allReports = [
+    const list = [
       {
         reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
         status: "MATCHED",
@@ -624,10 +730,6 @@ export const handlers = [
         adjusterNickname: "김도현",
         offeredAmount: 8_500_000,
         treatment: "후유장해",
-        title: "우측 슬관절 인대 파열 · 등급 재산정",
-        confirmedMinAmount: 14_000_000,
-        confirmedMaxAmount: 17_500_000,
-        rating: 4.9,
       },
       {
         reportId: DASHBOARD_AWAITING_REPORT_ID,
@@ -642,141 +744,20 @@ export const handlers = [
         adjusterNickname: null,
         offeredAmount: null,
         treatment: null,
-        title: "비급여 주사료 삭감 · 실손 청구 분쟁",
-        confirmedMinAmount: null,
-        confirmedMaxAmount: null,
-        rating: null,
-      },
-      {
-        reportId: "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
-        status: "AWAITING_ADOPTION",
-        accidentType: "질병",
-        createdAt: "2026-05-08T09:00:00Z",
-        reportNo: "20260508-031",
-        claimedMinAmount: 9_000_000,
-        claimedMaxAmount: 12_000_000,
-        proposalCount: 3,
-        reviewedAt: "2026-05-09T11:00:00Z",
-        adjusterNickname: "최민호",
-        offeredAmount: null,
-        treatment: null,
-        title: "급성 심근경색 · 진단비 지급 분쟁",
-        confirmedMinAmount: null,
-        confirmedMaxAmount: null,
-        rating: null,
-      },
-      {
-        reportId: "dddddddd-dddd-4ddd-8ddd-dddddddddddd",
-        status: "COUNSELING",
-        accidentType: "후유장해",
-        createdAt: "2026-05-04T09:00:00Z",
-        reportNo: "20260504-022",
-        claimedMinAmount: 21_000_000,
-        claimedMaxAmount: 26_000_000,
-        proposalCount: 1,
-        reviewedAt: "2026-05-05T14:20:00Z",
-        adjusterNickname: "박서준",
-        offeredAmount: null,
-        treatment: null,
-        title: "다발성 늑골 골절 · 일실수입 산정",
-        confirmedMinAmount: 21_000_000,
-        confirmedMaxAmount: 26_000_000,
-        rating: 5.0,
-      },
-      {
-        reportId: "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee",
-        status: "CLOSED",
-        accidentType: "교통사고",
-        createdAt: "2026-04-28T09:00:00Z",
-        reportNo: "20260428-014",
-        claimedMinAmount: 3_500_000,
-        claimedMaxAmount: 5_000_000,
-        proposalCount: 2,
-        reviewedAt: "2026-04-30T10:00:00Z",
-        adjusterNickname: "김하늘",
-        offeredAmount: null,
-        treatment: null,
-        title: "경추 염좌 · 향후 치료비 분쟁",
-        confirmedMinAmount: 3_500_000,
-        confirmedMaxAmount: 5_000_000,
-        rating: 4.8,
-      },
-      {
-        reportId: "ffffffff-ffff-4fff-8fff-ffffffffffff",
-        status: "MATCHED",
-        accidentType: "상해",
-        createdAt: "2026-04-22T09:00:00Z",
-        reportNo: "20260422-008",
-        claimedMinAmount: 8_000_000,
-        claimedMaxAmount: 11_000_000,
-        proposalCount: 1,
-        reviewedAt: "2026-04-24T09:30:00Z",
-        adjusterNickname: "정우성",
-        offeredAmount: null,
-        treatment: null,
-        title: "손목 골절 · 후유장해 평가",
-        confirmedMinAmount: 8_000_000,
-        confirmedMaxAmount: 11_000_000,
-        rating: 4.7,
-      },
-      {
-        reportId: "a1a1a1a1-a1a1-4a1a-8a1a-a1a1a1a1a1a1",
-        status: "COUNSELING",
-        accidentType: "실손",
-        createdAt: "2026-04-16T09:00:00Z",
-        reportNo: "20260416-003",
-        claimedMinAmount: 2_400_000,
-        claimedMaxAmount: 3_100_000,
-        proposalCount: 1,
-        reviewedAt: "2026-04-17T13:00:00Z",
-        adjusterNickname: "한소희",
-        offeredAmount: null,
-        treatment: null,
-        title: "비급여 도수치료 과잉 삭감",
-        confirmedMinAmount: null,
-        confirmedMaxAmount: null,
-        rating: null,
-      },
-      {
-        reportId: "b2b2b2b2-b2b2-4b2b-8b2b-b2b2b2b2b2b2",
-        status: "CLOSED",
-        accidentType: "질병",
-        createdAt: "2026-04-08T09:00:00Z",
-        reportNo: "20260408-019",
-        claimedMinAmount: 12_000_000,
-        claimedMaxAmount: 15_000_000,
-        proposalCount: 2,
-        reviewedAt: "2026-04-10T16:40:00Z",
-        adjusterNickname: "이지은",
-        offeredAmount: null,
-        treatment: null,
-        title: "갑상선암 · 진단비 재산정",
-        confirmedMinAmount: 12_000_000,
-        confirmedMaxAmount: 15_000_000,
-        rating: 4.6,
       },
     ];
-
-    const filtered = status
-      ? allReports.filter((report) => report.status === status)
-      : allReports;
-
-    const totalElements = filtered.length;
-    const totalPages = Math.max(1, Math.ceil(totalElements / size));
-    const start = (page - 1) * size;
-    const pageItems = filtered.slice(start, start + size);
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
-        list: pageItems,
+        list,
         pagination: {
           page,
-          size,
-          totalElements,
-          totalPages,
-          hasNext: start + size < totalElements,
+          size: 10,
+          totalElements: list.length,
+          totalPages: 1,
+          hasNext: false,
         },
       },
     });
@@ -1146,6 +1127,61 @@ export const handlers = [
     });
   }),
 
+  // 사정사 후기 등록 (이슈 #76) — 성공 201, 같은 adjusterId 재등록 시 409 DUPLICATE_RESOURCE.
+  // 등록분은 buildAdjusterProfile.recentReviews에 합류(score→score, createdAt→reviewedAt) + 집계 재계산.
+  http.post(`${API_BASE_URL}/adjusters/:adjusterId/reviews`, async ({ request, params }) => {
+    await delay(500);
+
+    const rawAdjusterId = typeof params.adjusterId === "string" ? params.adjusterId : "";
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawAdjusterId);
+    const adjusterId = isUuid ? rawAdjusterId : crypto.randomUUID();
+
+    const body = (await request.json().catch(() => ({}))) as {
+      score?: number;
+      content?: string;
+    };
+
+    if (typeof body.score !== "number" || body.score < 1 || body.score > 5) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "별점을 선택해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    if (submittedReviews.has(adjusterId)) {
+      return HttpResponse.json(
+        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 등록된 리뷰입니다." },
+        { status: 409 },
+      );
+    }
+
+    const createdAt = new Date().toISOString();
+    submittedReviews.set(adjusterId, [
+      {
+        nickname: maskNickname("윤서"),
+        score: body.score,
+        item: "",
+        reviewedAt: createdAt,
+        content: body.content ?? "",
+      },
+    ]);
+
+    return HttpResponse.json(
+      {
+        status: "201",
+        message: "리뷰가 등록되었습니다.",
+        data: {
+          reviewId: crypto.randomUUID(),
+          adjusterId,
+          score: body.score,
+          createdAt,
+        },
+      },
+      { status: 201 },
+    );
+  }),
+
   // 손해사정사 공개 프로필 조회 (이슈 #32)
   http.get(`${API_BASE_URL}/adjusters/:adjusterId`, async ({ params }) => {
     await delay(500);
@@ -1186,7 +1222,9 @@ export const handlers = [
         ? params.reportId
         : crypto.randomUUID();
 
-    const isCustomerSample = reportId === "test-id-123";
+    // MATCHED 클릭스루용 안정 uuid — 상세→리뷰 작성 왕복 시 동일 MATCHED 응답 보장.
+    const isCustomerSample =
+      reportId === "test-id-123" || reportId === DASHBOARD_PROPOSABLE_REPORT_ID;
 
     const isUuid =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(reportId);
@@ -1237,7 +1275,7 @@ export const handlers = [
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
         reportNo: "20260520-017",
-        adjusterId: crypto.randomUUID(),
+        adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
           : null,

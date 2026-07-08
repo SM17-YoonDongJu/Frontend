@@ -30,6 +30,8 @@ export const reportListItemSchema = z.object({
   confirmedMinAmount: z.number().int().nullable().optional(),
   confirmedMaxAmount: z.number().int().nullable().optional(),
   rating: z.number().nullable().optional(),
+  // 받은 제안 목록 "NEW N" 배지용 신규 도착 제안 수(이슈 #78).
+  newProposalCount: z.number().int().optional(),
 });
 
 export const paginationSchema = z.object({

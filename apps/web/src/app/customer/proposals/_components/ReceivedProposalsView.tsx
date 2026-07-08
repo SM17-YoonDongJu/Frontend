@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import { useReportHistory } from "@/app/customer/_shared/api/use-report-history";
+import { CustomerBottomNav } from "@/app/customer/_shared/components/CustomerBottomNav";
 import { ReceivedProposalCard } from "./ReceivedProposalCard";
 import { ReceivedProposalsEmpty } from "./ReceivedProposalsEmpty";
 
@@ -12,45 +13,49 @@ export function ReceivedProposalsView() {
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[25.125rem] flex-col bg-paper">
-      <header className="px-5 pt-7 pb-4">
-        <h1 className="font-serif text-[1.625rem] font-bold leading-[1.3] tracking-[-0.0144rem] text-ink">
-          받은 제안
-        </h1>
-        <p className="mt-2 text-[0.84375rem] leading-[1.45] text-ink-3">
-          분석 요청건별로 도착한 제안을 모아 보여드려요.
-        </p>
-      </header>
-
-      {list.length === 0 ? (
-        <ReceivedProposalsEmpty />
-      ) : (
-        <>
-          <ul className="flex flex-col gap-3 px-5 pt-1 pb-5">
-            {list.map((item) => (
-              <li key={item.reportId}>
-                <ReceivedProposalCard item={item} />
-              </li>
-            ))}
-          </ul>
-
-          {hasNextPage && (
-            <div className="px-5 pb-4">
-              <button
-                type="button"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="w-full rounded-button border border-line bg-card py-3 text-[0.875rem] font-semibold text-ink-2 transition hover:brightness-[.98] disabled:cursor-not-allowed disabled:opacity-[.42]"
-              >
-                {isFetchingNextPage ? "불러오는 중…" : "더보기"}
-              </button>
-            </div>
-          )}
-
-          <p className="px-5 pb-8 text-center text-[0.75rem] leading-[1.5] text-ink-3">
-            요청건을 선택하면 해당 리포트에 도착한 제안 목록으로 이동합니다.
+      <div className="flex-1">
+        <header className="px-5 pt-6 pb-4">
+          <h1 className="font-serif text-[1.625rem] font-bold leading-[1.3] tracking-[-0.0144rem] text-ink">
+            받은 제안
+          </h1>
+          <p className="mt-2 text-[0.8125rem] leading-[1.45] text-ink-3">
+            분석 요청건별로 도착한 제안을 모아 보여드려요.
           </p>
-        </>
-      )}
+        </header>
+
+        {list.length === 0 ? (
+          <ReceivedProposalsEmpty />
+        ) : (
+          <>
+            <ul className="flex flex-col gap-3 px-5 pb-5">
+              {list.map((item) => (
+                <li key={item.reportId}>
+                  <ReceivedProposalCard item={item} />
+                </li>
+              ))}
+            </ul>
+
+            {hasNextPage && (
+              <div className="px-5 pb-4">
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="w-full rounded-button border border-line bg-card py-3 text-[0.875rem] font-semibold text-ink-2 transition hover:brightness-[.98] disabled:cursor-not-allowed disabled:opacity-[.42]"
+                >
+                  {isFetchingNextPage ? "불러오는 중…" : "더보기"}
+                </button>
+              </div>
+            )}
+
+            <p className="px-5 pb-6 text-center text-[0.6875rem] leading-[1.5] text-ink-3">
+              요청건을 선택하면 해당 리포트에 도착한 제안 목록으로 이동합니다.
+            </p>
+          </>
+        )}
+      </div>
+
+      <CustomerBottomNav active="상담" />
     </div>
   );
 }
