@@ -4,9 +4,9 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
  * 파트너 대시보드 모바일 E2E (happy-path CUJ, 이슈 #45).
  *
  * 원칙(메모리 fe-e2e-strategy): 핵심 사용자 흐름·통합 happy-path만. 엣지/형식검증은 zod·TS에 위임(미테스트).
- * 응답은 앱 내장 MSW 기본 핸들러가 제공(요약 4수치·검수 대기 5건). 에러만 x-mock-failure 헤더로 override.
+ * 응답은 앱 내장 MSW 기본 핸들러가 제공(요약 4수치·검수 대기 4건). 에러만 x-mock-failure 헤더로 override.
  *
- * 흐름: 요약 4카드 수치 표시 / 검수 대기 카드 렌더(배지·지역·제목·마감)
+ * 흐름: 요약 4카드 수치 표시 / 검수 대기 카드 렌더(배지·지역·제목·케이스번호)
  *       / 검수 시작 → /partner/review/{reportId} 이동 / 전체보기 → /partner/review
  *       / 대시보드 요약 로드 실패 시 섹션 에러 표시.
  *
@@ -30,32 +30,32 @@ test("요약 4카드 수치가 표시된다", async ({ page }) => {
   await expect(visibleText(page, "이번 달 완료", true)).toBeVisible();
   await expect(visibleText(page, "고객 평점", true)).toBeVisible();
 
-  // MSW 기본값: pending 5 / inProgress 2 / monthly 14 / rating 4.9
-  await expect(visibleText(page, "5건")).toBeVisible();
+  // MSW 기본값: pending 4 / inProgress 2 / monthly 14 / rating 4.9
+  await expect(visibleText(page, "4건", true)).toBeVisible();
   await expect(visibleText(page, "2건")).toBeVisible();
   await expect(visibleText(page, "14건")).toBeVisible();
   await expect(visibleText(page, "4.9")).toBeVisible();
 });
 
-test("검수 대기 카드에 배지·지역·제목·마감이 렌더된다", async ({ page }) => {
+test("검수 대기 카드에 배지·지역·제목·케이스번호가 렌더된다", async ({ page }) => {
   await page.goto(PATH);
 
   // createdAt desc 정렬 시 최상단 = 6/19 09:00 항목
   const topCard = page
     .getByRole("listitem")
     .filter({ visible: true })
-    .filter({ hasText: "우측 슬관절 후방십자인대 파열" });
+    .filter({ hasText: "우측 슬관절 인대 파열" });
   await expect(topCard).toBeVisible();
 
   await expect(topCard.getByText("후유장해")).toBeVisible();
   await expect(topCard.getByText("서울 강남")).toBeVisible();
-  await expect(topCard.getByText(/등급 재산정 쟁점/)).toBeVisible();
-  // reviewDeadline addDays(0) → 오늘 마감
-  await expect(topCard.getByText("오늘 마감")).toBeVisible();
+  await expect(topCard.getByText(/등급 재산정/)).toBeVisible();
+  // 마감일 필드는 계약 정리로 제거 — 케이스번호 표기로 대체
+  await expect(topCard.getByText("#042")).toBeVisible();
 
-  // 섹션 헤더 카운트 "검수 대기 5"
+  // 섹션 헤더 카운트 "검수 대기 4"
   await expect(
-    page.getByRole("heading", { name: /검수 대기\s*5/ }).filter({ visible: true }),
+    page.getByRole("heading", { name: /검수 대기\s*4/ }).filter({ visible: true }),
   ).toBeVisible();
 });
 
@@ -65,7 +65,7 @@ test("검수 시작을 누르면 해당 리포트 상세로 이동한다", async
   const topCard = page
     .getByRole("listitem")
     .filter({ visible: true })
-    .filter({ hasText: "우측 슬관절 후방십자인대 파열" });
+    .filter({ hasText: "우측 슬관절 인대 파열" });
   const startLink = topCard.getByRole("link", { name: /검수 시작/ });
   await expect(startLink).toBeVisible();
 

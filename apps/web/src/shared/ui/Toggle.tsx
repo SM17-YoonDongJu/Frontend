@@ -30,7 +30,7 @@ export function Toggle({ checked, onChange, label, disabled, className }: Toggle
         aria-hidden
         className={cn(
           "flex h-6 w-11 shrink-0 items-center rounded-full p-0.5 transition group-focus-visible:ring-[3px] group-focus-visible:ring-gold-soft",
-          checked ? "bg-ink" : "bg-line",
+          checked ? "bg-green" : "bg-line",
         )}
       >
         <span

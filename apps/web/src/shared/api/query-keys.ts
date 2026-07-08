@@ -8,7 +8,6 @@ export interface ReportListFilter {
 export interface ReviewListFilter {
   status?: string;
   accidentType?: string;
-  region?: string;
   page?: number;
   size?: number;
 }
@@ -32,12 +31,20 @@ export const userKeys = createQueryKeys("user", {
   me: null,
 });
 
+export const settingsKeys = createQueryKeys("settings", {
+  notification: null,
+});
+
 export const proposalKeys = createQueryKeys("proposal", {
   list: (reportId: string) => [reportId],
 });
 
 export const reviewKeys = createQueryKeys("review", {
   detail: (reportId: string) => [reportId],
+});
+
+export const notificationKeys = createQueryKeys("notification", {
+  list: null,
 });
 
 export interface AdjusterListFilter {
@@ -55,6 +62,7 @@ export const adjusterKeys = createQueryKeys("adjuster", {
   meProfileSummary: () => ["me", "profile", "summary"],
   dashboard: () => ["dashboard"],
   inProgress: () => ["in-progress"],
+  mypage: () => ["me", "mypage"],
   list: (filter?: AdjusterListFilter) => [{ filter: filter ?? {} }],
   detail: (adjusterId: string) => [adjusterId],
 });

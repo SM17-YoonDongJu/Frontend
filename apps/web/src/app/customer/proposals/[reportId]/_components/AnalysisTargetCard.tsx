@@ -21,10 +21,10 @@ export function AnalysisTargetCard({
       </span>
       <div className="min-w-0">
         <div className="flex items-baseline gap-2">
-          <p className="truncate text-[16px] font-semibold">{accidentType}</p>
-          <span className="shrink-0 text-[13px] text-white/45">No.{reportNo}</span>
+          <p className="truncate text-[1rem] font-semibold">{accidentType}</p>
+          <span className="shrink-0 text-[0.8125rem] text-white/45">No.{reportNo}</span>
         </div>
-        <p className="mt-1 text-[13px] text-white/70">
+        <p className="mt-1 text-[0.8125rem] text-white/70">
           접수 {receivedAt} · 손해사정사 {proposalCount}명이 검수 의견을 보냈어요
         </p>
       </div>

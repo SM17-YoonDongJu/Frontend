@@ -40,13 +40,13 @@ export function CustomerHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            type="button"
+          <Link
+            href="/notifications"
             aria-label="알림"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-ink-2 transition hover:bg-paper hover:text-ink"
           >
             <Bell />
-          </button>
+          </Link>
           {/* 계정 메뉴 트리거 — 드롭다운 토글은 후속(클라이언트 컴포넌트) */}
           <button
             type="button"

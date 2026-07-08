@@ -17,11 +17,15 @@ export function CareerSection({ control, register, errors }: CareerSectionProps)
   const [pendingRemove, setPendingRemove] = useState<number | null>(null);
 
   return (
-    <section className="space-y-4 rounded-card-lg border border-line bg-card p-6">
-      <div className="flex items-center justify-between">
+    <section className="space-y-4 lg:rounded-card-lg lg:border lg:border-line lg:bg-card lg:p-6">
+      <div className="hidden items-center justify-between lg:flex">
         <h2 className="font-serif text-[1.125rem] font-bold text-ink">주요 경력</h2>
         <span className="text-[0.8125rem] text-ink-3">공개 프로필에 순서대로 표시돼요</span>
       </div>
+
+      <span className="block text-[0.8125rem] font-semibold text-ink-2 lg:hidden">
+        대표 이력 <span className="font-normal text-ink-3">(프로필에 공개)</span>
+      </span>
 
       {fields.length === 0 ? (
         <p className="rounded-input border border-dashed border-line bg-paper-2 px-4 py-6 text-center text-[0.8125rem] text-ink-3">

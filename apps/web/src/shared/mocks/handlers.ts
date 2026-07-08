@@ -218,16 +218,14 @@ function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
   };
 }
 
-// 검수 대기 목 데이터 — 보류 상태 반영 위해 모듈 스코프에 고정(reportId 안정)
+// 검수 대기 목 데이터 — reportId 안정 위해 모듈 스코프에 고정.
+// CONTRACT: 명세없음-임시 — caseId·title·region·claimedMin/Max·offerHeadroom은 list 미확장 필드(MSW 목킹).
 const PENDING_REVIEWS = [
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T09:00:00Z", caseId: "20260619-042", title: "우측 슬관절 후방십자인대 파열 · 등급 재산정 쟁점", region: "서울 강남", matchingScore: 96, claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2, reviewDeadline: addDays(new Date(), 0) },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-19T08:10:00Z", caseId: "20260619-041", title: "다발성 늑골 골절 · 일실수입 과소 산정 의심", region: "경기 성남", matchingScore: 91, claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3, reviewDeadline: addDays(new Date(), 1) },
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "20260618-030", title: "요추 추간판탈출 · 외모추상 특약 청구 누락", region: "서울 송파", matchingScore: 88, claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2, reviewDeadline: addDays(new Date(), 3) },
-  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "20260618-019", title: "비급여 도수치료 · 통원 한도 적용 분쟁", region: "인천 연수", matchingScore: 74, claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1, reviewDeadline: addDays(new Date(), 2) },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-17T14:05:00Z", caseId: "20260517-007", title: "경추 염좌 · 향후 치료비 미반영", region: "경기 수원", matchingScore: 82, claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 1_800_000, issueCount: 1, reviewDeadline: addDays(new Date(), 5) },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), 0)}T09:00:00Z`, caseId: "042", title: "우측 슬관절 인대 파열 · 등급 재산정", region: "서울 강남", claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000 },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), -1)}T08:10:00Z`, caseId: "041", title: "다발성 늑골 골절 · 일실수입 과소", region: "경기 성남", claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000 },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "038", title: "요추 추간판탈출 · 특약 누락", region: "서울 송파", claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000 },
+  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "036", title: "비급여 도수치료 · 한도 분쟁", region: "인천 연수", claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000 },
 ];
-
-const heldReportIds = new Set<string>();
 
 // 검수 내역 목 데이터 (이슈 #59) — GET /adjusters/me/reviewed-reports.
 // 명세 6필드(caseId·title·sentDate·status·statusLabel·hasOpinion) + ⚠️명세없음-1 4필드
@@ -248,6 +246,32 @@ const REVIEWED_REPORTS = [
   { caseId: "20260503-010", title: "암·진단비 · 재진단암 인정 범위", sentDate: "2026-05-03", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "cancer_diagnosis", confirmedMinAmount: 30_000_000, confirmedMaxAmount: 30_000_000, rating: 4.8 },
   { caseId: "20260430-005", title: "실손 의료비 · 비급여 주사료 분쟁", sentDate: "2026-04-30", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "medical_indemnity", confirmedMinAmount: 1_400_000, confirmedMaxAmount: 1_750_000, rating: 4.4 },
 ] as const;
+
+// 알림 목록 목 데이터 (이슈 #49) — ⚠️ 명세없음-초안(.pr-assets/api-spec-draft-notifications.md).
+// createdAt은 달력 기준(오늘/어제 고정) → 조회 시각과 무관하게 오늘·어제·이전 세 그룹이 항상 나온다.
+// read-all 호출 시 isRead를 모듈 상태로 전부 true 반영.
+// 오늘 항목: 오늘 자정 기준 hoursBack 시간 전, 단 자정을 넘지 않게 클램프(새벽 조회 시에도 오늘 유지).
+function todayAgo(hoursBack: number): string {
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const target = Date.now() - hoursBack * 60 * 60 * 1000;
+  return new Date(Math.max(target, startOfToday.getTime() + 60 * 1000)).toISOString();
+}
+
+function yesterdayAt(hour: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  d.setHours(hour, 0, 0, 0);
+  return d.toISOString();
+}
+
+const NOTIFICATIONS = [
+  { notificationId: "d0000000-0000-4000-8000-000000000001", type: "REVIEW_COMPLETE", title: "검수가 완료됐어요", body: "김도현 사정사님이 리포트를 검수했어요.", isRead: false, createdAt: todayAgo(2) },
+  { notificationId: "d0000000-0000-4000-8000-000000000002", type: "RECEIVED_PROPOSAL", title: "새 제안 2건 도착", body: "교통사고 리포트에 상담 제안이 왔어요.", isRead: false, createdAt: todayAgo(5) },
+  { notificationId: "d0000000-0000-4000-8000-000000000003", type: "CONSULT_ACCEPTED", title: "상담이 수락됐어요", body: "정우성 사정사님이 상담을 수락했어요.", isRead: true, createdAt: yesterdayAt(15) },
+  { notificationId: "d0000000-0000-4000-8000-000000000004", type: "ANALYSIS_COMPLETE", title: "분석이 완료됐어요", body: "제출하신 서류 분석 리포트가 준비됐어요.", isRead: true, createdAt: yesterdayAt(11) },
+  { notificationId: "d0000000-0000-4000-8000-000000000005", type: "IDENTITY_VERIFIED", title: "본인 인증 완료", body: "계정 본인 인증이 완료됐어요.", isRead: true, createdAt: "2026-05-18T09:00:00Z" },
+];
 
 // 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
 const rejectedProposals = new Set<string>();
@@ -273,15 +297,153 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
     { period: "2014.03 ~ 2019.02", company: "OO손해사정법인" },
     { period: "2019.03 ~ 현재", company: "독립 손해사정사" },
   ],
+  registrationNo: "제0000호",
   updatedAt: "2026-06-20T08:00:00Z",
   // 대시보드 헤더·인사말용 집계(읽기 전용)
   averageRating: 4.9,
   reviewCount: 86,
-  pendingReviewCount: 5,
+  pendingReviewCount: 4,
+};
+
+// 알림 설정 (이슈 #46) — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체
+const NOTIFICATION_SETTINGS: Record<string, boolean> = {
+  newReviewRequest: true,
+  consultMessage: true,
+  settlementNotice: false,
+  reviewComplete: true,
+  receivedProposal: true,
+  marketing: false,
+};
+
+// 마이페이지 집계 (이슈 #46) — GET /adjusters/me/mypage, ADJUSTER_PROFILE 페르소나와 수치 일치
+const ADJUSTER_MYPAGE = {
+  profile: {
+    nickname: "김상정",
+    email: "kimsangjeong@example.com",
+    avatarUrl: null,
+    headline: "후유장해 전문 12년, 거절 사건을 다시 봅니다",
+    specialties: ["후유장해", "교통사고"],
+    career: 12,
+    activityRegion: "서울·경기",
+    role: "CERTIFICATED_ADJUSTER",
+  },
+  stats: {
+    averageRating: 4.9,
+    reviewCount: 86,
+    totalCompletedCount: 240,
+    consultationConversionRate: 62,
+  },
+  monthlyActivity: {
+    completedCount: 14,
+    consultationConvertedCount: 9,
+    averageRating: 4.9,
+  },
+  certification: {
+    licenseNo: "제2014-0087호",
+    activityRegion: "서울·경기",
+    createdAt: "2026-01-01T00:00:00Z",
+  },
 };
 
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
+
+  // 알림 모두 읽음 처리 (#49) — ⚠️ 명세없음-초안. 구체 경로를 목록 GET보다 먼저 등록.
+  http.patch(`${API_BASE_URL}/users/me/notifications/read-all`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-failure") === "read-all") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "읽음 처리에 실패했습니다." },
+        { status: 500 },
+      );
+    }
+
+    for (const notification of NOTIFICATIONS) notification.isRead = true;
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: null,
+    });
+  }),
+
+  // 내 알림 목록 (#49) — ⚠️ 명세없음-초안. read-all 반영된 isRead 상태 그대로 반환.
+  http.get(`${API_BASE_URL}/users/me/notifications`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-failure") === "notifications") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "알림을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { list: NOTIFICATIONS },
+    });
+  }),
+
+  // 회원가입 (#43) — 전역 봉투 거울. 성공 201 + data(토큰 포함).
+  // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 2자 미만→400 VALIDATION_ERROR,
+  //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD, x-mock-failure:social→500 EXTERNAL_API_ERROR.
+  http.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {
+    await delay(600);
+
+    const body = (await request.json().catch(() => ({}))) as {
+      provider?: string;
+      socialToken?: string;
+      nickname?: string;
+      userType?: string;
+      email?: string;
+    };
+
+    if (request.headers.get("x-mock-failure") === "social") {
+      return HttpResponse.json(
+        { status: "500", code: "EXTERNAL_API_ERROR", message: "소셜 인증에 실패했습니다. 다시 시도해 주세요." },
+        { status: 500 },
+      );
+    }
+
+    if (!body.provider || !body.socialToken || !body.userType) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
+        { status: 400 },
+      );
+    }
+
+    if (!body.nickname || body.nickname.length < 2 || body.nickname.length > 20) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "닉네임은 2~20자로 입력해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    if (body.nickname === "중복닉네임") {
+      return HttpResponse.json(
+        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 사용 중인 닉네임이에요." },
+        { status: 409 },
+      );
+    }
+
+    return HttpResponse.json(
+      {
+        status: "201",
+        message: "회원가입이 완료되었습니다.",
+        data: {
+          userId: crypto.randomUUID(),
+          nickname: body.nickname,
+          // 응답 역할은 명세대로 role(요청 userType 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
+          role: body.userType === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
+          accessToken: `mock-access-${crypto.randomUUID()}`,
+          refreshToken: `mock-refresh-${crypto.randomUUID()}`,
+        },
+      },
+      { status: 201 },
+    );
+  }),
 
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
@@ -317,7 +479,7 @@ export const handlers = [
       message: "정상 처리되었습니다.",
       data: {
         summary: {
-          pendingCount: 5,
+          pendingCount: 4,
           pendingNewCount: 2,
           inProgressCount: 2,
           monthlyCompletedCount: 14,
@@ -327,10 +489,80 @@ export const handlers = [
         },
         activity: {
           completedCount: 14,
-          consultConvertedCount: 9,
+          consultationConvertedCount: 9,
           averageRating: 4.9,
         },
       },
+    });
+  }),
+
+  // 손해사정사 마이페이지 집계 (이슈 #46)
+  http.get(`${API_BASE_URL}/adjusters/me/mypage`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "mypage") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "마이페이지를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: ADJUSTER_MYPAGE,
+    });
+  }),
+
+  // 알림 설정 조회 (이슈 #46)
+  http.get(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "notification-settings") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "알림 설정을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...NOTIFICATION_SETTINGS },
+    });
+  }),
+
+  // 알림 설정 저장 (이슈 #46) — 수정한 항목만 머지, 전체 설정 반환
+  http.patch(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "notification-settings") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "알림 설정을 저장하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    for (const key of Object.keys(NOTIFICATION_SETTINGS)) {
+      if (typeof body[key] === "boolean") {
+        NOTIFICATION_SETTINGS[key] = body[key];
+      }
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...NOTIFICATION_SETTINGS },
     });
   }),
 
@@ -382,7 +614,7 @@ export const handlers = [
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
-        userId: 1024,
+        userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
         nickname: "윤서",
         email: "yunseo@example.com",
         userType,
@@ -399,6 +631,18 @@ export const handlers = [
     const url = new URL(request.url, "http://localhost");
     const page = Number(url.searchParams.get("page") ?? "0");
 
+    // 빈 상태(0건) 주입 — E2E 빈 상태 검증용(x-mock-failure 패턴 미러)
+    if (request.headers.get("x-mock-scenario") === "reports-empty") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: {
+          list: [],
+          pagination: { page, size: 10, totalElements: 0, totalPages: 0, hasNext: false },
+        },
+      });
+    }
+
     const list = [
       {
         reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
@@ -411,6 +655,8 @@ export const handlers = [
         proposalCount: 2,
         reviewedAt: "2026-05-22T10:14:00Z",
         adjusterNickname: "김도현",
+        offeredAmount: 8_500_000,
+        treatment: "후유장해",
       },
       {
         reportId: DASHBOARD_AWAITING_REPORT_ID,
@@ -423,6 +669,8 @@ export const handlers = [
         proposalCount: 0,
         reviewedAt: null,
         adjusterNickname: null,
+        offeredAmount: null,
+        treatment: null,
       },
     ];
 
@@ -523,16 +771,10 @@ export const handlers = [
     const page = Number(url.searchParams.get("page") ?? "1");
     const size = Number(url.searchParams.get("size") ?? "10");
     const accidentType = url.searchParams.get("accidentType");
-    const region = url.searchParams.get("region");
 
     const list = PENDING_REVIEWS.filter(
-      (review) =>
-        (!accidentType || review.accidentType === accidentType) &&
-        (!region || review.region === region),
-    ).map((review) => ({
-      ...review,
-      held: heldReportIds.has(review.reportId),
-    }));
+      (review) => !accidentType || review.accidentType === accidentType,
+    );
 
     return HttpResponse.json({
       status: "200",
@@ -544,24 +786,11 @@ export const handlers = [
     });
   }),
 
-  // 검수 보류 처리 (사정사별 토글)
-  http.patch(`${API_BASE_URL}/reports/:reportId/hold`, async ({ params }) => {
-    await delay(300);
-    const reportId = String(params.reportId);
-    heldReportIds.add(reportId);
-
-    return HttpResponse.json({
-      status: "200",
-      message: "보류 처리되었습니다.",
-      data: { reportId, held: true },
-    });
-  }),
-
-  // 검수 현황 요약 (집계 카드 3종)
+  // 검수 현황 요약 (하단 탭바 뱃지 카운트용)
   http.get(`${API_BASE_URL}/reports/pending-review/summary`, async () => {
     await delay(300);
 
-    const pendingCount = PENDING_REVIEWS.filter((r) => !heldReportIds.has(r.reportId)).length;
+    const pendingCount = PENDING_REVIEWS.length;
 
     return HttpResponse.json({
       status: "200",

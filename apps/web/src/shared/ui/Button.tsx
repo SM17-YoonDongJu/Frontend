@@ -15,9 +15,9 @@ const buttonVariants = cva(
         danger: "bg-terra text-white"
       },
       size: {
-        sm: "px-[14px] py-2 text-[13.5px]",
-        md: "px-[18px] py-3 text-[15px]",
-        lg: "px-[22px] py-[15px] text-[16px]"
+        sm: "px-3.5 py-2 text-[0.84375rem]",
+        md: "px-[1.125rem] py-3 text-[0.9375rem]",
+        lg: "px-[1.375rem] py-[0.9375rem] text-[1rem]"
       },
       full: { true: "w-full" }
     },

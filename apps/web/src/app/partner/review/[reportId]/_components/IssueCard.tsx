@@ -40,14 +40,14 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-2.5">
-          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-semibold text-white">
+          <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-[0.75rem] font-semibold text-white">
             {index + 1}
           </span>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-[15px] font-semibold text-ink">{issue.title}</h3>
+              <h3 className="text-[0.9375rem] font-semibold text-ink">{issue.title}</h3>
               {impact && (
-                <span className={cn("text-[13px] font-semibold", impactTone)}>{impact}</span>
+                <span className={cn("text-[0.8125rem] font-semibold", impactTone)}>{impact}</span>
               )}
               {issue.isNew && <StatusBadge tone="gold">신규</StatusBadge>}
             </div>
@@ -57,16 +57,16 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
       </div>
 
       {!isModified && (
-        <p className="mt-2.5 pl-[34px] text-[13.5px] leading-relaxed text-ink-2">
+        <p className="mt-2.5 pl-[2.125rem] text-[0.84375rem] leading-relaxed text-ink-2">
           {issue.description}
         </p>
       )}
 
       {issue.tags.length > 0 && (
-        <ul className="mt-2.5 flex flex-wrap gap-1.5 pl-[34px]">
+        <ul className="mt-2.5 flex flex-wrap gap-1.5 pl-[2.125rem]">
           {issue.tags.map((tag) => (
             <li key={tag}>
-              <span className="inline-flex items-center rounded-tag border border-line bg-card px-2 py-1 text-[12px] text-ink-3">
+              <span className="inline-flex items-center rounded-tag border border-line bg-card px-2 py-1 text-[0.75rem] text-ink-3">
                 {tag}
               </span>
             </li>
@@ -74,7 +74,7 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
         </ul>
       )}
 
-      <div className="mt-3 pl-[34px]">
+      <div className="mt-3 pl-[2.125rem]">
         {isModified && <IssueModifyForm issue={issue} onPatch={onPatch} />}
         {issue.reviewStatus === "EXCLUDED" && <IssueExcludeForm issue={issue} onPatch={onPatch} />}
 
@@ -83,7 +83,7 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
             aria-hidden
             className="mt-1.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-navy text-gold"
           >
-            <Scale className="text-[13px]" />
+            <Scale className="text-[0.8125rem]" />
           </span>
           <Input
             aria-label="사정사 의견"
@@ -100,7 +100,7 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
           <button
             type="button"
             onClick={onRemove}
-            className="mt-2 text-[12.5px] font-medium text-terra hover:underline"
+            className="mt-2 text-[0.78125rem] font-medium text-terra hover:underline"
           >
             쟁점 삭제
           </button>

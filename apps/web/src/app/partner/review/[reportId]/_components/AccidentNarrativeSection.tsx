@@ -7,9 +7,9 @@ export function AccidentNarrativeSection({ description }: AccidentNarrativeSecti
 
   return (
     <div>
-      <p className="text-[13px] font-bold text-ink">의뢰인이 작성한 사고 경위</p>
+      <p className="text-[0.8125rem] font-bold text-ink">의뢰인이 작성한 사고 경위</p>
       <div className="mt-2 rounded-card border border-line bg-paper-2 p-4">
-        <p className="text-[14px] leading-relaxed text-ink-2">{description}</p>
+        <p className="text-[0.875rem] leading-relaxed text-ink-2">{description}</p>
       </div>
     </div>
   );

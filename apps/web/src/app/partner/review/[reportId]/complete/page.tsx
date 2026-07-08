@@ -26,14 +26,14 @@ export default async function ReviewCompletePage({
       >
         ✓
       </span>
-      <h1 className="mt-6 font-serif text-[22px] font-bold text-ink">
+      <h1 className="mt-6 font-serif text-[1.375rem] font-bold text-ink">
         검수 리포트를 고객에게 전송했습니다
       </h1>
-      <p className="mt-2 text-[14px] text-ink-3">
+      <p className="mt-2 text-[0.875rem] text-ink-3">
         손해사정사 검수 완료 배지가 부착되어 고객 리포트에 반영됩니다.
       </p>
 
-      <dl className="mt-8 w-full space-y-2.5 rounded-card-lg border border-line bg-card p-5 text-[14px]">
+      <dl className="mt-8 w-full space-y-2.5 rounded-card-lg border border-line bg-card p-5 text-[0.875rem]">
         {caseId && (
           <div className="flex items-center justify-between">
             <dt className="text-ink-3">사건 번호</dt>

@@ -10,7 +10,7 @@ export function ActivityStats() {
 
   const rows = [
     { label: "검수 완료", value: `${activity.completedCount}건` },
-    { label: "상담 전환", value: `${activity.consultConvertedCount}건` },
+    { label: "상담 전환", value: `${activity.consultationConvertedCount}건` },
     { label: "고객 평점", value: activity.averageRating.toFixed(1) },
   ];
 

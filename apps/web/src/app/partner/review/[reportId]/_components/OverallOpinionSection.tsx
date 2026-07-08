@@ -14,11 +14,11 @@ const OPINION_PLACEHOLDER =
 export function OverallOpinionSection({ value, onChange }: OverallOpinionSectionProps) {
   return (
     <section className="rounded-card-lg border border-line bg-card p-6">
-      <h2 className="flex items-center gap-2 font-serif text-[17px] font-bold text-ink">
+      <h2 className="flex items-center gap-2 font-serif text-[1.0625rem] font-bold text-ink">
         <Scale className="text-gold" />
         손해사정사 종합 의견
       </h2>
-      <p className="mt-1.5 text-[13px] text-ink-3">고객 리포트 상단에 함께 전달됩니다.</p>
+      <p className="mt-1.5 text-[0.8125rem] text-ink-3">고객 리포트 상단에 함께 전달됩니다.</p>
 
       <Input
         aria-label="손해사정사 종합 의견"
