@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronLeft } from "@/shared/ui/icons/ChevronLeft";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 
 export function ReviewHeader({ reportId }: { reportId: string }) {
@@ -12,9 +13,7 @@ export function ReviewHeader({ reportId }: { reportId: string }) {
           aria-label="뒤로"
           className="-ml-1 flex size-9 items-center justify-center rounded-full text-ink transition hover:bg-paper-2"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ChevronLeft className="size-5" />
         </Link>
         <span className="text-[0.9375rem] font-bold text-ink">리뷰 작성</span>
         <Link href={detailHref} className="text-[0.875rem] font-medium text-ink-3 transition hover:text-ink">
