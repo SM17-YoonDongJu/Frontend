@@ -6,7 +6,7 @@ export function ReviewHeader({ reportId }: { reportId: string }) {
 
   return (
     <>
-      <header className="flex h-14 items-center justify-between border-b border-line bg-card px-4 lg:hidden">
+      <header className="flex h-14 items-center justify-between bg-paper px-4 lg:hidden">
         <Link
           href={detailHref}
           aria-label="뒤로"

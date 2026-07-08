@@ -24,6 +24,7 @@ export function ReviewContentField({
         rows={5}
         aria-label="자세한 후기"
         counterHint=" · 개인정보(연락처 등)는 적지 말아 주세요"
+        counterClassName="hidden lg:inline"
         footerRight={
           <span className="flex items-center gap-1 text-[0.8125rem] text-ink-2">
             <User className="size-3.5" />

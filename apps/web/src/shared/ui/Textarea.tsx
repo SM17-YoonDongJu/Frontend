@@ -13,6 +13,8 @@ export interface TextareaProps {
   counterHint?: string;
   /** 카운터 줄 우측 슬롯 */
   footerRight?: ReactNode;
+  /** 카운터(글자수·보조 안내) 텍스트에 붙는 클래스 — 예: 모바일 숨김 `hidden lg:inline` */
+  counterClassName?: string;
   className?: string;
 }
 
@@ -26,6 +28,7 @@ export function Textarea({
   "aria-label": ariaLabel,
   counterHint,
   footerRight,
+  counterClassName,
   className,
 }: TextareaProps) {
   const showCounter = maxLength != null;
@@ -50,7 +53,7 @@ export function Textarea({
       {(showCounter || footerRight) && (
         <div className="flex items-center justify-between gap-3 text-[0.75rem] text-ink-3">
           {showCounter ? (
-            <span>
+            <span className={counterClassName}>
               {value.length.toLocaleString()}/{maxLength!.toLocaleString()}자{counterHint}
             </span>
           ) : (
