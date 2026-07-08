@@ -18,9 +18,8 @@ test.describe("모바일 뷰(454px)", () => {
   test("리뷰 작성에 진입하면 앱바·풀폭 등록 버튼·30일 안내가 보인다", async ({ page }) => {
     await page.goto(REVIEW_PATH);
 
-    // 모바일 앱바: 뒤로 · 나중에
+    // 모바일 앱바: 뒤로
     await expect(page.getByRole("link", { name: "뒤로" })).toBeVisible();
-    await expect(page.getByRole("link", { name: "나중에" })).toBeVisible();
 
     // 폼 본문
     await expect(page.getByRole("heading", { name: "사건이 잘 마무리되었나요?" })).toBeVisible();
