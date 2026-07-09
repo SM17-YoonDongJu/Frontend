@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { RoomStatus } from "@/shared/api/chat/chat.schema";
 import { Avatar } from "@/shared/ui/Avatar";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
@@ -14,7 +15,13 @@ export interface ChatThreadHeaderProps {
   reportHref: string;
   /** 모바일 뒤로가기 — 없으면 버튼 미노출 */
   onBack?: () => void;
-  /** 상담 종료(데스크톱 전용 버튼). ACTIVE 방에서만 노출 */
+  /** 이름 옆 배지(매칭 완료 등). 없으면 미표시 */
+  badge?: ReactNode;
+  /** 서브타이틀 오버라이드. 없으면 기존 caseNo·roomStatus 라벨 */
+  subtitle?: string;
+  /** 우측 액션 슬롯(데스크톱). 리포트 보기 다음에 붙는다(customer 매칭 버튼 등) */
+  actions?: ReactNode;
+  /** 상담 종료(데스크톱 전용 버튼, partner 하위호환). ACTIVE 방에서만 노출 */
   onClose?: () => void;
   closePending?: boolean;
 }
@@ -25,10 +32,14 @@ export function ChatThreadHeader({
   roomStatus,
   reportHref,
   onBack,
+  badge,
+  subtitle: subtitleOverride,
+  actions,
   onClose,
   closePending,
 }: ChatThreadHeaderProps) {
-  const subtitle = `${caseNo} · ${ROOM_STATUS_META[roomStatus].label}`;
+  const subtitle =
+    subtitleOverride ?? `${caseNo} · ${ROOM_STATUS_META[roomStatus].label}`;
 
   return (
     <header className="flex items-center gap-2.5 border-b border-line-2 bg-paper px-4 py-3 md:bg-card md:px-5">
@@ -51,6 +62,7 @@ export function ChatThreadHeader({
           {name}
           {/* Figma 95:4611 — 이름 옆 인증 마크 */}
           <ShieldCheck className="shrink-0 text-[0.8125rem] text-ink-3" />
+          {badge}
         </p>
         {/* Figma 모바일(663:3796) 헤더는 이름만 — 사건번호·상태는 데스크톱(95:4571) 전용 */}
         <p className="hidden truncate text-[0.6875rem] text-ink-3 md:block">{subtitle}</p>
@@ -75,6 +87,7 @@ export function ChatThreadHeader({
           리포트 보기
           <FileText className="text-[0.9375rem]" />
         </Link>
+        {actions}
         {onClose && roomStatus === "ACTIVE" && (
           <button
             type="button"
