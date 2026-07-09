@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
-import { useReportHistory } from "@/app/customer/_shared/api/use-report-history";
+import { useReceivedProposals } from "@/app/customer/_shared/api/use-received-proposals";
 import { CustomerBottomNav } from "@/app/customer/_shared/components/CustomerBottomNav";
 import { ReceivedProposalCard } from "./ReceivedProposalCard";
 import { ReceivedProposalsEmpty } from "./ReceivedProposalsEmpty";
 
 export function ReceivedProposalsView() {
-  const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useReportHistory();
+  const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useReceivedProposals();
 
   const list = useMemo(() => data.pages.flatMap((page) => page.list), [data.pages]);
 
