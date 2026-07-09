@@ -15,7 +15,7 @@ export default function CustomerChatPage() {
           fallback={<ChatListSkeleton />}
           errorTitle="대화 목록을 불러오지 못했어요"
         >
-          <ChatListContent chatBasePath={CHAT_BASE_PATH} emptyAction={EMPTY_ACTION} />
+          <ChatListContent chatBasePath={CHAT_BASE_PATH} emptyAction={EMPTY_ACTION} grouped />
         </ChatSectionBoundary>
       }
       main={<ChatEmptyPane />}

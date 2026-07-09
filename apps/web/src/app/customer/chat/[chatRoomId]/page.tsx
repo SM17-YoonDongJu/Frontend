@@ -2,8 +2,8 @@ import { ChatListContent } from "@/shared/ui/chat/ChatListContent";
 import { ChatListSkeleton } from "@/shared/ui/chat/ChatListSkeleton";
 import { ChatSectionBoundary } from "@/shared/ui/chat/ChatSectionBoundary";
 import { ChatSplitShell } from "@/shared/ui/chat/ChatSplitShell";
-import { ChatThreadContent } from "@/shared/ui/chat/ChatThreadContent";
 import { ChatThreadSkeleton } from "@/shared/ui/chat/ChatThreadSkeleton";
+import { CustomerChatThreadContent } from "./_components/CustomerChatThreadContent";
 
 const CHAT_BASE_PATH = "/customer/chat";
 const REPORT_BASE_PATH = "/customer/report";
@@ -28,6 +28,7 @@ export default async function CustomerChatThreadPage({
             chatBasePath={CHAT_BASE_PATH}
             activeChatRoomId={chatRoomId}
             emptyAction={EMPTY_ACTION}
+            grouped
           />
         </ChatSectionBoundary>
       }
@@ -36,7 +37,7 @@ export default async function CustomerChatThreadPage({
           fallback={<ChatThreadSkeleton />}
           errorTitle="대화를 불러오지 못했어요"
         >
-          <ChatThreadContent
+          <CustomerChatThreadContent
             chatRoomId={chatRoomId}
             chatBasePath={CHAT_BASE_PATH}
             reportBasePath={REPORT_BASE_PATH}
