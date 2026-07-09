@@ -39,7 +39,7 @@ export const step3DateSchema = z.object({
 
 export const step2TreatmentSchema = z.object({
   treatmentTypes: z.array(treatmentTypeSchema).min(1, "치료 형태를 선택하세요."),
-  diagnosis: z.string().min(1, "진단명·치료 내용을 입력하세요."),
+  diagnosis: z.array(z.string().min(1)).min(1, "진단명을 입력하세요."),
   treatmentCount: z.number().int().min(0).nullish(), // 입원·통원 횟수(회), 선택
   totalTreatmentCost: z.number().int().min(0).nullish(), // 총 치료비 본인부담(원), 선택
   nonCoveredOption: nonCoveredOptionSchema,
@@ -75,7 +75,7 @@ export const createReportBodySchema = z.object({
   productId: z.uuid().optional(), // 퍼널에 상품선택 없음 → 생략
   accidentType: accidentTypeSchema,
   accidentDate: z.string().date(),
-  diagnosis: z.string().min(1),
+  diagnosis: z.array(z.string().min(1)).min(1),
   offeredAmount: z.number().int().nullable(),
   hospitalizations: z
     .array(
@@ -102,7 +102,7 @@ export const createReportResponseSchema = z.object({
 export const adjustRequestDraftSchema = z.object({
   accidentType: accidentTypeSchema.optional(),
   treatmentTypes: z.array(treatmentTypeSchema).optional(),
-  diagnosis: z.string().optional(),
+  diagnosis: z.array(z.string()).optional(),
   treatmentCount: z.number().int().min(0).nullable().optional(),
   totalTreatmentCost: z.number().int().min(0).nullable().optional(),
   nonCoveredOption: nonCoveredOptionSchema.optional(),
@@ -158,7 +158,7 @@ export function toCreateReportBody(
   return createReportBodySchema.parse({
     accidentType: draft.accidentType ?? SUPPORTED_ACCIDENT_TYPE,
     accidentDate: draft.accidentDate,
-    diagnosis: draft.diagnosis,
+    diagnosis: (draft.diagnosis ?? []).map((d) => d.trim()).filter(Boolean),
     offeredAmount: draft.insuranceNotOffered ? null : (draft.insuranceOffered ?? null),
     hospitalizations: stays.length
       ? stays.map((s) => ({
