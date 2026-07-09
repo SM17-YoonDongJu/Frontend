@@ -10,12 +10,15 @@ export interface ChatListContentProps {
   activeChatRoomId?: string;
   /** 대화 없음 빈 상태 CTA — customer만 전달(손해사정사 찾기) */
   emptyAction?: ChatEmptyAction;
+  /** 매칭 상태 그룹 섹션 — customer만 전달(partner 미전달=평면) */
+  grouped?: boolean;
 }
 
 export function ChatListContent({
   chatBasePath,
   activeChatRoomId,
   emptyAction,
+  grouped,
 }: ChatListContentProps) {
   const { data: rooms } = useChatList();
 
@@ -25,6 +28,7 @@ export function ChatListContent({
       buildHref={(chatRoomId) => `${chatBasePath}/${chatRoomId}`}
       activeChatRoomId={activeChatRoomId}
       emptyAction={emptyAction}
+      grouped={grouped}
     />
   );
 }

@@ -14,6 +14,9 @@ const rooms: ChatRoom[] = [
     caseNo: "#20260520-017",
     roomStatus: "ACTIVE",
     lastMessageAt: new Date().toISOString(),
+    proposalId: "cccccccc-1111-1111-1111-111111111111",
+    matchStatus: "COUNSELING",
+    reportTypeLabel: "후유장해",
   },
   {
     chatRoomId: "22222222-2222-2222-2222-222222222222",
@@ -26,6 +29,9 @@ const rooms: ChatRoom[] = [
     caseNo: "#20260512-009",
     roomStatus: "ACTIVE",
     lastMessageAt: "2026-05-20T09:00:00+09:00",
+    proposalId: "cccccccc-2222-2222-2222-222222222222",
+    matchStatus: "COUNSELING",
+    reportTypeLabel: "후유장해",
   },
   {
     chatRoomId: "33333333-3333-3333-3333-333333333333",
@@ -38,6 +44,9 @@ const rooms: ChatRoom[] = [
     caseNo: "#20260428-003",
     roomStatus: "CLOSED",
     lastMessageAt: "2026-04-28T09:00:00+09:00",
+    proposalId: "cccccccc-3333-3333-3333-333333333333",
+    matchStatus: "REJECTED",
+    reportTypeLabel: "후유장해",
   },
 ];
 
@@ -62,6 +71,20 @@ export const Default: Story = {};
 
 export const ActiveRow: Story = {
   args: { activeChatRoomId: "11111111-1111-1111-1111-111111111111" },
+};
+
+/** customer — 매칭 그룹 섹션(매칭 완료 1 / 비교 1 / 종료 1). */
+export const Grouped: Story = {
+  args: {
+    grouped: true,
+    activeChatRoomId: "11111111-1111-1111-1111-111111111111",
+    rooms: rooms.map((room, index) => ({
+      ...room,
+      roomStatus: index === 2 ? "CLOSED" : "ACTIVE",
+      matchStatus:
+        index === 0 ? "ACCEPTED" : index === 2 ? "REJECTED" : "COUNSELING",
+    })),
+  },
 };
 
 export const Empty: Story = { args: { rooms: [] } };

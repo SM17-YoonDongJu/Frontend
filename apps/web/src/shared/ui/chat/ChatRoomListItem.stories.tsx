@@ -40,3 +40,13 @@ export const Closed: Story = {
 };
 
 export const NoMessage: Story = { args: { lastMessage: null } };
+
+/** customer 매칭 완료 — 아바타 초록 체크 표식. */
+export const Matched: Story = {
+  args: { matchStatus: "ACCEPTED", lastMessage: "매칭 완료 · 자료 검토를 시작할게요." },
+};
+
+/** customer 종료(거절) — 행 흐림 처리. */
+export const Ended: Story = {
+  args: { matchStatus: "REJECTED", lastMessage: "상담이 종료됐어요." },
+};
