@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/Button";
-import { useRejectProposal } from "../_api/use-reject-proposal";
+import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
 import { useViewedProposals } from "../_hooks/use-viewed-proposals";
 import type { Proposal } from "../../../_shared/model/proposal.schema";
 
@@ -23,9 +23,10 @@ function formatEstimateRange(min?: number | null, max?: number | null) {
 export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
   const router = useRouter();
   const { isViewed, markViewed } = useViewedProposals();
-  const rejectProposal = useRejectProposal(reportId);
+  const matchProposal = useMatchProposal(reportId);
 
   const {
+    proposalId,
     adjusterId,
     nickname,
     proposalSummary,
@@ -51,7 +52,7 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
   };
 
   const handleReject = () => {
-    rejectProposal.mutate(adjusterId);
+    matchProposal.mutate({ proposalId, status: "REJECTED" });
   };
 
   return (
@@ -118,7 +119,7 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
           <Button
             variant="outline"
             size="sm"
-            loading={rejectProposal.isPending}
+            loading={matchProposal.isPending}
             onClick={handleReject}
           >
             거절
