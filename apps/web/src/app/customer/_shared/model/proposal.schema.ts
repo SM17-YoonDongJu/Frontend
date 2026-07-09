@@ -2,15 +2,21 @@ import { z } from "zod";
 
 /**
  * 받은 제안 목록. 출처: 식별자 사전 §5b GET /reports/{reportId}/proposals.
- * 제안 식별자는 별도 proposalId 없이 adjusterId(reportId당 사정사 1제안).
+ * 제안 식별자는 proposalId(report_reviews.id) — 매칭/거절 PATCH 대상.
  */
 
-// 서버 계산 상태: 채택(COMPLETED) / 상담중(CONSULTATION) / 발송(SENT).
-export const proposalStatusSchema = z.enum(["COMPLETED", "CONSULTATION", "SENT"]);
+// review status 원천(GET /reports/{id}/proposals): 발송(SENT) / 상담중(COUNSELING) / 거절(REJECTED) / 채택(ACCEPTED).
+export const proposalStatusSchema = z.enum([
+  "SENT",
+  "COUNSELING",
+  "REJECTED",
+  "ACCEPTED",
+]);
 
-// 명세 필수: adjusterId·nickname·rating·proposalSummary·status·submittedAt.
+// 명세 필수: proposalId·adjusterId·nickname·rating·proposalSummary·status·submittedAt.
 // 그 외(speciality·career·isNew·isVerified·estimate·feeBasis)는 디자인용 확장 → 백엔드 확정 전까지 optional.
 export const proposalSchema = z.object({
+  proposalId: z.uuid(), // report_reviews.id — 매칭/거절 PATCH 대상
   adjusterId: z.uuid(),
   nickname: z.string(),
   rating: z.number(),
