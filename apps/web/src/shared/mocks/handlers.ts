@@ -295,6 +295,13 @@ const CHAT_ROOM_1_ID = "e1000000-0000-4000-8000-000000000001";
 const CHAT_ROOM_2_ID = "e1000000-0000-4000-8000-000000000002";
 const CHAT_ROOM_3_ID = "e1000000-0000-4000-8000-000000000003";
 
+// 각 방 = 각 제안(report_reviews.id). 매칭/거절 PATCH 대상.
+const CHAT_PROPOSAL_1_ID = "c1000000-0000-4000-8000-000000000001";
+const CHAT_PROPOSAL_2_ID = "c1000000-0000-4000-8000-000000000002";
+const CHAT_PROPOSAL_3_ID = "c1000000-0000-4000-8000-000000000003";
+
+type MockMatchStatus = "SENT" | "COUNSELING" | "REJECTED" | "ACCEPTED";
+
 interface MockChatRoom {
   chatRoomId: string;
   lastMessage: string | null;
@@ -306,6 +313,9 @@ interface MockChatRoom {
   caseNo: string;
   roomStatus: "REQUESTED" | "ACTIVE" | "CLOSED";
   lastMessageAt: string;
+  proposalId: string;
+  matchStatus: MockMatchStatus;
+  reportTypeLabel: string;
 }
 
 interface MockChatMessage {
@@ -315,6 +325,7 @@ interface MockChatMessage {
   createdAt: string;
 }
 
+// 비교 그룹 검증: 3방 모두 동일 reportId·caseNo, COUNSELING(비교중)으로 시작. adjusterName만 상이.
 const chatRooms: MockChatRoom[] = [
   {
     chatRoomId: CHAT_ROOM_1_ID,
@@ -327,6 +338,9 @@ const chatRooms: MockChatRoom[] = [
     caseNo: "#20260520-017",
     roomStatus: "ACTIVE",
     lastMessageAt: "2026-07-01T10:32:00Z",
+    proposalId: CHAT_PROPOSAL_1_ID,
+    matchStatus: "COUNSELING",
+    reportTypeLabel: "후유장해",
   },
   {
     chatRoomId: CHAT_ROOM_2_ID,
@@ -335,24 +349,85 @@ const chatRooms: MockChatRoom[] = [
     adjusterId: CHAT_ADJUSTER_2_ID,
     adjusterName: "정우성 손해사정사",
     avatarUrl: null,
-    reportId: "f1000000-0000-4000-8000-000000000012",
-    caseNo: "#20260512-009",
+    reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
+    caseNo: "#20260520-017",
     roomStatus: "ACTIVE",
     lastMessageAt: "2026-06-30T15:10:00Z",
+    proposalId: CHAT_PROPOSAL_2_ID,
+    matchStatus: "COUNSELING",
+    reportTypeLabel: "후유장해",
   },
   {
     chatRoomId: CHAT_ROOM_3_ID,
-    lastMessage: "상담이 종료되었습니다.",
+    lastMessage: "상담 도와드리겠습니다.",
     updatedAt: "2026-06-20T09:00:00Z",
     adjusterId: CHAT_ADJUSTER_3_ID,
     adjusterName: "윤지후 손해사정사",
     avatarUrl: null,
-    reportId: "f1000000-0000-4000-8000-000000000003",
-    caseNo: "#20260428-003",
-    roomStatus: "CLOSED",
+    reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
+    caseNo: "#20260520-017",
+    roomStatus: "ACTIVE",
     lastMessageAt: "2026-06-20T09:00:00Z",
+    proposalId: CHAT_PROPOSAL_3_ID,
+    matchStatus: "COUNSELING",
+    reportTypeLabel: "후유장해",
   },
 ];
+
+// GET /reports/{id}/proposals ↔ 채팅방 정합용 제안 메타(디자인 확장 필드). 상태·식별자는 chatRooms가 원천.
+const CHAT_PROPOSAL_META: Record<
+  string,
+  {
+    rating: number;
+    proposalSummary: string;
+    submittedAt: string;
+    speciality: string;
+    career: number;
+    isNew: boolean;
+    isVerified: boolean;
+    estimateMinAmount: number | null;
+    estimateMaxAmount: number | null;
+    feeBasis: string;
+  }
+> = {
+  [CHAT_PROPOSAL_1_ID]: {
+    rating: 4.8,
+    proposalSummary:
+      "장해등급 재산정으로 12급 적용 여지가 있어 보입니다. 상담 후 함께 판단해요.",
+    submittedAt: "2026-05-22T10:14:00+09:00",
+    speciality: "후유장해 전문",
+    career: 12,
+    isNew: true,
+    isVerified: true,
+    estimateMinAmount: 14_000_000,
+    estimateMaxAmount: 17_500_000,
+    feeBasis: "상담 시 서면 안내",
+  },
+  [CHAT_PROPOSAL_2_ID]: {
+    rating: 4.6,
+    proposalSummary: "외모추상 특약 누락 건까지 함께 청구를 검토할 수 있습니다.",
+    submittedAt: "2026-05-21T16:40:00+09:00",
+    speciality: "후유장해 전문",
+    career: 18,
+    isNew: true,
+    isVerified: true,
+    estimateMinAmount: 13_500_000,
+    estimateMaxAmount: 17_000_000,
+    feeBasis: "상담 시 서면 안내",
+  },
+  [CHAT_PROPOSAL_3_ID]: {
+    rating: 4.9,
+    proposalSummary: "과실 비율 재검토 여지가 있는지 리포트를 살펴보고 싶습니다.",
+    submittedAt: "2026-05-20T09:05:00+09:00",
+    speciality: "교통사고 전문",
+    career: 8,
+    isNew: false,
+    isVerified: true,
+    estimateMinAmount: null,
+    estimateMaxAmount: null,
+    feeBasis: "상담 시 서면 안내",
+  },
+};
 
 // 방별 메시지 히스토리(2일 이상 걸쳐 날짜 구분선 검증, mine/theirs 교차)
 const chatMessages: Record<string, MockChatMessage[]> = {
@@ -953,62 +1028,33 @@ export const handlers = [
     });
   }),
 
-  // 받은 제안 목록 조회 (이슈 #18) — 거절된 제안은 제외
+  // 받은 제안 목록 조회 (이슈 #18/#48) — 채팅방(chatRooms)을 원천으로 동기화.
+  //   같은 proposalId·status를 노출해 채팅↔proposals 정합 유지. REJECTED 제안도 반환(카드에서 회색 처리).
   http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async ({ params }) => {
     await delay(500);
 
     const reportId = typeof params.reportId === "string" ? params.reportId : "";
-    const list = [
-      {
-        adjusterId: "11111111-1111-4111-8111-111111111111",
-        nickname: "김도현",
-        rating: 4.8,
-        proposalSummary: "장해등급 재산정으로 12급 적용 여지가 있어 보입니다. 상담 후 함께 판단해요.",
-        status: "COMPLETED",
-        submittedAt: "2026-05-22T10:14:00+09:00",
-        speciality: "후유장해 전문",
-        career: 12,
-        isNew: true,
-        isVerified: true,
-        estimateMinAmount: 14_000_000,
-        estimateMaxAmount: 17_500_000,
-        feeBasis: "상담 시 서면 안내",
-      },
-      {
-        adjusterId: "22222222-2222-4222-8222-222222222222",
-        nickname: "정우성",
-        rating: 4.6,
-        proposalSummary: "외모추상 특약 누락 건까지 함께 청구를 검토할 수 있습니다.",
-        status: "COMPLETED",
-        submittedAt: "2026-05-21T16:40:00+09:00",
-        speciality: "후유장해 전문",
-        career: 18,
-        isNew: true,
-        isVerified: true,
-        estimateMinAmount: 13_500_000,
-        estimateMaxAmount: 17_000_000,
-        feeBasis: "상담 시 서면 안내",
-      },
-      {
-        adjusterId: "33333333-3333-4333-8333-333333333333",
-        nickname: "이서연",
-        rating: 4.9,
-        proposalSummary: "과실 비율 재검토 여지가 있는지 리포트를 살펴보고 싶습니다.",
-        status: "COMPLETED",
-        submittedAt: "2026-05-20T09:05:00+09:00",
-        speciality: "교통사고 전문",
-        career: 8,
-        isNew: false,
-        isVerified: true,
-        estimateMinAmount: null,
-        estimateMaxAmount: null,
-        feeBasis: "상담 시 서면 안내",
-      },
-    ];
-
-    const visible = list.filter(
-      (proposal) => !rejectedProposals.has(`${reportId}:${proposal.adjusterId}`),
-    );
+    const list = chatRooms
+      .filter((room) => room.reportId === reportId)
+      .map((room) => {
+        const meta = CHAT_PROPOSAL_META[room.proposalId];
+        return {
+          proposalId: room.proposalId,
+          adjusterId: room.adjusterId,
+          nickname: room.adjusterName.replace(/\s*손해사정사$/, ""),
+          status: room.matchStatus,
+          rating: meta?.rating ?? 4.5,
+          proposalSummary: meta?.proposalSummary ?? "리포트를 검토해 보고 싶습니다.",
+          submittedAt: meta?.submittedAt ?? room.updatedAt,
+          speciality: meta?.speciality,
+          career: meta?.career,
+          isNew: meta?.isNew,
+          isVerified: meta?.isVerified,
+          estimateMinAmount: meta?.estimateMinAmount ?? null,
+          estimateMaxAmount: meta?.estimateMaxAmount ?? null,
+          feeBasis: meta?.feeBasis,
+        };
+      });
 
     return HttpResponse.json({
       status: "200",
@@ -1019,17 +1065,95 @@ export const handlers = [
           reportNo: "20260520-017",
           receivedAt: "2026.05.20",
         },
-        list: visible,
+        list,
         pagination: {
           page: 1,
           size: 10,
-          totalElements: visible.length,
+          totalElements: list.length,
           totalPages: 1,
           hasNext: false,
         },
       },
     });
   }),
+
+  // 제안 매칭(채택·거절) 통합 (이슈 #48) — PATCH /reports/:reportId/proposals/:proposalId {status}.
+  //   ACCEPTED: 대상 방 매칭완료 + 형제(같은 reportId) 방 자동종료(REJECTED·CLOSED) 캐스케이드.
+  //   REJECTED: 대상 방만 종료. 이미 확정된 방 재PATCH → 409.
+  http.patch(
+    `${API_BASE_URL}/reports/:reportId/proposals/:proposalId`,
+    async ({ request, params }) => {
+      await delay(400);
+
+      const reportId = typeof params.reportId === "string" ? params.reportId : "";
+      const proposalId =
+        typeof params.proposalId === "string" ? params.proposalId : "";
+      const body = (await request.json().catch(() => ({}))) as {
+        status?: string;
+      };
+      const status = body.status === "ACCEPTED" ? "ACCEPTED" : "REJECTED";
+
+      const target = chatRooms.find((room) => room.proposalId === proposalId);
+      if (!target) {
+        return HttpResponse.json(
+          { status: "404", code: "POST_NOT_FOUND", message: "제안을 찾을 수 없습니다." },
+          { status: 404 },
+        );
+      }
+      if (target.matchStatus === "ACCEPTED" || target.matchStatus === "REJECTED") {
+        // CONTRACT: 명세없음-임시 — 상태전이 위반 전용 code 부재, 근접 enum UNSUPPORTED_OPERATION 사용.
+        return HttpResponse.json(
+          {
+            status: "409",
+            code: "UNSUPPORTED_OPERATION",
+            message: "이미 처리된 제안입니다.",
+          },
+          { status: 409 },
+        );
+      }
+
+      if (status === "ACCEPTED") {
+        target.matchStatus = "ACCEPTED";
+        chatRooms
+          .filter(
+            (room) =>
+              room.reportId === target.reportId &&
+              room.proposalId !== target.proposalId,
+          )
+          .forEach((room) => {
+            room.matchStatus = "REJECTED";
+            room.roomStatus = "CLOSED";
+          });
+
+        return HttpResponse.json({
+          status: "200",
+          message: "매칭이 완료되었습니다.",
+          data: {
+            reportId,
+            proposalId,
+            adjusterId: target.adjusterId,
+            reportStatus: "CLOSED",
+            reviewStatus: "ACCEPTED",
+          },
+        });
+      }
+
+      target.matchStatus = "REJECTED";
+      target.roomStatus = "CLOSED";
+
+      return HttpResponse.json({
+        status: "200",
+        message: "제안을 거절했습니다.",
+        data: {
+          reportId,
+          proposalId,
+          adjusterId: target.adjusterId,
+          reportStatus: "AWAITING_ADOPTION",
+          reviewStatus: "REJECTED",
+        },
+      });
+    },
+  ),
 
   // 제안 거절 (사정사별) — 성공 시 해당 제안은 목록에서 제외
   http.patch(
