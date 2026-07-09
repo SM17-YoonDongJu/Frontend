@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { blockNonNumericKeys, toNonNegativeInt } from "@/shared/lib/number-input";
 import { Input } from "@/shared/ui/Input";
@@ -21,32 +20,20 @@ const NON_COVERED: { value: NonCoveredOption; label: string }[] = [
   { value: "UNKNOWN", label: "모름" },
 ];
 
-/** 진단명은 폼에서 단일 문자열(diagnosis) — 여러 행은 줄바꿈으로 직렬화. */
-function splitDiagnosis(value?: string): string[] {
-  return value ? value.split("\n") : [""];
-}
-function joinDiagnosis(rows: string[]): string {
-  return rows.map((r) => r.trim()).filter(Boolean).join("\n");
-}
-
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return <span className="mb-2 block text-[0.8125rem] font-semibold text-ink-2">{children}</span>;
 }
 
 export function Step2TreatmentDetail() {
-  const { control, watch, setValue, getValues, formState } = useFormContext<AdjustRequestDraft>();
+  const { control, watch, setValue, formState } = useFormContext<AdjustRequestDraft>();
   const { errors } = formState;
 
   const treatmentTypes = watch("treatmentTypes") ?? [];
   const nonCoveredOption = watch("nonCoveredOption");
-
-  const [diagnosisRows, setDiagnosisRows] = useState<string[]>(() =>
-    splitDiagnosis(getValues("diagnosis")),
-  );
+  const diagnosisRows = watch("diagnosis") ?? [""];
 
   const handleDiagnosisChange = (rows: string[]) => {
-    setDiagnosisRows(rows);
-    setValue("diagnosis", joinDiagnosis(rows), { shouldValidate: true });
+    setValue("diagnosis", rows, { shouldValidate: true });
   };
 
   const toggleTreatment = (t: TreatmentType) => {

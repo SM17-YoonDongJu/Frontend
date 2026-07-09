@@ -2,7 +2,7 @@ interface HomeProps {
   className?: string;
 }
 
-/** 홈(집) 아이콘. 크기·색은 className으로(currentColor). */
+/** 집(홈) 아이콘. 크기·색은 className으로(currentColor). */
 export function Home({ className }: HomeProps) {
   return (
     <svg
@@ -12,13 +12,13 @@ export function Home({ className }: HomeProps) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.6"
+      strokeWidth="1.8"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
     >
-      <path d="M3 10.5 12 4l9 6.5" />
-      <path d="M5 9.5V20h14V9.5" />
+      <path d="m3 10 9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      <path d="M9 21v-7h6v7" />
     </svg>
   );
 }

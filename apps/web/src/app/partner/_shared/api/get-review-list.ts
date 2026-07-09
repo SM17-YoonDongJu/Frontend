@@ -1,8 +1,8 @@
 import { API_BASE_URL } from "@/shared/api/config";
 import { fetchJson } from "@/shared/api/fetch-json";
 import type { ReviewListFilter } from "@/shared/api/query-keys";
-import { reviewListSchema } from "../_model/review.schema";
-import type { ReviewList } from "../_model/types";
+import { reviewListSchema } from "../model/review-list.schema";
+import type { ReviewList } from "../model/types";
 
 export function getReviewList(filter?: ReviewListFilter): Promise<ReviewList> {
   const params = new URLSearchParams();

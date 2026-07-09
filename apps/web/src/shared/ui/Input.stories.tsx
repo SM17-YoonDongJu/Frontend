@@ -27,7 +27,7 @@ export const SuffixNode: Story = {
   args: {
     placeholder: "010-0000-0000",
     suffix: (
-      <button type="button" className="rounded-button bg-ink px-3 py-1.5 text-[13px] font-semibold text-white">
+      <button type="button" className="rounded-button bg-ink px-3 py-1.5 text-[0.8125rem] font-semibold text-white">
         인증요청
       </button>
     )
