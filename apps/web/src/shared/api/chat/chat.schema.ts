@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { matchStatusSchema } from "./match-status";
 
 // 채팅 도메인 계약(봉투 내부 data만 모델링 — fetch-json이 봉투 해제).
 // senderId: 노션 명세 그대로 uuid(string). mine/theirs는 현재 사용자 식별자와 문자열 비교.
@@ -19,6 +20,10 @@ export const chatRoomSchema = z.object({
   caseNo: z.string(), // ⚠️ 명세 수정 예정: REPORTS.case_no (표시 "#20260520-017")
   roomStatus: roomStatusSchema, // ⚠️ 명세 수정 예정: CHATROOM.status
   lastMessageAt: z.string(), // ⚠️ 명세 수정 예정: 정렬 기준(desc). updatedAt 대체
+
+  proposalId: z.string().uuid(), // ⚠️ 명세 확장(GET /chats): report_reviews.id — 매칭 PATCH 대상
+  matchStatus: matchStatusSchema, // ⚠️ 명세 확장: 방의 제안 상태(비교/매칭/종료 파생 원천)
+  reportTypeLabel: z.string(), // ⚠️ 명세 확장: 배너 "후유장해 건" 표시용
 });
 
 export const chatListSchema = z.object({
