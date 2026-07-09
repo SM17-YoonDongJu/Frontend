@@ -623,6 +623,79 @@ export const handlers = [
     });
   }),
 
+  // 고객이 요청건별로 받은 제안 목록 (이슈 #78) — 대시보드 /reports와 분리된 전용 목.
+  // 🏷 API 스펙 협의 필요: GET /me/received-proposals. 상태별 표현(제안 도착/검수 대기 중/종결)·NEW 배지.
+  http.get(`${API_BASE_URL}/me/received-proposals`, async () => {
+    await delay(400);
+    const now = Date.now();
+    const hoursAgo = (h: number) => new Date(now - h * 60 * 60 * 1000).toISOString();
+
+    const list = [
+      {
+        reportId: "a1000000-0000-4000-8000-000000000001",
+        status: "AWAITING_ADOPTION",
+        accidentType: "교통사고",
+        title: "교통사고 · 후유장해",
+        createdAt: hoursAgo(2),
+        reviewedAt: hoursAgo(2),
+        reportNo: "20260520-017",
+        claimedMinAmount: 14_000_000,
+        claimedMaxAmount: 17_500_000,
+        proposalCount: 3,
+        newProposalCount: 2,
+        adjusterNickname: "김도현",
+      },
+      {
+        reportId: "a1000000-0000-4000-8000-000000000002",
+        status: "CLOSED",
+        accidentType: "실손",
+        title: "실손 · 도수치료 한도",
+        createdAt: "2026-04-28T09:00:00Z",
+        reviewedAt: "2026-04-28T09:00:00Z",
+        reportNo: "20260415-031",
+        claimedMinAmount: 3_200_000,
+        claimedMaxAmount: 4_800_000,
+        proposalCount: 2,
+        adjusterNickname: "박준호",
+      },
+      {
+        reportId: "a1000000-0000-4000-8000-000000000003",
+        status: "CLOSED",
+        accidentType: "질병",
+        title: "질병 · 암진단비",
+        createdAt: "2026-03-10T09:00:00Z",
+        reviewedAt: "2026-03-10T09:00:00Z",
+        reportNo: "20260302-008",
+        claimedMinAmount: 9_000_000,
+        claimedMaxAmount: 12_000_000,
+        proposalCount: 1,
+        adjusterNickname: null,
+      },
+      {
+        reportId: "a1000000-0000-4000-8000-000000000004",
+        status: "AWAITING_INSPECTION",
+        accidentType: "상해",
+        title: "상해 · 외모추상 특약",
+        createdAt: "2026-06-01T09:00:00Z",
+        reviewedAt: null,
+        reportNo: "20260601-042",
+        claimedMinAmount: 2_400_000,
+        claimedMaxAmount: 3_100_000,
+        proposalCount: 0,
+        adjusterNickname: null,
+      },
+    ];
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: {
+        list,
+        pagination: { page: 1, size: 10, totalElements: list.length, totalPages: 1, hasNext: false },
+      },
+    });
+  }),
+
   // 고객 리포트 목록 (대시보드) — :reportId·pending-review와 충돌 없게 정확 경로.
   // §9 드리프트 필드 선반영(reportNo·claimedMin/Max·proposalCount·reviewedAt·adjusterNickname).
   http.get(`${API_BASE_URL}/reports`, async ({ request }) => {

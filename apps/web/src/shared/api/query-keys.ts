@@ -21,6 +21,8 @@ export interface ReviewedReportsFilter {
 
 export const reportKeys = createQueryKeys("report", {
   list: (filter?: ReportListFilter) => [{ filter: filter ?? {} }],
+  // 고객이 받은 제안 목록(이슈 #78). page는 useInfiniteQuery의 pageParam이 관리 → 파라미터 없음.
+  receivedProposals: null,
   detail: (reportId: string) => [reportId],
   pendingReview: (filter?: ReviewListFilter) => [{ filter: filter ?? {} }],
   pendingReviewSummary: () => ["summary"],
