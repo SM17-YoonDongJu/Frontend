@@ -19,3 +19,5 @@ export type UploadDocumentResponse = z.infer<typeof uploadDocumentResponseSchema
 export type CreateReportBody = z.infer<typeof createReportBodySchema>;
 export type CreateReportResponse = z.infer<typeof createReportResponseSchema>;
 export type AdjustRequestDraft = z.infer<typeof adjustRequestDraftSchema>;
+
+export type { DocumentSlotKey, DocumentSlotValue, DocumentSlots } from "./document-slots";
