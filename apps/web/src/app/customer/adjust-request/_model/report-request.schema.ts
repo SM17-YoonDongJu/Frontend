@@ -3,6 +3,7 @@ import {
   accidentTypeSchema,
   SUPPORTED_ACCIDENT_TYPE,
 } from "@/shared/model/accident-type";
+import { documentSlotsSchema } from "./document-slots";
 
 /** 손해사정 요청 퍼널 입력 스키마. 도메인 = report (슬러그만 adjust-request). */
 
@@ -111,6 +112,7 @@ export const adjustRequestDraftSchema = z.object({
   insuranceNotOffered: z.boolean().optional(),
   insuranceOffered: z.number().int().min(0).nullish(),
   documentUrls: z.array(z.url()).nullish(),
+  documentSlots: documentSlotsSchema.optional(), // 슬롯→업로드 결과(복원용). 제출은 documentUrls로 평면화.
   agreedToPrivacy: z.boolean().optional(),
   agreedToTerms: z.boolean().optional(),
 });
