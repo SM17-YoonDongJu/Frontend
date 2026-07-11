@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
-import { PublicHeader } from "@/shared/ui/PublicHeader";
-import { Footer } from "@/shared/ui/Footer";
+import { LandingFooter } from "./_components/LandingFooter";
+import { LandingHeader } from "./_components/LandingHeader";
 
 export default function PublicLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex min-h-dvh flex-col">
-      <PublicHeader />
+    <div className="flex min-h-dvh flex-col bg-paper">
+      <LandingHeader />
       <main className="flex-1">{children}</main>
-      <Footer />
+      <LandingFooter />
     </div>
   );
 }
