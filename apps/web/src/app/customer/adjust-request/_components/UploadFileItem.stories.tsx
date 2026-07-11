@@ -13,7 +13,7 @@ const meta: Meta<typeof UploadFileItem> = {
   },
   decorators: [
     (Story) => (
-      <div className="w-[420px]">
+      <div className="w-[26.25rem]">
         <Story />
       </div>
     ),

@@ -7,7 +7,7 @@ import { buttonVariants } from "@/shared/ui/Button";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { Spinner } from "@/shared/ui/icons/Spinner";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
-import type { ReviewListItem } from "../review/_model/types";
+import type { ReviewListItem } from "../_shared/model/types";
 
 interface MobilePendingCardProps {
   item: ReviewListItem;

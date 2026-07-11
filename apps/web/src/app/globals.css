@@ -47,6 +47,9 @@
   --font-sans: var(--font-inter), "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-gowun-batang), "Gowun Batang", serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* 그림자 → shadow-* 유틸 (카드 표면 미세 그림자) */
+  --shadow-card: 0 0.0625rem 0.0625rem rgba(21, 32, 46, 0.03);
 }
 
 /* shadcn semantic 토큰 → #12 팔레트 매핑 (stock shadcn 컴포넌트용. light 전용) */

@@ -3,6 +3,7 @@ import {
   accidentTypeSchema,
   SUPPORTED_ACCIDENT_TYPE,
 } from "@/shared/model/accident-type";
+import { documentSlotsSchema } from "./document-slots";
 
 /** 손해사정 요청 퍼널 입력 스키마. 도메인 = report (슬러그만 adjust-request). */
 
@@ -38,7 +39,7 @@ export const step3DateSchema = z.object({
 
 export const step2TreatmentSchema = z.object({
   treatmentTypes: z.array(treatmentTypeSchema).min(1, "치료 형태를 선택하세요."),
-  diagnosis: z.string().min(1, "진단명·치료 내용을 입력하세요."),
+  diagnosis: z.array(z.string().min(1)).min(1, "진단명을 입력하세요."),
   treatmentCount: z.number().int().min(0).nullish(), // 입원·통원 횟수(회), 선택
   totalTreatmentCost: z.number().int().min(0).nullish(), // 총 치료비 본인부담(원), 선택
   nonCoveredOption: nonCoveredOptionSchema,
@@ -74,7 +75,7 @@ export const createReportBodySchema = z.object({
   productId: z.uuid().optional(), // 퍼널에 상품선택 없음 → 생략
   accidentType: accidentTypeSchema,
   accidentDate: z.string().date(),
-  diagnosis: z.string().min(1),
+  diagnosis: z.array(z.string().min(1)).min(1),
   offeredAmount: z.number().int().nullable(),
   hospitalizations: z
     .array(
@@ -101,7 +102,7 @@ export const createReportResponseSchema = z.object({
 export const adjustRequestDraftSchema = z.object({
   accidentType: accidentTypeSchema.optional(),
   treatmentTypes: z.array(treatmentTypeSchema).optional(),
-  diagnosis: z.string().optional(),
+  diagnosis: z.array(z.string()).optional(),
   treatmentCount: z.number().int().min(0).nullable().optional(),
   totalTreatmentCost: z.number().int().min(0).nullable().optional(),
   nonCoveredOption: nonCoveredOptionSchema.optional(),
@@ -111,6 +112,7 @@ export const adjustRequestDraftSchema = z.object({
   insuranceNotOffered: z.boolean().optional(),
   insuranceOffered: z.number().int().min(0).nullish(),
   documentUrls: z.array(z.url()).nullish(),
+  documentSlots: documentSlotsSchema.optional(), // 슬롯→업로드 결과(복원용). 제출은 documentUrls로 평면화.
   agreedToPrivacy: z.boolean().optional(),
   agreedToTerms: z.boolean().optional(),
 });
@@ -156,7 +158,7 @@ export function toCreateReportBody(
   return createReportBodySchema.parse({
     accidentType: draft.accidentType ?? SUPPORTED_ACCIDENT_TYPE,
     accidentDate: draft.accidentDate,
-    diagnosis: draft.diagnosis,
+    diagnosis: (draft.diagnosis ?? []).map((d) => d.trim()).filter(Boolean),
     offeredAmount: draft.insuranceNotOffered ? null : (draft.insuranceOffered ?? null),
     hospitalizations: stays.length
       ? stays.map((s) => ({

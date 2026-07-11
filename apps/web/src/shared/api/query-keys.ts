@@ -8,6 +8,7 @@ export interface ReportListFilter {
 export interface ReviewListFilter {
   status?: string;
   accidentType?: string;
+  region?: string;
   page?: number;
   size?: number;
 }
@@ -21,9 +22,13 @@ export interface ReviewedReportsFilter {
 
 export const reportKeys = createQueryKeys("report", {
   list: (filter?: ReportListFilter) => [{ filter: filter ?? {} }],
+  // 고객이 받은 제안 목록(이슈 #78). page는 useInfiniteQuery의 pageParam이 관리 → 파라미터 없음.
+  receivedProposals: null,
   detail: (reportId: string) => [reportId],
   pendingReview: (filter?: ReviewListFilter) => [{ filter: filter ?? {} }],
   pendingReviewSummary: () => ["summary"],
+  // 검수 대기 PC 프리뷰 패널 전용(고객 상세 detail 키와 스키마가 달라 캐시 분리).
+  draftPreview: (reportId: string) => [reportId],
   reviewedReports: (filter?: ReviewedReportsFilter) => [{ filter: filter ?? {} }],
 });
 
@@ -45,6 +50,10 @@ export const proposalKeys = createQueryKeys("proposal", {
 
 export const reviewKeys = createQueryKeys("review", {
   detail: (reportId: string) => [reportId],
+});
+
+export const notificationKeys = createQueryKeys("notification", {
+  list: null,
 });
 
 export interface AdjusterListFilter {

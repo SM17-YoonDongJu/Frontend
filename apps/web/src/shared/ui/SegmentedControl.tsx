@@ -16,8 +16,8 @@ export interface SegmentedControlProps<T extends string> {
 }
 
 const SIZE_PADDING = {
-  sm: "px-3 py-1.5 text-[12.5px]",
-  md: "px-4 py-2 text-[13.5px]",
+  sm: "px-3 py-1.5 text-[0.78125rem]",
+  md: "px-4 py-2 text-[0.84375rem]",
 } as const;
 
 export function SegmentedControl<T extends string>({

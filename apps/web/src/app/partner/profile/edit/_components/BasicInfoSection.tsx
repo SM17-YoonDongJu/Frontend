@@ -7,6 +7,7 @@ import {
   type UseFormRegister,
 } from "react-hook-form";
 import { Input } from "@/shared/ui/Input";
+import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { HEADLINE_MAX, INTRODUCTION_MAX } from "../_model/specialty-options";
 import type { ProfileFormValues } from "../_model/types";
 import { AvatarUploader } from "./AvatarUploader";
@@ -16,6 +17,7 @@ interface BasicInfoSectionProps {
   control: Control<ProfileFormValues>;
   errors: FieldErrors<ProfileFormValues>;
   nickname: string;
+  registrationNo?: string | null;
   headlineLength: number;
   introductionLength: number;
   onUploadingChange?: (uploading: boolean) => void;
@@ -31,7 +33,7 @@ function FieldLabel({
   return (
     <div className="mb-2 flex items-center justify-between">
       <span className="text-[0.8125rem] font-semibold text-ink-2">{children}</span>
-      {counter && <span className="text-[0.75rem] text-ink-3">{counter}</span>}
+      {counter && <span className="hidden text-[0.75rem] text-ink-3 lg:inline">{counter}</span>}
     </div>
   );
 }
@@ -41,13 +43,14 @@ export function BasicInfoSection({
   control,
   errors,
   nickname,
+  registrationNo,
   headlineLength,
   introductionLength,
   onUploadingChange,
 }: BasicInfoSectionProps) {
   return (
-    <section className="space-y-5 rounded-card-lg border border-line bg-card p-6">
-      <h2 className="font-serif text-[1.125rem] font-bold text-ink">기본 정보</h2>
+    <section className="space-y-5 lg:rounded-card-lg lg:border lg:border-line lg:bg-card lg:p-6">
+      <h2 className="hidden font-serif text-[1.125rem] font-bold text-ink lg:block">기본 정보</h2>
 
       <Controller
         control={control}
@@ -61,6 +64,13 @@ export function BasicInfoSection({
           />
         )}
       />
+
+      <div className="flex justify-center lg:hidden">
+        <span className="inline-flex items-center gap-1.5 rounded-chip bg-green-soft px-2.5 py-1 text-[0.75rem] font-bold text-green">
+          <ShieldCheck className="text-[0.8125rem]" />
+          자격 인증 완료{registrationNo ? ` · 등록번호 ${registrationNo}` : ""}
+        </span>
+      </div>
 
       <div>
         <FieldLabel counter={`${headlineLength}/${HEADLINE_MAX}`}>한 줄 소개 (태그라인)</FieldLabel>
@@ -85,7 +95,7 @@ export function BasicInfoSection({
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <FieldLabel>경력</FieldLabel>
           <Input

@@ -5,8 +5,8 @@ import { cn } from "@/shared/lib/utils";
 const amountVariants = cva("font-semibold tabular-nums text-ink", {
   variants: {
     size: {
-      md: "text-[15px]",
-      lg: "text-[28px] leading-tight",
+      md: "text-[0.9375rem]",
+      lg: "text-[1.75rem] leading-tight",
     },
   },
   defaultVariants: { size: "md" },
