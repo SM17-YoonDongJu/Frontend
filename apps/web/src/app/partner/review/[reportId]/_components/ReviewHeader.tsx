@@ -48,10 +48,10 @@ export function ReviewHeader({
         </Link>
         <div>
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-serif text-[22px] font-bold text-ink">{treatment} 검수</h1>
+            <h1 className="font-serif text-[1.375rem] font-bold text-ink">{treatment} 검수</h1>
             <StatusBadge tone="gold">{accidentCategory(accidentType)}</StatusBadge>
           </div>
-          <p className="mt-1 text-[13px] text-ink-3">
+          <p className="mt-1 text-[0.8125rem] text-ink-3">
             #{caseId} · {region} · {clientName} 의뢰
           </p>
         </div>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
-import type { ReviewListItem } from "../_model/types";
+import type { ReviewListItem } from "../../_shared/model/types";
 
 type Tone = NonNullable<StatusBadgeProps["tone"]>;
 

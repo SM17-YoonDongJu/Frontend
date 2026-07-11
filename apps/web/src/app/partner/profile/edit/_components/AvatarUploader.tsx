@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/Button";
+import { Pencil } from "@/shared/ui/icons/Pencil";
 import { useUploadAvatar } from "../_api/use-upload-avatar";
 import { AVATAR_ACCEPT, AVATAR_MAX_BYTES } from "../_model/specialty-options";
 
@@ -69,18 +70,28 @@ export function AvatarUploader({ value, onChange, onUploadingChange, nickname }:
   const initial = nickname.trim().charAt(0) || "?";
 
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex items-center gap-4">
-        <div className="flex size-[3.5rem] items-center justify-center overflow-hidden rounded-full bg-ink text-[1.25rem] font-bold text-white">
-          {shownImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={shownImage} alt="프로필 사진 미리보기" className="size-full object-cover" />
-          ) : (
-            initial
-          )}
+    <div className="flex flex-col items-center gap-2 lg:items-stretch">
+      <div className="flex flex-col items-center gap-4 lg:flex-row">
+        <div className="relative">
+          <div className="flex size-[4.875rem] items-center justify-center overflow-hidden rounded-full bg-navy text-[2rem] font-bold text-white lg:size-[3.5rem] lg:bg-ink lg:text-[1.25rem]">
+            {shownImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={shownImage} alt="프로필 사진 미리보기" className="size-full object-cover" />
+            ) : (
+              initial
+            )}
+          </div>
+          <button
+            type="button"
+            aria-label="사진 변경"
+            onClick={() => inputRef.current?.click()}
+            className="absolute bottom-0 right-0 flex size-7 items-center justify-center rounded-full border-2 border-paper bg-gold text-white transition hover:brightness-[.96] lg:hidden"
+          >
+            <Pencil className="text-[0.875rem]" />
+          </button>
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="hidden flex-col gap-1 lg:flex">
           <Button
             variant="outline"
             size="sm"

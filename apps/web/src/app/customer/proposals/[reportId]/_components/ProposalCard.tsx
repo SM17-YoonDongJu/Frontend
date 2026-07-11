@@ -66,24 +66,24 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
         <div className="flex min-w-0 items-center gap-3">
           <span
             aria-hidden
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-navy text-[17px] font-semibold text-white"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-navy text-[1.0625rem] font-semibold text-white"
           >
             {avatarLabel}
           </span>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
-              <p className="truncate text-[15px] font-semibold text-ink">
+              <p className="truncate text-[0.9375rem] font-semibold text-ink">
                 {nickname} 손해사정사
               </p>
               {isVerified && <VerifiedIcon />}
               {isNew && (
-                <span className="shrink-0 rounded-full bg-terra-soft px-2 py-0.5 text-[11px] font-medium text-terra">
+                <span className="shrink-0 rounded-full bg-terra-soft px-2 py-0.5 text-[0.6875rem] font-medium text-terra">
                   신규
                 </span>
               )}
             </div>
             {(speciality || career != null) && (
-              <p className="mt-0.5 text-[13px] text-ink-3">
+              <p className="mt-0.5 text-[0.8125rem] text-ink-3">
                 {[speciality, career != null ? `경력 ${career}년` : null]
                   .filter(Boolean)
                   .join(" · ")}
@@ -94,25 +94,25 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
         <button
           type="button"
           onClick={openAdjusterProfile}
-          className="shrink-0 text-[13px] text-ink-3 transition hover:text-ink"
+          className="shrink-0 text-[0.8125rem] text-ink-3 transition hover:text-ink"
         >
           프로필 보기
         </button>
       </div>
 
-      <p className="mt-4 text-[14px] leading-relaxed text-ink-2">“{proposalSummary}”</p>
+      <p className="mt-4 text-[0.875rem] leading-relaxed text-ink-2">“{proposalSummary}”</p>
 
       <div className="mt-5 flex items-end justify-between gap-4">
         <div className="flex min-w-0 gap-8">
           <div className="min-w-0">
-            <p className="text-[12px] text-ink-3">이 사정사의 검토 범위 · 참고용</p>
-            <p className="mt-1 text-[15px] font-semibold text-ink">
+            <p className="text-[0.75rem] text-ink-3">이 사정사의 검토 범위 · 참고용</p>
+            <p className="mt-1 text-[0.9375rem] font-semibold text-ink">
               {estimateRange ?? "범위 미제시"}
             </p>
           </div>
           <div className="min-w-0">
-            <p className="text-[12px] text-ink-3">보수 기준</p>
-            <p className="mt-1 text-[15px] font-semibold text-ink">{feeBasis ?? "상담 시 안내"}</p>
+            <p className="text-[0.75rem] text-ink-3">보수 기준</p>
+            <p className="mt-1 text-[0.9375rem] font-semibold text-ink">{feeBasis ?? "상담 시 안내"}</p>
           </div>
         </div>
         <div className="flex shrink-0 items-center gap-2">

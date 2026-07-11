@@ -11,13 +11,19 @@ import { expect, test } from "@playwright/test";
 
 const PATH = "/customer/dashboard";
 
+// 이슈 #63부터 <md는 모바일 홈(dashboard-mobile.spec.ts 담당) — 이 스펙은 데스크톱 뷰 검증.
+test.use({ viewport: { width: 1280, height: 900 } });
+
 test("진입하면 인사말·진행현황·리포트·검수완료·받은제안이 보인다", async ({
   page,
 }) => {
   await page.goto(PATH);
 
   // 배너 인사말(GET /users/me → nickname 윤서)
-  const banner = page.locator("section").filter({ hasText: "님, 안녕하세요" });
+  // 페이지 래퍼 <section>도 같은 텍스트를 포함하므로 가장 가까운 section만 지정한다.
+  const banner = page
+    .getByText("윤서 님, 안녕하세요")
+    .locator("xpath=ancestor::section[1]");
   await expect(banner.getByText("윤서 님, 안녕하세요")).toBeVisible();
 
   // 진행 현황 통계 — 진행 중 1건(AWAITING_INSPECTION) / 받은 제안 합계 2

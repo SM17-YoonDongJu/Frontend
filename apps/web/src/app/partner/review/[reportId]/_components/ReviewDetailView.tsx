@@ -75,7 +75,7 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-6xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_320px]">
+      <div className="mx-auto w-full max-w-6xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
           <section className="space-y-5 rounded-card-lg border border-line bg-card p-6">
             <ClientAccidentSection client={data.client} isMasked={data.isMasked} />

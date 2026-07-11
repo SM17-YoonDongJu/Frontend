@@ -3,6 +3,8 @@
 import { Suspense, useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { FieldPath } from "react-hook-form";
+import { Button } from "@/shared/ui/Button";
+import { Modal } from "@/shared/ui/Modal";
 import { useCreateReport } from "./_api/use-create-report";
 import { SubmitComplete } from "./_components/SubmitComplete";
 import { FunnelFooter } from "./_components/FunnelFooter";
@@ -13,7 +15,7 @@ import { Step3AccidentDate } from "./_components/Step3AccidentDate";
 import { Step4OfferedAmount } from "./_components/Step4OfferedAmount";
 import { Step5Documents } from "./_components/Step5Documents";
 import { Step6Confirm } from "./_components/Step6Confirm";
-import { useDraftAutosave, loadDraft, clearDraft } from "./_hooks/use-draft";
+import { useDraftPrompt, clearDraft } from "./_hooks/use-draft";
 import { useFunnel } from "./_hooks/use-funnel";
 import { FUNNEL_STEPS, firstIncompleteStep } from "./_model/funnel-config";
 import { toCreateReportBody } from "./_model/report-request.schema";
@@ -25,10 +27,8 @@ function AdjustRequestFunnel() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<CreateReportResponse | null>(null);
 
-  const form = useForm<AdjustRequestDraft>({
-    defaultValues: loadDraft(),
-  });
-  useDraftAutosave(form.watch);
+  const form = useForm<AdjustRequestDraft>({ defaultValues: {} });
+  const draftPrompt = useDraftPrompt(form);
 
   const step = FUNNEL_STEPS[funnel.currentStep - 1]!; // currentStep은 1..total로 clamp됨
 
@@ -117,6 +117,26 @@ function AdjustRequestFunnel() {
         onPrev={funnel.prev}
         onNext={handleNext}
       />
+
+      <Modal
+        open={draftPrompt.open}
+        title="작성하던 내용이 있어요"
+        dismissible={false}
+        onClose={draftPrompt.discard}
+        className="max-w-sm"
+      >
+        <p className="text-[0.875rem] leading-relaxed text-ink-2">
+          이전에 작성하던 분석 신청 내용이 남아 있습니다. 이어서 작성할까요? 새로 시작하면 저장된 내용은 지워집니다.
+        </p>
+        <div className="mt-6 flex justify-end gap-2">
+          <Button variant="ghost" size="sm" onClick={draftPrompt.discard}>
+            새로 시작
+          </Button>
+          <Button size="sm" onClick={draftPrompt.restore}>
+            이어서 작성
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

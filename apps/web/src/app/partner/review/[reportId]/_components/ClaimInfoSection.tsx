@@ -51,7 +51,7 @@ export function ClaimInfoSection({
         총 {totalDays}일{hospitalizations.length > 1 && ` · ${hospitalizations.length}회`}
         <span
           role="tooltip"
-          className="invisible absolute left-0 top-full z-30 mt-2 w-max max-w-[280px] rounded-card border border-line bg-card p-3 text-left text-[12.5px] font-normal opacity-0 shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
+          className="invisible absolute left-0 top-full z-30 mt-2 w-max max-w-[17.5rem] rounded-card border border-line bg-card p-3 text-left text-[0.78125rem] font-normal opacity-0 shadow-lg transition-opacity duration-150 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"
         >
           {hospitalizations.map((h, index) => {
             const days = periodDays(h.hospitalStart, h.hospitalEnd);
@@ -87,8 +87,8 @@ export function ClaimInfoSection({
     <dl className="grid grid-cols-1 gap-px rounded-card border border-line bg-line sm:grid-cols-3">
       {fields.map((field) => (
         <div key={field.kicker} className="bg-card p-4">
-          <dt className="text-[12.5px] text-ink-3">{field.kicker}</dt>
-          <dd className="mt-1.5 text-[15px] font-semibold text-ink">{field.value}</dd>
+          <dt className="text-[0.78125rem] text-ink-3">{field.kicker}</dt>
+          <dd className="mt-1.5 text-[0.9375rem] font-semibold text-ink">{field.value}</dd>
         </div>
       ))}
     </dl>

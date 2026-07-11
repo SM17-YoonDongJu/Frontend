@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
-import { Button } from "@/shared/ui/Button";
+import { Button, buttonVariants } from "@/shared/ui/Button";
 import { REPORT_FILENAME, REPORT_TITLE } from "../_model/report-meta";
 import type { ReportDetail } from "../_model/types";
 
@@ -79,9 +80,19 @@ export function ReportActions({
     );
   }
 
+  const canReview = report.status === "MATCHED" && report.adjusterId != null;
+
   return (
     <div className="flex shrink-0 flex-col items-end gap-1">
       <div className="flex gap-2">
+        {canReview && (
+          <Link
+            href={`/customer/report/${report.reportId}/review`}
+            className={buttonVariants({ variant: "gold", size: "sm" })}
+          >
+            리뷰 남기기
+          </Link>
+        )}
         <Button variant="outline" size="sm" loading={loading} onClick={handlePdf}>
           PDF 저장
         </Button>

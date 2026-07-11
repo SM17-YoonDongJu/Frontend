@@ -56,7 +56,10 @@ export function Step6Confirm() {
 
       <div className="rounded-card border border-line bg-paper-2 px-4 py-1">
         <SummaryRow label="사고 유형" value="실손 의료비" />
-        <SummaryRow label="진단명·치료 내용" value={v.diagnosis || "-"} />
+        <SummaryRow
+          label="진단명"
+          value={v.diagnosis?.filter(Boolean).join(", ") || "-"}
+        />
         <SummaryRow label="치료 형태" value={treatments} />
         <SummaryRow label="사고 발생일" value={v.accidentDate || "-"} />
         <SummaryRow label="입원 기간" value={hospitalRange} />

@@ -127,7 +127,7 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
         </Button>
       </div>
 
-      <div className="mt-4 grid gap-4 md:grid-cols-[200px_1fr]">
+      <div className="mt-4 grid gap-4 md:grid-cols-[12.5rem_1fr]">
         <ul className="flex flex-col gap-2" aria-label="첨부 파일 목록">
           {attachments.map((file) => {
             const active = file.id === selected?.id;
@@ -175,7 +175,7 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
               )}
             </div>
 
-            <div className="mt-3 grid gap-4 sm:grid-cols-[140px_1fr]">
+            <div className="mt-3 grid gap-4 sm:grid-cols-[8.75rem_1fr]">
               <div
                 aria-hidden
                 className="aspect-[3/4] rounded-card border border-line bg-card"

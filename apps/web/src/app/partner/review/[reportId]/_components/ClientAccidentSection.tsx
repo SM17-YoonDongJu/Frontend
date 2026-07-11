@@ -13,7 +13,7 @@ export function ClientAccidentSection({ client, isMasked }: ClientAccidentSectio
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
-        <h2 className="flex items-center gap-2 font-serif text-[17px] font-bold text-ink">
+        <h2 className="flex items-center gap-2 font-serif text-[1.0625rem] font-bold text-ink">
           <User className="text-ink-3" />
           의뢰인 정보 · 사고 내용
         </h2>
@@ -27,7 +27,7 @@ export function ClientAccidentSection({ client, isMasked }: ClientAccidentSectio
         >
           {initial}
         </span>
-        <div className="text-[14px]">
+        <div className="text-[0.875rem]">
           <p>
             <span className="font-semibold text-ink">{client.maskedName}</span>
             <span className="text-ink-3"> · {client.ageBand} · {client.gender}</span>

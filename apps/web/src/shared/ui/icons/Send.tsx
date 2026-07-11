@@ -2,7 +2,7 @@ interface SendProps {
   className?: string;
 }
 
-/** 종이비행기(전송) 아이콘. 크기·색은 className으로(currentColor). */
+/** 종이비행기(전송). 크기·색은 className으로(currentColor). */
 export function Send({ className }: SendProps) {
   return (
     <svg
@@ -12,13 +12,12 @@ export function Send({ className }: SendProps) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.8"
+      strokeWidth="1.7"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
     >
-      <path d="M21 3L10.5 13.5" />
-      <path d="M21 3l-6.5 18-4-8-8-4 18-6.5z" />
+      <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
     </svg>
   );
 }

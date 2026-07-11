@@ -4,8 +4,8 @@ import Link from "next/link";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 import { buttonVariants } from "@/shared/ui/Button";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
-import { useReviewList } from "../review/_api/use-review-list";
-import type { ReviewListItem } from "../review/_model/types";
+import { useReviewList } from "../_shared/api/use-review-list";
+import type { ReviewListItem } from "../_shared/model/types";
 import { SectionCard } from "./SectionCard";
 import { PendingReviewEmpty } from "./PendingReviewEmpty";
 

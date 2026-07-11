@@ -1,16 +1,20 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { type ReactNode, useRef, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Upload } from "@/shared/ui/icons/Upload";
 
 interface FileDropzoneProps {
   onFiles: (files: File[]) => void;
   accept: string;
+  /** 제목 override(미지정 시 "파일 추가"). */
+  title?: string;
+  /** 보조문구 override(미지정 시 반응형 기본 안내). */
+  hint?: ReactNode;
 }
 
 /** 파일 추가 영역. 모바일=탭(촬영·갤러리·파일 선택), 데스크톱=클릭·드래그. */
-export function FileDropzone({ onFiles, accept }: FileDropzoneProps) {
+export function FileDropzone({ onFiles, accept, title, hint }: FileDropzoneProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -39,10 +43,14 @@ export function FileDropzone({ onFiles, accept }: FileDropzoneProps) {
       <span className="flex h-12 w-12 items-center justify-center rounded-input border border-line bg-card text-ink-3">
         <Upload className="text-[1.4375rem]" />
       </span>
-      <p className="text-[0.875rem] font-bold text-ink">파일 추가</p>
+      <p className="text-[0.875rem] font-bold text-ink">{title ?? "파일 추가"}</p>
       <p className="text-[0.75rem] text-ink-3">
-        <span className="sm:hidden">촬영 · 갤러리 · 파일 선택</span>
-        <span className="hidden sm:inline">끌어다 놓거나 클릭해 업로드 · PDF, JPG, PNG</span>
+        {hint ?? (
+          <>
+            <span className="sm:hidden">촬영 · 갤러리 · 파일 선택</span>
+            <span className="hidden sm:inline">끌어다 놓거나 클릭해 업로드 · PDF, JPG, PNG</span>
+          </>
+        )}
       </p>
       <input
         ref={inputRef}

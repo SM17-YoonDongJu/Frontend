@@ -53,6 +53,9 @@ function ReportList() {
 - 인라인 long-class는 논리 그룹 순서(layout → spacing → color → state)로 정렬.
 - 모바일 우선: 기본이 모바일, `md:` 이상에서 데스크탑. 기획의 "모바일은 필터칩+카드" 같은 반응형 분기 반영.
 
+## 아이콘 (인라인 svg 금지)
+페이지·컴포넌트에 **인라인 `<svg>` 금지.** `src/shared/ui/icons/`에서 의미로 재사용하고(예: `ChevronLeft`·`ChevronRight`·`Send`·`Bell`·`User`·`Check`), 없으면 그곳에 새 아이콘 컴포넌트로 추가한다(currentColor + `width/height="1em"`, 크기·색은 소비처 `className`의 `size-*`(rem)·색 토큰으로). 로컬 인라인 아이콘 모음(`_components/icons.tsx` 등)도 금지. 상세는 `figma-design-convert/references/figma-mapping.md §8`. `.claude/hooks/inline-svg-lint.sh`가 app 트리 인라인 `<svg>`를 차단한다(차트·일러스트 등 비아이콘 svg는 `svg-lint-ignore` 주석으로 예외).
+
 ## 접근성
 표준 a11y(의미 태그·label 연결·aria-label·focus 가시성) 지킨다. 기획이 모바일 반응형·툴팁·쉬운말 토글을 요구하므로 접근성은 선택 아닌 요구사항.
 

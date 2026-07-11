@@ -20,13 +20,17 @@ export function SpecialtySection({ value, onChange, error }: SpecialtySectionPro
   };
 
   return (
-    <section className="space-y-4 rounded-card-lg border border-line bg-card p-6">
-      <div className="flex items-center justify-between">
+    <section className="space-y-4 lg:rounded-card-lg lg:border lg:border-line lg:bg-card lg:p-6">
+      <div className="hidden items-center justify-between lg:flex">
         <h2 className="font-serif text-[1.125rem] font-bold text-ink">전문 분야</h2>
         <span className="text-[0.8125rem] text-ink-3">
           {value.length}/{MAX_SPECIALTIES} · 검색 노출에 사용돼요
         </span>
       </div>
+
+      <span className="block text-[0.8125rem] font-semibold text-ink-2 lg:hidden">
+        전문 분야 <span className="font-normal text-ink-3">(중복 선택)</span>
+      </span>
 
       <div className="flex flex-wrap gap-2">
         {SPECIALTY_OPTIONS.map((option) => {
