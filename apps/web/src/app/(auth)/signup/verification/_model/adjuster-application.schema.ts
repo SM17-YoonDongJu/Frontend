@@ -42,7 +42,9 @@ export const adjusterApplicationBodySchema = z.object({
   affiliation: affiliationSchema,
   region: z.string(),
   registrationImageUrl: z.string().url(),
-  idCardImageUrl: z.string().url(),
+  // 명세는 Y(필수)지만 Figma 신청 화면에 신분증 업로드가 없어 사용자 결정으로 optional 완화(FE 미전송).
+  // 명세 충돌은 리더 백엔드 확인 대기(.pr-assets/api-spec-draft-adjuster-verification.md).
+  idCardImageUrl: z.string().url().nullish(),
 });
 export type AdjusterApplicationBody = z.infer<typeof adjusterApplicationBodySchema>;
 

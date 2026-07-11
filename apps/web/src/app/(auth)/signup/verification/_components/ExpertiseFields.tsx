@@ -24,10 +24,16 @@ interface ExpertiseFieldsProps {
   form: VerificationForm;
   /** 모바일 퍼널: 텍스트 인풋을 placeholder-only로(칩·선택 라벨은 유지). */
   hideLabels?: boolean;
+  /** 전문분야 칩·한 줄 소개 노출 여부. 모바일 STEP2=true, 데스크톱 폼(131-10583 부재)=false. */
+  showProfileExtras?: boolean;
 }
 
-/** 전문성 필드(자격구분·소속·전문분야·경력·활동지역·소개). */
-export function ExpertiseFields({ form, hideLabels }: ExpertiseFieldsProps) {
+/** 전문성 필드(자격구분·소속[·전문분야]·경력·활동지역[·소개]). */
+export function ExpertiseFields({
+  form,
+  hideLabels,
+  showProfileExtras = true,
+}: ExpertiseFieldsProps) {
   const inputLabelClass = hideLabels ? "sr-only" : undefined;
 
   return (
@@ -58,16 +64,18 @@ export function ExpertiseFields({ form, hideLabels }: ExpertiseFieldsProps) {
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label>
-          전문 분야 <span className="font-normal text-ink-3">(중복 선택)</span>
-        </Label>
-        <SpecialtyChips
-          aria-label="전문 분야"
-          value={form.specialties}
-          onToggle={form.toggleSpecialty}
-        />
-      </div>
+      {showProfileExtras && (
+        <div className="flex flex-col gap-2">
+          <Label>
+            전문 분야 <span className="font-normal text-ink-3">(중복 선택)</span>
+          </Label>
+          <SpecialtyChips
+            aria-label="전문 분야"
+            value={form.specialties}
+            onToggle={form.toggleSpecialty}
+          />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-[1.125rem] md:grid-cols-2">
         <div className="flex flex-col gap-2">
@@ -98,19 +106,21 @@ export function ExpertiseFields({ form, hideLabels }: ExpertiseFieldsProps) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="verification-introduction" className={inputLabelClass}>
-          한 줄 소개
-        </Label>
-        <Textarea
-          id="verification-introduction"
-          value={form.introduction}
-          onChange={form.setIntroduction}
-          rows={3}
-          maxLength={INTRODUCTION_MAX}
-          placeholder="예) 후유장해 등급 재산정 전문"
-        />
-      </div>
+      {showProfileExtras && (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="verification-introduction" className={inputLabelClass}>
+            한 줄 소개
+          </Label>
+          <Textarea
+            id="verification-introduction"
+            value={form.introduction}
+            onChange={form.setIntroduction}
+            rows={3}
+            maxLength={INTRODUCTION_MAX}
+            placeholder="예) 후유장해 등급 재산정 전문"
+          />
+        </div>
+      )}
     </div>
   );
 }

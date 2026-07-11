@@ -447,13 +447,13 @@ export const handlers = [
       licenseImageUrl?: string | null;
     };
 
+    // idCardImageUrl은 명세상 Y지만 Figma 신청 화면에 신분증 업로드가 없어 필수 검증에서 제외(사용자 결정).
     if (
       !body.name ||
       !body.speciality ||
       !body.affiliation ||
       !body.region ||
-      !body.registrationImageUrl ||
-      !body.idCardImageUrl
+      !body.registrationImageUrl
     ) {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },

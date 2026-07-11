@@ -30,8 +30,7 @@ export type VerificationFieldError =
   | "affiliation"
   | "region"
   | "license"
-  | "registration"
-  | "idCard";
+  | "registration";
 
 type ErrorMap = Partial<Record<VerificationFieldError, string>>;
 
@@ -59,7 +58,7 @@ export interface VerificationForm {
   introduction: string;
   setIntroduction: (value: string) => void;
 
-  documents: Record<"license" | "registration" | "idCard", DocumentUpload>;
+  documents: Record<"license" | "registration", DocumentUpload>;
 
   errors: ErrorMap;
   isUploading: boolean;
@@ -74,13 +73,17 @@ export interface VerificationForm {
   goStatus: () => void;
 }
 
-export function useVerificationForm(): VerificationForm {
+/**
+ * 신청 폼 공유 상태 훅. 뷰포트별 노출 필드가 달라(연락처·이메일은 모바일 STEP1에만),
+ * 데스크톱에선 미노출 필드(phone·email)를 검증하지 않는다. 제출 로직은 하나로 공유.
+ * 서류는 자격증 사본·등록증 2종(신분증은 Figma 신청 화면에 없어 제거).
+ */
+export function useVerificationForm(isDesktop: boolean): VerificationForm {
   const router = useRouter();
   const apply = useApplyAdjuster();
 
   const license = useDocumentUpload();
   const registration = useDocumentUpload();
-  const idCard = useDocumentUpload();
 
   const [name, setName] = useState("");
   const [licenseNo, setLicenseNo] = useState("");
@@ -109,7 +112,6 @@ export function useVerificationForm(): VerificationForm {
     if (draft.introduction) setIntroduction(draft.introduction);
     if (draft.licenseImageUrl) license.restore(draft.licenseImageUrl);
     if (draft.registrationImageUrl) registration.restore(draft.registrationImageUrl);
-    if (draft.idCardImageUrl) idCard.restore(draft.idCardImageUrl);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -128,7 +130,7 @@ export function useVerificationForm(): VerificationForm {
       introduction,
       licenseImageUrl: license.url ?? null,
       registrationImageUrl: registration.url ?? null,
-      idCardImageUrl: idCard.url ?? null,
+      idCardImageUrl: null,
     });
   }, [
     name,
@@ -143,7 +145,6 @@ export function useVerificationForm(): VerificationForm {
     introduction,
     license.url,
     registration.url,
-    idCard.url,
   ]);
 
   const toggleSpecialty = (value: string) => {
@@ -153,24 +154,23 @@ export function useVerificationForm(): VerificationForm {
   };
 
   const isUploading =
-    license.status === "uploading" ||
-    registration.status === "uploading" ||
-    idCard.status === "uploading";
+    license.status === "uploading" || registration.status === "uploading";
 
   const licenseSatisfied = Boolean(licenseNo.trim()) || Boolean(license.url);
+
+  // 연락처·이메일은 모바일 STEP1에만 노출 → 데스크톱에선 필수 아님.
+  const contactValid = isDesktop || (Boolean(phone.trim()) && EMAIL_PATTERN.test(email.trim()));
 
   const requiredValid = useMemo(
     () =>
       Boolean(name.trim()) &&
-      Boolean(phone.trim()) &&
-      EMAIL_PATTERN.test(email.trim()) &&
+      contactValid &&
       speciality !== null &&
       affiliation !== null &&
       Boolean(region.trim()) &&
       licenseSatisfied &&
-      Boolean(registration.url) &&
-      Boolean(idCard.url),
-    [name, phone, email, speciality, affiliation, region, licenseSatisfied, registration.url, idCard.url],
+      Boolean(registration.url),
+    [name, contactValid, speciality, affiliation, region, licenseSatisfied, registration.url],
   );
 
   const collectErrors = (step?: VerificationStep): ErrorMap => {
@@ -179,8 +179,11 @@ export function useVerificationForm(): VerificationForm {
 
     if (wants("basic")) {
       if (!name.trim()) next.name = "이름을 입력해 주세요.";
-      if (!phone.trim()) next.phone = "연락처를 입력해 주세요.";
-      if (!EMAIL_PATTERN.test(email.trim())) next.email = "올바른 이메일을 입력해 주세요.";
+      // 연락처·이메일은 모바일 STEP1 전용 검증(데스크톱 미노출 → 스킵).
+      if (!isDesktop) {
+        if (!phone.trim()) next.phone = "연락처를 입력해 주세요.";
+        if (!EMAIL_PATTERN.test(email.trim())) next.email = "올바른 이메일을 입력해 주세요.";
+      }
     }
     if (wants("expertise")) {
       if (speciality === null) next.speciality = "자격 구분을 선택해 주세요.";
@@ -189,7 +192,6 @@ export function useVerificationForm(): VerificationForm {
     }
     if (wants("documents")) {
       if (!registration.url) next.registration = "등록증을 올려 주세요.";
-      if (!idCard.url) next.idCard = "신분증을 올려 주세요.";
       if (!licenseSatisfied) next.license = "자격증 번호 또는 사본 중 하나는 필수예요.";
     }
     return next;
@@ -206,6 +208,7 @@ export function useVerificationForm(): VerificationForm {
     setErrors(allErrors);
     if (Object.keys(allErrors).length > 0 || isUploading || apply.isPending) return;
 
+    // idCardImageUrl은 신청 화면에서 제거(Figma 부재) → 미전송. phone·email은 데스크톱에선 빈 값.
     const body: AdjusterApplicationExtendedBody = {
       name: name.trim(),
       speciality: speciality as Speciality,
@@ -216,7 +219,6 @@ export function useVerificationForm(): VerificationForm {
       affiliation: affiliation as AffiliationType,
       region: region.trim(),
       registrationImageUrl: registration.url as string,
-      idCardImageUrl: idCard.url as string,
       phone: phone.trim(),
       email: email.trim(),
       specialties,
@@ -249,7 +251,7 @@ export function useVerificationForm(): VerificationForm {
     setRegion,
     introduction,
     setIntroduction,
-    documents: { license, registration, idCard },
+    documents: { license, registration },
     errors,
     isUploading,
     isSubmitting: apply.isPending,

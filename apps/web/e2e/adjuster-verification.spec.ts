@@ -26,17 +26,19 @@ function file(name: string) {
 }
 
 async function uploadAllDocuments(page: Page) {
-  const inputs = page.locator('input[type="file"]'); // 파일 인풋은 sr-only — type 셀렉터 예외(3개: 자격증/등록증/신분증 순)
+  const inputs = page.locator('input[type="file"]'); // 파일 인풋은 sr-only — type 셀렉터 예외(2개: 자격증/등록증 순)
   await inputs.nth(0).setInputFiles(file("license.png"));
   await inputs.nth(1).setInputFiles(file("registration.png"));
-  await inputs.nth(2).setInputFiles(file("id-card.png"));
-  await expect(page.getByText("업로드됨")).toHaveCount(3);
+  await expect(page.getByText("업로드됨")).toHaveCount(2);
 }
 
+// 연락처·이메일은 모바일 STEP1에만 노출(데스크톱 폼엔 없음) → 있을 때만 채운다.
 async function fillBasic(page: Page) {
   await page.getByLabel("이름").fill("김상정");
-  await page.getByLabel("연락처").fill("010-1234-5678");
-  await page.getByLabel("이메일").fill("adjuster@example.com");
+  if ((await page.getByLabel("연락처").count()) > 0) {
+    await page.getByLabel("연락처").fill("010-1234-5678");
+    await page.getByLabel("이메일").fill("adjuster@example.com");
+  }
 }
 
 async function fillExpertise(page: Page) {
@@ -73,9 +75,8 @@ test.describe("데스크톱 단일 폼", () => {
     await page.goto(FORM_PATH);
     await page.getByRole("button", { name: "인증 신청하기" }).click();
 
-    // 기본·전문성 필드(Input/SegmentedControl)는 인라인 에러를 노출한다.
+    // 데스크톱 폼은 이름·자격구분·소속·활동지역만 검증(연락처·이메일 미노출).
     await expect(page.getByText("이름을 입력해 주세요.")).toBeVisible();
-    await expect(page.getByText("연락처를 입력해 주세요.")).toBeVisible();
     await expect(page.getByText("자격 구분을 선택해 주세요.")).toBeVisible();
     await expect(page.getByText("소속을 선택해 주세요.")).toBeVisible();
     await expect(page.getByText("활동 지역을 입력해 주세요.")).toBeVisible();
@@ -83,14 +84,13 @@ test.describe("데스크톱 단일 폼", () => {
     await expect(page).toHaveURL(new RegExp(`${FORM_PATH}$`));
   });
 
-  // B1 수정(DocumentFields resolveFieldState) 검증: 서류 미업로드 시 3필드 모두 인라인 에러 표면화.
-  test("등록증·신분증을 올리지 않고 신청하면 서류 필드에 인라인 에러가 뜬다", async ({ page }) => {
+  // B1 수정(DocumentFields resolveFieldState) 검증: 서류 미업로드 시 각 필드 인라인 에러 표면화.
+  test("등록증을 올리지 않고 신청하면 서류 필드에 인라인 에러가 뜬다", async ({ page }) => {
     await page.goto(FORM_PATH);
     await fillBasic(page);
     await fillExpertise(page);
     await page.getByRole("button", { name: "인증 신청하기" }).click();
     await expect(page.getByText("등록증을 올려 주세요.")).toBeVisible();
-    await expect(page.getByText("신분증을 올려 주세요.")).toBeVisible();
     await expect(page.getByText("자격증 번호 또는 사본 중 하나는 필수예요.")).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`${FORM_PATH}$`));
   });
@@ -100,11 +100,10 @@ test.describe("데스크톱 단일 폼", () => {
     await fillBasic(page);
     await fillExpertise(page);
 
-    // 등록증·신분증만 업로드(자격증 파일 미제출), 자격증 번호도 비움
+    // 등록증만 업로드(자격증 파일 미제출), 자격증 번호도 비움
     const inputs = page.locator('input[type="file"]');
     await inputs.nth(1).setInputFiles(file("registration.png"));
-    await inputs.nth(2).setInputFiles(file("id-card.png"));
-    await expect(page.getByText("업로드됨")).toHaveCount(2);
+    await expect(page.getByText("업로드됨")).toHaveCount(1);
 
     await page.getByRole("button", { name: "인증 신청하기" }).click();
     await expect(page.getByText("자격증 번호 또는 사본 중 하나는 필수예요.")).toBeVisible();

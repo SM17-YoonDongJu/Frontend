@@ -9,10 +9,12 @@ interface BasicInfoFieldsProps {
   form: VerificationForm;
   /** 모바일 퍼널: Figma는 placeholder-only 인풋 → 시각 라벨 숨김(sr-only 유지). */
   hideLabels?: boolean;
+  /** 연락처·이메일 노출 여부. 모바일 STEP1=true, 데스크톱 폼(131-10583 부재)=false. */
+  showContact?: boolean;
 }
 
-/** 기본 정보 필드(이름·등록번호·연락처·이메일). 데스크톱=2열, 모바일=1열. */
-export function BasicInfoFields({ form, hideLabels }: BasicInfoFieldsProps) {
+/** 기본 정보 필드(이름·등록번호[·연락처·이메일]). 데스크톱=2열, 모바일=1열. */
+export function BasicInfoFields({ form, hideLabels, showContact = true }: BasicInfoFieldsProps) {
   const labelClass = hideLabels ? "sr-only" : undefined;
 
   return (
@@ -44,35 +46,39 @@ export function BasicInfoFields({ form, hideLabels }: BasicInfoFieldsProps) {
         />
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="verification-phone" className={labelClass}>
-          연락처
-        </Label>
-        <Input
-          id="verification-phone"
-          type="tel"
-          value={form.phone}
-          onChange={(event) => form.setPhone(event.target.value)}
-          placeholder="010-0000-0000"
-          autoComplete="tel"
-          error={form.errors.phone}
-        />
-      </div>
+      {showContact && (
+        <>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="verification-phone" className={labelClass}>
+              연락처
+            </Label>
+            <Input
+              id="verification-phone"
+              type="tel"
+              value={form.phone}
+              onChange={(event) => form.setPhone(event.target.value)}
+              placeholder="010-0000-0000"
+              autoComplete="tel"
+              error={form.errors.phone}
+            />
+          </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="verification-email" className={labelClass}>
-          이메일
-        </Label>
-        <Input
-          id="verification-email"
-          type="email"
-          value={form.email}
-          onChange={(event) => form.setEmail(event.target.value)}
-          placeholder="name@email.com"
-          autoComplete="email"
-          error={form.errors.email}
-        />
-      </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="verification-email" className={labelClass}>
+              이메일
+            </Label>
+            <Input
+              id="verification-email"
+              type="email"
+              value={form.email}
+              onChange={(event) => form.setEmail(event.target.value)}
+              placeholder="name@email.com"
+              autoComplete="email"
+              error={form.errors.email}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }

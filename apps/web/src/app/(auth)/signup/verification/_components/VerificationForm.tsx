@@ -56,8 +56,8 @@ export function VerificationForm({ form }: VerificationFormProps) {
 
         <div className="mt-[1.125rem] flex flex-col gap-[1.125rem]">
           <FormCard title="자격 정보">
-            <BasicInfoFields form={form} />
-            <ExpertiseFields form={form} />
+            <BasicInfoFields form={form} showContact={false} />
+            <ExpertiseFields form={form} showProfileExtras={false} />
           </FormCard>
 
           <FormCard title="증빙 서류" description="PDF 또는 이미지, 최대 20MB">

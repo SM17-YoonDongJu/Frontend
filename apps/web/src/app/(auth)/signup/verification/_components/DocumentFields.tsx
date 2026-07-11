@@ -20,13 +20,12 @@ function resolveFieldState(
   };
 }
 
-/** 증빙 서류 업로드(자격증 사본·등록증·신분증) + 안내 배너. */
+/** 증빙 서류 업로드(자격증 사본·등록증). 신분증은 Figma 신청 화면에 없어 제거. */
 export function DocumentFields({ form }: DocumentFieldsProps) {
-  const { license, registration, idCard } = form.documents;
+  const { license, registration } = form.documents;
 
   const licenseState = resolveFieldState(license, form.errors.license);
   const registrationState = resolveFieldState(registration, form.errors.registration);
-  const idCardState = resolveFieldState(idCard, form.errors.idCard);
 
   return (
     <div className="flex flex-col gap-3">
@@ -45,14 +44,6 @@ export function DocumentFields({ form }: DocumentFieldsProps) {
         fileName={registration.fileName}
         errorMessage={registrationState.errorMessage}
         onSelectFile={registration.select}
-      />
-      <FileUploadField
-        label="신분증"
-        description="주민번호 뒷자리는 자동으로 가려집니다"
-        status={idCardState.status}
-        fileName={idCard.fileName}
-        errorMessage={idCardState.errorMessage}
-        onSelectFile={idCard.select}
       />
     </div>
   );
