@@ -84,16 +84,8 @@ export function CustomerChatThreadContent({
 
   const actions =
     group === "comparing" ? (
+      // Figma 1012:11044/11042 — 매칭 완료(primary·ink)가 앞, 매칭 거절(terra)이 뒤
       <>
-        <button
-          type="button"
-          onClick={rejectMatch}
-          disabled={match.isPending}
-          className="flex items-center gap-1.5 rounded-full bg-terra px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
-        >
-          매칭 거절
-          <X className="text-[0.875rem]" />
-        </button>
         <button
           type="button"
           onClick={() => setConfirmOpen(true)}
@@ -102,6 +94,15 @@ export function CustomerChatThreadContent({
         >
           매칭 완료
           <CheckCircle className="text-[0.9375rem]" />
+        </button>
+        <button
+          type="button"
+          onClick={rejectMatch}
+          disabled={match.isPending}
+          className="flex items-center gap-1.5 rounded-full bg-terra px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
+        >
+          매칭 거절
+          <X className="text-[0.875rem]" />
         </button>
       </>
     ) : group === "matched" ? (
