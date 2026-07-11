@@ -1,11 +1,44 @@
-/** 공공 랜딩 placeholder — 실제 마케팅 콘텐츠는 후속 이슈. */
+import Link from "next/link";
+import { buttonVariants } from "@/shared/ui/Button";
+import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
+import { CtaBandSection } from "./_components/CtaBandSection";
+import { HeroSection } from "./_components/HeroSection";
+import { HowItWorksSection } from "./_components/HowItWorksSection";
+import { LandingRedirectGate } from "./_components/LandingRedirectGate";
+import { MobileFeatureCards } from "./_components/MobileFeatureCards";
+import { MobileHero } from "./_components/MobileHero";
+import { ReportTypesSection } from "./_components/ReportTypesSection";
+
+/** 온보딩(랜딩) 페이지. md↑ PC 시안 / md↓ 모바일 시안(문구가 다른 별도 변형). */
 export default function HomePage() {
   return (
-    <section className="mx-auto max-w-6xl px-6 py-24">
-      <h1 className="font-serif text-4xl font-bold text-navy">손해사정 매칭 플랫폼</h1>
-      <p className="mt-4 max-w-xl text-ink-2">
-        약관·특약·판례를 분석해 예상 보상 범위와 주요 쟁점을 리포트로 정리합니다.
-      </p>
-    </section>
+    <LandingRedirectGate>
+      <div className="hidden md:block">
+        <HeroSection />
+        <HowItWorksSection />
+        <ReportTypesSection />
+        <CtaBandSection />
+      </div>
+
+      <div className="md:hidden">
+        <MobileHero />
+        <MobileFeatureCards />
+        <div className="flex flex-col gap-3 px-6 pb-10 pt-8">
+          <Link
+            href="/login"
+            className={buttonVariants({ variant: "primary", size: "lg", full: true })}
+          >
+            무료로 분석 시작하기
+            <ArrowRight className="size-[1.1875rem]" />
+          </Link>
+          <Link
+            href="/login"
+            className={buttonVariants({ variant: "ghost", size: "md", full: true })}
+          >
+            손해사정사로 활동하기
+          </Link>
+        </div>
+      </div>
+    </LandingRedirectGate>
   );
 }

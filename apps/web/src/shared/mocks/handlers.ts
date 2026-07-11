@@ -605,8 +605,15 @@ export const handlers = [
 
   // 본인 정보 조회 (고객 대시보드 인사말)
   // E2E 역할 게이팅 검증용: localStorage["mock:userType"]="adjuster"면 사정사로 응답(기본 insured_person).
-  http.get(`${API_BASE_URL}/users/me`, async () => {
+  http.get(`${API_BASE_URL}/users/me`, async ({ request }) => {
     await delay(300);
+    // 비로그인 시나리오 주입 — E2E 랜딩(온보딩) 검증용. 기본은 로그인 유저(변경 없음).
+    if (request.headers.get("x-mock-scenario") === "unauthenticated") {
+      return HttpResponse.json(
+        { status: "401", code: "LOGIN_REQUIRED", message: "로그인이 필요합니다." },
+        { status: 401 },
+      );
+    }
     const override =
       typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
     const userType = override === "adjuster" ? "adjuster" : "insured_person";
