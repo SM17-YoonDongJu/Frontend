@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMypage } from "../_api/use-mypage";
+import { useMypagePanel } from "../_hooks/use-mypage-panel";
 import { CredentialProofModal } from "./CredentialProofModal";
 import { LogoutButton } from "./LogoutButton";
 import { MonthlyActivityCard } from "./MonthlyActivityCard";
@@ -12,8 +13,13 @@ import { StatCards } from "./StatCards";
 
 export function MypageView() {
   const { data } = useMypage();
-  const [notificationOpen, setNotificationOpen] = useState(false);
+  const { panel, clearPanel } = useMypagePanel();
+  const [notificationOpen, setNotificationOpen] = useState(panel === "notifications");
   const [credentialOpen, setCredentialOpen] = useState(false);
+
+  useEffect(() => {
+    if (panel === "notifications") setNotificationOpen(true);
+  }, [panel]);
 
   return (
     <div className="mt-5.5">
@@ -48,7 +54,10 @@ export function MypageView() {
 
       <NotificationSettingsModal
         open={notificationOpen}
-        onClose={() => setNotificationOpen(false)}
+        onClose={() => {
+          setNotificationOpen(false);
+          if (panel === "notifications") clearPanel();
+        }}
       />
       <CredentialProofModal
         open={credentialOpen}
