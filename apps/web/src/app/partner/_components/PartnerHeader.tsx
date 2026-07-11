@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { Scale } from "@/shared/ui/icons/Scale";
-import { Bell } from "@/shared/ui/icons/Bell";
 import { useProfile } from "../_api/use-profile";
+import { NotificationBellMenu } from "./NotificationBellMenu";
 
 // href: null → 준비 중(미구현) 탭. 링크 대신 비활성 표시로 렌더.
 const NAV_ITEMS = [
@@ -65,13 +65,7 @@ export function PartnerHeader() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/notifications"
-            aria-label="알림"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-ink-2 transition hover:bg-paper hover:text-ink"
-          >
-            <Bell />
-          </Link>
+          <NotificationBellMenu />
           <Link href="/partner/mypage" className="flex items-center gap-2">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-lg text-gold">
               <Scale className="text-base" />
