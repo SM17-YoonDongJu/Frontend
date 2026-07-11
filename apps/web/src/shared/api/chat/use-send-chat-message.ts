@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { InfiniteData } from "@tanstack/react-query";
 import { chatKeys } from "@/shared/api/query-keys";
 import { useMe } from "@/shared/api/use-me";
 import { sendChatMessage } from "./send-chat-message";
@@ -10,8 +11,11 @@ import type {
   SendChatMessageBody,
 } from "./chat.schema";
 
+// use-chat-messages가 무한 조회라 메시지 캐시는 페이지 배열 형태
+type ChatMessagesCache = InfiniteData<ChatMessages, string | null>;
+
 interface SendContext {
-  previousMessages?: ChatMessages;
+  previousMessages?: ChatMessagesCache;
   previousList?: ChatList;
 }
 
@@ -37,23 +41,32 @@ export function useSendChatMessage(chatRoomId: string) {
       await queryClient.cancelQueries({ queryKey: listKey });
 
       const previousMessages =
-        queryClient.getQueryData<ChatMessages>(messagesKey);
+        queryClient.getQueryData<ChatMessagesCache>(messagesKey);
       const previousList = queryClient.getQueryData<ChatList>(listKey);
 
       const now = new Date().toISOString();
 
-      queryClient.setQueryData<ChatMessages>(messagesKey, (current) => {
-        const base: ChatMessages = current ?? { list: [], nextCursor: null };
+      // 최신 구간인 첫 페이지(pages[0]) 끝에 temp 메시지 append
+      queryClient.setQueryData<ChatMessagesCache>(messagesKey, (current) => {
+        if (!current) return current;
+        const [latest, ...older] = current.pages;
+        const base: ChatMessages = latest ?? { list: [], nextCursor: null };
         return {
-          ...base,
-          list: [
-            ...base.list,
+          ...current,
+          pages: [
             {
-              messageId: crypto.randomUUID(),
-              senderId: optimisticSenderId,
-              content: body.content,
-              createdAt: now,
+              ...base,
+              list: [
+                ...base.list,
+                {
+                  messageId: crypto.randomUUID(),
+                  senderId: optimisticSenderId,
+                  content: body.content,
+                  createdAt: now,
+                },
+              ],
             },
+            ...older,
           ],
         };
       });

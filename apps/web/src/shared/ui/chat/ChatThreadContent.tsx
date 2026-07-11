@@ -26,7 +26,7 @@ export function ChatThreadContent({
   const router = useRouter();
   const { data: me } = useMe();
   const { data: rooms } = useChatList();
-  const { data: messages } = useChatMessages(chatRoomId);
+  const { messages, hasOlder, loadOlder, loadingOlder } = useChatMessages(chatRoomId);
   const sendMessage = useSendChatMessage(chatRoomId);
   const closeChat = useCloseChat(chatRoomId);
 
@@ -48,7 +48,13 @@ export function ChatThreadContent({
         />
       )}
 
-      <ChatThreadView messages={messages.list} currentUserId={currentUserId} />
+      <ChatThreadView
+        messages={messages}
+        currentUserId={currentUserId}
+        hasOlder={hasOlder}
+        onLoadOlder={loadOlder}
+        loadingOlder={loadingOlder}
+      />
 
       <MessageInputBar
         onSend={(content) => sendMessage.mutate({ content })}

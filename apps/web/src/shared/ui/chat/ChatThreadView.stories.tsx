@@ -46,3 +46,12 @@ type Story = StoryObj<typeof ChatThreadView>;
 export const Default: Story = {};
 
 export const Empty: Story = { args: { messages: [] } };
+
+/** 커서가 남아 상단에 이전 대화 안내가 보이는 상태 */
+export const HasOlder: Story = {
+  args: { hasOlder: true, onLoadOlder: () => {} },
+};
+
+export const LoadingOlder: Story = {
+  args: { hasOlder: true, onLoadOlder: () => {}, loadingOlder: true },
+};

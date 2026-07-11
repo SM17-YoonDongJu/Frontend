@@ -15,6 +15,7 @@ import { ChatComparisonBanner } from "@/shared/ui/chat/ChatComparisonBanner";
 import { ChatThreadHeader } from "@/shared/ui/chat/ChatThreadHeader";
 import { ChatThreadView } from "@/shared/ui/chat/ChatThreadView";
 import { MatchConfirmModal } from "@/shared/ui/chat/MatchConfirmModal";
+import { MatchRejectConfirmModal } from "@/shared/ui/chat/MatchRejectConfirmModal";
 import { MatchStatusBadge } from "@/shared/ui/chat/MatchStatusBadge";
 import { MessageInputBar } from "@/shared/ui/chat/MessageInputBar";
 import { ROOM_STATUS_META } from "@/shared/ui/chat/room-status";
@@ -40,19 +41,26 @@ export function CustomerChatThreadContent({
   const router = useRouter();
   const { data: me } = useMe();
   const { data: rooms } = useChatList();
-  const { data: messages } = useChatMessages(chatRoomId);
+  const { messages, hasOlder, loadOlder, loadingOlder } = useChatMessages(chatRoomId);
   const sendMessage = useSendChatMessage(chatRoomId);
 
   const room = rooms.find((item) => item.chatRoomId === chatRoomId);
   const match = useMatchProposal(room?.reportId ?? "");
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
 
   const currentUserId = String(me.userId);
 
   if (!room) {
     return (
       <div className="flex h-full flex-col">
-        <ChatThreadView messages={messages.list} currentUserId={currentUserId} />
+        <ChatThreadView
+        messages={messages}
+        currentUserId={currentUserId}
+        hasOlder={hasOlder}
+        onLoadOlder={loadOlder}
+        loadingOlder={loadingOlder}
+      />
       </div>
     );
   }
@@ -74,8 +82,13 @@ export function CustomerChatThreadContent({
 
   const subtitle = `${room.caseNo} · ${SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.roomStatus].label}`;
 
-  const rejectMatch = () =>
-    match.mutate({ proposalId: room.proposalId, status: "REJECTED" });
+  // 거절도 비가역이라 완료와 대칭으로 확인 모달을 거친다
+  const rejectMatch = () => setRejectOpen(true);
+  const confirmReject = () =>
+    match.mutate(
+      { proposalId: room.proposalId, status: "REJECTED" },
+      { onSuccess: () => setRejectOpen(false) },
+    );
   const confirmMatch = () =>
     match.mutate(
       { proposalId: room.proposalId, status: "ACCEPTED" },
@@ -181,7 +194,13 @@ export function CustomerChatThreadContent({
         </div>
       )}
 
-      <ChatThreadView messages={messages.list} currentUserId={currentUserId} />
+      <ChatThreadView
+        messages={messages}
+        currentUserId={currentUserId}
+        hasOlder={hasOlder}
+        onLoadOlder={loadOlder}
+        loadingOlder={loadingOlder}
+      />
 
       <MessageInputBar
         onSend={(content) => sendMessage.mutate({ content })}
@@ -197,6 +216,14 @@ export function CustomerChatThreadContent({
         pending={match.isPending}
         onConfirm={confirmMatch}
         onCancel={() => setConfirmOpen(false)}
+      />
+
+      <MatchRejectConfirmModal
+        open={rejectOpen}
+        adjusterName={room.adjusterName}
+        pending={match.isPending}
+        onConfirm={confirmReject}
+        onCancel={() => setRejectOpen(false)}
       />
     </div>
   );
