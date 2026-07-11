@@ -1269,13 +1269,14 @@ export const handlers = [
   }),
 
   // 받은 제안 목록 조회 (이슈 #18/#48) — 채팅방(chatRooms)을 원천으로 동기화.
-  //   같은 proposalId·status를 노출해 채팅↔proposals 정합 유지. REJECTED 제안도 반환(카드에서 회색 처리).
+  //   같은 proposalId·status를 노출해 채팅↔proposals 정합 유지.
+  //   REJECTED 제안은 목록에서 제외(받은제안 카드 UX: 거절 시 제거. ⚠️ 노출 정책 백엔드 확인 중 — TEMP §5-3).
   http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async ({ params }) => {
     await delay(500);
 
     const reportId = typeof params.reportId === "string" ? params.reportId : "";
     const list = chatRooms
-      .filter((room) => room.reportId === reportId)
+      .filter((room) => room.reportId === reportId && room.matchStatus !== "REJECTED")
       .map((room) => {
         const meta = CHAT_PROPOSAL_META[room.proposalId];
         return {
