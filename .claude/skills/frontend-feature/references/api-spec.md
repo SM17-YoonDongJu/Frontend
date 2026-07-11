@@ -61,6 +61,7 @@ auth · user · settings · report · review · matching · chat · payment · a
 | 400 | `VALIDATION_ERROR` | 필드 값 검증 위반(형식·길이·범위) |
 | 400 | `MISSING_REQUIRED_FIELD` | 필수 입력값 누락 |
 | 400 | `UNSUPPORTED_OPERATION` | 미지원 동작(MVP 미지원 보험사, 미적재 약관 리포트 등) |
+| 400 | `UNSUPPORTED_PROVIDER` | 미지원 소셜 로그인 provider(kakao·naver 외) — `/auth/oauth2/{provider}/callback` |
 | 401 | `INVALID_TOKEN` | 토큰 위조·변조·서명 오류 |
 | 401 | `EXPIRED_TOKEN` | 토큰 만료 → Refresh 재발급 필요 |
 | 401 | `LOGIN_REQUIRED` | 비로그인 상태로 보호 리소스 접근 |
