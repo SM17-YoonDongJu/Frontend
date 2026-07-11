@@ -57,6 +57,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @insurance/web build
+        env:
+          # main/dev push에서만 소스맵 업로드 — PR 빌드는 토큰 미주입으로 자동 스킵
+          SENTRY_AUTH_TOKEN: ${{ github.event_name == 'push' && secrets.SENTRY_AUTH_TOKEN || '' }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
 
   e2e:
     runs-on: ubuntu-latest
