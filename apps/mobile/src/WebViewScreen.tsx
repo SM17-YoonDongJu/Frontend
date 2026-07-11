@@ -4,6 +4,7 @@ import { ActivityIndicator, BackHandler, Pressable, StyleSheet, Text, View } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
+import { APP_USER_AGENT_SUFFIX } from './config/user-agent';
 import { getWebUrl } from './config/web-url';
 
 export function WebViewScreen() {
@@ -26,6 +27,7 @@ export function WebViewScreen() {
       <WebView
         ref={webViewRef}
         source={{ uri: getWebUrl() }}
+        applicationNameForUserAgent={APP_USER_AGENT_SUFFIX}
         style={styles.webview}
         onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
         startInLoadingState
