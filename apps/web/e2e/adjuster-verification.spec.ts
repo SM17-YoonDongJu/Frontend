@@ -174,11 +174,17 @@ test.describe("심사 현황 상태 분기", () => {
     await expect(page).toHaveURL(new RegExp(`${FORM_PATH}$`));
   });
 
-  test("심사 중(PENDING)이면 진행 타임라인이 보인다", async ({ page }) => {
+  test("심사 중(PENDING)이면 진행 타임라인이 보인다", async ({ page }, testInfo) => {
     await page.setExtraHTTPHeaders({ "x-mock-scenario": "application-pending" });
     await page.goto(STATUS_PATH);
-    await expect(page.getByRole("heading", { name: "자격 인증을 심사하고 있어요" })).toBeVisible();
-    await expect(page.getByText("서류 제출 완료")).toBeVisible();
+    // ReviewTimeline은 md 경계로 레이아웃 분기(모바일=가로 스테퍼, 데스크톱=세로 카드).
+    if (testInfo.project.name === "chromium") {
+      await expect(page.getByRole("heading", { name: "자격 인증을 심사하고 있어요" })).toBeVisible();
+      await expect(page.getByText("서류 제출 완료")).toBeVisible();
+    } else {
+      await expect(page.getByRole("heading", { name: "자격 심사가 진행 중이에요" })).toBeVisible();
+      await expect(page.getByText("제출 완료", { exact: true })).toBeVisible();
+    }
   });
 
   test("반려(REJECTED)면 반려 사유와 서류별 결과가 보인다", async ({ page }) => {
@@ -240,7 +246,8 @@ test.describe("모바일 3스텝 퍼널", () => {
       await page.getByRole("button", { name: "등록 신청하기" }).click();
       await expect(page).toHaveURL(new RegExp(`${STATUS_PATH}$`));
     }).toPass({ timeout: 15000 });
-    await expect(page.getByRole("heading", { name: "자격 인증을 심사하고 있어요" })).toBeVisible();
+    // 모바일 레이아웃의 심사 현황 헤딩(가로 스테퍼).
+    await expect(page.getByRole("heading", { name: "자격 심사가 진행 중이에요" })).toBeVisible();
   });
 
   test("STEP1에서 미입력으로 다음을 누르면 인라인 에러가 뜨고 진행되지 않는다", async ({ page }) => {
