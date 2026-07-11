@@ -2,7 +2,15 @@ import { z } from "zod";
 
 /** 검수 대기 목록. 출처: API 명세 GET /reports/pending-review. 필드명 명세 그대로. */
 
-export const reviewStatusSchema = z.enum(["AWAITING_INSPECTION", "COUNSELING"]);
+export const reviewStatusSchema = z.enum([
+  "AWAITING_INSPECTION",
+  "AWAITING_ADOPTION",
+  "COUNSELING",
+  "MATCHED",
+  "CLOSED",
+  // CONTRACT: 명세없음-임시 — 미채택 탭 대응값 백엔드 협의 중
+  "NOT_SELECTED",
+]);
 
 export const reviewListItemSchema = z.object({
   // 명세 확정 4필드 (naming-dictionary §7-6)
