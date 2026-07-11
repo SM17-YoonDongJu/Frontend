@@ -36,7 +36,13 @@ export const paginationSchema = z.object({
   hasNext: z.boolean(),
 });
 
+// CONTRACT: 명세없음-임시 — 탭 건수 필드 백엔드 협의 중
+export const reviewStatusCountsSchema = z
+  .object({ total: z.number().int() })
+  .catchall(z.number().int());
+
 export const reviewListSchema = z.object({
   list: z.array(reviewListItemSchema),
   pagination: paginationSchema,
+  statusCounts: reviewStatusCountsSchema.optional(),
 });
