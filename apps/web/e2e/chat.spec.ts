@@ -146,10 +146,30 @@ test("비교 중 방 헤더에는 매칭 거절·매칭 완료 버튼이 보인�
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
+  await expect(page.getByRole("button", { name: "매칭 거절" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "매칭 완료" }).first()).toBeVisible();
+  // 비교 배너(스레드 상단)
+  await expect(page.getByText(/명과 상담 중 · 마음에 들면/)).toBeVisible();
+});
+
+test("모바일에서도 헤더 매칭 버튼으로 매칭을 완료할 수 있다", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+
+  // 목록 상단 비교 배너(모바일 전용 문구)
+  await page.goto(CUSTOMER_LIST);
+  await expect(page.getByText(/3명과 상담 중이에요/)).toBeVisible();
+
+  // 스레드 헤더 컴팩트 매칭 버튼 → 모달 → 확정
+  await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
   await expect(page.getByRole("button", { name: "매칭 거절" })).toBeVisible();
-  await expect(page.getByRole("button", { name: "매칭 완료" })).toBeVisible();
-  // 비교 배너
-  await expect(page.getByText(/명과 상담 중/)).toBeVisible();
+  await page.getByRole("button", { name: "매칭 완료" }).click();
+
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText("함께 종료되는 상담 2건")).toBeVisible();
+  await dialog.getByRole("button", { name: "매칭 완료" }).click();
+
+  // 매칭 후 — 모바일 헤더에 사건 진행 링크
+  await expect(page.getByRole("link", { name: /사건 진행/ })).toBeVisible();
 });
 
 test("매칭 완료를 확정하면 형제 상담이 종료되고 매칭 완료로 바뀐다", async ({
@@ -241,6 +261,8 @@ test("데스크톱에서는 목록과 스레드가 분할 뷰로 함께 보이�
 });
 
 test("고객 방에서 공유 리포트를 열면 고객 리포트로 이동한다", async ({ page }) => {
+  // 비교 중 모바일 헤더는 매칭 버튼이 리포트 아이콘을 대체(Figma 1012:9931) — 리포트 보기는 데스크톱 헤더에서
+  await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
   await expect(async () => {
