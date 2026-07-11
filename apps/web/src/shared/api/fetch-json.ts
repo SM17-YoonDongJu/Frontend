@@ -1,5 +1,4 @@
 import type { ZodType } from "zod";
-import { getAccessToken } from "@/shared/auth/token-storage";
 
 interface ResponseEnvelope {
   status?: string;
@@ -22,11 +21,7 @@ export async function fetchJson<T>(
   schema: ZodType<T>,
   init?: RequestInit,
 ): Promise<T> {
-  const token = getAccessToken();
-  const headers = new Headers(init?.headers);
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-
-  const res = await fetch(url, { ...init, headers });
+  const res = await fetch(url, { ...init, credentials: "include" });
   const json: unknown = await res.json().catch(() => null);
 
   if (!res.ok || (isEnvelope(json) && json.code)) {

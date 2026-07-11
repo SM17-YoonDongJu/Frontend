@@ -287,7 +287,7 @@ export const handlers = [
   // OAuth 소셜 로그인 콜백 (#40). 기본 성공(기존 회원).
   //  - code=new            → isNewUser:true (회원가입 플로우 분기)
   //  - code=fail-invalid   → 400 INVALID_REQUEST     (브라우저 URL 주입 — E2E)
-  //  - code=fail-unsupported → 400 UNSUPPORTED_OPERATION (브라우저 URL 주입 — E2E)
+  //  - code=fail-unsupported → 400 UNSUPPORTED_PROVIDER (브라우저 URL 주입 — E2E)
   //  - code=fail-external  → 500 EXTERNAL_API_ERROR   (브라우저 URL 주입 — E2E)
   //  - x-mock-failure 헤더 → invalid / unsupported / 그 외: 위와 동일(서버측 주입, 유지)
   //  콜백 페이지가 URL 쿼리 code를 그대로 전달하므로 E2E는 URL만으로 실패 결정 주입 가능.
@@ -301,7 +301,7 @@ export const handlers = [
 
     if (provider !== "kakao" && provider !== "naver") {
       return HttpResponse.json(
-        { status: "400", code: "UNSUPPORTED_OPERATION", message: "지원하지 않는 소셜 로그인입니다." },
+        { status: "400", code: "UNSUPPORTED_PROVIDER", message: "지원하지 않는 소셜 로그인입니다." },
         { status: 400 },
       );
     }
@@ -314,7 +314,7 @@ export const handlers = [
     }
     if (failure === "unsupported" || code === "fail-unsupported") {
       return HttpResponse.json(
-        { status: "400", code: "UNSUPPORTED_OPERATION", message: "지원하지 않는 소셜 로그인입니다." },
+        { status: "400", code: "UNSUPPORTED_PROVIDER", message: "지원하지 않는 소셜 로그인입니다." },
         { status: 400 },
       );
     }
@@ -325,15 +325,13 @@ export const handlers = [
       );
     }
 
+    const isNewUser = code === "new";
     return HttpResponse.json({
       status: "200",
       message: "로그인 성공",
-      data: {
-        userId: crypto.randomUUID(),
-        isNewUser: code === "new",
-        accessToken: `mock-access-${crypto.randomUUID()}`,
-        refreshToken: `mock-refresh-${crypto.randomUUID()}`,
-      },
+      data: isNewUser
+        ? { userId: null, isNewUser: true, signupTicket: `mock-signup-ticket-${crypto.randomUUID()}` }
+        : { userId: crypto.randomUUID(), isNewUser: false, signupTicket: null },
     });
   }),
 

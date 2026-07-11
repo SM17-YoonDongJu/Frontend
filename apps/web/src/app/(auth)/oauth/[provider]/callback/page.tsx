@@ -3,9 +3,9 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { getMe } from "@/shared/api/get-me";
-import { setTokens } from "@/shared/auth/token-storage";
 import { Button } from "@/shared/ui/Button";
 import { maskEmail } from "../../../_shared/lib/mask-email";
+import { saveSignupTicket } from "../../../_shared/lib/signup-ticket";
 import { Spinner } from "@/shared/ui/icons/Spinner";
 import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 import {
@@ -22,7 +22,7 @@ function isSupportedProvider(value: string): value is OauthProvider {
 const ERROR_MESSAGE: Record<string, string> = {
   EXTERNAL_API_ERROR: "소셜 로그인 연동 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.",
   INVALID_REQUEST: "로그인 요청이 만료되었어요. 다시 시도해 주세요.",
-  UNSUPPORTED_OPERATION: "지원하지 않는 소셜 로그인 방식이에요. 다시 시도해 주세요.",
+  UNSUPPORTED_PROVIDER: "지원하지 않는 소셜 로그인 방식이에요. 다시 시도해 주세요.",
 };
 
 function CenteredMessage({ children }: { children: React.ReactNode }) {
@@ -61,12 +61,15 @@ export default function OauthCallbackPage() {
     if (!data || handledRef.current || !isSupportedProvider(provider)) return;
     handledRef.current = true;
 
-    void (async () => {
-      // 스토리지 실패(사생활 모드·quota 초과)나 프로필 조회 실패가 나도 로그인 이동은 항상 진행한다.
-      try {
-        setTokens(data.accessToken, data.refreshToken);
-      } catch {}
+    // 신규 회원은 쿠키가 없어(getMe 시 401) 티켓만 보관하고 가입으로 이동한다.
+    if (data.isNewUser) {
+      if (data.signupTicket) saveSignupTicket(data.signupTicket);
+      router.replace("/signup");
+      return;
+    }
 
+    void (async () => {
+      // 프로필 조회·스토리지 실패(사생활 모드·quota 초과)가 나도 로그인 이동은 항상 진행한다.
       try {
         let maskedEmail = "";
         try {
@@ -82,7 +85,7 @@ export default function OauthCallbackPage() {
         saveRecentLogin(recent);
       } catch {}
 
-      router.replace(data.isNewUser ? "/signup" : "/");
+      router.replace("/");
     })();
   }, [data, provider, router, saveRecentLogin]);
 

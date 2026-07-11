@@ -6,9 +6,8 @@ export const oauthProviderSchema = z.enum(["kakao", "naver"]);
 export type OauthProvider = z.infer<typeof oauthProviderSchema>;
 
 export const oauthCallbackSchema = z.object({
-  userId: z.uuid(),
+  userId: z.uuid().nullable(),
   isNewUser: z.boolean(),
-  accessToken: z.string(),
-  refreshToken: z.string(),
+  signupTicket: z.string().nullable(),
 });
 export type OauthCallback = z.infer<typeof oauthCallbackSchema>;
