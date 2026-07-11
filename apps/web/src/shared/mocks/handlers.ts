@@ -345,8 +345,221 @@ const ADJUSTER_MYPAGE = {
   },
 };
 
+// 손해사정사 자격 신청 상태(이슈 #44) — POST가 세우고 GET .../me가 읽는 모듈 스코프 상태.
+// 기본 null(미신청 → GET 404 POST_NOT_FOUND → NOT_APPLIED → 폼).
+type MockDocumentReview = {
+  type: "LICENSE" | "REGISTRATION" | "ID_CARD";
+  status: "PENDING" | "APPROVED" | "RESUBMIT_REQUIRED";
+};
+type MockAdjusterApplication = {
+  applicationId: string;
+  status: "PENDING" | "APPROVED" | "REJECTED";
+  submittedAt: string;
+  name: string;
+  speciality: string;
+  licenseNo: string | null;
+  documents: MockDocumentReview[];
+  rejectedAt: string | null;
+  rejectReason: string | null;
+};
+
+let adjusterApplicationState: MockAdjusterApplication | null = null;
+
+// 시나리오 override(E2E)용 고정 페이로드 빌더 — status GET을 상태별로 강제 렌더.
+function buildAdjusterApplication(
+  status: "PENDING" | "APPROVED" | "REJECTED",
+): MockAdjusterApplication {
+  const base: MockAdjusterApplication = {
+    applicationId: "aaaaaaaa-0044-4000-8000-000000000044",
+    status,
+    submittedAt: "2026-07-05T09:00:00Z",
+    name: "김상정",
+    speciality: "종합",
+    licenseNo: "제2014-0087호",
+    documents: [
+      { type: "LICENSE", status: "PENDING" },
+      { type: "REGISTRATION", status: "PENDING" },
+      { type: "ID_CARD", status: "PENDING" },
+    ],
+    rejectedAt: null,
+    rejectReason: null,
+  };
+
+  if (status === "APPROVED") {
+    return {
+      ...base,
+      documents: base.documents.map((d) => ({ ...d, status: "APPROVED" })),
+    };
+  }
+
+  if (status === "REJECTED") {
+    return {
+      ...base,
+      documents: [
+        { type: "LICENSE", status: "APPROVED" },
+        { type: "REGISTRATION", status: "RESUBMIT_REQUIRED" },
+        { type: "ID_CARD", status: "APPROVED" },
+      ],
+      rejectedAt: "2026-07-07T13:20:00Z",
+      rejectReason:
+        "등록확인서 이미지가 흐려 식별이 어렵습니다. 금감원 등록확인서를 다시 제출해 주세요.",
+    };
+  }
+
+  return base;
+}
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
+
+  // 손해사정사 자격 신청 생성 (#44) — 전역 봉투 거울. 성공 201 + { applicationId, status: PENDING }.
+  //   필수값 누락→400 MISSING_REQUIRED_FIELD, 자격증 번호·사본 둘 다 없음→400 MISSING_REQUIRED_FIELD,
+  //   진행중/승인 상태에서 재-POST→409 DUPLICATE_RESOURCE, REJECTED에서 재-POST→201 재허용(재제출).
+  //   x-mock-failure:apply→500 INTERNAL_SERVER_ERROR.
+  //   x-mock-scenario:application-duplicate→409 강제(E2E "이미 신청" 재현용, 상태 무관).
+  http.post(`${API_BASE_URL}/users/adjuster-applications`, async ({ request }) => {
+    await delay(600);
+
+    if (request.headers.get("x-mock-failure") === "apply") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "신청 처리 중 오류가 발생했습니다." },
+        { status: 500 },
+      );
+    }
+
+    // E2E "409 이미 신청" 시나리오 강제 — 스테이트풀 상태(초기 404)로는 POST가 항상 201이라 재현 불가.
+    // GET override 컨벤션(x-mock-scenario)과 동일하게 헤더로 중복 신청을 강제.
+    if (request.headers.get("x-mock-scenario") === "application-duplicate") {
+      return HttpResponse.json(
+        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 신청되었거나 인증된 상태입니다." },
+        { status: 409 },
+      );
+    }
+
+    const body = (await request.json().catch(() => ({}))) as {
+      name?: string;
+      speciality?: string;
+      affiliation?: string;
+      region?: string;
+      registrationImageUrl?: string;
+      idCardImageUrl?: string;
+      licenseNo?: string | null;
+      licenseImageUrl?: string | null;
+    };
+
+    if (
+      !body.name ||
+      !body.speciality ||
+      !body.affiliation ||
+      !body.region ||
+      !body.registrationImageUrl ||
+      !body.idCardImageUrl
+    ) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
+        { status: 400 },
+      );
+    }
+
+    if (!body.licenseNo && !body.licenseImageUrl) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "자격증 번호 또는 사본 중 하나는 필수입니다." },
+        { status: 400 },
+      );
+    }
+
+    // 진행중(PENDING)·승인(APPROVED)이면 중복 신청. REJECTED·미신청이면 새 PENDING 생성(재제출 재허용).
+    if (adjusterApplicationState && adjusterApplicationState.status !== "REJECTED") {
+      return HttpResponse.json(
+        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 신청되었거나 인증된 상태입니다." },
+        { status: 409 },
+      );
+    }
+
+    adjusterApplicationState = {
+      applicationId: crypto.randomUUID(),
+      status: "PENDING",
+      submittedAt: new Date().toISOString(),
+      name: body.name,
+      speciality: body.speciality,
+      licenseNo: body.licenseNo ?? null,
+      documents: [
+        { type: "LICENSE", status: "PENDING" },
+        { type: "REGISTRATION", status: "PENDING" },
+        { type: "ID_CARD", status: "PENDING" },
+      ],
+      rejectedAt: null,
+      rejectReason: null,
+    };
+
+    return HttpResponse.json(
+      {
+        status: "201",
+        message: "자격 인증 신청이 접수되었습니다.",
+        data: { applicationId: adjusterApplicationState.applicationId, status: "PENDING" },
+      },
+      { status: 201 },
+    );
+  }),
+
+  // 본인 자격 신청 상태 조회 (#44) — 미신청 404 POST_NOT_FOUND, 그 외 PENDING/APPROVED/REJECTED.
+  //   시나리오 override: x-mock-scenario=application-(not-applied|pending|approved|rejected).
+  //   x-mock-failure=application-unauthorized→401 LOGIN_REQUIRED / application-status→500.
+  http.get(`${API_BASE_URL}/users/adjuster-applications/me`, async ({ request }) => {
+    await delay(400);
+
+    const failure = request.headers.get("x-mock-failure");
+    if (failure === "application-unauthorized") {
+      return HttpResponse.json(
+        { status: "401", code: "LOGIN_REQUIRED", message: "로그인이 필요합니다." },
+        { status: 401 },
+      );
+    }
+    if (failure === "application-status") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "신청 상태를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    const scenario = request.headers.get("x-mock-scenario");
+    if (scenario === "application-not-applied") {
+      return HttpResponse.json(
+        { status: "404", code: "POST_NOT_FOUND", message: "신청 이력이 없습니다." },
+        { status: 404 },
+      );
+    }
+    if (
+      scenario === "application-pending" ||
+      scenario === "application-approved" ||
+      scenario === "application-rejected"
+    ) {
+      const status =
+        scenario === "application-approved"
+          ? "APPROVED"
+          : scenario === "application-rejected"
+            ? "REJECTED"
+            : "PENDING";
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: buildAdjusterApplication(status),
+      });
+    }
+
+    if (!adjusterApplicationState) {
+      return HttpResponse.json(
+        { status: "404", code: "POST_NOT_FOUND", message: "신청 이력이 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: adjusterApplicationState,
+    });
+  }),
 
   // 알림 모두 읽음 처리 (#49) — ⚠️ 명세없음-초안. 구체 경로를 목록 GET보다 먼저 등록.
   http.patch(`${API_BASE_URL}/users/me/notifications/read-all`, async ({ request }) => {
