@@ -31,13 +31,13 @@ export function SpecialtyChips({ value, onToggle, "aria-label": ariaLabel }: Spe
             aria-pressed={selected}
             onClick={() => onToggle(option)}
             className={cn(
-              "inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-chip border px-3.5 py-2 text-[0.84375rem] font-semibold transition",
+              "inline-flex min-h-[2.75rem] items-center gap-1.5 rounded-[0.625rem] border px-3.5 py-2 text-[0.8125rem] font-bold transition",
               selected
-                ? "border-ink bg-card text-ink"
-                : "border-line bg-card text-ink-3 hover:text-ink",
+                ? "border-ink bg-ink text-white"
+                : "border-line bg-card text-ink-2 hover:brightness-[.98]",
             )}
           >
-            {selected && <Check className="text-[0.875rem]" />}
+            {selected && <Check className="text-[0.8125rem]" />}
             {option}
           </button>
         );

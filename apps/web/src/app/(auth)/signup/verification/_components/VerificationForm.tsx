@@ -6,6 +6,7 @@ import { Label } from "@/shared/ui/Label";
 import type { VerificationForm as VerificationFormState } from "../_hooks/use-verification-form";
 import { BasicInfoFields } from "./BasicInfoFields";
 import { DocumentFields } from "./DocumentFields";
+import { DocumentSecurityNote } from "./DocumentSecurityNote";
 import { ExpertiseFields } from "./ExpertiseFields";
 import { SubmitErrorNotice } from "./SubmitErrorNotice";
 import { VerificationHeader } from "./VerificationHeader";
@@ -32,7 +33,7 @@ function FormCard({ title, description, children }: FormCardProps) {
   );
 }
 
-/** 데스크톱(md↑) 단일 페이지 폼. 전 필드를 한 화면에. */
+/** 데스크톱(md↑) 단일 페이지 폼. Figma 131-10583: 자격 정보 + 증빙 서류 2카드. */
 export function VerificationForm({ form }: VerificationFormProps) {
   return (
     <div className="fixed inset-0 z-40 overflow-y-auto bg-paper">
@@ -54,17 +55,16 @@ export function VerificationForm({ form }: VerificationFormProps) {
         </div>
 
         <div className="mt-[1.125rem] flex flex-col gap-[1.125rem]">
-          <FormCard title="기본 정보">
+          <FormCard title="자격 정보">
             <BasicInfoFields form={form} />
-          </FormCard>
-
-          <FormCard title="전문성">
             <ExpertiseFields form={form} />
           </FormCard>
 
           <FormCard title="증빙 서류" description="PDF 또는 이미지, 최대 20MB">
             <DocumentFields form={form} />
           </FormCard>
+
+          <DocumentSecurityNote />
 
           {form.submitErrorCode && (
             <SubmitErrorNotice code={form.submitErrorCode} onGoStatus={form.goStatus} />

@@ -1,6 +1,7 @@
 import { Label } from "@/shared/ui/Label";
 import type { VerificationForm } from "../_hooks/use-verification-form";
 import { DocumentFields } from "./DocumentFields";
+import { DocumentSecurityNote } from "./DocumentSecurityNote";
 
 interface StepDocumentsProps {
   form: VerificationForm;
@@ -18,6 +19,7 @@ export function StepDocuments({ form }: StepDocumentsProps) {
         </p>
       </header>
       <DocumentFields form={form} />
+      <DocumentSecurityNote />
     </div>
   );
 }

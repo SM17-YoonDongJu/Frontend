@@ -2,18 +2,18 @@
 
 import { Input } from "@/shared/ui/Input";
 import { Label } from "@/shared/ui/Label";
-import { SegmentedControl } from "@/shared/ui/SegmentedControl";
 import { Textarea } from "@/shared/ui/Textarea";
 import type { AffiliationType, Speciality } from "../_model/adjuster-application.schema";
 import type { VerificationForm } from "../_hooks/use-verification-form";
+import { ChoiceChips, type ChoiceOption } from "./ChoiceChips";
 import { SpecialtyChips } from "./SpecialtyChips";
 
-const SPECIALITY_OPTIONS: { value: Speciality; label: string }[] = [
+const SPECIALITY_OPTIONS: ChoiceOption<Speciality>[] = [
   { value: "신체", label: "신체손해사정사" },
   { value: "종합", label: "종합손해사정사 (신체 포함)" },
 ];
 
-const AFFILIATION_OPTIONS: { value: AffiliationType; label: string }[] = [
+const AFFILIATION_OPTIONS: ChoiceOption<AffiliationType>[] = [
   { value: "INDEPENDENT", label: "독립 (개업)" },
   { value: "FIRM", label: "손해사정법인 소속" },
 ];
@@ -22,20 +22,23 @@ const INTRODUCTION_MAX = 200;
 
 interface ExpertiseFieldsProps {
   form: VerificationForm;
+  /** 모바일 퍼널: 텍스트 인풋을 placeholder-only로(칩·선택 라벨은 유지). */
+  hideLabels?: boolean;
 }
 
 /** 전문성 필드(자격구분·소속·전문분야·경력·활동지역·소개). */
-export function ExpertiseFields({ form }: ExpertiseFieldsProps) {
+export function ExpertiseFields({ form, hideLabels }: ExpertiseFieldsProps) {
+  const inputLabelClass = hideLabels ? "sr-only" : undefined;
+
   return (
     <div className="flex flex-col gap-[1.125rem]">
       <div className="flex flex-col gap-2">
         <Label>자격 구분</Label>
-        <SegmentedControl
+        <ChoiceChips
           aria-label="자격 구분"
           options={SPECIALITY_OPTIONS}
           value={form.speciality}
           onChange={form.setSpeciality}
-          className="w-full flex-wrap"
         />
         {form.errors.speciality && (
           <span className="text-[0.75rem] font-medium text-terra">{form.errors.speciality}</span>
@@ -44,12 +47,11 @@ export function ExpertiseFields({ form }: ExpertiseFieldsProps) {
 
       <div className="flex flex-col gap-2">
         <Label>소속</Label>
-        <SegmentedControl
+        <ChoiceChips
           aria-label="소속"
           options={AFFILIATION_OPTIONS}
           value={form.affiliation}
           onChange={form.setAffiliation}
-          className="w-full flex-wrap"
         />
         {form.errors.affiliation && (
           <span className="text-[0.75rem] font-medium text-terra">{form.errors.affiliation}</span>
@@ -69,31 +71,37 @@ export function ExpertiseFields({ form }: ExpertiseFieldsProps) {
 
       <div className="grid grid-cols-1 gap-[1.125rem] md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="verification-career">경력 연차</Label>
+          <Label htmlFor="verification-career" className={inputLabelClass}>
+            경력 연차
+          </Label>
           <Input
             id="verification-career"
             inputMode="numeric"
             value={form.career}
             onChange={(event) => form.setCareer(event.target.value.replace(/\D/g, ""))}
-            placeholder="12"
+            placeholder={hideLabels ? "경력 연차" : "12"}
             suffix="년"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="verification-region">활동 지역</Label>
+          <Label htmlFor="verification-region" className={inputLabelClass}>
+            활동 지역
+          </Label>
           <Input
             id="verification-region"
             value={form.region}
             onChange={(event) => form.setRegion(event.target.value)}
-            placeholder="서울 · 경기"
+            placeholder={hideLabels ? "활동 지역" : "서울 · 경기"}
             error={form.errors.region}
           />
         </div>
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="verification-introduction">한 줄 소개</Label>
+        <Label htmlFor="verification-introduction" className={inputLabelClass}>
+          한 줄 소개
+        </Label>
         <Textarea
           id="verification-introduction"
           value={form.introduction}
