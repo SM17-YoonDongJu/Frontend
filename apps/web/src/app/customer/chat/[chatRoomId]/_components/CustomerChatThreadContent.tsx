@@ -115,6 +115,38 @@ export function CustomerChatThreadContent({
       </Link>
     ) : null;
 
+  // Figma 1012:9931 — 모바일 헤더 매칭 버튼(거절=terra-soft·완료=navy, 컴팩트). 데스크톱 actions보다 작고 순서·톤 상이
+  const mobileActions =
+    group === "comparing" ? (
+      <>
+        <button
+          type="button"
+          onClick={rejectMatch}
+          disabled={match.isPending}
+          className="rounded-button bg-terra-soft px-2.5 py-2 text-[0.75rem] font-bold text-terra transition hover:brightness-[.97] disabled:cursor-not-allowed disabled:opacity-[.42]"
+        >
+          매칭 거절
+        </button>
+        <button
+          type="button"
+          onClick={() => setConfirmOpen(true)}
+          disabled={match.isPending}
+          className="flex items-center gap-1 rounded-button bg-navy px-2.5 py-2 text-[0.75rem] font-bold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
+        >
+          <CheckCircle className="text-[0.9375rem]" />
+          매칭 완료
+        </button>
+      </>
+    ) : group === "matched" ? (
+      <Link
+        href={reportHref}
+        className="flex items-center gap-1 rounded-button bg-navy px-2.5 py-2 text-[0.75rem] font-bold text-white transition hover:brightness-[.96]"
+      >
+        사건 진행
+        <ArrowRight className="text-[0.9375rem]" />
+      </Link>
+    ) : null;
+
   return (
     <div className="flex h-full flex-col">
       <ChatThreadHeader
@@ -125,22 +157,28 @@ export function CustomerChatThreadContent({
         subtitle={subtitle}
         badge={group === "matched" ? <MatchStatusBadge group={group} /> : undefined}
         actions={actions}
+        mobileActions={mobileActions}
         onBack={() => router.push(chatBasePath)}
       />
 
+      {/* Figma 1012:9931 — 모바일 스레드엔 배너 없음(목록 배너·헤더 버튼이 대체). 데스크톱만 노출 */}
       {group === "comparing" && (
-        <ChatComparisonBanner
-          variant="comparing"
-          reportTypeLabel={room.reportTypeLabel}
-          comparingCount={comparingCount}
-        />
+        <div className="hidden md:block">
+          <ChatComparisonBanner
+            variant="comparing"
+            reportTypeLabel={room.reportTypeLabel}
+            comparingCount={comparingCount}
+          />
+        </div>
       )}
       {group === "matched" && (
-        <ChatComparisonBanner
-          variant="matched"
-          reportTypeLabel={room.reportTypeLabel}
-          progressHref={reportHref}
-        />
+        <div className="hidden md:block">
+          <ChatComparisonBanner
+            variant="matched"
+            reportTypeLabel={room.reportTypeLabel}
+            progressHref={reportHref}
+          />
+        </div>
       )}
 
       <ChatThreadView messages={messages.list} currentUserId={currentUserId} />

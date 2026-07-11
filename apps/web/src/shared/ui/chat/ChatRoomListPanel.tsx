@@ -9,6 +9,7 @@ import { cn } from "@/shared/lib/utils";
 import { ChatBubble } from "@/shared/ui/icons/ChatBubble";
 import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { Search } from "@/shared/ui/icons/Search";
+import { ChatListComparisonBanner } from "./ChatListComparisonBanner";
 import { ChatRoomListItem } from "./ChatRoomListItem";
 
 interface MatchGroupMeta {
@@ -83,6 +84,15 @@ export function ChatRoomListPanel({
     });
   }, [rooms, query]);
 
+  // 비교 배너용 — 비교중 그룹 방(모바일 목록 상단 배너 노출·수 계산)
+  const comparingRooms = useMemo(
+    () =>
+      filteredRooms.filter(
+        (room) => toMatchGroup(room.matchStatus, room.roomStatus) === "comparing",
+      ),
+    [filteredRooms],
+  );
+
   return (
     <div className="flex h-full flex-col">
       {/* Figma — 모바일 제목 23px(663:3655) · 데스크톱 20px + 하단 구분선(95:4574) */}
@@ -112,6 +122,14 @@ export function ChatRoomListPanel({
       ) : grouped ? (
         /* customer — 매칭 그룹 섹션(상담 중·비교 / 진행 중·매칭 완료 / 종료된 상담) */
         <div className="flex-1 overflow-y-auto pb-5 md:pb-0">
+          {comparingRooms[0] && (
+            // Figma 1011:9251 — 모바일 목록 상단 비교 배너(데스크톱 목록엔 없음)
+            <ChatListComparisonBanner
+              reportTypeLabel={comparingRooms[0].reportTypeLabel}
+              comparingCount={comparingRooms.length}
+              className="md:hidden"
+            />
+          )}
           {MATCH_GROUP_SECTIONS.map((section) => {
             const sectionRooms = filteredRooms.filter(
               (room) => toMatchGroup(room.matchStatus, room.roomStatus) === section.key,
@@ -121,15 +139,21 @@ export function ChatRoomListPanel({
             const isCollapsed = collapsed.has(section.key);
 
             return (
-              <section key={section.key}>
+              // Figma 1011:9252 — 모바일은 그룹 라벨을 카드 밖 상단에, 방들은 흰 라운드 카드. 데스크톱은 평면 섹션
+              <section key={section.key} className="px-5 pt-2 first:pt-1 md:p-0">
                 {/* 아코디언 헤더 — 클릭 시 섹션 펼침/접힘 */}
                 <button
                   type="button"
                   onClick={() => toggleGroup(section.key)}
                   aria-expanded={!isCollapsed}
-                  className="flex w-full items-center gap-1.5 bg-paper-2 px-5 py-2.5 text-left transition hover:brightness-[.98]"
+                  className="flex w-full items-center gap-1.5 px-0.5 py-2 text-left md:bg-paper-2 md:px-5 md:py-2.5 md:transition md:hover:brightness-[.98]"
                 >
-                  <span className={cn("text-[0.6875rem] font-bold", section.labelClass)}>
+                  <span
+                    className={cn(
+                      "text-[0.75rem] font-bold md:text-[0.6875rem]",
+                      section.labelClass,
+                    )}
+                  >
                     {section.label}
                   </span>
                   <span
@@ -148,26 +172,27 @@ export function ChatRoomListPanel({
                   />
                 </button>
                 {!isCollapsed && (
-                <ul>
-                  {sectionRooms.map((room) => (
-                    <li
-                      key={room.chatRoomId}
-                      className="border-b border-line-2 last:border-b-0"
-                    >
-                      <ChatRoomListItem
-                        name={room.adjusterName}
-                        caseNo={room.caseNo}
-                        lastMessage={room.lastMessage}
-                        lastMessageAt={room.lastMessageAt}
-                        avatarUrl={room.avatarUrl}
-                        roomStatus={room.roomStatus}
-                        matchStatus={room.matchStatus}
-                        href={buildHref(room.chatRoomId)}
-                        active={room.chatRoomId === activeChatRoomId}
-                      />
-                    </li>
-                  ))}
-                </ul>
+                  <ul className="overflow-hidden rounded-card border border-line bg-card shadow-[0px_1px_1px_rgba(21,32,46,0.03)] md:rounded-none md:border-0 md:bg-transparent md:shadow-none">
+                    {sectionRooms.map((room) => (
+                      <li
+                        key={room.chatRoomId}
+                        className="border-b border-line-2 last:border-b-0"
+                      >
+                        <ChatRoomListItem
+                          name={room.adjusterName}
+                          caseNo={room.caseNo}
+                          lastMessage={room.lastMessage}
+                          lastMessageAt={room.lastMessageAt}
+                          avatarUrl={room.avatarUrl}
+                          roomStatus={room.roomStatus}
+                          matchStatus={room.matchStatus}
+                          reportTypeLabel={room.reportTypeLabel}
+                          href={buildHref(room.chatRoomId)}
+                          active={room.chatRoomId === activeChatRoomId}
+                        />
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </section>
             );

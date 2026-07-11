@@ -87,6 +87,19 @@ export const Grouped: Story = {
   },
 };
 
+/** customer 모바일 — 비교 3명 그룹 + 상단 비교 배너(mobile1 뷰포트에서 배너 노출). */
+export const GroupedComparing: Story = {
+  parameters: { viewport: { defaultViewport: "mobile1" } },
+  args: {
+    grouped: true,
+    rooms: rooms.map((room) => ({
+      ...room,
+      roomStatus: "ACTIVE",
+      matchStatus: "COUNSELING",
+    })),
+  },
+};
+
 export const Empty: Story = { args: { rooms: [] } };
 
 export const EmptyWithAction: Story = {

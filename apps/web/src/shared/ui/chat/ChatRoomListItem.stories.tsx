@@ -50,3 +50,8 @@ export const Matched: Story = {
 export const Ended: Story = {
   args: { matchStatus: "REJECTED", lastMessage: "상담이 종료됐어요." },
 };
+
+/** customer 그룹 목록 — 이름 옆 사건 유형 라벨("· 후유장해"). */
+export const WithReportType: Story = {
+  args: { matchStatus: "COUNSELING", reportTypeLabel: "후유장해" },
+};

@@ -57,6 +57,32 @@ export const CustomerComparing: Story = {
   },
 };
 
+/** customer 모바일 비교중 — 헤더 우측 컴팩트 매칭 버튼(거절=terra-soft·완료=navy). 모바일 폭에서 확인. */
+export const CustomerComparingMobile: Story = {
+  parameters: { viewport: { defaultViewport: "mobile1" } },
+  args: {
+    onBack: () => {},
+    subtitle: "#20260520-017 · 상담 중 · 비교 중",
+    mobileActions: (
+      <>
+        <button
+          type="button"
+          className="rounded-button bg-terra-soft px-2.5 py-2 text-[0.75rem] font-bold text-terra"
+        >
+          매칭 거절
+        </button>
+        <button
+          type="button"
+          className="flex items-center gap-1 rounded-button bg-navy px-2.5 py-2 text-[0.75rem] font-bold text-white"
+        >
+          <CheckCircle className="text-[0.9375rem]" />
+          매칭 완료
+        </button>
+      </>
+    ),
+  },
+};
+
 /** customer 매칭후 — 매칭 완료 배지 + 리포트 보기 + 사건 진행 보기(ink). */
 export const CustomerMatched: Story = {
   args: {

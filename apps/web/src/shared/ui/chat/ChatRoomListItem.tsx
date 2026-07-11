@@ -20,6 +20,8 @@ export interface ChatRoomListItemProps {
   active?: boolean;
   /** 매칭 상태(customer 그룹 목록). 미전달(partner)이면 roomStatus 기반 렌더 유지 */
   matchStatus?: MatchStatus;
+  /** 사건 유형 라벨(예 "후유장해"). customer 그룹 목록에서 이름 옆 "· {label}" 표시. 미전달(partner)이면 미표시 */
+  reportTypeLabel?: string;
 }
 
 const EMPTY_MESSAGE = "아직 주고받은 메시지가 없어요.";
@@ -34,6 +36,7 @@ export function ChatRoomListItem({
   href,
   active,
   matchStatus,
+  reportTypeLabel,
 }: ChatRoomListItemProps) {
   const group = matchStatus ? toMatchGroup(matchStatus, roomStatus) : null;
   // partner(미전달)는 기존 roomStatus 기반, customer는 매칭 그룹 파생을 따른다.
@@ -75,6 +78,10 @@ export function ChatRoomListItem({
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
           <span className="truncate text-[0.8625rem] font-bold text-ink">{name}</span>
+          {reportTypeLabel && (
+            // Figma 1011:9706 — 이름 옆 사건 유형(10px·ink-3)
+            <span className="shrink-0 text-[0.625rem] text-ink-3">· {reportTypeLabel}</span>
+          )}
           {ended && (
             <span className="sr-only">{ROOM_STATUS_META.CLOSED.label}</span>
           )}

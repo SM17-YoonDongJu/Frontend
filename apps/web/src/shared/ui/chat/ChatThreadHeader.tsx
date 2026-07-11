@@ -21,6 +21,8 @@ export interface ChatThreadHeaderProps {
   subtitle?: string;
   /** 우측 액션 슬롯(데스크톱). 리포트 보기 다음에 붙는다(customer 매칭 버튼 등) */
   actions?: ReactNode;
+  /** 모바일 우측 액션 슬롯. 전달 시 모바일 리포트 아이콘 대신 표시(customer 매칭 버튼). 미전달(partner)=현행 리포트 아이콘 */
+  mobileActions?: ReactNode;
   /** 상담 종료(데스크톱 전용 버튼, partner 하위호환). ACTIVE 방에서만 노출 */
   onClose?: () => void;
   closePending?: boolean;
@@ -35,6 +37,7 @@ export function ChatThreadHeader({
   badge,
   subtitle: subtitleOverride,
   actions,
+  mobileActions,
   onClose,
   closePending,
 }: ChatThreadHeaderProps) {
@@ -69,14 +72,18 @@ export function ChatThreadHeader({
         <span className="sr-only md:hidden">{subtitle}</span>
       </div>
 
-      {/* 모바일 — 맨 아이콘(Figma 663:3811). 접근성 이름은 데스크톱 버튼과 동일("리포트 보기") */}
-      <Link
-        href={reportHref}
-        aria-label="리포트 보기"
-        className="flex size-9 items-center justify-center rounded-button text-[1.1875rem] text-ink transition hover:bg-paper-2 md:hidden"
-      >
-        <FileText />
-      </Link>
+      {/* 모바일 — 매칭 액션 주입 시(customer) 리포트 아이콘 대신 표시, 아니면(partner) 리포트 아이콘. Figma 1012:9931 */}
+      {mobileActions ? (
+        <div className="flex shrink-0 items-center gap-1.5 md:hidden">{mobileActions}</div>
+      ) : (
+        <Link
+          href={reportHref}
+          aria-label="리포트 보기"
+          className="flex size-9 items-center justify-center rounded-button text-[1.1875rem] text-ink transition hover:bg-paper-2 md:hidden"
+        >
+          <FileText />
+        </Link>
+      )}
 
       {/* 데스크톱 — 리포트 보기·상담 종료 버튼 */}
       <div className="hidden items-center gap-2 md:flex">
