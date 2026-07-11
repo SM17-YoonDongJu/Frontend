@@ -26,7 +26,7 @@ interface Props {
 
 export function ReviewStatusTabs({ value, counts, onSelect }: Props) {
   return (
-    <div role="tablist" aria-label="상태 필터" className="flex gap-5 overflow-x-auto border-b border-line px-5 pt-3">
+    <div role="tablist" aria-label="상태 필터" className="flex gap-5 overflow-x-auto border-b border-line px-5 pt-3 md:px-0">
       {REVIEW_STATUS_OPTIONS.map((option) => {
         const active = option.value === value;
         const count = option.value === "전체" ? counts?.total : counts?.[option.value];
