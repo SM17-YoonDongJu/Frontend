@@ -52,7 +52,7 @@ export function NotificationBellMenu() {
           onClose={() => setOpen(false)}
           triggerRef={triggerRef}
           label="알림"
-          className="w-95"
+          className="w-95 bg-paper"
         >
           <NotificationPopover onClose={() => setOpen(false)} />
         </Popover>
