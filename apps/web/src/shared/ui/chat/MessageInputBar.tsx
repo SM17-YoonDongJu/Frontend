@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore, type FormEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import { Send } from "@/shared/ui/icons/Send";
 
 export interface MessageInputBarProps {
@@ -33,6 +33,8 @@ function useIsMdUp() {
 export function MessageInputBar({ onSend, disabled, closed, sendFailed }: MessageInputBarProps) {
   const [value, setValue] = useState("");
   const isMdUp = useIsMdUp();
+  // 직전 전송 내용 — 실패(롤백) 시 입력창에 복원해 바로 재시도할 수 있게
+  const lastSentRef = useRef("");
 
   const trimmed = value.trim();
   const blocked = Boolean(disabled) || Boolean(closed);
@@ -41,9 +43,16 @@ export function MessageInputBar({ onSend, disabled, closed, sendFailed }: Messag
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (!canSend) return;
+    lastSentRef.current = trimmed;
     onSend(trimmed);
     setValue("");
   };
+
+  useEffect(() => {
+    if (!sendFailed || !lastSentRef.current) return;
+    // 사용자가 새로 입력 중이면 덮어쓰지 않는다
+    setValue((current) => (current === "" ? lastSentRef.current : current));
+  }, [sendFailed]);
 
   if (closed) {
     // 종료된 방 — 입력·전송을 회색 비활성으로 잠금(문구는 placeholder로 안내)
