@@ -17,8 +17,7 @@ import { clearSignupDraft, loadSignupDraft, saveSignupDraft } from "./_model/sig
 import type { TermsType } from "./_shared/model/terms";
 
 const CUSTOMER_DASHBOARD_PATH = "/customer/dashboard";
-// TODO: 자격 인증 이슈 확정 후 실제 경로로 교체.
-const ADJUSTER_CERTIFY_PATH = "/signup?step=role";
+const ADJUSTER_CERTIFY_PATH = "/signup/verification";
 
 function SignupFunnel() {
   const router = useRouter();
