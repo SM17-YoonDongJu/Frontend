@@ -858,12 +858,20 @@ export const handlers = [
         (!status || review.status === status),
     );
 
+    // 탭 배지는 status 필터 적용 전 전체 분포 기준
+    const countsByStatus = PENDING_REVIEWS.reduce<Record<string, number>>((acc, review) => {
+      acc[review.status] = (acc[review.status] ?? 0) + 1;
+      return acc;
+    }, {});
+    const statusCounts = { total: PENDING_REVIEWS.length, ...countsByStatus };
+
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
         list,
         pagination: { page, size, totalElements: list.length, totalPages: 1, hasNext: false },
+        statusCounts,
       },
     });
   }),
