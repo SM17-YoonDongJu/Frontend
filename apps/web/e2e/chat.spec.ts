@@ -134,11 +134,25 @@ test("전송이 실패하면 낙관적으로 추가된 메시지가 롤백된다
   await input.fill(failing);
   await page.getByRole("button", { name: "전송" }).click();
 
-  // onError 롤백 → temp 메시지 제거 + 실패 안내 노출
-  await expect(page.getByText(failing)).toHaveCount(0);
+  // onError 롤백 → temp 말풍선 제거 + 실패 안내 + 입력창에 내용 복원(재시도 가능)
   await expect(
     page.getByText("메시지를 보내지 못했어요. 다시 시도해 주세요."),
   ).toBeVisible();
+  await expect(input).toHaveValue(failing);
+  // 말풍선은 롤백으로 제거(입력창 value는 getByText 매칭 대상 아님)
+  await expect(page.getByText(failing)).toHaveCount(0);
+});
+
+test("이전 대화는 위로 스크롤하면 이어서 불러온다", async ({ page }) => {
+  await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
+
+  // 최신 페이지에는 가장 오래된 메시지가 아직 없다
+  await expect(page.getByText("장해등급 재산정 여지가 있어 보입니다.")).toBeVisible();
+  await expect(page.getByText("이전 답변 내용 1번입니다.")).toHaveCount(0);
+
+  // 상단 센티널로 스크롤 → 이전 페이지 로드
+  await page.getByText(/이전 대화/).scrollIntoViewIfNeeded();
+  await expect(page.getByText("이전 답변 내용 1번입니다.")).toBeVisible();
 });
 
 test("비교 중 방 헤더에는 매칭 거절·매칭 완료 버튼이 보인다", async ({ page }) => {
@@ -208,6 +222,11 @@ test("매칭 거절을 누르면 그 방만 종료되고 입력이 차단된다"
   await expect(input).toBeEnabled();
   await page.getByRole("button", { name: "매칭 거절" }).click();
 
+  // 거절도 확인 모달을 거친다(비가역 액션)
+  const rejectDialog = page.getByRole("dialog");
+  await expect(rejectDialog.getByText(/상담을 종료할까요\?/)).toBeVisible();
+  await rejectDialog.getByRole("button", { name: "매칭 거절" }).click();
+
   // 거절한 방은 종료 — 입력·전송이 회색 비활성으로 잠김, 나머지 비교 유지
   await expect(input).toBeDisabled();
   await expect(input).toHaveAttribute(
@@ -222,8 +241,9 @@ test("종료된 상담 그룹은 기본으로 접혀 있고 헤더를 누르면 
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
-  // 김도현 방을 거절해 종료 그룹 생성
+  // 김도현 방을 거절(확인 모달 경유)해 종료 그룹 생성
   await page.getByRole("button", { name: "매칭 거절" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "매칭 거절" }).click();
   const endedHeader = page.getByRole("button", { name: /종료된 상담/ });
   await expect(endedHeader).toBeVisible();
 
