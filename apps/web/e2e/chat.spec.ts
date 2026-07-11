@@ -195,6 +195,35 @@ test("매칭 거절을 누르면 그 방만 종료되고 입력이 차단된다"
   await expect(page.getByText("상담 중 · 비교", { exact: true })).toBeVisible();
 });
 
+test("종료된 상담 그룹은 기본으로 접혀 있고 헤더를 누르면 펼쳐진다", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
+
+  // 김도현 방을 거절해 종료 그룹 생성
+  await page.getByRole("button", { name: "매칭 거절" }).click();
+  const endedHeader = page.getByRole("button", { name: /종료된 상담/ });
+  await expect(endedHeader).toBeVisible();
+
+  // 기본 접힘 — 종료된 김도현 행이 목록에 없음
+  await expect(endedHeader).toHaveAttribute("aria-expanded", "false");
+  await expect(
+    page.getByRole("listitem").filter({ hasText: ROOM_KIM }),
+  ).toHaveCount(0);
+
+  // 헤더 클릭 → 펼침, 행 노출
+  await endedHeader.click();
+  await expect(endedHeader).toHaveAttribute("aria-expanded", "true");
+  await expect(
+    page.getByRole("listitem").filter({ hasText: ROOM_KIM }),
+  ).toHaveCount(1);
+
+  // 다시 클릭 → 접힘
+  await endedHeader.click();
+  await expect(
+    page.getByRole("listitem").filter({ hasText: ROOM_KIM }),
+  ).toHaveCount(0);
+});
+
 test("데스크톱에서는 목록과 스레드가 분할 뷰로 함께 보이고 활성 행이 강조된다", async ({
   page,
   isMobile,
