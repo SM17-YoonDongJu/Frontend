@@ -1,6 +1,6 @@
-import type { Notification } from "../_model/notification.schema";
-import { formatRelativeTime } from "../_model/notification-group";
-import { NotificationTypeIcon } from "./NotificationTypeIcon";
+import type { Notification } from "../../_shared/notifications/model/notification.schema";
+import { formatRelativeTime } from "../../_shared/notifications/model/notification-group";
+import { NotificationTypeIcon } from "../../_shared/notifications/ui/NotificationTypeIcon";
 
 interface NotificationCardProps {
   notification: Notification;

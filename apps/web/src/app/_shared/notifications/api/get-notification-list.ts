@@ -4,7 +4,7 @@ import { fetchJson } from "@/shared/api/fetch-json";
 import {
   notificationListSchema,
   type NotificationList,
-} from "../_model/notification.schema";
+} from "../model/notification.schema";
 
 export function getNotificationList(): Promise<NotificationList> {
   return fetchJson(
