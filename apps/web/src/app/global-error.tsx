@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { fontVariables } from "@/shared/fonts";
 import { cn } from "@/shared/lib/utils";
@@ -24,7 +25,8 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // 운영에선 message가 가려지고 digest만 옴 — 서버 로그 대조용으로 기록.
+    Sentry.captureException(error);
+    // 로컬은 DSN 미주입으로 Sentry가 no-op — 콘솔 기록이 유일한 dev 단서.
     console.error(error);
   }, [error]);
 
