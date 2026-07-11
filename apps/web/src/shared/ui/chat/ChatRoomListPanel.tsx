@@ -7,6 +7,7 @@ import type { MatchGroup } from "@/shared/api/chat/match-status";
 import { toMatchGroup } from "@/shared/api/chat/match-status";
 import { cn } from "@/shared/lib/utils";
 import { ChatBubble } from "@/shared/ui/icons/ChatBubble";
+import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { Search } from "@/shared/ui/icons/Search";
 import { ChatRoomListItem } from "./ChatRoomListItem";
 
@@ -62,6 +63,16 @@ export function ChatRoomListPanel({
   grouped,
 }: ChatRoomListPanelProps) {
   const [query, setQuery] = useState("");
+  // 아코디언 접힘 그룹 — 기본은 "종료된 상담"만 접힘(사용자 확정)
+  const [collapsed, setCollapsed] = useState<Set<MatchGroup>>(() => new Set(["ended"]));
+
+  const toggleGroup = (key: MatchGroup) =>
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
 
   const filteredRooms = useMemo(() => {
     const keyword = query.trim().toLowerCase();
@@ -107,9 +118,17 @@ export function ChatRoomListPanel({
             );
             if (sectionRooms.length === 0) return null;
 
+            const isCollapsed = collapsed.has(section.key);
+
             return (
               <section key={section.key}>
-                <div className="flex items-center gap-1.5 bg-paper-2 px-5 py-2.5">
+                {/* 아코디언 헤더 — 클릭 시 섹션 펼침/접힘 */}
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(section.key)}
+                  aria-expanded={!isCollapsed}
+                  className="flex w-full items-center gap-1.5 bg-paper-2 px-5 py-2.5 text-left transition hover:brightness-[.98]"
+                >
                   <span className={cn("text-[0.6875rem] font-bold", section.labelClass)}>
                     {section.label}
                   </span>
@@ -121,7 +140,14 @@ export function ChatRoomListPanel({
                   >
                     {sectionRooms.length}
                   </span>
-                </div>
+                  <ChevronDown
+                    className={cn(
+                      "ml-auto text-[1rem] text-ink-3 transition-transform",
+                      isCollapsed && "-rotate-90",
+                    )}
+                  />
+                </button>
+                {!isCollapsed && (
                 <ul>
                   {sectionRooms.map((room) => (
                     <li
@@ -142,6 +168,7 @@ export function ChatRoomListPanel({
                     </li>
                   ))}
                 </ul>
+                )}
               </section>
             );
           })}
