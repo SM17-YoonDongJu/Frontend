@@ -12,7 +12,7 @@ export default function ReviewPage() {
         </Suspense>
       </div>
 
-      <div className="mx-auto hidden w-full max-w-6xl px-10 py-8 md:block">
+      <div className="mx-auto hidden w-full max-w-[75rem] px-10 py-8 md:block">
         <p className="text-[0.8125rem] font-semibold tracking-[0.08em] text-gold-ink">
           AI 초안 검수
         </p>

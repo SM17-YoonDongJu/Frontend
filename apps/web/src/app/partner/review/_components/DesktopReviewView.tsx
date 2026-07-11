@@ -33,21 +33,18 @@ export function DesktopReviewView() {
     <div className="space-y-6">
       <ReviewSummaryCards />
       <ReviewStatusTabs value={status} counts={statusCounts} onSelect={setStatus} />
+      <ReviewFilterBar regions={regions} />
 
       <div className="grid items-start gap-6 lg:grid-cols-[1fr_24.5rem]">
-        <div className="space-y-5">
-          <ReviewFilterBar regions={regions} />
-
-          {data.list.length === 0 ? (
-            <ReviewEmpty activeType={type} activeStatus={status} />
-          ) : (
-            <DesktopReviewCaseList
-              items={data.list}
-              selectedId={selected?.reportId ?? null}
-              onSelect={setSelectedId}
-            />
-          )}
-        </div>
+        {data.list.length === 0 ? (
+          <ReviewEmpty activeType={type} activeStatus={status} />
+        ) : (
+          <DesktopReviewCaseList
+            items={data.list}
+            selectedId={selected?.reportId ?? null}
+            onSelect={setSelectedId}
+          />
+        )}
 
         <ReviewDraftPanel item={selected} />
       </div>
