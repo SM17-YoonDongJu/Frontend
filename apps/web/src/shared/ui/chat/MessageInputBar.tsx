@@ -46,9 +46,26 @@ export function MessageInputBar({ onSend, disabled, closed, sendFailed }: Messag
   };
 
   if (closed) {
+    // 종료된 방 — 입력·전송을 회색 비활성으로 잠금(문구는 placeholder로 안내)
     return (
-      <div className="border-t border-line-2 bg-paper-2 px-4 py-4 text-center text-[0.8125rem] text-ink-3">
-        종료된 상담이에요. 새 메시지를 보낼 수 없어요.
+      <div className="flex items-center gap-2.5 border-t border-line-2 bg-paper-2 px-4 py-3 md:bg-transparent md:pb-4">
+        <input
+          type="text"
+          value=""
+          disabled
+          readOnly
+          placeholder="종료된 상담이에요. 새 메시지를 보낼 수 없어요."
+          aria-label="메시지 입력"
+          className="h-11 flex-1 cursor-not-allowed rounded-full border border-line-2 bg-paper-2 px-4 text-[0.85rem] placeholder:text-ink-3 md:h-[2.625rem] md:rounded-input"
+        />
+        <button
+          type="button"
+          disabled
+          aria-label="전송"
+          className="flex size-11 shrink-0 cursor-not-allowed items-center justify-center rounded-full bg-line-2 text-[1.25rem] text-ink-3 md:size-[2.625rem] md:rounded-input md:text-[1.0625rem]"
+        >
+          <Send />
+        </button>
       </div>
     );
   }

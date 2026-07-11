@@ -204,14 +204,17 @@ test("매칭 거절을 누르면 그 방만 종료되고 입력이 차단된다"
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
-  await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeVisible();
+  const input = page.getByRole("textbox", { name: "메시지 입력" });
+  await expect(input).toBeEnabled();
   await page.getByRole("button", { name: "매칭 거절" }).click();
 
-  // 거절한 방은 종료(read-only), 나머지 비교 유지
-  await expect(
-    page.getByText("종료된 상담이에요. 새 메시지를 보낼 수 없어요."),
-  ).toBeVisible();
-  await expect(page.getByRole("textbox", { name: "메시지 입력" })).toHaveCount(0);
+  // 거절한 방은 종료 — 입력·전송이 회색 비활성으로 잠김, 나머지 비교 유지
+  await expect(input).toBeDisabled();
+  await expect(input).toHaveAttribute(
+    "placeholder",
+    "종료된 상담이에요. 새 메시지를 보낼 수 없어요.",
+  );
+  await expect(page.getByRole("button", { name: "전송" })).toBeDisabled();
   await expect(page.getByText("상담 중 · 비교", { exact: true })).toBeVisible();
 });
 
@@ -288,10 +291,12 @@ test("파트너 채팅은 그룹 없는 평면 목록·상담 종료 흐름을 �
   await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeVisible();
 
   await page.getByRole("button", { name: "상담 종료" }).click();
-  await expect(
-    page.getByText("종료된 상담이에요. 새 메시지를 보낼 수 없어요."),
-  ).toBeVisible();
-  await expect(page.getByRole("textbox", { name: "메시지 입력" })).toHaveCount(0);
+  const input = page.getByRole("textbox", { name: "메시지 입력" });
+  await expect(input).toBeDisabled();
+  await expect(input).toHaveAttribute(
+    "placeholder",
+    "종료된 상담이에요. 새 메시지를 보낼 수 없어요.",
+  );
 });
 
 test("파트너 방에서 공유 리포트를 열면 파트너 검수로 이동한다", async ({ page }) => {
