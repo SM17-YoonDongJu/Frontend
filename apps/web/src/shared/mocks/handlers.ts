@@ -499,9 +499,25 @@ const CHAT_PROPOSAL_META: Record<
   },
 };
 
+// 김도현 방 과거 메시지 36건 — 커서 페이지네이션(이전 대화 불러오기) 검증용. 결정적 생성(랜덤 없음).
+const CHAT_ROOM_1_OLDER: MockChatMessage[] = Array.from({ length: 36 }, (_, i) => {
+  const mine = i % 2 === 1;
+  const hour = String(9 + (i % 8)).padStart(2, "0");
+  const day = String(24 + Math.floor(i / 12)).padStart(2, "0"); // 06-24 ~ 06-26
+  return {
+    messageId: `a1000000-0000-4000-8000-0000000001${String(i).padStart(2, "0")}`,
+    senderId: mine ? MOCK_ME_ID : CHAT_ADJUSTER_1_ID,
+    content: mine
+      ? `이전 문의 내용 ${i + 1}번이에요.`
+      : `이전 답변 내용 ${i + 1}번입니다.`,
+    createdAt: `2026-06-${day}T${hour}:${String((i * 7) % 60).padStart(2, "0")}:00Z`,
+  };
+});
+
 // 방별 메시지 히스토리(2일 이상 걸쳐 날짜 구분선 검증, mine/theirs 교차)
 const chatMessages: Record<string, MockChatMessage[]> = {
   [CHAT_ROOM_1_ID]: [
+    ...CHAT_ROOM_1_OLDER,
     { messageId: "a1000000-0000-4000-8000-000000000001", senderId: CHAT_ADJUSTER_1_ID, content: "안녕하세요, 김도현 손해사정사입니다. 리포트 잘 받았습니다.", createdAt: "2026-06-30T09:00:00Z" },
     { messageId: "a1000000-0000-4000-8000-000000000002", senderId: MOCK_ME_ID, content: "네, 안녕하세요. 검토 부탁드려요.", createdAt: "2026-06-30T09:05:00Z" },
     { messageId: "a1000000-0000-4000-8000-000000000003", senderId: CHAT_ADJUSTER_1_ID, content: "장해등급 재산정 여지가 있어 보입니다.", createdAt: "2026-06-30T09:12:00Z" },
@@ -545,18 +561,31 @@ export const handlers = [
   }),
 
   // 메시지 히스토리 (이슈 #48) — 커서 페이지네이션(?cursor&size, 기본 30).
-  // CLOSED 방도 히스토리 조회 가능. 정확 경로(/chats)를 위에서 먼저 등록함.
-  http.get(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ params }) => {
+  // 최신 size건을 시간순으로 반환, cursor는 "이 메시지보다 오래된 것" 기준. CLOSED 방도 조회 가능.
+  http.get(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ request, params }) => {
     await delay(400);
 
     const chatRoomId = String(params.chatRoomId);
-    const list = chatMessages[chatRoomId] ?? [];
+    const all = chatMessages[chatRoomId] ?? [];
 
-    // MVP: 단일 페이지 반환(cursor 무시), 다음 페이지 없음.
+    const url = new URL(request.url);
+    const size = Number(url.searchParams.get("size") ?? 30);
+    const cursor = url.searchParams.get("cursor");
+
+    let end = all.length;
+    if (cursor) {
+      const cursorIndex = all.findIndex((message) => message.messageId === cursor);
+      if (cursorIndex !== -1) end = cursorIndex;
+    }
+    const start = Math.max(0, end - size);
+    const list = all.slice(start, end);
+    // 더 오래된 페이지가 남아 있으면 이번 페이지 첫 메시지를 다음 커서로
+    const nextCursor = start > 0 ? (list[0]?.messageId ?? null) : null;
+
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { list, nextCursor: null },
+      data: { list, nextCursor },
     });
   }),
 
