@@ -2,12 +2,9 @@ import { z } from "zod";
 
 /** 손해사정사 마이페이지 집계 — GET /adjusters/me/mypage (명세 등록 2026-07-05) */
 
-export const userRoleSchema = z.enum([
-  "USER",
-  "CERTIFICATED_ADJUSTER",
-  "UNCERTIFICATED_ADJUSTER",
-  "ADMIN",
-]);
+// userRoleSchema는 src/shared/model로 승격(이슈 #105) — 여기선 import 후 재노출.
+import { userRoleSchema } from "@/shared/model/user-role";
+export { userRoleSchema };
 
 export const mypageProfileSchema = z.object({
   nickname: z.string(),
