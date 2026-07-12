@@ -36,6 +36,10 @@ export const userKeys = createQueryKeys("user", {
   me: null,
 });
 
+export const authKeys = createQueryKeys("auth", {
+  oauthCallback: (provider: string, code: string) => [provider, code],
+});
+
 export const settingsKeys = createQueryKeys("settings", {
   notification: null,
 });
