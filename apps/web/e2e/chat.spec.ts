@@ -86,11 +86,13 @@ test("대화방에 들어가면 히스토리·날짜 구분선·양쪽 말풍선
     await expect(page).toHaveURL(/\/customer\/chat\/e1000000/);
   }).toPass({ timeout: 10000 });
 
-  // theirs / mine 히스토리 메시지
+  // theirs / mine 히스토리 메시지 — 내 메시지는 네이비(우측) 말풍선이어야 한다(uuid 정합 회귀 방지)
   await expect(
     page.getByText("안녕하세요, 김도현 손해사정사입니다. 리포트 잘 받았습니다."),
   ).toBeVisible();
-  await expect(page.getByText("그럼 어떻게 진행하면 될까요?")).toBeVisible();
+  const mineBubble = page.getByText("그럼 어떻게 진행하면 될까요?");
+  await expect(mineBubble).toBeVisible();
+  await expect(mineBubble).toHaveClass(/bg-navy/);
 
   // 2일 이상 걸친 히스토리 → 날짜 구분선 2개
   await expect(page.getByText("2026.06.30")).toBeVisible();

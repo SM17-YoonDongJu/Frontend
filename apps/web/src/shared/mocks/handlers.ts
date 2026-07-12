@@ -352,10 +352,9 @@ const ADJUSTER_MYPAGE = {
 };
 
 // ── 채팅(이슈 #48) 모듈 스코프 가변 상태 ─────────────────────────────
-// senderId 정합: 내 메시지는 MOCK_ME_ID(= String(users/me.userId "1024")).
-// 페이지가 넘기는 currentUserId도 String(me.userId)라 문자열 비교로 mine 판별.
-// ⚠️ userId uuid 전환 백엔드 확인 요청 — 명세 senderId는 uuid, use-me.userId는 number.
-const MOCK_ME_ID = "1024";
+// senderId 정합: 내 메시지는 MOCK_ME_ID(= users/me 목의 userId uuid와 동일해야 mine 판별이 맞음).
+// userId uuid 전환 확정(#40) — /users/me 목이 uuid를 내려주므로 여기도 같은 값 사용.
+const MOCK_ME_ID = "d1d1d1d1-1024-4aaa-8aaa-000000001024";
 
 const CHAT_ADJUSTER_1_ID = "d1000000-0000-4000-8000-000000000001";
 const CHAT_ADJUSTER_2_ID = "d1000000-0000-4000-8000-000000000002";
