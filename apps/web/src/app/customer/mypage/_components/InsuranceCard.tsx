@@ -50,18 +50,9 @@ export function InsuranceCard({ item }: InsuranceCardProps) {
             증권 미등록
           </span>
         )}
-        {registered ? (
-          <ComingSoonButton className="text-[0.8125rem] font-bold text-ink-2 transition hover:text-ink">
-            상세 보기
-          </ComingSoonButton>
-        ) : (
-          <button
-            type="button"
-            className="text-[0.8125rem] font-bold text-ink-2 transition hover:text-ink"
-          >
-            증권 올리기
-          </button>
-        )}
+        <ComingSoonButton className="text-[0.8125rem] font-bold text-ink-2 transition hover:text-ink">
+          {registered ? "상세 보기" : "증권 올리기"}
+        </ComingSoonButton>
       </div>
     </article>
   );
