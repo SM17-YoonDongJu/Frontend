@@ -50,6 +50,7 @@
 
   /* 그림자 → shadow-* 유틸 (카드 표면 미세 그림자) */
   --shadow-card: 0 0.0625rem 0.0625rem rgba(21, 32, 46, 0.03);
+  --shadow-sheet: 0 -1rem 3rem -0.75rem rgba(21, 32, 46, 0.35);
 }
 
 /* shadcn semantic 토큰 → #12 팔레트 매핑 (stock shadcn 컴포넌트용. light 전용) */

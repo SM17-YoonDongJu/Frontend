@@ -3,6 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useFocusTrap } from "@/shared/lib/use-focus-trap";
 import { cn } from "@/shared/lib/utils";
+import { Close } from "@/shared/ui/icons/Close";
 
 export interface BottomSheetProps {
   open: boolean;
@@ -57,7 +58,7 @@ export function BottomSheet({
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "max-h-[90dvh] w-full max-w-[30rem] overflow-y-auto rounded-t-card-lg bg-card px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-3 shadow-[0_-1rem_3rem_-0.75rem_rgba(21,32,46,0.35)] outline-none",
+          "max-h-[90dvh] w-full max-w-[30rem] overflow-y-auto rounded-t-card-lg bg-card px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-3 shadow-sheet outline-none",
           className,
         )}
       >
@@ -90,7 +91,7 @@ export function BottomSheet({
               aria-label="닫기"
               className="flex size-8.5 items-center justify-center rounded-full text-ink-3 transition hover:bg-paper"
             >
-              <CloseGlyph />
+              <Close className="size-[1.0625rem]" />
             </button>
           )}
         </div>
@@ -98,23 +99,5 @@ export function BottomSheet({
         {children}
       </div>
     </div>
-  );
-}
-
-function CloseGlyph() {
-  return (
-    <svg
-      width="1.0625rem"
-      height="1.0625rem"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M18 6 6 18M6 6l12 12" />
-    </svg>
   );
 }
