@@ -21,7 +21,7 @@ export async function fetchJson<T>(
   schema: ZodType<T>,
   init?: RequestInit,
 ): Promise<T> {
-  const res = await fetch(url, { ...init, credentials: "include" });
+  const res = await fetch(url, init);
   const json: unknown = await res.json().catch(() => null);
 
   if (!res.ok || (isEnvelope(json) && json.code)) {

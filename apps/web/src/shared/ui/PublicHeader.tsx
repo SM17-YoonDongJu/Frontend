@@ -34,10 +34,10 @@ export function PublicHeader() {
           </nav>
 
           <div className="flex items-center gap-2">
-            <Link href="/login" className={buttonVariants({ variant: "ghost", size: "sm" })}>
+            <Link href="#" className={buttonVariants({ variant: "ghost", size: "sm" })}>
               로그인
             </Link>
-            <Link href="/signup" className={buttonVariants({ variant: "primary", size: "sm" })}>
+            <Link href="#" className={buttonVariants({ variant: "primary", size: "sm" })}>
               회원가입
             </Link>
           </div>
