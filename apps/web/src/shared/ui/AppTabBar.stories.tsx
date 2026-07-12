@@ -9,10 +9,19 @@ const CUSTOMER_ME: Me = {
   nickname: "김보험",
   email: "customer@example.com",
   userType: "insured_person",
-  createdAt: "2026-01-01T00:00:00.000Z"
+  createdAt: "2026-01-01T00:00:00.000Z",
+  phone: null,
+  avatarUrl: null,
+  role: "USER",
+  socialProvider: "kakao"
 };
 
-const ADJUSTER_ME: Me = { ...CUSTOMER_ME, nickname: "박사정", userType: "adjuster" };
+const ADJUSTER_ME: Me = {
+  ...CUSTOMER_ME,
+  nickname: "박사정",
+  userType: "adjuster",
+  role: "CERTIFICATED_ADJUSTER"
+};
 
 /** useAuthStatus 쿼리에 인증 사용자를 미리 심어 탭바가 노출되도록 감싼다. */
 function authenticatedAs(me: Me): Decorator {
