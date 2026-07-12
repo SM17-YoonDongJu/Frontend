@@ -7,6 +7,7 @@ import { Input } from "@/shared/ui/Input";
 import { joinInfoLabel, socialAccountLabel } from "../_model/profile-format";
 import type { Me } from "../_model/types";
 import { useProfileSettingsForm } from "../_hooks/use-profile-settings-form";
+import { ComingSoonButton } from "./ComingSoonButton";
 import { ProfileAvatar } from "./ProfileAvatar";
 
 interface ProfileSettingsFormProps {
@@ -98,12 +99,9 @@ export function ProfileSettingsForm({
           <span className="text-[0.875rem] font-medium text-ink">
             {socialAccountLabel(profile.socialProvider)}
           </span>
-          <button
-            type="button"
-            className="text-[0.8125rem] font-bold text-ink-2 transition hover:text-ink"
-          >
+          <ComingSoonButton className="text-[0.8125rem] font-bold text-ink-2 transition hover:text-ink">
             관리
-          </button>
+          </ComingSoonButton>
         </div>
       </div>
 

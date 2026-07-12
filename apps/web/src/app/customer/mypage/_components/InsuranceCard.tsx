@@ -1,6 +1,7 @@
 import type { InsuranceItem } from "../_model/types";
 import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
+import { ComingSoonButton } from "./ComingSoonButton";
 
 interface InsuranceCardProps {
   item: InsuranceItem;
@@ -49,12 +50,18 @@ export function InsuranceCard({ item }: InsuranceCardProps) {
             증권 미등록
           </span>
         )}
-        <button
-          type="button"
-          className="text-[0.8125rem] font-bold text-ink-2 transition hover:text-ink"
-        >
-          {registered ? "상세 보기" : "증권 올리기"}
-        </button>
+        {registered ? (
+          <ComingSoonButton className="text-[0.8125rem] font-bold text-ink-2 transition hover:text-ink">
+            상세 보기
+          </ComingSoonButton>
+        ) : (
+          <button
+            type="button"
+            className="text-[0.8125rem] font-bold text-ink-2 transition hover:text-ink"
+          >
+            증권 올리기
+          </button>
+        )}
       </div>
     </article>
   );
