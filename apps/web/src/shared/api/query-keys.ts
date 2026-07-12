@@ -34,6 +34,9 @@ export const reportKeys = createQueryKeys("report", {
 
 export const userKeys = createQueryKeys("user", {
   me: null,
+  // 고객 마이페이지(이슈 #105) — 활동 카운트·보험 목록. insurance 도메인 미신설(user 배치).
+  activitySummary: null,
+  insurances: null,
 });
 
 export const authKeys = createQueryKeys("auth", {
