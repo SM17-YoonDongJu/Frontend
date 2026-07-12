@@ -388,12 +388,23 @@ interface MockChatRoom {
   reportTypeLabel: string;
 }
 
+interface MockChatAttachment {
+  attachmentId: string;
+  fileName: string;
+  mimeType: string;
+  url: string;
+}
+
 interface MockChatMessage {
   messageId: string;
   senderId: string;
   content: string;
   createdAt: string;
+  attachments?: MockChatAttachment[];
 }
+
+// 업로드된 첨부 임시 보관 — 메시지 전송 시 attachmentIds로 회수(⚠️ 명세없음-초안, TEMP §3-3)
+const uploadedChatAttachments = new Map<string, MockChatAttachment>();
 
 // 비교 그룹 검증: 3방 모두 동일 reportId·caseNo, COUNSELING(비교중)으로 시작. adjusterName만 상이.
 const chatRooms: MockChatRoom[] = [
@@ -611,8 +622,15 @@ export const handlers = [
       );
     }
 
-    const body = (await request.json().catch(() => ({}))) as { content?: string };
+    const body = (await request.json().catch(() => ({}))) as {
+      content?: string;
+      attachmentIds?: string[];
+    };
     const content = typeof body.content === "string" ? body.content : "";
+    // 업로드해 둔 첨부를 attachmentIds로 회수(⚠️ 명세없음-초안)
+    const attachments = (body.attachmentIds ?? [])
+      .map((id) => uploadedChatAttachments.get(id))
+      .filter((attachment): attachment is MockChatAttachment => Boolean(attachment));
     const createdAt = new Date().toISOString();
     const messageId = crypto.randomUUID();
 
@@ -621,10 +639,11 @@ export const handlers = [
       senderId: MOCK_ME_ID,
       content,
       createdAt,
+      ...(attachments.length > 0 ? { attachments } : {}),
     });
 
     if (room) {
-      room.lastMessage = content;
+      room.lastMessage = content || `📎 ${attachments[0]?.fileName ?? "첨부 파일"}`;
       room.lastMessageAt = createdAt;
       room.updatedAt = createdAt;
     }
@@ -635,6 +654,52 @@ export const handlers = [
         message: "전송되었습니다.",
         data: { messageId, chatRoomId, senderId: MOCK_ME_ID, content, createdAt },
       },
+      { status: 201 },
+    );
+  }),
+
+  // 첨부 업로드 (이슈 #48) — ⚠️ 명세없음-초안(TEMP §3-3). multipart file → attachmentId 발급.
+  http.post(`${API_BASE_URL}/chats/:chatRoomId/attachments`, async ({ request, params }) => {
+    await delay(500);
+
+    const chatRoomId = String(params.chatRoomId);
+    const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
+    if (room?.roomStatus === "CLOSED") {
+      return HttpResponse.json(
+        { status: "409", code: "CLOSED", message: "종료된 상담입니다." },
+        { status: 409 },
+      );
+    }
+
+    const formData = await request.formData().catch(() => null);
+    const entry = formData?.get("file");
+    const file = entry && typeof entry !== "string" ? (entry as File) : null;
+
+    // webkit 서비스워커는 multipart 파싱을 누락하는 경우가 있어 목 전용 헤더 폴백 사용
+    const fallbackName = request.headers.get("x-mock-file-name");
+    const fileName =
+      file?.name || (fallbackName ? decodeURIComponent(fallbackName) : "");
+    if (!fileName) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "첨부 파일이 없습니다." },
+        { status: 400 },
+      );
+    }
+    const mimeType =
+      file?.type ||
+      request.headers.get("x-mock-file-type") ||
+      "application/octet-stream";
+
+    const attachment: MockChatAttachment = {
+      attachmentId: crypto.randomUUID(),
+      fileName,
+      mimeType,
+      url: `https://mock.local/chat-uploads/${chatRoomId}/${encodeURIComponent(fileName)}`,
+    };
+    uploadedChatAttachments.set(attachment.attachmentId, attachment);
+
+    return HttpResponse.json(
+      { status: "201", message: "업로드되었습니다.", data: attachment },
       { status: 201 },
     );
   }),

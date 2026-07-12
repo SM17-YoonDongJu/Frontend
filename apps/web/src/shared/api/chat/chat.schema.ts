@@ -30,11 +30,20 @@ export const chatListSchema = z.object({
   items: z.array(chatRoomSchema),
 });
 
+// ⚠️ 명세없음-초안(TEMP §3-3) — 첨부 테이블·업로드 API 백엔드 확정 전 MSW 선반영
+export const chatAttachmentSchema = z.object({
+  attachmentId: z.string().uuid(),
+  fileName: z.string(),
+  mimeType: z.string(),
+  url: z.string(),
+});
+
 export const chatMessageSchema = z.object({
   messageId: z.string().uuid(),
   senderId: z.string(), // ⚠️ userId uuid 전환 백엔드 확인 요청 — 명세는 uuid, use-me.userId는 number
   content: z.string(),
   createdAt: z.string(), // ISO — 날짜 구분선·시각 표기 원천(sentAt 아님)
+  attachments: z.array(chatAttachmentSchema).optional(), // ⚠️ 명세없음-초안
 });
 
 export const chatMessagesSchema = z.object({
@@ -43,7 +52,8 @@ export const chatMessagesSchema = z.object({
 });
 
 export const sendChatMessageBodySchema = z.object({
-  content: z.string().min(1),
+  content: z.string(), // 첨부만 보낼 땐 빈 문자열 허용
+  attachmentIds: z.array(z.string().uuid()).optional(), // ⚠️ 명세없음-초안(TEMP §3-3)
 });
 
 export const sendChatMessageResponseSchema = z.object({
@@ -62,6 +72,7 @@ export const closeChatResponseSchema = z.object({
 
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
 export type CloseChatResponse = z.infer<typeof closeChatResponseSchema>;
+export type ChatAttachment = z.infer<typeof chatAttachmentSchema>;
 export type ChatRoom = z.infer<typeof chatRoomSchema>;
 export type ChatList = z.infer<typeof chatListSchema>;
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
