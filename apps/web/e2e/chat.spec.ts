@@ -143,6 +143,22 @@ test("전송이 실패하면 낙관적으로 추가된 메시지가 롤백된다
   await expect(page.getByText(failing)).toHaveCount(0);
 });
 
+test("파일을 첨부하면 파일 말풍선으로 전송된다", async ({ page }) => {
+  await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
+  await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeVisible();
+
+  // 첨부 버튼 노출 + 숨은 파일 입력으로 업로드(⚠️ 명세없음-초안, MSW 목)
+  await expect(page.getByRole("button", { name: "파일 첨부" }).first()).toBeVisible();
+  await page.locator('input[type="file"]').first().setInputFiles({
+    name: "진단서.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("mock-pdf"),
+  });
+
+  // 업로드→전송 후 파일 칩 말풍선 표시(목록 미리보기 "📎 진단서.pdf"와 구분해 exact 매치)
+  await expect(page.getByText("진단서.pdf", { exact: true })).toBeVisible();
+});
+
 test("이전 대화는 위로 스크롤하면 이어서 불러온다", async ({ page }) => {
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
