@@ -319,7 +319,47 @@ const NOTIFICATION_SETTINGS: Record<string, boolean> = {
   reviewComplete: true,
   receivedProposal: true,
   marketing: false,
+  // CONTRACT(명세없음, 이슈 #105): 카카오톡 플러스 친구 알림(고객 마이페이지 토글).
+  kakaoPlusFriend: false,
 };
+
+// 본인 정보 목 상태 (이슈 #105 확장) — GET/PATCH /users/me 공유. phone·avatarUrl·role·socialProvider 확장.
+// role은 localStorage["mock:role"]로 override(파트너 전환 섹션 검증: USER 기본 / CERTIFICATED_ADJUSTER).
+const MOCK_ME: Record<string, unknown> = {
+  userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
+  nickname: "윤서",
+  email: "yunseo@example.com",
+  createdAt: "2024-03-02T09:00:00Z",
+  phone: "010-1234-5678",
+  avatarUrl: null,
+  socialProvider: "kakao",
+};
+
+// 활동 카운트 (이슈 #105) — CONTRACT(명세없음-임시): GET /users/me/activity-summary
+const ACTIVITY_SUMMARY = {
+  reportCount: 3,
+  proposalCount: 2,
+  consultCount: 1,
+  closedCount: 4,
+};
+
+// 내 보험 (이슈 #105) — CONTRACT(명세없음-임시): GET·POST /users/me/insurances. 등록1 + 미등록1.
+const MOCK_INSURANCES: Array<Record<string, unknown>> = [
+  {
+    insuranceId: "e1000000-0000-4000-8000-000000000001",
+    insurerName: "OO손해보험",
+    productName: "무배당 행복드림 종합보험",
+    riders: ["상해후유장해", "질병입원일당", "골절진단금"],
+    policyStatus: "REGISTERED",
+  },
+  {
+    insuranceId: "e1000000-0000-4000-8000-000000000002",
+    insurerName: "△△생명",
+    productName: "The건강한 종신보험",
+    riders: ["암진단비"],
+    policyStatus: "UNREGISTERED",
+  },
+];
 
 // 마이페이지 집계 (이슈 #46) — GET /adjusters/me/mypage, ADJUSTER_PROFILE 페르소나와 수치 일치
 const ADJUSTER_MYPAGE = {
@@ -623,6 +663,93 @@ export const handlers = [
     });
   }),
 
+  // 활동 카운트 (이슈 #105) — CONTRACT(명세없음-임시): GET /users/me/activity-summary
+  http.get(`${API_BASE_URL}/users/me/activity-summary`, async ({ request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "activity-summary") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "활동 내역을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...ACTIVITY_SUMMARY },
+    });
+  }),
+
+  // 내 보험 목록 (이슈 #105) — CONTRACT(명세없음-임시): GET /users/me/insurances
+  // x-mock-scenario=insurances-empty → 0건 빈 상태 검증.
+  http.get(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "insurances") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "보험 목록을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    const list =
+      request.headers.get("x-mock-scenario") === "insurances-empty"
+        ? []
+        : MOCK_INSURANCES.map((item) => ({ ...item }));
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { list },
+    });
+  }),
+
+  // 내 보험 추가 (이슈 #105) — CONTRACT(명세없음-임시): POST /users/me/insurances
+  // 직접 입력 → 증권 미등록(UNREGISTERED) 상태로 생성.
+  http.post(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "add-insurance") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "보험을 추가하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    if (typeof body.insurerName !== "string" || typeof body.productName !== "string") {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "보험사·상품명을 입력해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    const created = {
+      insuranceId: crypto.randomUUID(),
+      insurerName: body.insurerName,
+      productName: body.productName,
+      riders: Array.isArray(body.riders) ? body.riders : [],
+      policyStatus: "UNREGISTERED",
+    };
+    MOCK_INSURANCES.push({ ...created });
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: created,
+    });
+  }),
+
   // 진행 중 사건 (#30) — ⚠️ API 명세 미정(드리프트), MSW 선구현
   http.get(`${API_BASE_URL}/adjusters/me/in-progress`, async ({ request }) => {
     await delay(500);
@@ -674,16 +801,55 @@ export const handlers = [
     const override =
       typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
     const userType = override === "adjuster" ? "adjuster" : "insured_person";
+    // role 기본 USER. mock:role=CERTIFICATED_ADJUSTER면 파트너 전환 섹션 노출(이슈 #105).
+    const roleOverride =
+      typeof localStorage !== "undefined" ? localStorage.getItem("mock:role") : null;
+    const role =
+      roleOverride === "CERTIFICATED_ADJUSTER" ? "CERTIFICATED_ADJUSTER" : "USER";
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
-        userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
-        nickname: "윤서",
-        email: "yunseo@example.com",
-        userType,
-        createdAt: "2024-03-02T09:00:00Z",
-      },
+      data: { ...MOCK_ME, userType, role },
+    });
+  }),
+
+  // 본인 정보 수정 (이슈 #105) — phone·avatarUrl·nickname·email 부분 머지 후 전체 반환
+  http.patch(`${API_BASE_URL}/users/me`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "update-me") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "프로필을 저장하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    for (const field of ["nickname", "email", "phone", "avatarUrl"] as const) {
+      if (field in body) MOCK_ME[field] = body[field];
+    }
+
+    const override =
+      typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
+    const userType = override === "adjuster" ? "adjuster" : "insured_person";
+    const roleOverride =
+      typeof localStorage !== "undefined" ? localStorage.getItem("mock:role") : null;
+    const role =
+      roleOverride === "CERTIFICATED_ADJUSTER" ? "CERTIFICATED_ADJUSTER" : "USER";
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...MOCK_ME, userType, role },
     });
   }),
 
