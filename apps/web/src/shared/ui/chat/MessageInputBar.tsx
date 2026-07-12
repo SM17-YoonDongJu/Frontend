@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
+import { Plus } from "@/shared/ui/icons/Plus";
 import { Send } from "@/shared/ui/icons/Send";
+import { Upload } from "@/shared/ui/icons/Upload";
+import { AttachmentSheet } from "./AttachmentSheet";
 
 export interface MessageInputBarProps {
   onSend: (content: string) => void;
@@ -11,6 +14,9 @@ export interface MessageInputBarProps {
   closed?: boolean;
   /** 직전 전송 실패 — 롤백 후 재시도 안내 노출 */
   sendFailed?: boolean;
+  /** 파일 첨부(⚠️ 명세없음-초안) — 미전달 시 첨부 버튼 미노출 */
+  onPickFile?: (file: File) => void;
+  attachPending?: boolean;
 }
 
 const MD_QUERY = "(min-width: 768px)";
@@ -30,11 +36,21 @@ function useIsMdUp() {
   );
 }
 
-export function MessageInputBar({ onSend, disabled, closed, sendFailed }: MessageInputBarProps) {
+export function MessageInputBar({
+  onSend,
+  disabled,
+  closed,
+  sendFailed,
+  onPickFile,
+  attachPending,
+}: MessageInputBarProps) {
   const [value, setValue] = useState("");
+  const [sheetOpen, setSheetOpen] = useState(false);
   const isMdUp = useIsMdUp();
   // 직전 전송 내용 — 실패(롤백) 시 입력창에 복원해 바로 재시도할 수 있게
   const lastSentRef = useRef("");
+  // 데스크톱 ↑ 버튼은 시트 없이 파일 선택을 바로 연다(Figma 95:4635)
+  const desktopFileRef = useRef<HTMLInputElement>(null);
 
   const trimmed = value.trim();
   const blocked = Boolean(disabled) || Boolean(closed);
@@ -90,6 +106,40 @@ export function MessageInputBar({ onSend, disabled, closed, sendFailed }: Messag
       onSubmit={submit}
       className="flex items-center gap-2.5 px-4 py-3 md:pb-4"
     >
+      {onPickFile && (
+        <>
+          {/* 첨부 — 모바일 + 원형(663:3846, 시트 열기) · 데스크톱 ↑ 사각(95:4635, 바로 파일 선택) */}
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            disabled={disabled || attachPending}
+            aria-label="파일 첨부"
+            className="flex size-10 shrink-0 items-center justify-center rounded-full border border-line bg-card text-[1.125rem] text-ink transition hover:bg-paper-2 disabled:cursor-not-allowed disabled:opacity-[.42] md:hidden"
+          >
+            <Plus />
+          </button>
+          <button
+            type="button"
+            onClick={() => desktopFileRef.current?.click()}
+            disabled={disabled || attachPending}
+            aria-label="파일 첨부"
+            className="hidden size-[2.625rem] shrink-0 items-center justify-center rounded-input border border-line bg-card text-[1.125rem] text-ink transition hover:bg-paper-2 disabled:cursor-not-allowed disabled:opacity-[.42] md:flex"
+          >
+            <Upload />
+          </button>
+          <input
+            ref={desktopFileRef}
+            type="file"
+            accept="image/*,application/pdf"
+            className="hidden"
+            onChange={() => {
+              const file = desktopFileRef.current?.files?.[0];
+              if (desktopFileRef.current) desktopFileRef.current.value = "";
+              if (file) onPickFile(file);
+            }}
+          />
+        </>
+      )}
       <input
         type="text"
         value={value}
@@ -110,6 +160,14 @@ export function MessageInputBar({ onSend, disabled, closed, sendFailed }: Messag
         <Send />
       </button>
     </form>
+
+      {onPickFile && (
+        <AttachmentSheet
+          open={sheetOpen}
+          onPick={onPickFile}
+          onClose={() => setSheetOpen(false)}
+        />
+      )}
     </div>
   );
 }

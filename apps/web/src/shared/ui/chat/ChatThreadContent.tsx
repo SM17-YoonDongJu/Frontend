@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
 import { useChatMessages } from "@/shared/api/chat/use-chat-messages";
 import { useCloseChat } from "@/shared/api/chat/use-close-chat";
+import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
 import { useMe } from "@/shared/api/use-me";
 import { ChatThreadHeader } from "./ChatThreadHeader";
@@ -28,6 +29,7 @@ export function ChatThreadContent({
   const { data: rooms } = useChatList();
   const { messages, hasOlder, loadOlder, loadingOlder } = useChatMessages(chatRoomId);
   const sendMessage = useSendChatMessage(chatRoomId);
+  const sendAttachment = useSendChatAttachment(chatRoomId);
   const closeChat = useCloseChat(chatRoomId);
 
   const room = rooms.find((item) => item.chatRoomId === chatRoomId);
@@ -61,6 +63,8 @@ export function ChatThreadContent({
         disabled={sendMessage.isPending}
         closed={closed}
         sendFailed={sendMessage.isError}
+        onPickFile={(file) => sendAttachment.mutate(file)}
+        attachPending={sendAttachment.isPending}
       />
     </div>
   );

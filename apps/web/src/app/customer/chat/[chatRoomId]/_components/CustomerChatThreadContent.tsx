@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
 import { useChatMessages } from "@/shared/api/chat/use-chat-messages";
 import { isChatWritable, toMatchGroup } from "@/shared/api/chat/match-status";
+import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
 import { useMe } from "@/shared/api/use-me";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
@@ -43,6 +44,7 @@ export function CustomerChatThreadContent({
   const { data: rooms } = useChatList();
   const { messages, hasOlder, loadOlder, loadingOlder } = useChatMessages(chatRoomId);
   const sendMessage = useSendChatMessage(chatRoomId);
+  const sendAttachment = useSendChatAttachment(chatRoomId);
 
   const room = rooms.find((item) => item.chatRoomId === chatRoomId);
   const match = useMatchProposal(room?.reportId ?? "");
@@ -207,6 +209,8 @@ export function CustomerChatThreadContent({
         disabled={sendMessage.isPending}
         closed={!isChatWritable(group)}
         sendFailed={sendMessage.isError}
+        onPickFile={(file) => sendAttachment.mutate(file)}
+        attachPending={sendAttachment.isPending}
       />
 
       <MatchConfirmModal

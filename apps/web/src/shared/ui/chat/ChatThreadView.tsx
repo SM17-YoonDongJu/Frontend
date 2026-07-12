@@ -131,6 +131,7 @@ export function ChatThreadView({
                   content={message.content}
                   createdAt={message.createdAt}
                   mine={message.senderId === currentUserId}
+                  attachments={message.attachments}
                 />
               </Fragment>
             );
