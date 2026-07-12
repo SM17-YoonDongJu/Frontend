@@ -60,6 +60,7 @@
 ### auth — `POST /auth/register`
 `provider`(`kakao`|`naver`) · `socialToken` · `nickname`(2~20자) · `userType` · `email`(N)
 → resp: `userId` · `nickname` · `userType` · `accessToken` · `refreshToken`
+- `nickname` = **사용자 이름**(소셜 프로필 표시명, 팀 확정 2026-07-12). 별도 "이름/실명" 필드를 만들지 말 것(사정사 자격신청의 `name`(실명)은 별개). ⚠️ 콜백 응답에 프로필이 없어 프론트가 이름을 알 수 없음 — 백엔드가 signupTicket에서 추출하는지 확인 필요.
 
 ### user — `GET /users/me`
 `userId` · `nickname` · `email` · `userType` · `createdAt`
