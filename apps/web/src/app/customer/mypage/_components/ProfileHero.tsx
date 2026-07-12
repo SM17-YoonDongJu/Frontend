@@ -7,9 +7,9 @@ interface ProfileHeroProps {
   onEdit: () => void;
 }
 
-/** PC 프로필 히어로 — 다크(navy) 카드. 아바타·이름·`일반 회원` 칩·연락처 + 프로필 수정. */
+/** PC 프로필 히어로 — 다크(navy) 카드. 아바타·이름·`일반 회원` 칩·휴대폰 + 프로필 수정. */
 export function ProfileHero({ profile, onEdit }: ProfileHeroProps) {
-  const contact = [profile.email, profile.phone].filter(Boolean).join(" · ");
+  const contact = profile.phone ?? "";
 
   return (
     <section className="flex items-center gap-6 rounded-[1.25rem] bg-navy p-6.5">

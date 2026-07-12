@@ -106,7 +106,7 @@ export function ProfileSettingsForm({
       </div>
 
       <p className="text-[0.8125rem] text-ink-3">
-        휴대폰·이메일은 리포트·제안 알림 수신에 사용돼요.
+        휴대폰은 리포트·제안 알림 수신에 사용돼요.
       </p>
 
       {variant === "modal" ? (

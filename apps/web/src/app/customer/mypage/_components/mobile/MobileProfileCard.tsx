@@ -13,7 +13,7 @@ interface MobileProfileCardProps {
 
 /** 모바일 프로필 카드 — navy 다크 카드. 아바타(카메라 badge)·`일반 회원` 칩·수정. 하단 스탯 슬롯. */
 export function MobileProfileCard({ profile, onEdit, children }: MobileProfileCardProps) {
-  const contact = profile.email ?? profile.phone ?? "";
+  const contact = profile.phone ?? "";
 
   return (
     <section className="overflow-hidden rounded-card-lg bg-navy shadow-xl shadow-navy/40">

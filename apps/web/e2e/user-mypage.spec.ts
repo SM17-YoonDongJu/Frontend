@@ -47,13 +47,11 @@ test.describe("PC 내 정보 · 프로필 수정", () => {
     await dialog.getByLabel("휴대폰 번호").fill("010-9999-0000");
     await dialog.getByRole("button", { name: "저장하기" }).click();
 
-    // 저장 성공 → 모달 닫힘 + 프로필 재검증 → 히어로 연락처(email · phone 결합)에 새 번호 노출
+    // 저장 성공 → 모달 닫힘 + 프로필 재검증 → 히어로 연락처(휴대폰)에 새 번호 노출
     await expect(
       page.getByRole("heading", { name: "프로필 설정" }).filter({ visible: true }),
     ).toBeHidden();
-    await expect(
-      page.getByText("yunseo@example.com · 010-9999-0000"),
-    ).toBeVisible();
+    await expect(page.getByText("010-9999-0000").first()).toBeVisible();
   });
 
   test("보험이 0건이면 빈 상태 안내가 보인다", async ({ page }) => {
