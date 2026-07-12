@@ -63,7 +63,7 @@ export default function OauthCallbackPage() {
 
     // 신규 회원은 쿠키가 없어(getMe 시 401) 티켓만 보관하고 가입으로 이동한다.
     if (data.isNewUser) {
-      if (data.signupTicket) saveSignupTicket(data.signupTicket);
+      if (data.signupTicket) saveSignupTicket(data.signupTicket, provider);
       router.replace("/signup");
       return;
     }
