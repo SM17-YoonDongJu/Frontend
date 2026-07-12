@@ -13,8 +13,6 @@ interface MobileProfileCardProps {
 
 /** 모바일 프로필 카드 — navy 다크 카드. 아바타(카메라 badge)·`일반 회원` 칩·수정. 하단 스탯 슬롯. */
 export function MobileProfileCard({ profile, onEdit, children }: MobileProfileCardProps) {
-  const contact = profile.phone ?? "";
-
   return (
     <section className="overflow-hidden rounded-card-lg bg-navy shadow-xl shadow-navy/40">
       <div className="flex items-center gap-3.5 p-5">
@@ -36,9 +34,6 @@ export function MobileProfileCard({ profile, onEdit, children }: MobileProfileCa
               일반 회원
             </span>
           </div>
-          {contact && (
-            <p className="mt-1 truncate text-[0.8125rem] text-white/60">{contact}</p>
-          )}
         </div>
 
         <button

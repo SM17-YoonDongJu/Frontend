@@ -30,7 +30,7 @@ test.describe("PC 내 정보 · 프로필 수정", () => {
     ).toBeVisible();
   });
 
-  test("프로필 수정을 열어 휴대폰을 바꿔 저장하면 히어로에 반영된다", async ({
+  test("프로필 수정을 열어 휴대폰을 바꿔 저장하면 연락처 카드에 반영된다", async ({
     page,
   }) => {
     await page.goto(PATH);
@@ -47,7 +47,7 @@ test.describe("PC 내 정보 · 프로필 수정", () => {
     await dialog.getByLabel("휴대폰 번호").fill("010-9999-0000");
     await dialog.getByRole("button", { name: "저장하기" }).click();
 
-    // 저장 성공 → 모달 닫힘 + 프로필 재검증 → 히어로 연락처(휴대폰)에 새 번호 노출
+    // 저장 성공 → 모달 닫힘 + 프로필 재검증 → 연락처·계정 카드 휴대폰 행에 새 번호 노출
     await expect(
       page.getByRole("heading", { name: "프로필 설정" }).filter({ visible: true }),
     ).toBeHidden();
