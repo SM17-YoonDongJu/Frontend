@@ -44,7 +44,7 @@ export const InsuranceDirectInput = forwardRef<
       />
       <button
         type="submit"
-        disabled={disabled}
+        disabled={disabled || !value.trim()}
         className="inline-flex shrink-0 items-center gap-1.5 rounded-button border border-line bg-card px-3.5 py-2 text-[0.8125rem] font-bold text-ink transition hover:bg-paper disabled:cursor-not-allowed disabled:opacity-[.42]"
       >
         증권으로 자동 등록

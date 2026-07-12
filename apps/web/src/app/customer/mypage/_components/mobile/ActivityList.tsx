@@ -22,7 +22,7 @@ export function ActivityList() {
         right={<CountText value={`${counts.reportCount}건`} />}
       />
       <MobileMenuRow
-        href="/customer/dashboard"
+        href="/customer/proposals"
         icon={<MessageSquare className={ICON_CLASS} />}
         label="받은 제안"
         right={

@@ -17,8 +17,8 @@ export function joinInfoLabel(
   createdAt: string,
 ): string {
   const date = new Date(createdAt);
-  const yearMonth = Number.isNaN(date.getTime())
-    ? ""
-    : `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}`;
-  return `${socialAccountLabel(provider)}으로 가입 · ${yearMonth}`;
+  const label = `${socialAccountLabel(provider)}으로 가입`;
+  if (Number.isNaN(date.getTime())) return label;
+  const yearMonth = `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, "0")}`;
+  return `${label} · ${yearMonth}`;
 }

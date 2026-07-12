@@ -3,7 +3,7 @@ import type { ActivitySummary } from "./types";
 /**
  * PC 사이드바 메뉴 config. 아이콘은 소비처(MypageSidebar)에서 key로 해석.
  * count는 활동 카운트에서 파생, emphasis=받은 제안(신규 강조).
- * CONTRACT(리더 확인, 이슈 #105): reports·proposals·consult 목적지 라우트 미확정 — 잠정 매핑.
+ * CONTRACT(리더 확인, 이슈 #105): reports·consult 전용 목적지 라우트 미확정 — 잠정 매핑(대시보드).
  */
 export interface MypageSidebarLink {
   key: "dashboard" | "reports" | "proposals" | "consult";
@@ -24,7 +24,7 @@ export const MYPAGE_SIDEBAR_LINKS: MypageSidebarLink[] = [
   {
     key: "proposals",
     label: "받은 제안",
-    href: "/customer/dashboard",
+    href: "/customer/proposals",
     countField: "proposalCount",
     emphasis: true,
   },

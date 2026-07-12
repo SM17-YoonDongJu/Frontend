@@ -114,12 +114,12 @@ export function ProfileSettingsForm({
           <Button variant="ghost" onClick={onClose}>
             취소
           </Button>
-          <Button onClick={save} loading={isSaving}>
+          <Button onClick={save} loading={isSaving} disabled={isUploading}>
             저장하기
           </Button>
         </div>
       ) : (
-        <Button full onClick={save} loading={isSaving}>
+        <Button full onClick={save} loading={isSaving} disabled={isUploading}>
           저장하기
         </Button>
       )}
