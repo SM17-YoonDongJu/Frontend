@@ -3,13 +3,12 @@ import type { AffiliationType, Speciality } from "./adjuster-application.schema"
 /**
  * 자격 인증 폼 로컬 draft(sessionStorage).
  * GET .../me는 name·speciality·licenseNo·documents만 반환 → 반려 후 재제출 시
- * 전화·전문분야·경력·소속·활동지역·소개까지 프리필하려면 로컬 draft 병행이 필요(signup-draft 패턴).
+ * 연락처·전문분야·경력·소속·활동지역·소개까지 프리필하려면 로컬 draft 병행이 필요(signup-draft 패턴).
  */
 export interface VerificationDraft {
   name: string;
   licenseNo: string;
   phone: string;
-  email: string;
   speciality: Speciality | "";
   affiliation: AffiliationType | "";
   specialties: string[];
@@ -18,7 +17,6 @@ export interface VerificationDraft {
   introduction: string;
   licenseImageUrl: string | null;
   registrationImageUrl: string | null;
-  idCardImageUrl: string | null;
 }
 
 const STORAGE_KEY = "verification-draft";
@@ -27,7 +25,6 @@ const EMPTY_DRAFT: VerificationDraft = {
   name: "",
   licenseNo: "",
   phone: "",
-  email: "",
   speciality: "",
   affiliation: "",
   specialties: [],
@@ -36,7 +33,6 @@ const EMPTY_DRAFT: VerificationDraft = {
   introduction: "",
   licenseImageUrl: null,
   registrationImageUrl: null,
-  idCardImageUrl: null,
 };
 
 export function loadVerificationDraft(): VerificationDraft {

@@ -20,7 +20,7 @@ function resolveFieldState(
   };
 }
 
-/** 증빙 서류 업로드(자격증 사본·등록증). 신분증은 Figma 신청 화면에 없어 제거. */
+/** 증빙 서류 업로드(자격증 사본·등록증). */
 export function DocumentFields({ form }: DocumentFieldsProps) {
   const { license, registration } = form.documents;
 

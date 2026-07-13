@@ -10,7 +10,6 @@ import type {
 const DOCUMENT_LABEL: Record<DocumentType, string> = {
   LICENSE: "자격증 사본",
   REGISTRATION: "등록확인서",
-  ID_CARD: "신분증",
 };
 
 const STATUS_LABEL: Record<DocumentReviewStatus, string> = {

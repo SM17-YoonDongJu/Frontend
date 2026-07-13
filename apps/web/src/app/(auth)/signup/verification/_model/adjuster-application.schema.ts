@@ -9,7 +9,7 @@ export const specialitySchema = z.enum(["신체", "종합"]);
 export type Speciality = z.infer<typeof specialitySchema>;
 
 // 서류 검토 결과
-export const documentTypeSchema = z.enum(["LICENSE", "REGISTRATION", "ID_CARD"]);
+export const documentTypeSchema = z.enum(["LICENSE", "REGISTRATION"]);
 export type DocumentType = z.infer<typeof documentTypeSchema>;
 
 export const documentReviewStatusSchema = z.enum([
@@ -31,7 +31,7 @@ export type ApplicationStatus = z.infer<typeof applicationStatusSchema>;
 
 // ── 신청 body ──
 // adjusterApplicationBodySchema = Notion 명세 필드(단일 진실).
-// UI 확장 필드(phone·email·specialties)는 아래 .extend()로 분리해 명세/확장을 구분한다.
+// UI 확장 필드(phone·specialties)는 아래 .extend()로 분리해 명세/확장을 구분한다.
 export const adjusterApplicationBodySchema = z.object({
   name: z.string(),
   speciality: specialitySchema,
@@ -42,9 +42,6 @@ export const adjusterApplicationBodySchema = z.object({
   affiliation: affiliationSchema,
   region: z.string(),
   registrationImageUrl: z.string().url(),
-  // 명세는 Y(필수)지만 Figma 신청 화면에 신분증 업로드가 없어 사용자 결정으로 optional 완화(FE 미전송).
-  // 명세 충돌은 리더 백엔드 확인 대기(.pr-assets/api-spec-draft-adjuster-verification.md).
-  idCardImageUrl: z.string().url().nullish(),
 });
 export type AdjusterApplicationBody = z.infer<typeof adjusterApplicationBodySchema>;
 
@@ -53,12 +50,11 @@ const licenseEitherRequired = (
   value: { licenseNo?: string | null; licenseImageUrl?: string | null },
 ) => Boolean(value.licenseNo) || Boolean(value.licenseImageUrl);
 
-// UI 확장 body — 명세 필드 + phone·email·specialties(리더 승인).
+// UI 확장 body — 명세 필드 + phone·specialties(백엔드 정의 요청 중).
 // 확장 초안: .pr-assets/api-spec-draft-adjuster-verification.md
 export const adjusterApplicationExtendedBodySchema = adjusterApplicationBodySchema
   .extend({
     phone: z.string(),
-    email: z.string().email(),
     specialties: z.array(z.string()),
   })
   .refine(licenseEitherRequired, {

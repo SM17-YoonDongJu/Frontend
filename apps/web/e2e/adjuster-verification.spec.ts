@@ -9,7 +9,7 @@ import { expect, test, type Page } from "@playwright/test";
  *   상태 분기는 GET /users/adjuster-applications/me 의 x-mock-scenario 헤더(setExtraHTTPHeaders)로 override.
  * 레이아웃 분기(useIsDesktop, md 48rem)는 project로 가름 — 데스크톱=chromium, 퍼널=mobile-chrome. beforeEach에서 skip.
  * 파일 형식·크기(20MB/pdf·image) 검증은 use-document-upload zod/TS에 위임(미테스트).
- * 정적 위임(미테스트): 필드 형식(email 정규식 등)·서버 status enum 파싱은 zod·TS 계약.
+ * 정적 위임(미테스트): 서버 status enum 파싱은 zod·TS 계약.
  * 409(DUPLICATE_RESOURCE)는 POST 핸들러의 x-mock-scenario=application-duplicate 강제 override로 재현(재검 반영).
  */
 
@@ -32,12 +32,11 @@ async function uploadAllDocuments(page: Page) {
   await expect(page.getByText("업로드됨")).toHaveCount(2);
 }
 
-// 연락처·이메일은 모바일 STEP1에만 노출(데스크톱 폼엔 없음) → 있을 때만 채운다.
+// 연락처는 모바일 STEP1에만 노출(데스크톱 폼엔 없음) → 있을 때만 채운다.
 async function fillBasic(page: Page) {
   await page.getByLabel("이름").fill("김상정");
   if ((await page.getByLabel("연락처").count()) > 0) {
     await page.getByLabel("연락처").fill("010-1234-5678");
-    await page.getByLabel("이메일").fill("adjuster@example.com");
   }
 }
 
@@ -75,7 +74,7 @@ test.describe("데스크톱 단일 폼", () => {
     await page.goto(FORM_PATH);
     await page.getByRole("button", { name: "인증 신청하기" }).click();
 
-    // 데스크톱 폼은 이름·자격구분·소속·활동지역만 검증(연락처·이메일 미노출).
+    // 데스크톱 폼은 이름·자격구분·소속·활동지역만 검증(연락처 미노출).
     await expect(page.getByText("이름을 입력해 주세요.")).toBeVisible();
     await expect(page.getByText("자격 구분을 선택해 주세요.")).toBeVisible();
     await expect(page.getByText("소속을 선택해 주세요.")).toBeVisible();

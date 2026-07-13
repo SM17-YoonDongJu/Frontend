@@ -6,11 +6,11 @@ import type { VerificationForm } from "../_hooks/use-verification-form";
 
 interface BasicInfoFieldsProps {
   form: VerificationForm;
-  /** 연락처·이메일 노출 여부. 모바일 STEP1=true, 데스크톱 폼(131-10583 부재)=false. */
+  /** 연락처 노출 여부. 모바일 STEP1=true, 데스크톱 폼(131-10583 부재)=false. */
   showContact?: boolean;
 }
 
-/** 기본 정보 필드(이름·등록번호[·연락처·이메일]). 데스크톱=2열, 모바일=1열. */
+/** 기본 정보 필드(이름·등록번호[·연락처]). 데스크톱=2열, 모바일=1열. */
 export function BasicInfoFields({ form, showContact = true }: BasicInfoFieldsProps) {
   return (
     <div className="grid grid-cols-1 gap-[1.125rem] md:grid-cols-2">
@@ -42,37 +42,18 @@ export function BasicInfoFields({ form, showContact = true }: BasicInfoFieldsPro
       </div>
 
       {showContact && (
-        <>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="verification-phone">
-              연락처
-            </Label>
-            <Input
-              id="verification-phone"
-              type="tel"
-              value={form.phone}
-              onChange={(event) => form.setPhone(event.target.value)}
-              placeholder="010-0000-0000"
-              autoComplete="tel"
-              error={form.errors.phone}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="verification-email">
-              이메일
-            </Label>
-            <Input
-              id="verification-email"
-              type="email"
-              value={form.email}
-              onChange={(event) => form.setEmail(event.target.value)}
-              placeholder="name@email.com"
-              autoComplete="email"
-              error={form.errors.email}
-            />
-          </div>
-        </>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="verification-phone">연락처</Label>
+          <Input
+            id="verification-phone"
+            type="tel"
+            value={form.phone}
+            onChange={(event) => form.setPhone(event.target.value)}
+            placeholder="010-0000-0000"
+            autoComplete="tel"
+            error={form.errors.phone}
+          />
+        </div>
       )}
     </div>
   );

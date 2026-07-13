@@ -348,7 +348,7 @@ const ADJUSTER_MYPAGE = {
 // 손해사정사 자격 신청 상태(이슈 #44) — POST가 세우고 GET .../me가 읽는 모듈 스코프 상태.
 // 기본 null(미신청 → GET 404 POST_NOT_FOUND → NOT_APPLIED → 폼).
 type MockDocumentReview = {
-  type: "LICENSE" | "REGISTRATION" | "ID_CARD";
+  type: "LICENSE" | "REGISTRATION";
   status: "PENDING" | "APPROVED" | "RESUBMIT_REQUIRED";
 };
 type MockAdjusterApplication = {
@@ -379,7 +379,6 @@ function buildAdjusterApplication(
     documents: [
       { type: "LICENSE", status: "PENDING" },
       { type: "REGISTRATION", status: "PENDING" },
-      { type: "ID_CARD", status: "PENDING" },
     ],
     rejectedAt: null,
     rejectReason: null,
@@ -398,7 +397,6 @@ function buildAdjusterApplication(
       documents: [
         { type: "LICENSE", status: "APPROVED" },
         { type: "REGISTRATION", status: "RESUBMIT_REQUIRED" },
-        { type: "ID_CARD", status: "APPROVED" },
       ],
       rejectedAt: "2026-07-07T13:20:00Z",
       rejectReason:
@@ -442,12 +440,10 @@ export const handlers = [
       affiliation?: string;
       region?: string;
       registrationImageUrl?: string;
-      idCardImageUrl?: string;
       licenseNo?: string | null;
       licenseImageUrl?: string | null;
     };
 
-    // idCardImageUrl은 명세상 Y지만 Figma 신청 화면에 신분증 업로드가 없어 필수 검증에서 제외(사용자 결정).
     if (
       !body.name ||
       !body.speciality ||
@@ -486,7 +482,6 @@ export const handlers = [
       documents: [
         { type: "LICENSE", status: "PENDING" },
         { type: "REGISTRATION", status: "PENDING" },
-        { type: "ID_CARD", status: "PENDING" },
       ],
       rejectedAt: null,
       rejectReason: null,

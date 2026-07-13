@@ -25,7 +25,6 @@ const DASHBOARD_PATH = "/customer/dashboard";
 export type VerificationFieldError =
   | "name"
   | "phone"
-  | "email"
   | "speciality"
   | "affiliation"
   | "region"
@@ -34,10 +33,8 @@ export type VerificationFieldError =
 
 type ErrorMap = Partial<Record<VerificationFieldError, string>>;
 
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 const STEP_FIELDS: Record<VerificationStep, VerificationFieldError[]> = {
-  basic: ["name", "phone", "email"],
+  basic: ["name", "phone"],
   expertise: ["speciality", "affiliation", "region"],
   documents: ["registration", "license"],
 };
@@ -49,8 +46,6 @@ export interface VerificationForm {
   setLicenseNo: (value: string) => void;
   phone: string;
   setPhone: (value: string) => void;
-  email: string;
-  setEmail: (value: string) => void;
   speciality: Speciality | null;
   setSpeciality: (value: Speciality) => void;
   affiliation: AffiliationType | null;
@@ -80,9 +75,9 @@ export interface VerificationForm {
 }
 
 /**
- * 신청 폼 공유 상태 훅. 뷰포트별 노출 필드가 달라(연락처·이메일은 모바일 STEP1에만),
- * 데스크톱에선 미노출 필드(phone·email)를 검증하지 않는다. 제출 로직은 하나로 공유.
- * 서류는 자격증 사본·등록증 2종(신분증은 Figma 신청 화면에 없어 제거).
+ * 신청 폼 공유 상태 훅. 뷰포트별 노출 필드가 달라(연락처는 모바일 STEP1에만),
+ * 데스크톱에선 미노출 필드(phone)를 검증하지 않는다. 제출 로직은 하나로 공유.
+ * 서류는 자격증 사본·등록증 2종.
  */
 export function useVerificationForm(isDesktop: boolean): VerificationForm {
   const router = useRouter();
@@ -94,7 +89,6 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
   const [name, setName] = useState("");
   const [licenseNo, setLicenseNo] = useState("");
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
   const [speciality, setSpeciality] = useState<Speciality | null>(null);
   const [affiliation, setAffiliation] = useState<AffiliationType | null>(null);
   const [specialties, setSpecialties] = useState<string[]>([]);
@@ -109,7 +103,6 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
     if (draft.name) setName(draft.name);
     if (draft.licenseNo) setLicenseNo(draft.licenseNo);
     if (draft.phone) setPhone(draft.phone);
-    if (draft.email) setEmail(draft.email);
     if (draft.speciality) setSpeciality(draft.speciality);
     if (draft.affiliation) setAffiliation(draft.affiliation);
     if (draft.specialties.length > 0) setSpecialties(draft.specialties);
@@ -127,7 +120,6 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
       name,
       licenseNo,
       phone,
-      email,
       speciality: speciality ?? "",
       affiliation: affiliation ?? "",
       specialties,
@@ -136,13 +128,11 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
       introduction,
       licenseImageUrl: license.url ?? null,
       registrationImageUrl: registration.url ?? null,
-      idCardImageUrl: null,
     });
   }, [
     name,
     licenseNo,
     phone,
-    email,
     speciality,
     affiliation,
     specialties,
@@ -164,8 +154,8 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
 
   const licenseSatisfied = Boolean(licenseNo.trim()) || Boolean(license.url);
 
-  // 연락처·이메일은 모바일 STEP1에만 노출 → 데스크톱에선 필수 아님.
-  const contactValid = isDesktop || (Boolean(phone.trim()) && EMAIL_PATTERN.test(email.trim()));
+  // 연락처는 모바일 STEP1에만 노출 → 데스크톱에선 필수 아님.
+  const contactValid = isDesktop || Boolean(phone.trim());
 
   const requiredValid = useMemo(
     () =>
@@ -185,11 +175,8 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
 
     if (wants("basic")) {
       if (!name.trim()) next.name = "이름을 입력해 주세요.";
-      // 연락처·이메일은 모바일 STEP1 전용 검증(데스크톱 미노출 → 스킵).
-      if (!isDesktop) {
-        if (!phone.trim()) next.phone = "연락처를 입력해 주세요.";
-        if (!EMAIL_PATTERN.test(email.trim())) next.email = "올바른 이메일을 입력해 주세요.";
-      }
+      // 연락처는 모바일 STEP1 전용 검증(데스크톱 미노출 → 스킵).
+      if (!isDesktop && !phone.trim()) next.phone = "연락처를 입력해 주세요.";
     }
     if (wants("expertise")) {
       if (speciality === null) next.speciality = "자격 구분을 선택해 주세요.";
@@ -218,7 +205,7 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
     setErrors(allErrors);
     if (Object.keys(allErrors).length > 0 || isUploading || apply.isPending) return;
 
-    // idCardImageUrl은 신청 화면에서 제거(Figma 부재) → 미전송. phone·email은 데스크톱에선 빈 값.
+    // phone·specialties는 명세 미정의 확장 필드(백엔드 정의 요청 중). 데스크톱에선 빈 값.
     const body: AdjusterApplicationExtendedBody = {
       name: name.trim(),
       speciality: speciality as Speciality,
@@ -230,7 +217,6 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
       region: region.trim(),
       registrationImageUrl: registration.url as string,
       phone: phone.trim(),
-      email: email.trim(),
       specialties,
     };
 
@@ -247,8 +233,6 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
     setLicenseNo,
     phone,
     setPhone,
-    email,
-    setEmail,
     speciality,
     setSpeciality,
     affiliation,
