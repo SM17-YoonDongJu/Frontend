@@ -1,13 +1,16 @@
 import type { ReactNode } from "react";
-import { PublicHeader } from "@/shared/ui/PublicHeader";
-import { Footer } from "@/shared/ui/Footer";
+import { getIsAppWebView } from "@/shared/lib/app-webview";
+import { LandingFooter } from "./_components/LandingFooter";
+import { LandingHeader } from "./_components/LandingHeader";
 
-export default function PublicLayout({ children }: { children: ReactNode }) {
+export default async function PublicLayout({ children }: { children: ReactNode }) {
+  const isApp = await getIsAppWebView();
+
   return (
-    <div className="flex min-h-dvh flex-col">
-      <PublicHeader />
+    <div className="flex min-h-dvh flex-col bg-paper">
+      {!isApp && <LandingHeader />}
       <main className="flex-1">{children}</main>
-      <Footer />
+      {!isApp && <LandingFooter />}
     </div>
   );
 }

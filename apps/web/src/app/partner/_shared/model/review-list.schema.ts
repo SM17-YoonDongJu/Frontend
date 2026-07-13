@@ -2,7 +2,15 @@ import { z } from "zod";
 
 /** 검수 대기 목록. 출처: API 명세 GET /reports/pending-review. 필드명 명세 그대로. */
 
-export const reviewStatusSchema = z.enum(["AWAITING_INSPECTION", "COUNSELING"]);
+export const reviewStatusSchema = z.enum([
+  "AWAITING_INSPECTION",
+  "AWAITING_ADOPTION",
+  "COUNSELING",
+  "MATCHED",
+  "CLOSED",
+  // CONTRACT: 명세없음-임시 — 미채택 탭 대응값 백엔드 협의 중
+  "NOT_SELECTED",
+]);
 
 export const reviewListItemSchema = z.object({
   // 명세 확정 4필드 (naming-dictionary §7-6)
@@ -18,6 +26,9 @@ export const reviewListItemSchema = z.object({
   claimedMaxAmount: z.number().int().optional(),
   // CONTRACT: 명세없음-임시 — "제안 대비 +N만" 표시치. 백엔드 확장 시 정식 필드명 확인 대상.
   offerHeadroom: z.number().int().optional(),
+  // 명세 필드(issueCount·held) — PC 카드 쟁점 수·보류 표시용. list 미확장으로 FE optional.
+  issueCount: z.number().int().optional(),
+  held: z.boolean().optional(),
 });
 
 export const paginationSchema = z.object({
@@ -28,7 +39,13 @@ export const paginationSchema = z.object({
   hasNext: z.boolean(),
 });
 
+// CONTRACT: 명세없음-임시 — 탭 건수 필드 백엔드 협의 중
+export const reviewStatusCountsSchema = z
+  .object({ total: z.number().int() })
+  .catchall(z.number().int());
+
 export const reviewListSchema = z.object({
   list: z.array(reviewListItemSchema),
   pagination: paginationSchema,
+  statusCounts: reviewStatusCountsSchema.optional(),
 });

@@ -8,6 +8,7 @@ export interface ReportListFilter {
 export interface ReviewListFilter {
   status?: string;
   accidentType?: string;
+  region?: string;
   page?: number;
   size?: number;
 }
@@ -26,6 +27,8 @@ export const reportKeys = createQueryKeys("report", {
   detail: (reportId: string) => [reportId],
   pendingReview: (filter?: ReviewListFilter) => [{ filter: filter ?? {} }],
   pendingReviewSummary: () => ["summary"],
+  // 검수 대기 PC 프리뷰 패널 전용(고객 상세 detail 키와 스키마가 달라 캐시 분리).
+  draftPreview: (reportId: string) => [reportId],
   reviewedReports: (filter?: ReviewedReportsFilter) => [{ filter: filter ?? {} }],
 });
 
@@ -33,6 +36,10 @@ export const userKeys = createQueryKeys("user", {
   me: null,
   // 손해사정사 자격 신청 상태(이슈 #44) — GET /users/adjuster-applications/me
   adjusterApplication: null,
+});
+
+export const authKeys = createQueryKeys("auth", {
+  oauthCallback: (provider: string, code: string) => [provider, code],
 });
 
 export const settingsKeys = createQueryKeys("settings", {
@@ -45,6 +52,11 @@ export const proposalKeys = createQueryKeys("proposal", {
 
 export const reviewKeys = createQueryKeys("review", {
   detail: (reportId: string) => [reportId],
+});
+
+export const chatKeys = createQueryKeys("chat", {
+  list: null,
+  messages: (chatRoomId: string) => [chatRoomId],
 });
 
 export const notificationKeys = createQueryKeys("notification", {

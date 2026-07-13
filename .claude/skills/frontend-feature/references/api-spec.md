@@ -61,14 +61,17 @@ auth · user · settings · report · review · matching · chat · payment · a
 | 400 | `VALIDATION_ERROR` | 필드 값 검증 위반(형식·길이·범위) |
 | 400 | `MISSING_REQUIRED_FIELD` | 필수 입력값 누락 |
 | 400 | `UNSUPPORTED_OPERATION` | 미지원 동작(MVP 미지원 보험사, 미적재 약관 리포트 등) |
+| 400 | `UNSUPPORTED_PROVIDER` | 미지원 소셜 로그인 provider(kakao·naver 외) — `/auth/oauth2/{provider}/callback` |
 | 401 | `INVALID_TOKEN` | 토큰 위조·변조·서명 오류 |
 | 401 | `EXPIRED_TOKEN` | 토큰 만료 → Refresh 재발급 필요 |
 | 401 | `LOGIN_REQUIRED` | 비로그인 상태로 보호 리소스 접근 |
+| 401 | `REFRESH_TOKEN_NOT_FOUND` | 서버(Redis)에 저장된 refresh 토큰 없음 — `/auth/reissue` |
 | 403 | `FORBIDDEN` | 인증됐으나 권한 없음(미활성 사정사 채택, 타인 리포트) |
 | 404 | `USER_NOT_FOUND` | 사용자 없음 |
 | 404 | `POST_NOT_FOUND` | 게시물/리포트 없음 |
 | 404 | `SUBSCRIPTION_NOT_FOUND` | 구독 정보 없음 |
 | 409 | `DUPLICATE_RESOURCE` | 중복 생성 시도 |
+| 409 | `CLOSED` | ⚠️ Notion 명세 409 근거·enum 반영 요청 — 종료(CLOSED)된 상담방에 메시지 전송 시도(이슈 #48 채팅) |
 | 422 | `PAYMENT_FAILED` | 결제 실패(PG 거절·한도·잔액) |
 | 500 | `INTERNAL_SERVER_ERROR` | 처리되지 않은 서버 예외 |
 | 500 | `DATABASE_ERROR` | DB 조회/저장 실패 |
