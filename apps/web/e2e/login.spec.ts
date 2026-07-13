@@ -67,7 +67,9 @@ test("최근 로그인 흔적이 있으면 재로그인 화면과 최근 로그�
 test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저장된다", async ({ page }) => {
   await page.goto("/oauth/kakao/callback?code=valid&state=s1");
 
-  await expect(page).toHaveURL(/\/$/, { timeout: 15000 });
+  // 콜백은 "/"로 보내고, 랜딩 가드가 곧바로 역할별 홈으로 다시 보낸다(#108).
+  // "/" 체류 시간이 짧아 관측되지 않을 수 있어 최종 도착지인 고객 대시보드로 단언한다.
+  await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 15000 });
 
   // 흔적 저장은 사용자 관찰 기준으로 검증 — 로그인 화면 재진입 시 재로그인 화면이 보인다.
   // 로그인 상태로는 가드에 막히므로(#108) 로그아웃 상태를 주입해 재진입한다(흔적은 localStorage라 유지).

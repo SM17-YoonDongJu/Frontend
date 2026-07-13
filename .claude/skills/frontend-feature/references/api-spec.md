@@ -65,6 +65,7 @@ auth · user · settings · report · review · matching · chat · payment · a
 | 401 | `INVALID_TOKEN` | 토큰 위조·변조·서명 오류 |
 | 401 | `EXPIRED_TOKEN` | 토큰 만료 → Refresh 재발급 필요 |
 | 401 | `LOGIN_REQUIRED` | 비로그인 상태로 보호 리소스 접근 |
+| 401 | `REFRESH_TOKEN_NOT_FOUND` | 서버(Redis)에 저장된 refresh 토큰 없음 — `/auth/reissue` |
 | 403 | `FORBIDDEN` | 인증됐으나 권한 없음(미활성 사정사 채택, 타인 리포트) |
 | 404 | `USER_NOT_FOUND` | 사용자 없음 |
 | 404 | `POST_NOT_FOUND` | 게시물/리포트 없음 |
