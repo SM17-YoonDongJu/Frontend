@@ -309,7 +309,8 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
   pendingReviewCount: 4,
 };
 
-// 알림 설정 (이슈 #46) — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체
+// 알림 설정 (이슈 #46) — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체.
+// 확정 6필드(백엔드 2026-07-13): newReviewRequest·consultMessage·settlementNotice·reviewComplete·receivedProposal·marketing.
 const NOTIFICATION_SETTINGS: Record<string, boolean> = {
   newReviewRequest: true,
   consultMessage: true,
@@ -317,7 +318,75 @@ const NOTIFICATION_SETTINGS: Record<string, boolean> = {
   reviewComplete: true,
   receivedProposal: true,
   marketing: false,
+  // CONTRACT(확장 등재 요청 중, 이슈 #105): 카카오톡 플러스 친구 알림 — 백엔드 미채택으로 실서버 응답엔 이 키가 없다.
+  // Figma에 토글 행이 있어 FE 동작 검증용으로만 목이 제공한다(스키마는 nullish → false로 부재 방어).
+  kakaoPlusFriend: false,
 };
+
+// 본인 정보 목 상태 — GET/PATCH /users/me 공유.
+// GET 확정 응답은 userId(uuid string)·nickname·email·role·createdAt 5필드뿐(userType 없음 → FE가 role에서 파생).
+// CONTRACT(확장 등재 요청 중, 이슈 #105): phone·avatarUrl·socialProvider·region은 백엔드 미채택 — 실서버는 주지 않는다.
+// 마이페이지 화면 검증용으로만 목이 제공하며, 스키마는 nullish로 키 부재를 흡수한다("미등록" 표시).
+const MOCK_ME: Record<string, unknown> = {
+  userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
+  nickname: "윤서",
+  email: "yunseo@example.com",
+  createdAt: "2024-03-02T09:00:00Z",
+  phone: "010-1234-5678",
+  avatarUrl: null,
+  socialProvider: "kakao",
+  region: "서울 강남구",
+};
+
+/**
+ * 목 role 결정 — 기본 USER(피보험자).
+ * localStorage["mock:role"]=CERTIFICATED_ADJUSTER → 파트너 전환 섹션 노출(#105).
+ * localStorage["mock:userType"]="adjuster" → 사정사 화면 검증용(응답에 userType이 없으므로 role로 매핑).
+ */
+function resolveMockRole(): string {
+  if (typeof localStorage === "undefined") return "USER";
+  const roleOverride = localStorage.getItem("mock:role");
+  if (roleOverride === "CERTIFICATED_ADJUSTER") return "CERTIFICATED_ADJUSTER";
+  return localStorage.getItem("mock:userType") === "adjuster"
+    ? "CERTIFICATED_ADJUSTER"
+    : "USER";
+}
+
+// 활동 카운트 (이슈 #105) — CONTRACT(명세없음-임시): GET /users/me/activity-summary
+const ACTIVITY_SUMMARY = {
+  reportCount: 3,
+  proposalCount: 2,
+  consultCount: 1,
+  closedCount: 4,
+};
+
+// 내 보험 (이슈 #105) — GET·POST /users/me/insurances (백엔드 확정 2026-07-13).
+// policyFileUrl 있음(증권 등록됨) 1건 + 없음(증권 미등록) 1건 — Figma 목업 2건 거울.
+const MOCK_INSURANCES: Array<Record<string, unknown>> = [
+  {
+    id: "e1000000-0000-4000-8000-000000000001",
+    insurerName: "OO손해보험",
+    productName: "무배당 행복드림 종합보험",
+    policyNo: "100-2024-558***",
+    enrolledAt: "2024-03-15",
+    coverages: ["상해후유장해", "골절진단비", "입원일당"],
+    matchStatus: "MATCHED",
+    // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 확정 응답엔 policyFileUrl이 없다. 카드 배지("증권 등록됨/미등록")가
+    // 이 필드를 요구해 백엔드에 등재 요청 중 — 실서버에선 아직 안 온다(→ 전부 "미등록"으로 표시됨).
+    policyFileUrl: "https://cdn.example.com/policies/e1000000-0001.pdf",
+  },
+  {
+    id: "e1000000-0000-4000-8000-000000000002",
+    insurerName: "△△생명",
+    productName: "든든 의료실비보험",
+    policyNo: "220-2023-114***",
+    enrolledAt: "2023-08-02",
+    coverages: ["실손의료비", "수술비"],
+    matchStatus: "UNMATCHED",
+    // CONTRACT(확장 등재 요청 중, 이슈 #105): 위와 동일 — 증권 미등록 케이스.
+    policyFileUrl: null,
+  },
+];
 
 // 마이페이지 집계 (이슈 #46) — GET /adjusters/me/mypage, ADJUSTER_PROFILE 페르소나와 수치 일치
 const ADJUSTER_MYPAGE = {
@@ -1207,6 +1276,97 @@ export const handlers = [
     });
   }),
 
+  // 활동 카운트 (이슈 #105) — CONTRACT(명세없음-임시): GET /users/me/activity-summary
+  http.get(`${API_BASE_URL}/users/me/activity-summary`, async ({ request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "activity-summary") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "활동 내역을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...ACTIVITY_SUMMARY },
+    });
+  }),
+
+  // 내 보험 목록 (이슈 #105) — GET /users/me/insurances (확정 스펙)
+  // x-mock-scenario=insurances-empty → 0건 빈 상태 검증.
+  http.get(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "insurances") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "보험 목록을 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    const list =
+      request.headers.get("x-mock-scenario") === "insurances-empty"
+        ? []
+        : MOCK_INSURANCES.map((item) => ({ ...item }));
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { list },
+    });
+  }),
+
+  // 내 보험 추가 (이슈 #105) — POST /users/me/insurances (확정 스펙): 201 + data는 생성 id 단건.
+  http.post(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "add-insurance") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "보험을 추가하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    if (typeof body.insurerName !== "string" || typeof body.productName !== "string") {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "보험사·상품명을 입력해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    const id = crypto.randomUUID();
+    MOCK_INSURANCES.push({
+      id,
+      insurerName: body.insurerName,
+      productName: body.productName,
+      policyNo: typeof body.policyNo === "string" ? body.policyNo : null,
+      enrolledAt: typeof body.enrolledAt === "string" ? body.enrolledAt : null,
+      coverages: Array.isArray(body.coverages) ? body.coverages : [],
+      // CONTRACT(직접 입력 시 초기 matchStatus 백엔드 확인 필요): 서버가 즉시 fuzzy 매칭하는지 비동기 대기인지 미확정 → 대기(PENDING)로 둔다.
+      matchStatus: "PENDING",
+      // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 미등재 필드. 증권 업로드 없이 직접 입력 → 미등록.
+      policyFileUrl: typeof body.policyFileUrl === "string" ? body.policyFileUrl : null,
+    });
+
+    // 확정 응답: 201 + data는 생성 id 하나뿐(전체 객체 아님). 목록은 훅이 invalidate로 재조회한다.
+    return HttpResponse.json(
+      { status: "201", message: "등록되었습니다.", data: { id } },
+      { status: 201 },
+    );
+  }),
+
   // 진행 중 사건 (#30) — ⚠️ API 명세 미정(드리프트), MSW 선구현
   http.get(`${API_BASE_URL}/adjusters/me/in-progress`, async ({ request }) => {
     await delay(500);
@@ -1297,18 +1457,49 @@ export const handlers = [
         { status: 500 },
       );
     }
-    const override =
-      typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
-    const userType = override === "adjuster" ? "adjuster" : "insured_person";
+    // 응답에 userType이 없다(FE가 role에서 파생). mock:userType override는 resolveMockRole이 role로 매핑한다.
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { ...MOCK_ME, role: resolveMockRole() },
+    });
+  }),
+
+  // 본인 정보 수정 (이슈 #105) — PATCH /users/me (확정 스펙)
+  // 확정 body는 nickname·email뿐이지만 phone·avatarUrl·region도 머지한다(확장 등재 요청 중 — 실서버는 무시할 수 있음).
+  // 응답은 확정대로 부분 필드(userId·nickname·email)만 — 전체를 주면 setQueryData 캐시 오염이 드러나지 않는다.
+  http.patch(`${API_BASE_URL}/users/me`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "update-me") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "프로필을 저장하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    for (const field of ["nickname", "email", "phone", "avatarUrl", "region"] as const) {
+      if (field in body) MOCK_ME[field] = body[field];
+    }
+
+    // userId는 GET 기준 uuid string으로 유지한다(명세는 PATCH 응답에서 number — 드리프트. FE는 응답을 폐기하므로 무관).
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: {
-        userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
-        nickname: "윤서",
-        email: "yunseo@example.com",
-        userType,
-        createdAt: "2024-03-02T09:00:00Z",
+        userId: MOCK_ME.userId,
+        nickname: MOCK_ME.nickname,
+        email: MOCK_ME.email,
       },
     });
   }),
