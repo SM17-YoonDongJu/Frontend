@@ -36,7 +36,7 @@ export const profileFormSchema = z.object({
     .number({ error: "숫자를 입력해 주세요." })
     .int()
     .min(0, "0 이상으로 입력해 주세요."),
-  activityRegion: z.string().trim().min(1, "활동지역을 입력해 주세요."),
+  activityRegion: z.string().trim().min(1, "활동 지역을 선택해 주세요."),
   avatarUrl: z.string().url().nullable(),
   specialties: z
     .array(z.string())
