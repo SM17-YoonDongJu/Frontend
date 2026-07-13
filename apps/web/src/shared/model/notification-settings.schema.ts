@@ -1,10 +1,11 @@
 import { z } from "zod";
 
 /**
- * 알림 설정 — GET·PATCH /users/me/notification-settings.
+ * 알림 설정 — GET·PATCH /users/me/notification-settings (백엔드 확정 2026-07-13).
  * partner/mypage와 customer/mypage 두 그룹이 동일 API를 소비 → src/shared 승격(이슈 #105).
- * 사정사 노출 4종(newReviewRequest·consultMessage·settlementNotice·marketing),
- * 고객 노출 2종(receivedProposal·kakaoPlusFriend).
+ * 확정 6필드 전부 필수 boolean. 역할별 노출:
+ * 사정사 = newReviewRequest·consultMessage·settlementNotice·marketing,
+ * 고객 = reviewComplete·receivedProposal·marketing.
  */
 export const notificationSettingsSchema = z.object({
   newReviewRequest: z.boolean(),
@@ -13,9 +14,12 @@ export const notificationSettingsSchema = z.object({
   reviewComplete: z.boolean(),
   receivedProposal: z.boolean(),
   marketing: z.boolean(),
-  // CONTRACT(명세없음, 이슈 #105): 카카오톡 플러스 친구 알림 채널(marketing과 별개).
-  // 초안 .pr-assets/api-spec-draft-user-mypage.md — 백엔드 미확정.
-  kakaoPlusFriend: z.boolean(),
+  // CONTRACT(명세없음-등재 요청 중, 이슈 #105): 카카오톡 플러스 친구 알림. Figma에 행이 존재해 UI 유지, 백엔드 등재 요청 중.
+  // 확정 응답엔 이 키가 없다 → 필수로 두면 실서버에서 알림 설정 파싱이 통째로 깨진다. 키 부재 허용(nullish → false).
+  kakaoPlusFriend: z
+    .boolean()
+    .nullish()
+    .transform((value) => value ?? false),
 });
 
 export const updateNotificationSettingsBodySchema =

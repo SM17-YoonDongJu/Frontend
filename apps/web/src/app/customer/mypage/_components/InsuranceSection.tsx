@@ -49,7 +49,7 @@ export function InsuranceSection() {
       ) : (
         <div className="mt-4 grid grid-cols-2 gap-4">
           {insurances.map((item) => (
-            <InsuranceCard key={item.insuranceId} item={item} />
+            <InsuranceCard key={item.id} item={item} />
           ))}
         </div>
       )}

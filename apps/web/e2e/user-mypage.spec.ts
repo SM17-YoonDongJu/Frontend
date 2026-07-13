@@ -1,9 +1,9 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 /**
  * 고객 마이페이지 「내 정보」 E2E (happy-path + 빈 상태 + 역할 게이팅, 이슈 #105 커밋 #19).
  *
- * 원칙: 핵심 사용자 흐름만 — 진입/프로필 수정 저장(PC 모달)/보험 0건 빈 상태/모바일 허브+바텀시트/파트너 전환 role 조건부.
+ * 원칙: 핵심 사용자 흐름만 — 진입/프로필 수정 저장(PC 모달)/보험 목록·배지·추가/보험 0건 빈 상태/모바일 허브+바텀시트/파트너 전환 role 조건부.
  * 응답은 기본 MSW 핸들러가 제공(GET /users/me 윤서·role USER·phone 010-1234-5678, 활동카운트 3/2/1/4, 보험 2건, /reports 2건).
  * 고가치 override: 보험 0건은 x-mock-scenario 헤더, 파트너 전환 노출은 localStorage["mock:role"]=CERTIFICATED_ADJUSTER.
  * 필드 형식·범위(phone·nonnegative 카운트)·스테퍼 status→step 파생은 zod·TS에 위임(미테스트).
@@ -65,6 +65,62 @@ test.describe("PC 내 정보 · 프로필 수정", () => {
     await expect(
       page.getByText(/보험사·상품명을 입력해 추가/).filter({ visible: true }),
     ).toBeVisible();
+  });
+});
+
+// 카드는 상품명으로만 지목한다(필드명·DOM 구조 비의존).
+const cardOf = (page: Page, productName: string) =>
+  page.getByRole("article").filter({ hasText: productName });
+
+test.describe("PC 내 보험 정보", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  test("증권을 올린 보험은 등록됨, 안 올린 보험은 미등록 배지가 보인다", async ({
+    page,
+  }) => {
+    await page.goto(PATH);
+
+    const withPolicy = cardOf(page, "무배당 행복드림 종합보험");
+    await expect(withPolicy.getByText("증권 등록됨")).toBeVisible();
+    await expect(withPolicy.getByRole("button", { name: "상세 보기" })).toBeVisible();
+
+    const withoutPolicy = cardOf(page, "든든 의료실비보험");
+    await expect(withoutPolicy.getByText("증권 미등록")).toBeVisible();
+    await expect(
+      withoutPolicy.getByRole("button", { name: "증권 올리기" }),
+    ).toBeVisible();
+
+    // 보장 칩이 카드에 노출된다
+    await expect(withoutPolicy.getByText("실손의료비")).toBeVisible();
+  });
+
+  test("보험사·상품명을 입력해 추가하면 목록에 새 카드가 나타난다", async ({
+    page,
+  }) => {
+    await page.goto(PATH);
+
+    await expect(page.getByRole("heading", { name: /내 보험 정보/ })).toContainText(
+      "2건",
+    );
+
+    const input = page.getByPlaceholder("보험사 · 상품명 직접 입력");
+    const submit = page.getByRole("button", { name: "증권으로 자동 등록" });
+
+    // 하이드레이션 가드 — 입력이 상태에 반영돼야 제출 버튼이 활성화된다(fill은 멱등, 중복 추가 없음).
+    await expect(async () => {
+      await input.fill("테스트생명 안심보험");
+      await expect(submit).toBeEnabled();
+    }).toPass({ timeout: 10000 });
+
+    await submit.click();
+
+    // 생성 응답은 id 하나뿐 → 목록 재조회로만 새 카드가 보인다(캐시 직접 주입 아님).
+    const added = cardOf(page, "테스트생명 안심보험");
+    await expect(added).toBeVisible();
+    await expect(added.getByText("증권 미등록")).toBeVisible();
+    await expect(page.getByRole("heading", { name: /내 보험 정보/ })).toContainText(
+      "3건",
+    );
   });
 });
 

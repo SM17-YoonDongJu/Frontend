@@ -3,10 +3,11 @@ export type {
   ActivitySummary,
 } from "./activity.schema";
 export type {
-  PolicyStatus,
+  MatchStatus,
   InsuranceItem,
   InsuranceList,
   AddInsuranceBody,
+  AddInsuranceResult,
 } from "./insurance.schema";
 export type { AnalysisStep } from "./analysis-step";
 

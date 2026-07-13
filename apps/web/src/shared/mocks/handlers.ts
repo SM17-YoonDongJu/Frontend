@@ -311,7 +311,8 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
   pendingReviewCount: 4,
 };
 
-// 알림 설정 (이슈 #46) — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체
+// 알림 설정 (이슈 #46) — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체.
+// 확정 6필드(백엔드 2026-07-13): newReviewRequest·consultMessage·settlementNotice·reviewComplete·receivedProposal·marketing.
 const NOTIFICATION_SETTINGS: Record<string, boolean> = {
   newReviewRequest: true,
   consultMessage: true,
@@ -319,13 +320,15 @@ const NOTIFICATION_SETTINGS: Record<string, boolean> = {
   reviewComplete: true,
   receivedProposal: true,
   marketing: false,
-  // CONTRACT(명세없음, 이슈 #105): 카카오톡 플러스 친구 알림(고객 마이페이지 토글).
+  // CONTRACT(확장 등재 요청 중, 이슈 #105): 카카오톡 플러스 친구 알림 — 백엔드 미채택으로 실서버 응답엔 이 키가 없다.
+  // Figma에 토글 행이 있어 FE 동작 검증용으로만 목이 제공한다(스키마는 nullish → false로 부재 방어).
   kakaoPlusFriend: false,
 };
 
 // 본인 정보 목 상태 — GET/PATCH /users/me 공유.
-// 실제 응답은 userId·nickname·email·role·createdAt만 준다(userType 없음 → FE가 role에서 파생).
-// phone·avatarUrl·socialProvider·region은 마이페이지(#105) 확장 제안분 — CONTRACT(명세없음-임시), 백엔드 확정 대기.
+// GET 확정 응답은 userId(uuid string)·nickname·email·role·createdAt 5필드뿐(userType 없음 → FE가 role에서 파생).
+// CONTRACT(확장 등재 요청 중, 이슈 #105): phone·avatarUrl·socialProvider·region은 백엔드 미채택 — 실서버는 주지 않는다.
+// 마이페이지 화면 검증용으로만 목이 제공하며, 스키마는 nullish로 키 부재를 흡수한다("미등록" 표시).
 const MOCK_ME: Record<string, unknown> = {
   userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
   nickname: "윤서",
@@ -359,21 +362,31 @@ const ACTIVITY_SUMMARY = {
   closedCount: 4,
 };
 
-// 내 보험 (이슈 #105) — CONTRACT(명세없음-임시): GET·POST /users/me/insurances. 등록1 + 미등록1.
+// 내 보험 (이슈 #105) — GET·POST /users/me/insurances (백엔드 확정 2026-07-13).
+// policyFileUrl 있음(증권 등록됨) 1건 + 없음(증권 미등록) 1건 — Figma 목업 2건 거울.
 const MOCK_INSURANCES: Array<Record<string, unknown>> = [
   {
-    insuranceId: "e1000000-0000-4000-8000-000000000001",
+    id: "e1000000-0000-4000-8000-000000000001",
     insurerName: "OO손해보험",
     productName: "무배당 행복드림 종합보험",
-    riders: ["상해후유장해", "질병입원일당", "골절진단금"],
-    policyStatus: "REGISTERED",
+    policyNo: "100-2024-558***",
+    enrolledAt: "2024-03-15",
+    coverages: ["상해후유장해", "골절진단비", "입원일당"],
+    matchStatus: "MATCHED",
+    // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 확정 응답엔 policyFileUrl이 없다. 카드 배지("증권 등록됨/미등록")가
+    // 이 필드를 요구해 백엔드에 등재 요청 중 — 실서버에선 아직 안 온다(→ 전부 "미등록"으로 표시됨).
+    policyFileUrl: "https://cdn.example.com/policies/e1000000-0001.pdf",
   },
   {
-    insuranceId: "e1000000-0000-4000-8000-000000000002",
+    id: "e1000000-0000-4000-8000-000000000002",
     insurerName: "△△생명",
-    productName: "The건강한 종신보험",
-    riders: ["암진단비"],
-    policyStatus: "UNREGISTERED",
+    productName: "든든 의료실비보험",
+    policyNo: "220-2023-114***",
+    enrolledAt: "2023-08-02",
+    coverages: ["실손의료비", "수술비"],
+    matchStatus: "UNMATCHED",
+    // CONTRACT(확장 등재 요청 중, 이슈 #105): 위와 동일 — 증권 미등록 케이스.
+    policyFileUrl: null,
   },
 ];
 
@@ -697,7 +710,7 @@ export const handlers = [
     });
   }),
 
-  // 내 보험 목록 (이슈 #105) — CONTRACT(명세없음-임시): GET /users/me/insurances
+  // 내 보험 목록 (이슈 #105) — GET /users/me/insurances (확정 스펙)
   // x-mock-scenario=insurances-empty → 0건 빈 상태 검증.
   http.get(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
     await delay(300);
@@ -721,8 +734,7 @@ export const handlers = [
     });
   }),
 
-  // 내 보험 추가 (이슈 #105) — CONTRACT(명세없음-임시): POST /users/me/insurances
-  // 직접 입력 → 증권 미등록(UNREGISTERED) 상태로 생성.
+  // 내 보험 추가 (이슈 #105) — POST /users/me/insurances (확정 스펙): 201 + data는 생성 id 단건.
   http.post(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
     await delay(500);
 
@@ -750,20 +762,25 @@ export const handlers = [
       );
     }
 
-    const created = {
-      insuranceId: crypto.randomUUID(),
+    const id = crypto.randomUUID();
+    MOCK_INSURANCES.push({
+      id,
       insurerName: body.insurerName,
       productName: body.productName,
-      riders: Array.isArray(body.riders) ? body.riders : [],
-      policyStatus: "UNREGISTERED",
-    };
-    MOCK_INSURANCES.push({ ...created });
-
-    return HttpResponse.json({
-      status: "200",
-      message: "정상 처리되었습니다.",
-      data: created,
+      policyNo: typeof body.policyNo === "string" ? body.policyNo : null,
+      enrolledAt: typeof body.enrolledAt === "string" ? body.enrolledAt : null,
+      coverages: Array.isArray(body.coverages) ? body.coverages : [],
+      // CONTRACT(직접 입력 시 초기 matchStatus 백엔드 확인 필요): 서버가 즉시 fuzzy 매칭하는지 비동기 대기인지 미확정 → 대기(PENDING)로 둔다.
+      matchStatus: "PENDING",
+      // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 미등재 필드. 증권 업로드 없이 직접 입력 → 미등록.
+      policyFileUrl: typeof body.policyFileUrl === "string" ? body.policyFileUrl : null,
     });
+
+    // 확정 응답: 201 + data는 생성 id 하나뿐(전체 객체 아님). 목록은 훅이 invalidate로 재조회한다.
+    return HttpResponse.json(
+      { status: "201", message: "등록되었습니다.", data: { id } },
+      { status: 201 },
+    );
   }),
 
   // 진행 중 사건 (#30) — ⚠️ API 명세 미정(드리프트), MSW 선구현
@@ -821,7 +838,9 @@ export const handlers = [
     });
   }),
 
-  // 본인 정보 수정 (이슈 #105) — phone·avatarUrl·nickname·email 부분 머지 후 전체 반환
+  // 본인 정보 수정 (이슈 #105) — PATCH /users/me (확정 스펙)
+  // 확정 body는 nickname·email뿐이지만 phone·avatarUrl·region도 머지한다(확장 등재 요청 중 — 실서버는 무시할 수 있음).
+  // 응답은 확정대로 부분 필드(userId·nickname·email)만 — 전체를 주면 setQueryData 캐시 오염이 드러나지 않는다.
   http.patch(`${API_BASE_URL}/users/me`, async ({ request }) => {
     await delay(500);
 
@@ -846,10 +865,15 @@ export const handlers = [
       if (field in body) MOCK_ME[field] = body[field];
     }
 
+    // userId는 GET 기준 uuid string으로 유지한다(명세는 PATCH 응답에서 number — 드리프트. FE는 응답을 폐기하므로 무관).
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { ...MOCK_ME, role: resolveMockRole() },
+      data: {
+        userId: MOCK_ME.userId,
+        nickname: MOCK_ME.nickname,
+        email: MOCK_ME.email,
+      },
     });
   }),
 
