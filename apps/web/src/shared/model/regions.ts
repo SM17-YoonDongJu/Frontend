@@ -1,4 +1,4 @@
-/** 지역 선택 값. district=null이면 시·도 전체("서울 전체"). */
+/** 지역 선택 값. sido는 정식 명칭, district=null이면 시·도 전체("서울 전체"). */
 export interface RegionValue {
   sido: string;
   district: string | null;
@@ -138,3 +138,41 @@ export const SIDO_LIST: readonly Sido[] = [
     districts: ["제주시", "서귀포시"],
   },
 ];
+
+const SIDO_BY_NAME = new Map(SIDO_LIST.map((sido) => [sido.name, sido]));
+
+export function findSido(name: string): Sido | undefined {
+  return SIDO_BY_NAME.get(name);
+}
+
+/** 트리거 버튼·칩 표기 라벨. "서울 강남구" / "서울 전체". */
+export function formatRegionLabel({ sido, district }: RegionValue): string {
+  const shortName = SIDO_BY_NAME.get(sido)?.shortName ?? sido;
+  return district ? `${shortName} ${district}` : `${shortName} 전체`;
+}
+
+/** 선택 비교·React key용 식별자. */
+export function regionKey({ sido, district }: RegionValue): string {
+  return `${sido}|${district ?? ""}`;
+}
+
+export function isSameRegion(a: RegionValue, b: RegionValue): boolean {
+  return a.sido === b.sido && a.district === b.district;
+}
+
+/** 시·도명(정식·축약)과 시·군·구명을 함께 훑는 통합 검색. 시·도가 맞으면 그 시·도 전체를 결과에 넣는다. */
+export function searchRegions(keyword: string): RegionValue[] {
+  const query = keyword.trim();
+  if (!query) return [];
+
+  const matches: RegionValue[] = [];
+  for (const sido of SIDO_LIST) {
+    if (sido.name.includes(query) || sido.shortName.includes(query)) {
+      matches.push({ sido: sido.name, district: null });
+    }
+    for (const district of sido.districts) {
+      if (district.includes(query)) matches.push({ sido: sido.name, district });
+    }
+  }
+  return matches;
+}
