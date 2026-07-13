@@ -1,7 +1,9 @@
 "use client";
 
+import { formatRegionList, parseRegionList } from "@/shared/model/regions";
 import { Input } from "@/shared/ui/Input";
 import { Label } from "@/shared/ui/Label";
+import { RegionSelect } from "@/shared/ui/RegionSelect/RegionSelect";
 import { Textarea } from "@/shared/ui/Textarea";
 import type { AffiliationType, Speciality } from "../_model/adjuster-application.schema";
 import type { VerificationForm } from "../_hooks/use-verification-form";
@@ -86,15 +88,13 @@ export function ExpertiseFields({ form, showProfileExtras = true }: ExpertiseFie
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="verification-region">
-            활동 지역
-          </Label>
-          <Input
-            id="verification-region"
-            value={form.region}
-            onChange={(event) => form.setRegion(event.target.value)}
-            placeholder="서울 · 경기"
+          <Label>활동 지역</Label>
+          <RegionSelect
+            mode="multiple"
+            value={parseRegionList(form.region)}
+            onChange={(regions) => form.setRegion(formatRegionList(regions))}
             error={form.errors.region}
+            className="self-start"
           />
         </div>
       </div>

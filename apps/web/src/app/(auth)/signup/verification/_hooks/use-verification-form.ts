@@ -181,7 +181,7 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
     if (wants("expertise")) {
       if (speciality === null) next.speciality = "자격 구분을 선택해 주세요.";
       if (affiliation === null) next.affiliation = "소속을 선택해 주세요.";
-      if (!region.trim()) next.region = "활동 지역을 입력해 주세요.";
+      if (!region.trim()) next.region = "활동 지역을 선택해 주세요.";
     }
     if (wants("documents")) {
       if (!registration.url) next.registration = "등록증을 올려 주세요.";
