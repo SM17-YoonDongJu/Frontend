@@ -2030,13 +2030,11 @@ export const handlers = [
     }
 
     if (region) {
-      // region은 지역 라벨을 콤마로 이은 값("서울 강남구,경기 성남시"). 한 곳이라도 맞으면 통과.
+      // ⚠️ 임시 계약 — region 전송 포맷은 백엔드 미확정.
+      // 현재는 지역 라벨을 콤마로 이은 값("서울 강남구,경기 성남시")을 거울로 모킹한다. 한 곳이라도 맞으면 통과.
       const labels = region.split(",").map((label) => label.trim()).filter(Boolean);
       result = result.filter((a) =>
         labels.some((label) => {
-          if (label === "그 외 지역") {
-            return !["서울", "경기", "인천"].some((r) => a.activityRegion.includes(r));
-          }
           // "서울 전체"·"서울"은 시·도 단위, "서울 강남구"는 시·군·구까지 맞아야 한다.
           const [sido = "", district] = label.split(" ");
           if (!district || district === "전체") return a.activityRegion.includes(sido);

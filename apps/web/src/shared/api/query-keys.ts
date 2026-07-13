@@ -69,7 +69,7 @@ export const notificationKeys = createQueryKeys("notification", {
 export interface AdjusterListFilter {
   keyword?: string;
   specialty?: string;
-  /** 지역 라벨을 콤마로 이은 값("서울 강남구,경기 성남시"). serializeRegions로 만든다. */
+  /** ⚠️ 전송 포맷 백엔드 미확정. 현재는 지역 라벨 콤마 조인(_model/region-filter.ts). */
   region?: string;
   sort?: string;
   page?: number;

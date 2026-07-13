@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import type { AdjusterListFilter } from "@/shared/api/query-keys";
-import { serializeRegions, type RegionValue } from "@/shared/model/regions";
+import type { RegionValue } from "@/shared/model/regions";
 import { Button } from "@/shared/ui/Button";
 import { RegionSelect } from "@/shared/ui/RegionSelect/RegionSelect";
 import { useAdjusters } from "../_api/use-adjusters";
+import { serializeRegions } from "../_model/region-filter";
 import type { SortKey } from "../_model/types";
 import { AdjusterCard } from "./AdjusterCard";
 import { AdjusterListEmpty } from "./AdjusterListEmpty";

@@ -160,15 +160,6 @@ export function isSameRegion(a: RegionValue, b: RegionValue): boolean {
   return a.sido === b.sido && a.district === b.district;
 }
 
-/**
- * 지역 필터 쿼리 파라미터 직렬화. 라벨을 콤마로 잇는다("서울 강남구,경기 성남시").
- * 같은 선택이 항상 같은 문자열이 되도록 정렬해 쿼리키 캐시가 흔들리지 않게 한다.
- */
-export function serializeRegions(values: RegionValue[]): string | undefined {
-  if (values.length === 0) return undefined;
-  return values.map(formatRegionLabel).toSorted().join(",");
-}
-
 /** 시·도명(정식·축약)과 시·군·구명을 함께 훑는 통합 검색. 시·도가 맞으면 그 시·도 전체를 결과에 넣는다. */
 export function searchRegions(keyword: string): RegionValue[] {
   const query = keyword.trim();
