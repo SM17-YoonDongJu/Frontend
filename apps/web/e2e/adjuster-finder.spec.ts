@@ -172,6 +172,30 @@ test("지역명을 검색하면 시·군·구 결과가 바로 나온다", async
   await expect(dropdown.getByRole("checkbox", { name: "서울 강북구" })).toHaveCount(0);
 });
 
+test("지역 두 곳을 골라 적용하면 해당 지역 사정사만 남는다", async ({ page }) => {
+  await page.goto(PATH);
+  await expect(page.getByRole("article")).toHaveCount(PAGE_SIZE);
+
+  await page.getByRole("button", { name: "지역", exact: true }).click();
+  const dropdown = page.getByRole("dialog", { name: "지역 선택" });
+
+  await dropdown.getByRole("button", { name: "서울특별시" }).click();
+  await dropdown.getByText("강남구", { exact: true }).click();
+  await dropdown.getByRole("button", { name: "서울특별시" }).click();
+
+  await dropdown.getByRole("button", { name: "경기도" }).click();
+  await dropdown.getByText("수원시", { exact: true }).click();
+
+  await expect(dropdown.getByText("2곳 선택됨")).toBeVisible();
+  await dropdown.getByRole("button", { name: "적용 (2)" }).click();
+
+  // 트리거에 선택 결과 반영 + 목록은 두 지역 사정사만 (정우성=서울 강남구, 박준호=경기 수원시)
+  await expect(page.getByRole("button", { name: /서울 강남구 외 1곳/ })).toBeVisible();
+  await expect(page.getByRole("article")).toHaveCount(2);
+  await expect(page.getByRole("article").filter({ hasText: "정우성 사정사" })).toBeVisible();
+  await expect(page.getByRole("article").filter({ hasText: "박준호 사정사" })).toBeVisible();
+});
+
 test("서버 오류가 나면 에러 안내와 다시 시도가 보인다", async ({ page }) => {
   await page.goto(PATH);
   await expect(page.getByRole("article")).toHaveCount(PAGE_SIZE);
