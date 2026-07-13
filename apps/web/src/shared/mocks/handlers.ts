@@ -28,7 +28,7 @@ const EXTRA_ADJUSTER_NAMES = [
 ] as const;
 
 const EXTRA_SPECIALTIES = ["후유장해", "교통사고", "실손 의료비", "암·진단비", "배상책임", "산재 연계"] as const;
-const EXTRA_REGIONS = ["서울", "경기", "인천", "대구 · 경북", "광주 · 전남"] as const;
+const EXTRA_REGIONS = ["서울 송파구", "경기 고양시", "인천 부평구", "대구 수성구", "광주 서구"] as const;
 
 // 결정적 생성(랜덤 없음) — E2E가 개수·정렬을 단언할 수 있게 경력≤16(정우성 18 최고), 평점≤4.8(정우성 4.9 최고) 유지.
 const EXTRA_ADJUSTER_MOCK = EXTRA_ADJUSTER_NAMES.map((name, i) => {
@@ -61,7 +61,7 @@ const ADJUSTER_LIST_MOCK = [
     reviewCount: 214,
     career: 18,
     completedConsultCount: 410,
-    activityRegion: "서울 · 경기",
+    activityRegion: "서울 강남구 · 경기 성남시",
   },
   {
     adjusterId: "22222222-2222-4222-8222-222222222222",
@@ -74,7 +74,7 @@ const ADJUSTER_LIST_MOCK = [
     reviewCount: 176,
     career: 12,
     completedConsultCount: 320,
-    activityRegion: "서울",
+    activityRegion: "서울 서초구",
   },
   {
     adjusterId: "33333333-3333-4333-8333-333333333333",
@@ -87,7 +87,7 @@ const ADJUSTER_LIST_MOCK = [
     reviewCount: 132,
     career: 15,
     completedConsultCount: 268,
-    activityRegion: "인천 · 경기",
+    activityRegion: "인천 연수구 · 경기 부천시",
   },
   {
     adjusterId: "44444444-4444-4444-8444-444444444444",
@@ -100,7 +100,7 @@ const ADJUSTER_LIST_MOCK = [
     reviewCount: 98,
     career: 9,
     completedConsultCount: 152,
-    activityRegion: "경기",
+    activityRegion: "경기 수원시",
   },
   {
     adjusterId: "55555555-5555-4555-8555-555555555555",
@@ -113,7 +113,7 @@ const ADJUSTER_LIST_MOCK = [
     reviewCount: 145,
     career: 11,
     completedConsultCount: 205,
-    activityRegion: "부산 · 경남",
+    activityRegion: "부산 해운대구 · 경남 창원시",
   },
   {
     adjusterId: "66666666-6666-4666-8666-666666666666",
@@ -126,7 +126,7 @@ const ADJUSTER_LIST_MOCK = [
     reviewCount: 87,
     career: 6,
     completedConsultCount: 95,
-    activityRegion: "대전 · 충청",
+    activityRegion: "대전 유성구 · 충남 천안시",
   },
   ...EXTRA_ADJUSTER_MOCK,
 ];
@@ -2030,14 +2030,19 @@ export const handlers = [
     }
 
     if (region) {
-      if (region === "그 외 지역") {
-        result = result.filter(
-          (a) =>
-            !["서울", "경기", "인천"].some((r) => a.activityRegion.includes(r)),
-        );
-      } else {
-        result = result.filter((a) => a.activityRegion.includes(region));
-      }
+      // region은 지역 라벨을 콤마로 이은 값("서울 강남구,경기 성남시"). 한 곳이라도 맞으면 통과.
+      const labels = region.split(",").map((label) => label.trim()).filter(Boolean);
+      result = result.filter((a) =>
+        labels.some((label) => {
+          if (label === "그 외 지역") {
+            return !["서울", "경기", "인천"].some((r) => a.activityRegion.includes(r));
+          }
+          // "서울 전체"·"서울"은 시·도 단위, "서울 강남구"는 시·군·구까지 맞아야 한다.
+          const [sido = "", district] = label.split(" ");
+          if (!district || district === "전체") return a.activityRegion.includes(sido);
+          return a.activityRegion.includes(label);
+        }),
+      );
     }
 
     result.sort((a, b) => {
