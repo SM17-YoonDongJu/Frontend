@@ -323,8 +323,9 @@ const NOTIFICATION_SETTINGS: Record<string, boolean> = {
   kakaoPlusFriend: false,
 };
 
-// 본인 정보 목 상태 (이슈 #105 확장) — GET/PATCH /users/me 공유. phone·avatarUrl·role·socialProvider·region 확장.
-// role은 localStorage["mock:role"]로 override(파트너 전환 섹션 검증: USER 기본 / CERTIFICATED_ADJUSTER).
+// 본인 정보 목 상태 — GET/PATCH /users/me 공유.
+// 실제 응답은 userId·nickname·email·role·createdAt만 준다(userType 없음 → FE가 role에서 파생).
+// phone·avatarUrl·socialProvider·region은 마이페이지(#105) 확장 제안분 — CONTRACT(명세없음-임시), 백엔드 확정 대기.
 const MOCK_ME: Record<string, unknown> = {
   userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
   nickname: "윤서",
@@ -335,6 +336,20 @@ const MOCK_ME: Record<string, unknown> = {
   socialProvider: "kakao",
   region: "서울 강남구",
 };
+
+/**
+ * 목 role 결정 — 기본 USER(피보험자).
+ * localStorage["mock:role"]=CERTIFICATED_ADJUSTER → 파트너 전환 섹션 노출(#105).
+ * localStorage["mock:userType"]="adjuster" → 사정사 화면 검증용(응답에 userType이 없으므로 role로 매핑).
+ */
+function resolveMockRole(): string {
+  if (typeof localStorage === "undefined") return "USER";
+  const roleOverride = localStorage.getItem("mock:role");
+  if (roleOverride === "CERTIFICATED_ADJUSTER") return "CERTIFICATED_ADJUSTER";
+  return localStorage.getItem("mock:userType") === "adjuster"
+    ? "CERTIFICATED_ADJUSTER"
+    : "USER";
+}
 
 // 활동 카운트 (이슈 #105) — CONTRACT(명세없음-임시): GET /users/me/activity-summary
 const ACTIVITY_SUMMARY = {
@@ -799,18 +814,10 @@ export const handlers = [
         { status: 401 },
       );
     }
-    const override =
-      typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
-    const userType = override === "adjuster" ? "adjuster" : "insured_person";
-    // role 기본 USER. mock:role=CERTIFICATED_ADJUSTER면 파트너 전환 섹션 노출(이슈 #105).
-    const roleOverride =
-      typeof localStorage !== "undefined" ? localStorage.getItem("mock:role") : null;
-    const role =
-      roleOverride === "CERTIFICATED_ADJUSTER" ? "CERTIFICATED_ADJUSTER" : "USER";
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { ...MOCK_ME, userType, role },
+      data: { ...MOCK_ME, role: resolveMockRole() },
     });
   }),
 
@@ -839,18 +846,10 @@ export const handlers = [
       if (field in body) MOCK_ME[field] = body[field];
     }
 
-    const override =
-      typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
-    const userType = override === "adjuster" ? "adjuster" : "insured_person";
-    const roleOverride =
-      typeof localStorage !== "undefined" ? localStorage.getItem("mock:role") : null;
-    const role =
-      roleOverride === "CERTIFICATED_ADJUSTER" ? "CERTIFICATED_ADJUSTER" : "USER";
-
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { ...MOCK_ME, userType, role },
+      data: { ...MOCK_ME, role: resolveMockRole() },
     });
   }),
 
