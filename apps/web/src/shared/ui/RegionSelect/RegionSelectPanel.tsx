@@ -15,19 +15,29 @@ import { Checkbox } from "@/shared/ui/Checkbox";
 import { Check } from "@/shared/ui/icons/Check";
 import { ChevronLeft } from "@/shared/ui/icons/ChevronLeft";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
+import { Clock } from "@/shared/ui/icons/Clock";
 import { Search } from "@/shared/ui/icons/Search";
+import { X } from "@/shared/ui/icons/X";
 
 interface RegionSelectPanelProps {
   multiple: boolean;
   selected: RegionValue[];
+  recent: RegionValue[];
   /** 단일 모드는 확정, 다중 모드는 토글. */
   onSelect: (option: RegionValue) => void;
+  onRemoveRecent: (option: RegionValue) => void;
 }
 
 const ROW = "flex h-[2.4375rem] w-full items-center gap-2 rounded-[0.625rem] px-3.5 text-sm transition";
 
 /** 드롭다운 본체. 검색어가 있으면 통합 검색 결과, 없으면 1단계 시·도 → 2단계 시·군·구. */
-export function RegionSelectPanel({ multiple, selected, onSelect }: RegionSelectPanelProps) {
+export function RegionSelectPanel({
+  multiple,
+  selected,
+  recent,
+  onSelect,
+  onRemoveRecent,
+}: RegionSelectPanelProps) {
   const [keyword, setKeyword] = useState("");
   const [activeSido, setActiveSido] = useState<Sido | null>(null);
 
@@ -36,6 +46,8 @@ export function RegionSelectPanel({ multiple, selected, onSelect }: RegionSelect
     isSelected: (option: RegionValue) => selected.some((item) => isSameRegion(item, option)),
     onSelect,
   };
+
+  const searching = keyword.trim().length > 0;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -51,13 +63,61 @@ export function RegionSelectPanel({ multiple, selected, onSelect }: RegionSelect
         />
       </div>
 
-      {keyword.trim() ? (
+      {!searching && !activeSido && recent.length > 0 && (
+        <RecentRegions recent={recent} onSelect={onSelect} onRemove={onRemoveRecent} />
+      )}
+
+      {searching ? (
         <SearchResults keyword={keyword} {...optionProps} />
       ) : activeSido ? (
         <DistrictStep sido={activeSido} onBack={() => setActiveSido(null)} {...optionProps} />
       ) : (
         <SidoStep onEnter={setActiveSido} />
       )}
+    </div>
+  );
+}
+
+/** 최근 선택 지역 칩. 칩 본체와 삭제 버튼을 형제로 둔다(인터랙티브 중첩 금지). */
+function RecentRegions({
+  recent,
+  onSelect,
+  onRemove,
+}: {
+  recent: RegionValue[];
+  onSelect: (option: RegionValue) => void;
+  onRemove: (option: RegionValue) => void;
+}) {
+  return (
+    <div className="px-3.5 pb-3">
+      <p className="flex items-center gap-1.5 text-xs font-bold text-ink-3">
+        <Clock className="text-[0.875rem]" />
+        최근 선택
+      </p>
+      <ul className="mt-2 flex flex-wrap gap-1.5">
+        {recent.map((option) => (
+          <li
+            key={regionKey(option)}
+            className="flex h-8 items-center rounded-full border border-line bg-paper-2 transition hover:bg-paper"
+          >
+            <button
+              type="button"
+              onClick={() => onSelect(option)}
+              className="h-full pl-3 pr-1.5 text-[0.8125rem] font-bold text-ink-2"
+            >
+              {formatRegionLabel(option)}
+            </button>
+            <button
+              type="button"
+              aria-label={`${formatRegionLabel(option)} 최근 선택에서 삭제`}
+              onClick={() => onRemove(option)}
+              className="mr-1.5 flex size-4 items-center justify-center rounded-full text-[0.75rem] text-ink-3 transition hover:text-ink"
+            >
+              <X />
+            </button>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { formatRegionLabel, isSameRegion, type RegionValue } from "@/shared/mode
 import { X } from "@/shared/ui/icons/X";
 import { RegionSelectPanel } from "./RegionSelectPanel";
 import { RegionSelectTrigger } from "./RegionSelectTrigger";
+import { useRecentRegions } from "./use-recent-regions";
 
 interface CommonProps {
   placeholder?: string;
@@ -50,6 +51,7 @@ export function RegionSelect(props: RegionSelectProps) {
 
   const rootRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const { recent, add: addRecent, remove: removeRecent } = useRecentRegions();
 
   useFocusTrap(sheetRef, open);
 
@@ -94,11 +96,16 @@ export function RegionSelect(props: RegionSelectProps) {
       return;
     }
     props.onChange(option);
+    addRecent(option);
     setOpen(false);
   };
 
   const handleApply = () => {
-    if (props.mode === "multiple") props.onChange(draft);
+    if (props.mode === "multiple") {
+      props.onChange(draft);
+      // 최신이 앞에 오도록 역순으로 기록
+      draft.toReversed().forEach(addRecent);
+    }
     setOpen(false);
   };
 
@@ -142,7 +149,13 @@ export function RegionSelect(props: RegionSelectProps) {
               </button>
             </div>
 
-            <RegionSelectPanel multiple={multiple} selected={selected} onSelect={handleSelect} />
+            <RegionSelectPanel
+              multiple={multiple}
+              selected={selected}
+              recent={recent}
+              onSelect={handleSelect}
+              onRemoveRecent={removeRecent}
+            />
 
             {multiple && (
               <div className="flex items-center justify-between border-t border-line-2 px-4 py-3">
