@@ -6,12 +6,12 @@ import { useAuthStatus } from "@/shared/api/use-auth-status";
 import { homePathByUserType } from "@/shared/model/home-path";
 
 /**
- * 로그인 상태면 userType별 경로로 replace. 반환값으로 랜딩 표시 여부 판단.
- * - "loading": 판별 중 → 랜딩 숨김(무표시)
- * - "authenticated": 리다이렉트 진행 → 랜딩 숨김
- * - "unauthenticated"(401·기타 에러 fail-open): 랜딩 표시
+ * 로그인 상태면 userType별 홈으로 replace. 반환값으로 로그인 화면 표시 여부 판단.
+ * - "loading": 판별 중 → 로그인 화면 숨김(깜빡임 방지)
+ * - "authenticated": 리다이렉트 진행 → 로그인 화면 숨김
+ * - "unauthenticated"(401·기타 에러 fail-open): 로그인 화면 표시
  */
-export function useLandingRedirect() {
+export function useLoginRedirect() {
   const router = useRouter();
   const auth = useAuthStatus();
 
