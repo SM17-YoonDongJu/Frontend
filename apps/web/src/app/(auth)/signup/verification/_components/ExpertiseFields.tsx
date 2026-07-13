@@ -22,19 +22,12 @@ const INTRODUCTION_MAX = 200;
 
 interface ExpertiseFieldsProps {
   form: VerificationForm;
-  /** 모바일 퍼널: 텍스트 인풋을 placeholder-only로(칩·선택 라벨은 유지). */
-  hideLabels?: boolean;
   /** 전문분야 칩·한 줄 소개 노출 여부. 모바일 STEP2=true, 데스크톱 폼(131-10583 부재)=false. */
   showProfileExtras?: boolean;
 }
 
 /** 전문성 필드(자격구분·소속[·전문분야]·경력·활동지역[·소개]). */
-export function ExpertiseFields({
-  form,
-  hideLabels,
-  showProfileExtras = true,
-}: ExpertiseFieldsProps) {
-  const inputLabelClass = hideLabels ? "sr-only" : undefined;
+export function ExpertiseFields({ form, showProfileExtras = true }: ExpertiseFieldsProps) {
 
   return (
     <div className="flex flex-col gap-[1.125rem]">
@@ -79,7 +72,7 @@ export function ExpertiseFields({
 
       <div className="grid grid-cols-1 gap-[1.125rem] md:grid-cols-2">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="verification-career" className={inputLabelClass}>
+          <Label htmlFor="verification-career">
             경력 연차
           </Label>
           <Input
@@ -87,20 +80,20 @@ export function ExpertiseFields({
             inputMode="numeric"
             value={form.career}
             onChange={(event) => form.setCareer(event.target.value.replace(/\D/g, ""))}
-            placeholder={hideLabels ? "경력 연차" : "12"}
+            placeholder="12"
             suffix="년"
           />
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="verification-region" className={inputLabelClass}>
+          <Label htmlFor="verification-region">
             활동 지역
           </Label>
           <Input
             id="verification-region"
             value={form.region}
             onChange={(event) => form.setRegion(event.target.value)}
-            placeholder={hideLabels ? "활동 지역" : "서울 · 경기"}
+            placeholder="서울 · 경기"
             error={form.errors.region}
           />
         </div>
@@ -108,7 +101,7 @@ export function ExpertiseFields({
 
       {showProfileExtras && (
         <div className="flex flex-col gap-2">
-          <Label htmlFor="verification-introduction" className={inputLabelClass}>
+          <Label htmlFor="verification-introduction">
             한 줄 소개
           </Label>
           <Textarea

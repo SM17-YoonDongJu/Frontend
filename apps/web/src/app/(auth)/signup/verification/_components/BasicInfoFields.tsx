@@ -1,26 +1,21 @@
 "use client";
 
-import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/Input";
 import { Label } from "@/shared/ui/Label";
 import type { VerificationForm } from "../_hooks/use-verification-form";
 
 interface BasicInfoFieldsProps {
   form: VerificationForm;
-  /** 모바일 퍼널: Figma는 placeholder-only 인풋 → 시각 라벨 숨김(sr-only 유지). */
-  hideLabels?: boolean;
   /** 연락처·이메일 노출 여부. 모바일 STEP1=true, 데스크톱 폼(131-10583 부재)=false. */
   showContact?: boolean;
 }
 
 /** 기본 정보 필드(이름·등록번호[·연락처·이메일]). 데스크톱=2열, 모바일=1열. */
-export function BasicInfoFields({ form, hideLabels, showContact = true }: BasicInfoFieldsProps) {
-  const labelClass = hideLabels ? "sr-only" : undefined;
-
+export function BasicInfoFields({ form, showContact = true }: BasicInfoFieldsProps) {
   return (
-    <div className={cn("grid grid-cols-1 gap-[1.125rem]", !hideLabels && "md:grid-cols-2")}>
+    <div className="grid grid-cols-1 gap-[1.125rem] md:grid-cols-2">
       <div className="flex flex-col gap-2">
-        <Label htmlFor="verification-name" className={labelClass}>
+        <Label htmlFor="verification-name">
           이름
         </Label>
         <Input
@@ -34,7 +29,7 @@ export function BasicInfoFields({ form, hideLabels, showContact = true }: BasicI
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="verification-license-no" className={labelClass}>
+        <Label htmlFor="verification-license-no">
           손해사정사 등록번호
         </Label>
         <Input
@@ -42,14 +37,14 @@ export function BasicInfoFields({ form, hideLabels, showContact = true }: BasicI
           value={form.licenseNo}
           onChange={(event) => form.setLicenseNo(event.target.value)}
           placeholder="제0000호"
-          hint={hideLabels ? undefined : "금융감독원 등록번호"}
+          hint="금융감독원 등록번호"
         />
       </div>
 
       {showContact && (
         <>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="verification-phone" className={labelClass}>
+            <Label htmlFor="verification-phone">
               연락처
             </Label>
             <Input
@@ -64,7 +59,7 @@ export function BasicInfoFields({ form, hideLabels, showContact = true }: BasicI
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="verification-email" className={labelClass}>
+            <Label htmlFor="verification-email">
               이메일
             </Label>
             <Input

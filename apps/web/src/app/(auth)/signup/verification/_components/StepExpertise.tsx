@@ -15,7 +15,7 @@ export function StepExpertise({ form }: StepExpertiseProps) {
         <h1 className="mt-1.5 font-serif text-[1.5rem] font-bold text-ink">전문성</h1>
         <p className="mt-1.5 break-keep text-sm text-ink-3">전문분야와 경력을 알려주세요.</p>
       </header>
-      <ExpertiseFields form={form} hideLabels />
+      <ExpertiseFields form={form} />
     </div>
   );
 }
