@@ -41,9 +41,13 @@ function triggerLabel(selected: RegionValue[]): string | null {
 export function RegionSelect(props: RegionSelectProps) {
   const { placeholder, className } = props;
   const multiple = props.mode === "multiple";
-  const selected = multiple ? props.value : props.value ? [props.value] : [];
+  const committed = multiple ? props.value : props.value ? [props.value] : [];
 
   const [open, setOpen] = useState(false);
+  // 다중 모드는 "적용"을 눌러야 확정 — 그 전까지 드래프트에 담는다.
+  const [draft, setDraft] = useState<RegionValue[]>(committed);
+  const selected = multiple ? draft : committed;
+
   const rootRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -67,19 +71,25 @@ export function RegionSelect(props: RegionSelectProps) {
     };
   }, [open]);
 
+  const toggle = () => {
+    // 열 때마다 확정값으로 드래프트를 되돌린다 — 적용 없이 닫은 선택은 버린다.
+    if (!open) setDraft(committed);
+    setOpen((prev) => !prev);
+  };
+
   const handleClear = () => {
     if (props.mode === "multiple") props.onChange([]);
     else props.onChange(null);
+    setDraft([]);
     setOpen(false);
   };
 
   const handleSelect = (option: RegionValue) => {
     if (props.mode === "multiple") {
-      const exists = props.value.some((item) => isSameRegion(item, option));
-      props.onChange(
-        exists
-          ? props.value.filter((item) => !isSameRegion(item, option))
-          : [...props.value, option],
+      setDraft((prev) =>
+        prev.some((item) => isSameRegion(item, option))
+          ? prev.filter((item) => !isSameRegion(item, option))
+          : [...prev, option],
       );
       return;
     }
@@ -87,13 +97,18 @@ export function RegionSelect(props: RegionSelectProps) {
     setOpen(false);
   };
 
+  const handleApply = () => {
+    if (props.mode === "multiple") props.onChange(draft);
+    setOpen(false);
+  };
+
   return (
     <div ref={rootRef} className={cn("relative inline-block", className)}>
       <RegionSelectTrigger
-        label={triggerLabel(selected)}
+        label={triggerLabel(committed)}
         open={open}
         placeholder={placeholder}
-        onToggle={() => setOpen((prev) => !prev)}
+        onToggle={toggle}
         onClear={handleClear}
       />
 
@@ -128,6 +143,28 @@ export function RegionSelect(props: RegionSelectProps) {
             </div>
 
             <RegionSelectPanel multiple={multiple} selected={selected} onSelect={handleSelect} />
+
+            {multiple && (
+              <div className="flex items-center justify-between border-t border-line-2 px-4 py-3">
+                <p className="text-[0.8125rem] text-ink-3">{draft.length}곳 선택됨</p>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setDraft([])}
+                    className="rounded-button px-3 py-2 text-[0.8125rem] font-semibold text-ink-2 transition hover:bg-paper"
+                  >
+                    초기화
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleApply}
+                    className="rounded-button bg-ink px-3.5 py-2 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96]"
+                  >
+                    적용 ({draft.length})
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </>
       )}
