@@ -11,9 +11,6 @@ export const SPECIALTY_OPTIONS = [
   "산재 연계",
 ] as const;
 
-/** 지역 필터 옵션. "그 외 지역" = 서울·경기·인천 미포함. */
-export const REGION_OPTIONS = ["서울", "경기", "인천", "그 외 지역"] as const;
-
 /** 정렬 옵션. label=표시, value=쿼리 파라미터(sort). ※ review 정렬은 UI 미노출(명세 sort enum엔 존재). */
 export const SORT_OPTIONS: ReadonlyArray<{ label: string; value: SortKey }> = [
   { label: "평점순", value: "rating" },
