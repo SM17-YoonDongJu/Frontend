@@ -89,10 +89,8 @@ export function AdjusterListView() {
       <div className="mt-6 flex gap-6">
         <FilterSidebar
           specialty={activeSpecialty}
-          region={activeRegion}
           list={adjusters}
           onSpecialtyChange={handleSpecialtyChange}
-          onRegionChange={handleRegionChange}
         />
 
         <div className="min-w-0 flex-1">
