@@ -13,6 +13,10 @@ import { expect, test } from "@playwright/test";
 const LOGIN_PATH = "/login";
 const RECENT_LOGIN_KEY = "bb.recentLogin";
 
+// 로그인 화면은 비로그인 유저에게만 보인다(#108 접근 제한 가드). 기본 MSW 핸들러의 /users/me는
+// 로그인 유저를 반환하므로, 로그인 화면 검증 케이스는 비로그인 시나리오를 헤더로 주입한다.
+const UNAUTH_HEADER = { "x-mock-scenario": "unauthenticated" };
+
 // 재로그인 화면 카피는 뷰포트별로 다르다(데스크톱 "다시 만나서 반가워요" / 모바일 "다시 오신 걸 환영해요").
 // 최근 로그인 카드는 데스크톱 전용(모바일 시안엔 없음).
 const MOBILE_MAX_WIDTH = 640;
@@ -21,6 +25,7 @@ function returningHeading(width: number): string {
 }
 
 test("흔적이 없으면 첫 로그인 화면과 시작하기 버튼·약관 문구가 보인다", async ({ page }) => {
+  await page.setExtraHTTPHeaders(UNAUTH_HEADER);
   await page.goto(LOGIN_PATH);
 
   await expect(page.getByRole("heading", { name: "바른보상 시작하기" })).toBeVisible();
@@ -44,6 +49,7 @@ test("최근 로그인 흔적이 있으면 재로그인 화면과 최근 로그�
       }),
     ] as const,
   );
+  await page.setExtraHTTPHeaders(UNAUTH_HEADER);
 
   await page.goto(LOGIN_PATH);
 
@@ -61,9 +67,13 @@ test("최근 로그인 흔적이 있으면 재로그인 화면과 최근 로그�
 test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저장된다", async ({ page }) => {
   await page.goto("/oauth/kakao/callback?code=valid&state=s1");
 
-  await expect(page).toHaveURL(/\/$/, { timeout: 15000 });
+  // 콜백은 "/"로 보내고, 랜딩 가드가 곧바로 역할별 홈으로 다시 보낸다(#108).
+  // "/" 체류 시간이 짧아 관측되지 않을 수 있어 최종 도착지인 고객 대시보드로 단언한다.
+  await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 15000 });
 
   // 흔적 저장은 사용자 관찰 기준으로 검증 — 로그인 화면 재진입 시 재로그인 화면이 보인다.
+  // 로그인 상태로는 가드에 막히므로(#108) 로그아웃 상태를 주입해 재진입한다(흔적은 localStorage라 유지).
+  await page.setExtraHTTPHeaders(UNAUTH_HEADER);
   await page.goto(LOGIN_PATH);
   const width = page.viewportSize()?.width ?? 0;
   await expect(page.getByRole("heading", { name: returningHeading(width) })).toBeVisible();
@@ -95,8 +105,41 @@ test("콜백이 실패하면 에러 안내와 다시 시도 버튼이 보이고 
 });
 
 test("인가 코드가 없으면 로그인 화면으로 되돌아간다", async ({ page }) => {
+  await page.setExtraHTTPHeaders(UNAUTH_HEADER);
   await page.goto("/oauth/kakao/callback");
 
   await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
   await expect(page.getByRole("heading", { name: "바른보상 시작하기" })).toBeVisible();
+});
+
+/**
+ * 로그인 사용자 접근 제한 (이슈 #108).
+ * 로그인 여부는 GET /users/me로 판별 — 기본 MSW 핸들러가 로그인 유저(insured_person),
+ * localStorage["mock:userType"]="adjuster"면 사정사, x-mock-failure:me면 조회 실패(500).
+ */
+test.describe("로그인 사용자 접근 제한", () => {
+  test("로그인 유저가 진입하면 고객 대시보드로 이동한다", async ({ page }) => {
+    await page.goto(LOGIN_PATH);
+
+    await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 10000 });
+  });
+
+  test("사정사가 진입하면 파트너 홈으로 이동한다", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem("mock:userType", "adjuster");
+    });
+
+    await page.goto(LOGIN_PATH);
+
+    await expect(page).toHaveURL(/\/partner/, { timeout: 10000 });
+  });
+
+  test("로그인 여부 확인에 실패하면 로그인 화면이 보인다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-failure": "me" });
+
+    await page.goto(LOGIN_PATH);
+
+    await expect(page.getByRole("heading", { name: "바른보상 시작하기" })).toBeVisible();
+    await expect(page).toHaveURL(/\/login/);
+  });
 });

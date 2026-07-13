@@ -71,6 +71,7 @@ auth · user · settings · report · review · matching · chat · payment · a
 | 404 | `POST_NOT_FOUND` | 게시물/리포트 없음 |
 | 404 | `SUBSCRIPTION_NOT_FOUND` | 구독 정보 없음 |
 | 409 | `DUPLICATE_RESOURCE` | 중복 생성 시도 |
+| 409 | `CLOSED` | ⚠️ Notion 명세 409 근거·enum 반영 요청 — 종료(CLOSED)된 상담방에 메시지 전송 시도(이슈 #48 채팅) |
 | 422 | `PAYMENT_FAILED` | 결제 실패(PG 거절·한도·잔액) |
 | 500 | `INTERNAL_SERVER_ERROR` | 처리되지 않은 서버 예외 |
 | 500 | `DATABASE_ERROR` | DB 조회/저장 실패 |
