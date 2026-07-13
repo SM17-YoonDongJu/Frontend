@@ -13,12 +13,12 @@ import { useSignupFunnel } from "./_hooks/use-signup-funnel";
 import { useSignupSocial } from "./_hooks/use-signup-social";
 import { type ConsentState } from "./_model/consent-config";
 import { toRegisterBody, type RegisterResponse } from "./_model/register.schema";
+import { clearSignupTicket } from "../_shared/lib/signup-ticket";
 import { clearSignupDraft, loadSignupDraft, saveSignupDraft } from "./_model/signup-draft";
 import type { TermsType } from "./_shared/model/terms";
 
 const CUSTOMER_DASHBOARD_PATH = "/customer/dashboard";
-// TODO: 자격 인증 이슈 확정 후 실제 경로로 교체.
-const ADJUSTER_CERTIFY_PATH = "/signup?step=role";
+const ADJUSTER_CERTIFY_PATH = "/signup/verification";
 
 function SignupFunnel() {
   const router = useRouter();
@@ -37,6 +37,11 @@ function SignupFunnel() {
   useEffect(() => {
     saveSignupDraft({ userType: selectedUserType, consent });
   }, [selectedUserType, consent]);
+
+  // 소셜 인증 컨텍스트(티켓·쿼리) 없이 직접 진입하면 로그인으로 되돌림.
+  useEffect(() => {
+    if (!social) router.replace("/login");
+  }, [social, router]);
 
   // 직접 URL 진입 가드: 선행 단계 미완이면 첫 단계로 되돌림.
   useEffect(() => {
@@ -66,7 +71,7 @@ function SignupFunnel() {
   };
 
   const handleSubmit = () => {
-    if (selectedUserType !== "insured_person") return;
+    if (selectedUserType !== "insured_person" || !social) return;
 
     const body = toRegisterBody({
       provider: social.provider,
@@ -78,13 +83,15 @@ function SignupFunnel() {
 
     register.mutate(body, {
       onSuccess: (data) => {
-        // TODO: accessToken/refreshToken 저장은 auth 토큰 저장 유틸 확정 후 연결.
         clearSignupDraft();
+        clearSignupTicket();
         setResult(data);
         funnel.goTo("done", { replace: true });
       },
     });
   };
+
+  if (!social) return null;
 
   return (
     <div className="flex min-h-dvh w-full flex-col pb-8 pt-6 sm:pt-10">

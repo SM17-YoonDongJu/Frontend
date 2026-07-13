@@ -2,7 +2,7 @@ interface CameraProps {
   className?: string;
 }
 
-/** 카메라(사진 변경). 크기·색은 className으로(currentColor). */
+/** 카메라(사진 촬영). 크기·색은 className으로(currentColor). */
 export function Camera({ className }: CameraProps) {
   return (
     <svg
@@ -17,8 +17,8 @@ export function Camera({ className }: CameraProps) {
       strokeLinejoin="round"
       aria-hidden
     >
-      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-      <circle cx="12" cy="13" r="4" />
+      <path d="M4 7h3l2-2.5h6L17 7h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1z" />
+      <circle cx="12" cy="13" r="3.5" />
     </svg>
   );
 }

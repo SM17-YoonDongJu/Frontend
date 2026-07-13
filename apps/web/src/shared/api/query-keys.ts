@@ -37,6 +37,8 @@ export const userKeys = createQueryKeys("user", {
   // 고객 마이페이지(이슈 #105) — 활동 카운트·보험 목록. insurance 도메인 미신설(user 배치).
   activitySummary: null,
   insurances: null,
+  // 손해사정사 자격 신청 상태(이슈 #44) — GET /users/adjuster-applications/me
+  adjusterApplication: null,
 });
 
 export const authKeys = createQueryKeys("auth", {
@@ -53,6 +55,11 @@ export const proposalKeys = createQueryKeys("proposal", {
 
 export const reviewKeys = createQueryKeys("review", {
   detail: (reportId: string) => [reportId],
+});
+
+export const chatKeys = createQueryKeys("chat", {
+  list: null,
+  messages: (chatRoomId: string) => [chatRoomId],
 });
 
 export const notificationKeys = createQueryKeys("notification", {
