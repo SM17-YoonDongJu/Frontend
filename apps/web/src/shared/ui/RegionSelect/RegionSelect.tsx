@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { formatRegionLabel, type RegionValue } from "@/shared/model/regions";
+import { RegionSelectPanel } from "./RegionSelectPanel";
 import { RegionSelectTrigger } from "./RegionSelectTrigger";
 
 interface RegionSelectProps {
@@ -53,7 +54,15 @@ export function RegionSelect({ value, onChange, placeholder, className }: Region
           role="dialog"
           aria-label="지역 선택"
           className="absolute left-0 top-full z-20 mt-2 flex h-[28.75rem] w-96 flex-col overflow-hidden rounded-card border border-line bg-card shadow-[0_1rem_2.75rem_-1rem_rgba(21,32,46,0.35)]"
-        />
+        >
+          <RegionSelectPanel
+            value={value}
+            onSelect={(next) => {
+              onChange(next);
+              setOpen(false);
+            }}
+          />
+        </div>
       )}
     </div>
   );
