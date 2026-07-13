@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useMypage } from "../_api/use-mypage";
-import { useMypagePanel } from "../_hooks/use-mypage-panel";
+import { usePanelParam } from "@/shared/lib/use-panel-param";
 import { CredentialProofModal } from "./CredentialProofModal";
 import { LogoutButton } from "./LogoutButton";
 import { MonthlyActivityCard } from "./MonthlyActivityCard";
@@ -13,7 +13,7 @@ import { StatCards } from "./StatCards";
 
 export function MypageView() {
   const { data } = useMypage();
-  const { panel, clearPanel } = useMypagePanel();
+  const { panel, clearPanel } = usePanelParam();
   const [notificationOpen, setNotificationOpen] = useState(panel === "notifications");
   const [credentialOpen, setCredentialOpen] = useState(false);
 

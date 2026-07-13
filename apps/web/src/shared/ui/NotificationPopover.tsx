@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { ErrorBoundary } from "react-error-boundary";
 import { Button } from "@/shared/ui/Button";
-import { useReadAllNotifications } from "../../_shared/notifications/api/use-read-all-notifications";
-import { useNotificationUnreadCount } from "../../_shared/notifications/api/use-notification-unread-count";
+import { useReadAllNotifications } from "@/shared/api/use-read-all-notifications";
+import { useNotificationUnreadCount } from "@/shared/api/use-notification-unread-count";
 import { NotificationPopoverList } from "./NotificationPopoverList";
 
 const SKELETON_ROW_COUNT = 3;
@@ -44,17 +44,18 @@ function NotificationPopoverError({ code, onRetry }: NotificationPopoverErrorPro
 }
 
 interface NotificationPopoverProps {
+  settingsHref: string;
   onClose: () => void;
 }
 
-export function NotificationPopover({ onClose }: NotificationPopoverProps) {
+export function NotificationPopover({ settingsHref, onClose }: NotificationPopoverProps) {
   const router = useRouter();
   const readAll = useReadAllNotifications();
   const unreadCount = useNotificationUnreadCount();
 
   const goToSettings = () => {
     onClose();
-    router.push("/partner/mypage?panel=notifications");
+    router.push(settingsHref);
   };
 
   return (

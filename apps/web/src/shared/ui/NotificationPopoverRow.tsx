@@ -1,6 +1,6 @@
-import type { Notification } from "../../_shared/notifications/model/notification.schema";
-import { formatPopoverTime } from "../../_shared/notifications/model/notification-group";
-import { NotificationTypeIcon } from "../../_shared/notifications/ui/NotificationTypeIcon";
+import type { Notification } from "@/shared/model/notification.schema";
+import { formatPopoverTime } from "@/shared/model/notification-group";
+import { NotificationTypeIcon } from "@/shared/ui/NotificationTypeIcon";
 
 interface NotificationPopoverRowProps {
   notification: Notification;

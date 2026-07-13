@@ -1,7 +1,7 @@
 "use client";
 
-import { useNotificationList } from "../../_shared/notifications/api/use-notification-list";
-import { groupNotificationsForPopover } from "../../_shared/notifications/model/notification-group";
+import { useNotificationList } from "@/shared/api/use-notification-list";
+import { groupNotificationsForPopover } from "@/shared/model/notification-group";
 import { NotificationPopoverRow } from "./NotificationPopoverRow";
 
 export function NotificationPopoverList() {

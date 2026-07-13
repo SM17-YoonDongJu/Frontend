@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useMe } from "@/shared/api/use-me";
+import { usePanelParam } from "@/shared/lib/use-panel-param";
 import { ContactAccountCard } from "./ContactAccountCard";
 import { InsuranceSection } from "./InsuranceSection";
 import { MobileMypageView } from "./mobile/MobileMypageView";
@@ -19,6 +20,17 @@ export function MypageView() {
   const openEdit = () => setEditOpen(true);
   const closeEdit = () => setEditOpen(false);
 
+  // 알림 팝오버의 "알림 설정" 진입 — 인라인 카드라 열 모달이 없어 카드로 이동시킨다.
+  const { panel, clearPanel } = usePanelParam();
+  const notificationCardRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (panel !== "notifications") return;
+    notificationCardRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    notificationCardRef.current?.focus({ preventScroll: true });
+    clearPanel();
+  }, [panel, clearPanel]);
+
   return (
     <>
       <div className="hidden md:grid md:grid-cols-[14.75rem_minmax(0,1fr)] md:items-start md:gap-7">
@@ -34,7 +46,7 @@ export function MypageView() {
 
           <div className="grid grid-cols-2 items-start gap-5.5">
             <ContactAccountCard profile={profile} onEdit={openEdit} />
-            <NotificationSettingsCard />
+            <NotificationSettingsCard ref={notificationCardRef} />
           </div>
 
           <SectionBoundary
