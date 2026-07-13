@@ -1,9 +1,11 @@
 "use client";
 
 import { type ChangeEvent } from "react";
+import { formatRegionLabel, parseRegionLabel } from "@/shared/model/regions";
 import { Button } from "@/shared/ui/Button";
 import { Camera } from "@/shared/ui/icons/Camera";
 import { Input } from "@/shared/ui/Input";
+import { RegionSelect } from "@/shared/ui/RegionSelect/RegionSelect";
 import { joinInfoLabel } from "../_model/profile-format";
 import type { Me } from "../_model/types";
 import { useProfileSettingsForm } from "../_hooks/use-profile-settings-form";
@@ -39,7 +41,6 @@ export function ProfileSettingsForm({
       : joinInfoLabel(profile.socialProvider, profile.createdAt);
 
   const phoneInputId = `mypage-phone-${variant}`;
-  const regionInputId = `mypage-region-${variant}`;
 
   const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -103,17 +104,12 @@ export function ProfileSettingsForm({
       </div>
 
       <div>
-        <label
-          htmlFor={regionInputId}
-          className="mb-2 block text-[0.8125rem] font-bold text-ink-2"
-        >
-          지역
-        </label>
-        <Input
-          id={regionInputId}
-          value={region}
-          onChange={(event) => setRegion(event.target.value)}
-          placeholder="예: 서울 강남구"
+        <p className="mb-2 text-[0.8125rem] font-bold text-ink-2">지역</p>
+        <RegionSelect
+          value={parseRegionLabel(region)}
+          onChange={(next) => setRegion(next ? formatRegionLabel(next) : "")}
+          alwaysSheet
+          className="w-full"
         />
       </div>
 
