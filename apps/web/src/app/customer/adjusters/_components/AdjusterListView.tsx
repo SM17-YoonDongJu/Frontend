@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import type { AdjusterListFilter } from "@/shared/api/query-keys";
+import type { RegionValue } from "@/shared/model/regions";
 import { Button } from "@/shared/ui/Button";
+import { RegionSelect } from "@/shared/ui/RegionSelect/RegionSelect";
 import { useAdjusters } from "../_api/use-adjusters";
+import { serializeRegions } from "../_model/region-filter";
 import type { SortKey } from "../_model/types";
 import { AdjusterCard } from "./AdjusterCard";
 import { AdjusterListEmpty } from "./AdjusterListEmpty";
@@ -18,10 +21,13 @@ const ALL_SPECIALTY = "전체";
 
 export function AdjusterListView() {
   const [filter, setFilter] = useState<AdjusterListFilter>({});
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useAdjusters(filter);
+  const [regions, setRegions] = useState<RegionValue[]>([]);
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useAdjusters({
+    ...filter,
+    region: serializeRegions(regions),
+  });
 
   const activeSpecialty = filter.specialty ?? "";
-  const activeRegion = filter.region ?? "";
   const activeSort = (filter.sort as SortKey | undefined) ?? DEFAULT_SORT;
 
   // page는 infinite 쿼리의 pageParam이 관리 — 필터가 바뀌면 쿼리키 교체로 1페이지부터 다시 쌓인다
@@ -34,8 +40,6 @@ export function AdjusterListView() {
     const next = specialty === ALL_SPECIALTY || specialty === activeSpecialty ? undefined : specialty;
     patch({ specialty: next });
   };
-
-  const handleRegionChange = (region: string) => patch({ region: region || undefined });
 
   const handleSortChange = (sort: string) => patch({ sort });
 
@@ -69,15 +73,14 @@ export function AdjusterListView() {
       )}
 
       <div className="mt-6">
-        <SearchBar
-          keyword={filter.keyword ?? ""}
-          region={activeRegion}
-          onSearch={handleSearch}
-          onRegionChange={handleRegionChange}
-        />
+        <SearchBar keyword={filter.keyword ?? ""} onSearch={handleSearch} />
       </div>
 
-      <div className="mt-4 md:hidden">
+      <div className="mt-4">
+        <RegionSelect mode="multiple" value={regions} onChange={setRegions} />
+      </div>
+
+      <div className="mt-3 md:hidden">
         <FilterChips
           specialty={activeSpecialty}
           sort={activeSort}
@@ -89,10 +92,8 @@ export function AdjusterListView() {
       <div className="mt-6 flex gap-6">
         <FilterSidebar
           specialty={activeSpecialty}
-          region={activeRegion}
           list={adjusters}
           onSpecialtyChange={handleSpecialtyChange}
-          onRegionChange={handleRegionChange}
         />
 
         <div className="min-w-0 flex-1">

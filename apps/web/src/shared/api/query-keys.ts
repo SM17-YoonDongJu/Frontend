@@ -69,6 +69,7 @@ export const notificationKeys = createQueryKeys("notification", {
 export interface AdjusterListFilter {
   keyword?: string;
   specialty?: string;
+  /** ⚠️ 전송 포맷 백엔드 미확정. 현재는 지역 라벨 콤마 조인(_model/region-filter.ts). */
   region?: string;
   sort?: string;
   page?: number;
