@@ -105,6 +105,9 @@ test("약관 상세보기로 이동했다가 돌아와도 선택한 동의 상�
 });
 
 test("소셜 인증 컨텍스트 없이 직접 진입하면 로그인으로 되돌아간다", async ({ page }) => {
+  // 로그인 화면은 비로그인 유저에게만 보인다(#108 접근 제한 가드). 기본 MSW의 /users/me는
+  // 로그인 유저를 반환하므로 비로그인 시나리오를 헤더로 주입한다.
+  await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
   await page.goto("/signup");
 
   await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
