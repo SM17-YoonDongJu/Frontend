@@ -1,5 +1,6 @@
 ﻿import { delay, http, HttpResponse } from "msw";
 import { API_BASE_URL } from "@/shared/api/config";
+import { consumeReissue, isAccessTokenExpired } from "@/shared/mocks/auth-token-state";
 
 // 로드 시점 기준 상대 마감일(로컬 달력 날짜) — 대시보드 "오늘 마감/N일 남음" 검증용
 function addDays(base: Date, days: number): string {
@@ -660,6 +661,34 @@ export const handlers = [
     });
   }),
 
+  // 액세스 토큰 재발급 (#109) — refresh_token HttpOnly 쿠키만 사용(바디·Authorization 없음), data는 null.
+  // E2E 주입: localStorage["mock:tokenExpired"]="once"(재발급 성공) | "refresh-expired"(재발급 실패).
+  // 실제 호출 횟수는 localStorage["mock:reissueCount"]에 누적 — 동시 401 다발 시 단일-flight 검증용.
+  http.post(`${API_BASE_URL}/auth/reissue`, async () => {
+    await delay(200);
+
+    const outcome = consumeReissue();
+    if (outcome === "success") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: null,
+      });
+    }
+
+    return HttpResponse.json(
+      {
+        status: "401",
+        code: outcome,
+        message:
+          outcome === "EXPIRED_TOKEN"
+            ? "리프레시 토큰이 만료되었습니다."
+            : "로그인이 필요합니다.",
+      },
+      { status: 401 },
+    );
+  }),
+
   // 본인 정보 조회 (고객 대시보드 인사말)
   // E2E 역할 게이팅 검증용: localStorage["mock:userType"]="adjuster"면 사정사로 응답(기본 insured_person).
   http.get(`${API_BASE_URL}/users/me`, async ({ request }) => {
@@ -668,6 +697,13 @@ export const handlers = [
     if (request.headers.get("x-mock-scenario") === "unauthenticated") {
       return HttpResponse.json(
         { status: "401", code: "LOGIN_REQUIRED", message: "로그인이 필요합니다." },
+        { status: 401 },
+      );
+    }
+    // 액세스 토큰 만료 주입 (#109) — 재발급 성공 시 플래그가 해제돼 이후 호출은 200.
+    if (isAccessTokenExpired()) {
+      return HttpResponse.json(
+        { status: "401", code: "EXPIRED_TOKEN", message: "토큰이 만료되었습니다." },
         { status: 401 },
       );
     }
@@ -778,6 +814,14 @@ export const handlers = [
           pagination: { page, size: 10, totalElements: 0, totalPages: 0, hasNext: false },
         },
       });
+    }
+
+    // 액세스 토큰 만료 주입 (#109) — /users/me와 동시에 401을 받게 해 단일-flight 재발급을 검증한다.
+    if (isAccessTokenExpired()) {
+      return HttpResponse.json(
+        { status: "401", code: "EXPIRED_TOKEN", message: "토큰이 만료되었습니다." },
+        { status: 401 },
+      );
     }
 
     const list = [

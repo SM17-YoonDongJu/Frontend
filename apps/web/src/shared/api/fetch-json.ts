@@ -1,4 +1,8 @@
 import type { ZodType } from "zod";
+import { ERROR_CODES, getErrorCode } from "@/shared/api/error-codes";
+import { reissueTokens } from "@/shared/api/reissue";
+
+const LOGIN_PATH = "/login";
 
 interface ResponseEnvelope {
   status?: string;
@@ -7,19 +11,19 @@ interface ResponseEnvelope {
   data?: unknown;
 }
 
+export interface FetchJsonInit extends RequestInit {
+  /** 재발급 자신(`/auth/reissue`)처럼 401 시 재발급·재시도를 타면 안 되는 요청. */
+  skipTokenReissue?: boolean;
+}
+
 function isEnvelope(value: unknown): value is ResponseEnvelope {
   return typeof value === "object" && value !== null;
 }
 
-/**
- * 공용 fetch — 응답 봉투({ code?, message?, data }) 해제 + zod 검증.
- * 실패(HTTP 에러 또는 code 존재) 시 throw, err.name엔 서버 code(없으면 HTTP_<status>).
- * 비-JSON 본문도 throw 없이 흡수(null 처리).
- */
-export async function fetchJson<T>(
+async function requestJson<T>(
   url: string,
   schema: ZodType<T>,
-  init?: RequestInit,
+  init: RequestInit,
 ): Promise<T> {
   const res = await fetch(url, { ...init, credentials: "include" });
   const json: unknown = await res.json().catch(() => null);
@@ -33,4 +37,39 @@ export async function fetchJson<T>(
   }
 
   return schema.parse(isEnvelope(json) ? json.data : json);
+}
+
+function redirectToLogin(): void {
+  if (typeof window === "undefined") return;
+  if (window.location.pathname === LOGIN_PATH) return;
+  window.location.replace(LOGIN_PATH);
+}
+
+/**
+ * 공용 fetch — 응답 봉투({ code?, message?, data }) 해제 + zod 검증.
+ * 실패(HTTP 에러 또는 code 존재) 시 throw, err.name엔 서버 code(없으면 HTTP_<status>).
+ * EXPIRED_TOKEN이면 재발급 후 1회만 재시도하고, 재발급이 실패하면 /login으로 이동한다.
+ */
+export async function fetchJson<T>(
+  url: string,
+  schema: ZodType<T>,
+  init?: FetchJsonInit,
+): Promise<T> {
+  const { skipTokenReissue = false, ...requestInit } = init ?? {};
+
+  try {
+    return await requestJson(url, schema, requestInit);
+  } catch (error) {
+    if (skipTokenReissue || getErrorCode(error) !== ERROR_CODES.EXPIRED_TOKEN) {
+      throw error;
+    }
+
+    const reissued = await reissueTokens();
+    if (!reissued) {
+      redirectToLogin();
+      throw error;
+    }
+
+    return await requestJson(url, schema, requestInit);
+  }
 }
