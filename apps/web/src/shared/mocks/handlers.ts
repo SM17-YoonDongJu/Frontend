@@ -279,9 +279,6 @@ const NOTIFICATIONS = [
   { notificationId: "d0000000-0000-4000-8000-000000000005", type: "IDENTITY_VERIFIED", title: "본인 인증 완료", body: "계정 본인 인증이 완료됐어요.", isRead: true, createdAt: "2026-05-18T09:00:00Z" },
 ];
 
-// 거절된 제안(키: `${reportId}:${adjusterId}`) — 거절 후 목록에서 제외 재현.
-const rejectedProposals = new Set<string>();
-
 // 고객 대시보드 — 받은 제안이 연결된 리포트(①)의 안정 uuid.
 export const DASHBOARD_PROPOSABLE_REPORT_ID =
   "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
@@ -1536,27 +1533,6 @@ export const handlers = [
           reportStatus: "AWAITING_ADOPTION",
           reviewStatus: "REJECTED",
         },
-      });
-    },
-  ),
-
-  // 제안 거절 (사정사별) — 성공 시 해당 제안은 목록에서 제외
-  http.patch(
-    `${API_BASE_URL}/reports/:reportId/proposals/:adjusterId/reject`,
-    async ({ params }) => {
-      await delay(400);
-      const rawReportId = typeof params.reportId === "string" ? params.reportId : "";
-      const adjusterId =
-        typeof params.adjusterId === "string" ? params.adjusterId : crypto.randomUUID();
-      const isUuid =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawReportId);
-
-      rejectedProposals.add(`${rawReportId}:${adjusterId}`);
-
-      return HttpResponse.json({
-        status: "200",
-        message: "제안을 거절했습니다.",
-        data: { reportId: isUuid ? rawReportId : crypto.randomUUID(), adjusterId, rejected: true },
       });
     },
   ),

@@ -14,7 +14,7 @@ export function useChatList() {
     staleTime: STALE_TIME_LIST,
     gcTime: GC_TIME_DEFAULT,
     select: (data): ChatRoom[] =>
-      [...data.items].sort(
+      data.items.toSorted(
         (a, b) =>
           new Date(b.lastMessageAt).getTime() -
           new Date(a.lastMessageAt).getTime(),
