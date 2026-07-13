@@ -10,6 +10,8 @@ interface RegionSelectTriggerProps {
   label: string | null;
   open: boolean;
   placeholder?: string;
+  /** 폼 검증 오류 — 보더를 terra로. */
+  invalid?: boolean;
   onToggle: () => void;
   onClear: () => void;
 }
@@ -22,6 +24,7 @@ export function RegionSelectTrigger({
   label,
   open,
   placeholder = "지역",
+  invalid,
   onToggle,
   onClear,
 }: RegionSelectTriggerProps) {
@@ -31,7 +34,7 @@ export function RegionSelectTrigger({
     <div
       className={cn(
         "inline-flex h-[2.625rem] items-center rounded-button border bg-card transition",
-        selected ? "border-gold" : "border-line",
+        invalid ? "border-terra" : selected ? "border-gold" : "border-line",
       )}
     >
       <button
