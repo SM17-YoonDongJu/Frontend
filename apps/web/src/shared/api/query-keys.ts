@@ -34,6 +34,8 @@ export const reportKeys = createQueryKeys("report", {
 
 export const userKeys = createQueryKeys("user", {
   me: null,
+  // 손해사정사 자격 신청 상태(이슈 #44) — GET /users/adjuster-applications/me
+  adjusterApplication: null,
 });
 
 export const authKeys = createQueryKeys("auth", {
