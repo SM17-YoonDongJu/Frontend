@@ -3,23 +3,46 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { useFocusTrap } from "@/shared/lib/use-focus-trap";
-import { formatRegionLabel, type RegionValue } from "@/shared/model/regions";
+import { formatRegionLabel, isSameRegion, type RegionValue } from "@/shared/model/regions";
 import { X } from "@/shared/ui/icons/X";
 import { RegionSelectPanel } from "./RegionSelectPanel";
 import { RegionSelectTrigger } from "./RegionSelectTrigger";
 
-interface RegionSelectProps {
-  value: RegionValue | null;
-  onChange: (value: RegionValue | null) => void;
+interface CommonProps {
   placeholder?: string;
   className?: string;
+}
+
+interface SingleProps extends CommonProps {
+  mode?: "single";
+  value: RegionValue | null;
+  onChange: (value: RegionValue | null) => void;
+}
+
+interface MultipleProps extends CommonProps {
+  mode: "multiple";
+  value: RegionValue[];
+  onChange: (value: RegionValue[]) => void;
+}
+
+type RegionSelectProps = SingleProps | MultipleProps;
+
+function triggerLabel(selected: RegionValue[]): string | null {
+  const [first, ...rest] = selected;
+  if (!first) return null;
+  const label = formatRegionLabel(first);
+  return rest.length > 0 ? `${label} 외 ${rest.length}곳` : label;
 }
 
 /**
  * 시·도 → 시·군·구 2단계 지역 선택 드롭다운.
  * PC는 트리거 아래 팝오버, 모바일은 하단 시트. 바깥 클릭·Esc로 닫힌다.
  */
-export function RegionSelect({ value, onChange, placeholder, className }: RegionSelectProps) {
+export function RegionSelect(props: RegionSelectProps) {
+  const { placeholder, className } = props;
+  const multiple = props.mode === "multiple";
+  const selected = multiple ? props.value : props.value ? [props.value] : [];
+
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
@@ -44,17 +67,34 @@ export function RegionSelect({ value, onChange, placeholder, className }: Region
     };
   }, [open]);
 
+  const handleClear = () => {
+    if (props.mode === "multiple") props.onChange([]);
+    else props.onChange(null);
+    setOpen(false);
+  };
+
+  const handleSelect = (option: RegionValue) => {
+    if (props.mode === "multiple") {
+      const exists = props.value.some((item) => isSameRegion(item, option));
+      props.onChange(
+        exists
+          ? props.value.filter((item) => !isSameRegion(item, option))
+          : [...props.value, option],
+      );
+      return;
+    }
+    props.onChange(option);
+    setOpen(false);
+  };
+
   return (
     <div ref={rootRef} className={cn("relative inline-block", className)}>
       <RegionSelectTrigger
-        label={value ? formatRegionLabel(value) : null}
+        label={triggerLabel(selected)}
         open={open}
         placeholder={placeholder}
         onToggle={() => setOpen((prev) => !prev)}
-        onClear={() => {
-          onChange(null);
-          setOpen(false);
-        }}
+        onClear={handleClear}
       />
 
       {open && (
@@ -87,13 +127,7 @@ export function RegionSelect({ value, onChange, placeholder, className }: Region
               </button>
             </div>
 
-            <RegionSelectPanel
-              value={value}
-              onSelect={(next) => {
-                onChange(next);
-                setOpen(false);
-              }}
-            />
+            <RegionSelectPanel multiple={multiple} selected={selected} onSelect={handleSelect} />
           </div>
         </>
       )}

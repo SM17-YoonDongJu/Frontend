@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import {
   formatRegionLabel,
@@ -11,22 +11,31 @@ import {
   type RegionValue,
   type Sido,
 } from "@/shared/model/regions";
+import { Checkbox } from "@/shared/ui/Checkbox";
 import { Check } from "@/shared/ui/icons/Check";
 import { ChevronLeft } from "@/shared/ui/icons/ChevronLeft";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { Search } from "@/shared/ui/icons/Search";
 
 interface RegionSelectPanelProps {
-  value: RegionValue | null;
-  onSelect: (value: RegionValue) => void;
+  multiple: boolean;
+  selected: RegionValue[];
+  /** 단일 모드는 확정, 다중 모드는 토글. */
+  onSelect: (option: RegionValue) => void;
 }
 
+const ROW = "flex h-[2.4375rem] w-full items-center gap-2 rounded-[0.625rem] px-3.5 text-sm transition";
+
 /** 드롭다운 본체. 검색어가 있으면 통합 검색 결과, 없으면 1단계 시·도 → 2단계 시·군·구. */
-export function RegionSelectPanel({ value, onSelect }: RegionSelectPanelProps) {
+export function RegionSelectPanel({ multiple, selected, onSelect }: RegionSelectPanelProps) {
   const [keyword, setKeyword] = useState("");
   const [activeSido, setActiveSido] = useState<Sido | null>(null);
 
-  const isSelected = (option: RegionValue) => value !== null && isSameRegion(value, option);
+  const optionProps = {
+    multiple,
+    isSelected: (option: RegionValue) => selected.some((item) => isSameRegion(item, option)),
+    onSelect,
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -43,18 +52,9 @@ export function RegionSelectPanel({ value, onSelect }: RegionSelectPanelProps) {
       </div>
 
       {keyword.trim() ? (
-        <SearchResults
-          keyword={keyword}
-          isSelected={isSelected}
-          onSelect={onSelect}
-        />
+        <SearchResults keyword={keyword} {...optionProps} />
       ) : activeSido ? (
-        <DistrictStep
-          sido={activeSido}
-          isSelected={isSelected}
-          onBack={() => setActiveSido(null)}
-          onSelect={onSelect}
-        />
+        <DistrictStep sido={activeSido} onBack={() => setActiveSido(null)} {...optionProps} />
       ) : (
         <SidoStep onEnter={setActiveSido} />
       )}
@@ -69,13 +69,13 @@ function SidoStep({ onEnter }: { onEnter: (sido: Sido) => void }) {
       <ul className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
         {SIDO_LIST.map((sido) => (
           <li key={sido.name}>
-            <Row onClick={() => onEnter(sido)}>
+            <button type="button" onClick={() => onEnter(sido)} className={cn(ROW, "hover:bg-paper")}>
               <span className="flex-1 text-left font-medium text-ink-2">{sido.name}</span>
               {sido.districts.length > 0 && (
                 <span className="text-xs text-ink-3">{sido.districts.length}</span>
               )}
               <ChevronRight className="shrink-0 text-base text-ink-3" />
-            </Row>
+            </button>
           </li>
         ))}
       </ul>
@@ -83,17 +83,17 @@ function SidoStep({ onEnter }: { onEnter: (sido: Sido) => void }) {
   );
 }
 
-interface StepProps {
+interface OptionProps {
+  multiple: boolean;
   isSelected: (option: RegionValue) => boolean;
   onSelect: (option: RegionValue) => void;
 }
 
 function DistrictStep({
   sido,
-  isSelected,
   onBack,
-  onSelect,
-}: StepProps & { sido: Sido; onBack: () => void }) {
+  ...optionProps
+}: OptionProps & { sido: Sido; onBack: () => void }) {
   const options: RegionValue[] = [
     { sido: sido.name, district: null },
     ...sido.districts.map((district) => ({ sido: sido.name, district })),
@@ -114,32 +114,21 @@ function DistrictStep({
       </div>
 
       <ul className="min-h-0 flex-1 overflow-y-auto px-2 py-1.5">
-        {options.map((option) => {
-          const selected = isSelected(option);
-          return (
-            <li key={regionKey(option)}>
-              <Row selected={selected} onClick={() => onSelect(option)}>
-                <span
-                  className={cn(
-                    "flex-1 text-left",
-                    selected || option.district === null
-                      ? "font-bold text-ink"
-                      : "font-medium text-ink-2",
-                  )}
-                >
-                  {option.district ?? `${sido.shortName} 전체`}
-                </span>
-                {selected && <Check className="shrink-0 text-[1.0625rem] text-gold" />}
-              </Row>
-            </li>
-          );
-        })}
+        {options.map((option) => (
+          <li key={regionKey(option)}>
+            <OptionRow
+              option={option}
+              label={option.district ?? `${sido.shortName} 전체`}
+              {...optionProps}
+            />
+          </li>
+        ))}
       </ul>
     </div>
   );
 }
 
-function SearchResults({ keyword, isSelected, onSelect }: StepProps & { keyword: string }) {
+function SearchResults({ keyword, ...optionProps }: OptionProps & { keyword: string }) {
   const results = searchRegions(keyword);
 
   if (results.length === 0) {
@@ -152,48 +141,55 @@ function SearchResults({ keyword, isSelected, onSelect }: StepProps & { keyword:
 
   return (
     <ul className="min-h-0 flex-1 overflow-y-auto border-t border-line-2 px-2 py-1.5">
-      {results.map((option) => {
-        const selected = isSelected(option);
-        return (
-          <li key={regionKey(option)}>
-            <Row selected={selected} onClick={() => onSelect(option)}>
-              <span
-                className={cn(
-                  "flex-1 text-left",
-                  selected ? "font-bold text-ink" : "font-medium text-ink-2",
-                )}
-              >
-                {formatRegionLabel(option)}
-              </span>
-              {selected && <Check className="shrink-0 text-[1.0625rem] text-gold" />}
-            </Row>
-          </li>
-        );
-      })}
+      {results.map((option) => (
+        <li key={regionKey(option)}>
+          <OptionRow option={option} label={formatRegionLabel(option)} {...optionProps} />
+        </li>
+      ))}
     </ul>
   );
 }
 
-function Row({
-  selected,
-  onClick,
-  children,
-}: {
-  selected?: boolean;
-  onClick: () => void;
-  children: ReactNode;
-}) {
+/** 다중 모드는 체크박스 행, 단일 모드는 선택 시 체크 표시가 붙는 버튼 행. */
+function OptionRow({
+  option,
+  label,
+  multiple,
+  isSelected,
+  onSelect,
+}: OptionProps & { option: RegionValue; label: string }) {
+  const selected = isSelected(option);
+  const text = (
+    <span
+      className={cn(
+        "flex-1 text-left",
+        selected || option.district === null ? "font-bold text-ink" : "font-medium text-ink-2",
+      )}
+    >
+      {label}
+    </span>
+  );
+
+  if (multiple) {
+    return (
+      <Checkbox
+        checked={selected}
+        onChange={() => onSelect(option)}
+        label={text}
+        className={cn(ROW, "gap-2.5", selected ? "bg-paper-2" : "hover:bg-paper")}
+      />
+    );
+  }
+
   return (
     <button
       type="button"
       aria-pressed={selected}
-      onClick={onClick}
-      className={cn(
-        "flex h-[2.4375rem] w-full items-center gap-2 rounded-[0.625rem] px-3.5 text-sm transition",
-        selected ? "bg-paper-2" : "hover:bg-paper",
-      )}
+      onClick={() => onSelect(option)}
+      className={cn(ROW, selected ? "bg-paper-2" : "hover:bg-paper")}
     >
-      {children}
+      {text}
+      {selected && <Check className="shrink-0 text-[1.0625rem] text-gold" />}
     </button>
   );
 }
