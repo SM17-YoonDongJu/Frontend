@@ -36,6 +36,12 @@ type ErrorMap = Partial<Record<VerificationFieldError, string>>;
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+const STEP_FIELDS: Record<VerificationStep, VerificationFieldError[]> = {
+  basic: ["name", "phone", "email"],
+  expertise: ["speciality", "affiliation", "region"],
+  documents: ["registration", "license"],
+};
+
 export interface VerificationForm {
   name: string;
   setName: (value: string) => void;
@@ -199,7 +205,11 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
 
   const validateStep = (step: VerificationStep): boolean => {
     const stepErrors = collectErrors(step);
-    setErrors((prev) => ({ ...prev, ...stepErrors }));
+    setErrors((prev) => {
+      const next = { ...prev };
+      for (const field of STEP_FIELDS[step]) delete next[field];
+      return { ...next, ...stepErrors };
+    });
     return Object.keys(stepErrors).length === 0;
   };
 

@@ -4,20 +4,12 @@ import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 import { Upload } from "@/shared/ui/icons/Upload";
 import { Button } from "@/shared/ui/Button";
 import type { AdjusterApplicationStatus } from "../../_model/adjuster-application.schema";
+import { formatDate } from "./date-format";
 import { SubmittedDocuments } from "./SubmittedDocuments";
 
 interface RejectResultProps {
   application: AdjusterApplicationStatus;
   onResubmit: () => void;
-}
-
-const pad = (value: number) => String(value).padStart(2, "0");
-
-function formatDate(iso: string | null): string | null {
-  if (!iso) return null;
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())}`;
 }
 
 /** 반려(REJECTED) — 반려 사유 + 서류별 검토 결과 + 다시 제출/문의. */
@@ -61,7 +53,6 @@ export function RejectResult({ application, onResubmit }: RejectResultProps) {
           문의하기
         </Button>
         <Button
-          full
           className="flex-1"
           onClick={onResubmit}
           icon={<Upload className="text-[1.125rem]" />}

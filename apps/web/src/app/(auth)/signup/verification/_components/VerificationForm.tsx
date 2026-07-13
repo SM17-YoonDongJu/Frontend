@@ -45,7 +45,13 @@ export function VerificationForm({ form }: VerificationFormProps) {
         ]}
       />
 
-      <div className="mx-auto w-full max-w-[45rem] px-6 pb-16 pt-11">
+      <form
+        className="mx-auto w-full max-w-[45rem] px-6 pb-16 pt-11"
+        onSubmit={(event) => {
+          event.preventDefault();
+          form.submit();
+        }}
+      >
         <div className="flex flex-col gap-2.5">
           <Label kicker>손해사정사 인증</Label>
           <h1 className="font-serif text-[1.875rem] font-bold text-ink">자격 정보를 인증해주세요</h1>
@@ -79,17 +85,17 @@ export function VerificationForm({ form }: VerificationFormProps) {
               나중에 하기
             </button>
             <Button
+              type="submit"
               size="lg"
               loading={form.isSubmitting}
               disabled={form.isUploading || form.isSubmitting}
-              onClick={form.submit}
               icon={<ArrowRight className="text-[1.125rem]" />}
             >
               인증 신청하기
             </Button>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

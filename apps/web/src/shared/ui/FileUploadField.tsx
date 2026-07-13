@@ -83,7 +83,7 @@ export function FileUploadField({
         className={cn(
           "flex min-h-[2.75rem] items-center gap-3.5 rounded-input border px-[1.125rem] py-4 transition",
           surface,
-          dragOver && "border-gold ring-[3px] ring-gold-soft",
+          dragOver && "border-gold ring-3 ring-gold-soft",
         )}
       >
         <span

@@ -7,19 +7,12 @@ import { Search } from "@/shared/ui/icons/Search";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { Spinner } from "@/shared/ui/icons/Spinner";
 import type { AdjusterApplicationStatus } from "../../_model/adjuster-application.schema";
+import { formatDateTime } from "./date-format";
 import { SubmittedDocuments } from "./SubmittedDocuments";
 
 interface ReviewTimelineProps {
   application: AdjusterApplicationStatus;
   onHome: () => void;
-}
-
-const pad = (value: number) => String(value).padStart(2, "0");
-
-function formatDateTime(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return iso;
-  return `${date.getFullYear()}.${pad(date.getMonth() + 1)}.${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 /** 심사 진행(PENDING). 모바일=Figma 가로 3스텝 스테퍼(661-2893), 데스크톱=세로 카드 타임라인(131-10770). */
@@ -77,9 +70,13 @@ export function ReviewTimeline({ application, onHome }: ReviewTimelineProps) {
           <Button variant="outline" full onClick={toggleDocuments}>
             {showDocuments ? "제출 서류 접기" : "제출 서류 확인"}
           </Button>
-          <Button variant="ghost" full onClick={onHome}>
+          <button
+            type="button"
+            onClick={onHome}
+            className="py-2.5 text-sm font-semibold text-ink-3 transition hover:text-ink"
+          >
             홈으로
-          </Button>
+          </button>
         </div>
       </div>
 

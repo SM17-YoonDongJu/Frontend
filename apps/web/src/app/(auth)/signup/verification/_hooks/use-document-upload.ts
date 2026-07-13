@@ -42,6 +42,7 @@ export function useDocumentUpload(): DocumentUpload {
 
   const select = useCallback(
     (file: File) => {
+      if (upload.isPending) return;
       const invalid = validate(file);
       if (invalid) {
         setStatus("error");
@@ -51,6 +52,8 @@ export function useDocumentUpload(): DocumentUpload {
       const displayName = `${file.name} · ${formatSize(file.size)}`;
       setStatus("uploading");
       setErrorMessage(undefined);
+      setUrl(undefined);
+      setFileName(undefined);
       upload.mutate(file, {
         onSuccess: (data) => {
           setUrl(data.url);
