@@ -8,7 +8,7 @@ export const userTypeSchema = z.enum(["insured_person", "adjuster"]);
 // 소셜 연결 — auth §4 provider 값 재사용.
 export const socialProviderSchema = z.enum(["kakao", "naver"]);
 
-// CONTRACT(명세없음-확장, 이슈 #105): 고객 마이페이지가 요구하는 phone·avatarUrl·role·socialProvider를
+// CONTRACT(명세없음-확장, 이슈 #105): 고객 마이페이지가 요구하는 phone·avatarUrl·role·socialProvider·region을
 // GET /users/me에 확장(초안 .pr-assets/api-spec-draft-user-mypage.md). 백엔드 미확정 — MSW 선반영.
 export const meSchema = z.object({
   userId: z.string(), // §7-2 해소(#43, 2026-07-05): 전역 uuid(string) 통일.
@@ -20,15 +20,17 @@ export const meSchema = z.object({
   avatarUrl: z.string().nullable(),
   role: userRoleSchema.nullable(),
   socialProvider: socialProviderSchema.nullable(),
+  region: z.string().nullable(), // 활동/거주 지역 — 사전 §3 adjuster-applications `region` 재사용.
 });
 
-// PATCH /users/me 부분 수정 — 마이페이지는 phone·avatarUrl만, 기존 nickname·email 유지.
+// PATCH /users/me 부분 수정 — 마이페이지는 phone·avatarUrl·region, 기존 nickname·email 유지.
 export const updateMeBodySchema = z
   .object({
     nickname: z.string(),
     email: z.string(),
     phone: z.string(),
     avatarUrl: z.string(),
+    region: z.string(),
   })
   .partial();
 

@@ -13,7 +13,8 @@ const CUSTOMER_ME: Me = {
   phone: null,
   avatarUrl: null,
   role: "USER",
-  socialProvider: "kakao"
+  socialProvider: "kakao",
+  region: null
 };
 
 const ADJUSTER_ME: Me = {

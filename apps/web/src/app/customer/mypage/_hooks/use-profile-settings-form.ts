@@ -12,13 +12,14 @@ interface UseProfileSettingsFormParams {
 
 /**
  * 프로필 설정 폼 로컬 상태(모달/시트 공유).
- * 휴대폰·아바타 draft 관리 + 사진 업로드(→URL) + 저장(PATCH /users/me) 오케스트레이션.
+ * 휴대폰·지역·아바타 draft 관리 + 사진 업로드(→URL) + 저장(PATCH /users/me) 오케스트레이션.
  */
 export function useProfileSettingsForm({
   profile,
   onSaved,
 }: UseProfileSettingsFormParams) {
   const [phone, setPhone] = useState(profile.phone ?? "");
+  const [region, setRegion] = useState(profile.region ?? "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatarUrl);
 
   const { mutate: updateMe, isPending: isSaving } = useUpdateMe();
@@ -33,6 +34,7 @@ export function useProfileSettingsForm({
     updateMe(
       {
         phone,
+        region,
         ...(avatarUrl && avatarUrl !== profile.avatarUrl
           ? { avatarUrl }
           : {}),
@@ -44,6 +46,8 @@ export function useProfileSettingsForm({
   return {
     phone,
     setPhone,
+    region,
+    setRegion,
     avatarUrl,
     pickFile,
     isUploading,

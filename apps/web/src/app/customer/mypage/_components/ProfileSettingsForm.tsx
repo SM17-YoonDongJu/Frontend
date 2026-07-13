@@ -4,10 +4,9 @@ import { type ChangeEvent } from "react";
 import { Button } from "@/shared/ui/Button";
 import { Camera } from "@/shared/ui/icons/Camera";
 import { Input } from "@/shared/ui/Input";
-import { joinInfoLabel, socialAccountLabel } from "../_model/profile-format";
+import { joinInfoLabel } from "../_model/profile-format";
 import type { Me } from "../_model/types";
 import { useProfileSettingsForm } from "../_hooks/use-profile-settings-form";
-import { ComingSoonButton } from "./ComingSoonButton";
 import { ProfileAvatar } from "./ProfileAvatar";
 
 interface ProfileSettingsFormProps {
@@ -16,14 +15,23 @@ interface ProfileSettingsFormProps {
   onClose: () => void;
 }
 
-/** 프로필 설정 공용 폼(모달·바텀시트 공유). 사진·휴대폰·소셜 + 저장. variant로 문구·액션 분기. */
+/** 프로필 설정 공용 폼(모달·바텀시트 공유). 사진·휴대폰·지역 + 저장. variant로 문구·액션 분기. */
 export function ProfileSettingsForm({
   profile,
   variant,
   onClose,
 }: ProfileSettingsFormProps) {
-  const { phone, setPhone, avatarUrl, pickFile, isUploading, isSaving, save } =
-    useProfileSettingsForm({ profile, onSaved: onClose });
+  const {
+    phone,
+    setPhone,
+    region,
+    setRegion,
+    avatarUrl,
+    pickFile,
+    isUploading,
+    isSaving,
+    save,
+  } = useProfileSettingsForm({ profile, onSaved: onClose });
 
   const caption =
     variant === "modal"
@@ -31,6 +39,7 @@ export function ProfileSettingsForm({
       : joinInfoLabel(profile.socialProvider, profile.createdAt);
 
   const phoneInputId = `mypage-phone-${variant}`;
+  const regionInputId = `mypage-region-${variant}`;
 
   const onFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -94,15 +103,18 @@ export function ProfileSettingsForm({
       </div>
 
       <div>
-        <p className="mb-2 text-[0.8125rem] font-bold text-ink-2">연결된 소셜</p>
-        <div className="flex items-center justify-between rounded-input border border-line bg-card px-4 py-3">
-          <span className="text-[0.875rem] font-medium text-ink">
-            {socialAccountLabel(profile.socialProvider)}
-          </span>
-          <ComingSoonButton className="text-[0.8125rem] font-bold text-ink-2 transition hover:text-ink">
-            관리
-          </ComingSoonButton>
-        </div>
+        <label
+          htmlFor={regionInputId}
+          className="mb-2 block text-[0.8125rem] font-bold text-ink-2"
+        >
+          지역
+        </label>
+        <Input
+          id={regionInputId}
+          value={region}
+          onChange={(event) => setRegion(event.target.value)}
+          placeholder="예: 서울 강남구"
+        />
       </div>
 
       <p className="text-[0.8125rem] text-ink-3">

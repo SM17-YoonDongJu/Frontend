@@ -323,7 +323,7 @@ const NOTIFICATION_SETTINGS: Record<string, boolean> = {
   kakaoPlusFriend: false,
 };
 
-// 본인 정보 목 상태 (이슈 #105 확장) — GET/PATCH /users/me 공유. phone·avatarUrl·role·socialProvider 확장.
+// 본인 정보 목 상태 (이슈 #105 확장) — GET/PATCH /users/me 공유. phone·avatarUrl·role·socialProvider·region 확장.
 // role은 localStorage["mock:role"]로 override(파트너 전환 섹션 검증: USER 기본 / CERTIFICATED_ADJUSTER).
 const MOCK_ME: Record<string, unknown> = {
   userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
@@ -333,6 +333,7 @@ const MOCK_ME: Record<string, unknown> = {
   phone: "010-1234-5678",
   avatarUrl: null,
   socialProvider: "kakao",
+  region: "서울 강남구",
 };
 
 // 활동 카운트 (이슈 #105) — CONTRACT(명세없음-임시): GET /users/me/activity-summary
@@ -834,7 +835,7 @@ export const handlers = [
       );
     }
 
-    for (const field of ["nickname", "email", "phone", "avatarUrl"] as const) {
+    for (const field of ["nickname", "email", "phone", "avatarUrl", "region"] as const) {
       if (field in body) MOCK_ME[field] = body[field];
     }
 

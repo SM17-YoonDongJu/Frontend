@@ -1,6 +1,4 @@
 import type { Me } from "../_model/types";
-import { socialAccountLabel } from "../_model/profile-format";
-import { ComingSoonButton } from "./ComingSoonButton";
 
 interface ContactAccountCardProps {
   profile: Me;
@@ -10,23 +8,11 @@ interface ContactAccountCardProps {
 const ACTION_CLASS =
   "shrink-0 rounded-chip border border-line bg-card px-3.5 py-1.5 text-[0.8125rem] font-bold text-ink-2 transition hover:bg-paper";
 
-/** PC 연락처·계정 카드 — 휴대폰(변경→프로필 설정)/소셜(관리·추후 지원) 2행. */
+/** PC 연락처·계정 카드 — 휴대폰/지역 2행. 변경 시 프로필 설정 모달로 이동. */
 export function ContactAccountCard({ profile, onEdit }: ContactAccountCardProps) {
   const rows = [
-    {
-      label: "휴대폰",
-      value: profile.phone ?? "미등록",
-      action: (
-        <button type="button" onClick={onEdit} className={ACTION_CLASS}>
-          변경
-        </button>
-      ),
-    },
-    {
-      label: "연결된 소셜",
-      value: socialAccountLabel(profile.socialProvider),
-      action: <ComingSoonButton className={ACTION_CLASS}>관리</ComingSoonButton>,
-    },
+    { label: "휴대폰", value: profile.phone ?? "미등록" },
+    { label: "지역", value: profile.region ?? "미설정" },
   ];
 
   return (
@@ -47,7 +33,9 @@ export function ContactAccountCard({ profile, onEdit }: ContactAccountCardProps)
                 {row.value}
               </p>
             </div>
-            {row.action}
+            <button type="button" onClick={onEdit} className={ACTION_CLASS}>
+              변경
+            </button>
           </li>
         ))}
       </ul>
