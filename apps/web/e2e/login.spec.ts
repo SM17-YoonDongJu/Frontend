@@ -84,6 +84,8 @@ test("신규 회원 콜백이면 회원가입으로 이동한다", async ({ page
   await page.goto("/oauth/kakao/callback?code=new&state=s1");
 
   await expect(page).toHaveURL(/\/signup/, { timeout: 15000 });
+  // 콜백이 보관한 가입 티켓으로 컨텍스트 가드를 통과해 퍼널 첫 단계가 렌더된다.
+  await expect(page.getByRole("heading", { name: "어떤 역할로 시작하시겠어요?" })).toBeVisible();
 });
 
 test("콜백이 실패하면 에러 안내와 다시 시도 버튼이 보이고 재시도해도 실패가 유지된다", async ({ page }) => {
