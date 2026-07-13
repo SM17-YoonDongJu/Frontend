@@ -1,4 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import { hideQueryDevtools, selectRegion } from "./_region-helpers";
+
+test.beforeEach(async ({ page }) => {
+  await hideQueryDevtools(page);
+});
 
 /**
  * 고객 마이페이지 「내 정보」 E2E (happy-path + 빈 상태 + 역할 게이팅, 이슈 #105 커밋 #19).
@@ -52,6 +57,33 @@ test.describe("PC 내 정보 · 프로필 수정", () => {
       page.getByRole("heading", { name: "프로필 설정" }).filter({ visible: true }),
     ).toBeHidden();
     await expect(page.getByText("010-9999-0000").first()).toBeVisible();
+  });
+
+  test("프로필 수정에서 지역을 골라 저장하면 내 정보에 반영된다", async ({ page }) => {
+    await page.goto(PATH);
+
+    await expect(async () => {
+      await page.getByRole("button", { name: "프로필 수정" }).click();
+      await expect(
+        page.getByRole("heading", { name: "프로필 설정" }).filter({ visible: true }),
+      ).toBeVisible();
+    }).toPass({ timeout: 10000 });
+
+    // 저장된 지역("서울 강남구")이 드롭다운에 복원된다
+    await expect(page.getByRole("button", { name: /서울 강남구/ })).toBeVisible();
+
+    await selectRegion(page, "부산광역시", "해운대구", /서울 강남구/);
+    await expect(page.getByRole("button", { name: /부산 해운대구/ })).toBeVisible();
+
+    await page
+      .getByRole("dialog", { name: "프로필 설정" })
+      .getByRole("button", { name: "저장하기" })
+      .click();
+
+    await expect(
+      page.getByRole("heading", { name: "프로필 설정" }).filter({ visible: true }),
+    ).toBeHidden();
+    await expect(page.getByText("부산 해운대구").first()).toBeVisible();
   });
 
   test("보험이 0건이면 빈 상태 안내가 보인다", async ({ page }) => {
