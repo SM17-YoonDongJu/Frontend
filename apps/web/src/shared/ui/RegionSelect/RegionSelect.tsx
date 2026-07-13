@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { useFocusTrap } from "@/shared/lib/use-focus-trap";
+import { useMediaQuery } from "@/shared/lib/use-media-query";
 import { formatRegionLabel, isSameRegion, type RegionValue } from "@/shared/model/regions";
 import { X } from "@/shared/ui/icons/X";
 import { RegionSelectPanel } from "./RegionSelectPanel";
@@ -53,7 +54,11 @@ export function RegionSelect(props: RegionSelectProps) {
   const sheetRef = useRef<HTMLDivElement>(null);
   const { recent, add: addRecent, remove: removeRecent } = useRecentRegions();
 
-  useFocusTrap(sheetRef, open);
+  // 모바일은 배경을 덮는 하단 시트(=모달), PC는 배경이 그대로 살아있는 팝오버.
+  // 모달일 때만 포커스를 가두고 aria-modal을 세운다.
+  const isSheet = useMediaQuery("(max-width: 767px)");
+
+  useFocusTrap(sheetRef, open && isSheet);
 
   useEffect(() => {
     if (!open) return;
@@ -96,15 +101,14 @@ export function RegionSelect(props: RegionSelectProps) {
       return;
     }
     props.onChange(option);
-    addRecent(option);
+    addRecent([option]);
     setOpen(false);
   };
 
   const handleApply = () => {
     if (props.mode === "multiple") {
       props.onChange(draft);
-      // 최신이 앞에 오도록 역순으로 기록
-      draft.toReversed().forEach(addRecent);
+      addRecent(draft);
     }
     setOpen(false);
   };
@@ -130,7 +134,7 @@ export function RegionSelect(props: RegionSelectProps) {
           <div
             ref={sheetRef}
             role="dialog"
-            aria-modal="true"
+            aria-modal={isSheet || undefined}
             aria-label="지역 선택"
             className={cn(
               "fixed inset-x-0 bottom-0 z-50 flex h-[80dvh] flex-col overflow-hidden rounded-t-card-lg border border-line bg-card outline-none",

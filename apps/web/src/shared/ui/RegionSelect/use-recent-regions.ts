@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useHydrated } from "@/shared/lib/use-hydrated";
 import { isSameRegion, type RegionValue } from "@/shared/model/regions";
 
@@ -38,29 +38,40 @@ function write(regions: RegionValue[]) {
 export function useRecentRegions() {
   const hydrated = useHydrated();
   const [recent, setRecent] = useState<RegionValue[]>([]);
+  // 한 핸들러에서 여러 지역을 연달아 기록해도 직전 결과 위에 쌓이도록 최신값을 ref로 들고 간다.
+  const latest = useRef<RegionValue[]>([]);
+
+  const commit = useCallback((next: RegionValue[]) => {
+    latest.current = next;
+    setRecent(next);
+    write(next);
+  }, []);
 
   useEffect(() => {
-    if (hydrated) setRecent(read());
+    if (!hydrated) return;
+    const stored = read();
+    latest.current = stored;
+    setRecent(stored);
   }, [hydrated]);
 
-  const add = useCallback((region: RegionValue) => {
-    setRecent((prev) => {
-      const next = [region, ...prev.filter((item) => !isSameRegion(item, region))].slice(
-        0,
-        MAX_RECENT,
-      );
-      write(next);
-      return next;
-    });
-  }, []);
+  /** 앞에 오는 지역일수록 최신으로 남는다. */
+  const add = useCallback(
+    (regions: RegionValue[]) => {
+      let next = latest.current;
+      for (const region of regions.toReversed()) {
+        next = [region, ...next.filter((item) => !isSameRegion(item, region))];
+      }
+      commit(next.slice(0, MAX_RECENT));
+    },
+    [commit],
+  );
 
-  const remove = useCallback((region: RegionValue) => {
-    setRecent((prev) => {
-      const next = prev.filter((item) => !isSameRegion(item, region));
-      write(next);
-      return next;
-    });
-  }, []);
+  const remove = useCallback(
+    (region: RegionValue) => {
+      commit(latest.current.filter((item) => !isSameRegion(item, region)));
+    },
+    [commit],
+  );
 
   return { recent, add, remove };
 }
