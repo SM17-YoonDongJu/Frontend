@@ -671,6 +671,13 @@ export const handlers = [
         { status: 401 },
       );
     }
+    // 조회 실패 주입 — E2E 로그인 가드 검증용(실패 시 로그인 화면 유지).
+    if (request.headers.get("x-mock-failure") === "me") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "사용자 정보를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
     const override =
       typeof localStorage !== "undefined" ? localStorage.getItem("mock:userType") : null;
     const userType = override === "adjuster" ? "adjuster" : "insured_person";

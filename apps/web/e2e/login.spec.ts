@@ -109,3 +109,35 @@ test("인가 코드가 없으면 로그인 화면으로 되돌아간다", async 
   await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
   await expect(page.getByRole("heading", { name: "바른보상 시작하기" })).toBeVisible();
 });
+
+/**
+ * 로그인 사용자 접근 제한 (이슈 #108).
+ * 로그인 여부는 GET /users/me로 판별 — 기본 MSW 핸들러가 로그인 유저(insured_person),
+ * localStorage["mock:userType"]="adjuster"면 사정사, x-mock-failure:me면 조회 실패(500).
+ */
+test.describe("로그인 사용자 접근 제한", () => {
+  test("로그인 유저가 진입하면 고객 대시보드로 이동한다", async ({ page }) => {
+    await page.goto(LOGIN_PATH);
+
+    await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 10000 });
+  });
+
+  test("사정사가 진입하면 파트너 홈으로 이동한다", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem("mock:userType", "adjuster");
+    });
+
+    await page.goto(LOGIN_PATH);
+
+    await expect(page).toHaveURL(/\/partner/, { timeout: 10000 });
+  });
+
+  test("로그인 여부 확인에 실패하면 로그인 화면이 보인다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-failure": "me" });
+
+    await page.goto(LOGIN_PATH);
+
+    await expect(page.getByRole("heading", { name: "바른보상 시작하기" })).toBeVisible();
+    await expect(page).toHaveURL(/\/login/);
+  });
+});
