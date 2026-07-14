@@ -3,7 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import { useFocusTrap } from "@/shared/lib/use-focus-trap";
 import { cn } from "@/shared/lib/utils";
-import { Close } from "@/shared/ui/icons/Close";
+import { X } from "@/shared/ui/icons/X";
 
 export interface BottomSheetProps {
   open: boolean;
@@ -91,7 +91,7 @@ export function BottomSheet({
               aria-label="닫기"
               className="flex size-8.5 items-center justify-center rounded-full text-ink-3 transition hover:bg-paper"
             >
-              <Close className="size-[1.0625rem]" />
+              <X className="size-[1.0625rem]" />
             </button>
           )}
         </div>
