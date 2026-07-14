@@ -1,4 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import { hideQueryDevtools, selectRegions } from "./_region-helpers";
+
+test.beforeEach(async ({ page }) => {
+  await hideQueryDevtools(page);
+});
 
 /**
  * 손해사정사 자격 인증 신청·심사 현황 E2E (이슈 #44).
@@ -43,7 +48,7 @@ async function fillBasic(page: Page) {
 async function fillExpertise(page: Page) {
   await page.getByRole("radio", { name: "종합손해사정사 (신체 포함)" }).click();
   await page.getByRole("radio", { name: "독립 (개업)" }).click();
-  await page.getByLabel("활동 지역").fill("서울 송파");
+  await selectRegions(page, [["서울특별시", "송파구"]]);
 }
 
 // ───────────────────────── 데스크톱(단일 폼) ─────────────────────────
@@ -78,7 +83,7 @@ test.describe("데스크톱 단일 폼", () => {
     await expect(page.getByText("이름을 입력해 주세요.")).toBeVisible();
     await expect(page.getByText("자격 구분을 선택해 주세요.")).toBeVisible();
     await expect(page.getByText("소속을 선택해 주세요.")).toBeVisible();
-    await expect(page.getByText("활동 지역을 입력해 주세요.")).toBeVisible();
+    await expect(page.getByText("활동 지역을 선택해 주세요.")).toBeVisible();
     // 제출은 차단(이동 없음).
     await expect(page).toHaveURL(new RegExp(`${FORM_PATH}$`));
   });

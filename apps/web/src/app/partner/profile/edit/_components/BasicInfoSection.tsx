@@ -6,7 +6,9 @@ import {
   type FieldErrors,
   type UseFormRegister,
 } from "react-hook-form";
+import { formatRegionList, parseRegionList } from "@/shared/model/regions";
 import { Input } from "@/shared/ui/Input";
+import { RegionSelect } from "@/shared/ui/RegionSelect/RegionSelect";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { HEADLINE_MAX, INTRODUCTION_MAX } from "../_model/specialty-options";
 import type { ProfileFormValues } from "../_model/types";
@@ -110,10 +112,18 @@ export function BasicInfoSection({
         </div>
         <div>
           <FieldLabel>활동 지역</FieldLabel>
-          <Input
-            placeholder="예) 서울 · 경기"
-            error={errors.activityRegion?.message}
-            {...register("activityRegion")}
+          <Controller
+            control={control}
+            name="activityRegion"
+            render={({ field }) => (
+              <RegionSelect
+                mode="multiple"
+                value={parseRegionList(field.value)}
+                onChange={(regions) => field.onChange(formatRegionList(regions))}
+                error={errors.activityRegion?.message}
+                className="w-full"
+              />
+            )}
           />
         </div>
       </div>

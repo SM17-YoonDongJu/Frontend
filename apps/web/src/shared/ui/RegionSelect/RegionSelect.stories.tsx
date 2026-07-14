@@ -11,11 +11,24 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-function Demo({ initial = null }: { initial?: RegionValue | null }) {
+function Demo({
+  initial = null,
+  error,
+  alwaysSheet,
+}: {
+  initial?: RegionValue | null;
+  error?: string;
+  alwaysSheet?: boolean;
+}) {
   const [value, setValue] = useState<RegionValue | null>(initial);
   return (
     <div className="p-6">
-      <RegionSelect value={value} onChange={setValue} />
+      <RegionSelect
+        value={value}
+        onChange={setValue}
+        error={value ? undefined : error}
+        alwaysSheet={alwaysSheet}
+      />
       <p className="mt-80 text-sm text-ink-3">바깥 영역 · Esc로 닫힙니다.</p>
     </div>
   );
@@ -47,4 +60,15 @@ function MultipleDemo() {
 export const Multiple: Story = {
   args: { value: null, onChange: () => {} },
   render: () => <MultipleDemo />,
+};
+
+export const WithError: Story = {
+  args: { value: null, onChange: () => {} },
+  render: () => <Demo error="활동 지역을 선택해 주세요." />,
+};
+
+/** 모달·바텀시트 안에서 쓰는 형태 — PC에서도 팝오버 대신 시트로 연다. */
+export const AlwaysSheet: Story = {
+  args: { value: null, onChange: () => {} },
+  render: () => <Demo alwaysSheet />,
 };

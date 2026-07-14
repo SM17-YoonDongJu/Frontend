@@ -151,6 +151,47 @@ export function formatRegionLabel({ sido, district }: RegionValue): string {
   return district ? `${shortName} ${district}` : `${shortName} 전체`;
 }
 
+/** 여러 지역을 한 문자열로 저장할 때 쓰는 구분자("서울 강남구 · 경기 성남시"). */
+const LIST_SEPARATOR = " · ";
+
+const SIDO_BY_SHORT_NAME = new Map(SIDO_LIST.map((sido) => [sido.shortName, sido]));
+
+/**
+ * 저장된 라벨을 선택 값으로 되돌린다. "서울 강남구" · "서울 전체" · 시·도 단위 "서울" 모두 받는다.
+ * 사전에 없는 시·군·구("서울 강남")는 시·도 전체로, 시·도조차 못 찾으면 null로 떨어뜨린다.
+ * 지역은 API에서 nullish(`Me.region`)로 올 수 있어 "값 없음"을 "선택 없음"으로 받는다.
+ */
+export function parseRegionLabel(label: string | null | undefined): RegionValue | null {
+  if (!label) return null;
+
+  const [head = "", ...rest] = label.trim().split(/\s+/);
+  const sido = SIDO_BY_SHORT_NAME.get(head) ?? SIDO_BY_NAME.get(head);
+  if (!sido) return null;
+
+  const district = rest.join(" ");
+  if (!district || district === "전체" || !sido.districts.includes(district)) {
+    return { sido: sido.name, district: null };
+  }
+  return { sido: sido.name, district };
+}
+
+export function formatRegionList(values: RegionValue[]): string {
+  return values.map(formatRegionLabel).join(LIST_SEPARATOR);
+}
+
+export function parseRegionList(text: string | null | undefined): RegionValue[] {
+  if (!text) return [];
+
+  const parsed = text
+    .split("·")
+    .map(parseRegionLabel)
+    .filter((value): value is RegionValue => value !== null);
+
+  return parsed.filter(
+    (value, index) => parsed.findIndex((other) => isSameRegion(other, value)) === index,
+  );
+}
+
 /** 선택 비교·React key용 식별자. */
 export function regionKey({ sido, district }: RegionValue): string {
   return `${sido}|${district ?? ""}`;

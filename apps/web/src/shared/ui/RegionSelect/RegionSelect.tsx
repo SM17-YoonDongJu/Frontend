@@ -12,6 +12,13 @@ import { useRecentRegions } from "./use-recent-regions";
 
 interface CommonProps {
   placeholder?: string;
+  /** 폼 검증 오류 문구. 트리거를 오류 보더로 바꾸고 아래에 표시한다. */
+  error?: string;
+  /**
+   * 뷰포트와 무관하게 항상 하단 시트로 연다.
+   * 모달·바텀시트 안에서 쓸 때 필요 — 두 셸 모두 overflow-y-auto라 팝오버가 잘린다.
+   */
+  alwaysSheet?: boolean;
   className?: string;
 }
 
@@ -41,7 +48,7 @@ function triggerLabel(selected: RegionValue[]): string | null {
  * PC는 트리거 아래 팝오버, 모바일은 하단 시트. 바깥 클릭·Esc로 닫힌다.
  */
 export function RegionSelect(props: RegionSelectProps) {
-  const { placeholder, className } = props;
+  const { placeholder, error, alwaysSheet, className } = props;
   const multiple = props.mode === "multiple";
   const committed = multiple ? props.value : props.value ? [props.value] : [];
 
@@ -56,7 +63,8 @@ export function RegionSelect(props: RegionSelectProps) {
 
   // 모바일은 배경을 덮는 하단 시트(=모달), PC는 배경이 그대로 살아있는 팝오버.
   // 모달일 때만 포커스를 가두고 aria-modal을 세운다.
-  const isSheet = useMediaQuery("(max-width: 767px)");
+  const isMobile = useMediaQuery("(max-width: 767px)");
+  const isSheet = alwaysSheet || isMobile;
 
   useFocusTrap(sheetRef, open && isSheet);
 
@@ -119,17 +127,22 @@ export function RegionSelect(props: RegionSelectProps) {
         label={triggerLabel(committed)}
         open={open}
         placeholder={placeholder}
+        invalid={Boolean(error)}
         onToggle={toggle}
         onClear={handleClear}
       />
 
+      {error && <p className="mt-[0.4375rem] text-[0.75rem] font-medium text-terra">{error}</p>}
+
       {open && (
         <>
-          <div
-            aria-hidden
-            onClick={() => setOpen(false)}
-            className="fixed inset-0 z-40 bg-ink/60 md:hidden"
-          />
+          {isSheet && (
+            <div
+              aria-hidden
+              onClick={() => setOpen(false)}
+              className="fixed inset-0 z-40 bg-ink/60"
+            />
+          )}
 
           <div
             ref={sheetRef}
@@ -137,21 +150,25 @@ export function RegionSelect(props: RegionSelectProps) {
             aria-modal={isSheet || undefined}
             aria-label="지역 선택"
             className={cn(
-              "fixed inset-x-0 bottom-0 z-50 flex h-[80dvh] flex-col overflow-hidden rounded-t-card-lg border border-line bg-card outline-none",
-              "md:absolute md:inset-x-auto md:bottom-auto md:left-0 md:top-full md:z-20 md:mt-2 md:h-[28.75rem] md:w-96 md:rounded-card md:shadow-[0_1rem_2.75rem_-1rem_rgba(21,32,46,0.35)]",
+              "flex flex-col overflow-hidden border border-line bg-card outline-none",
+              isSheet
+                ? "fixed inset-x-0 bottom-0 z-50 mx-auto h-[80dvh] max-w-[30rem] rounded-t-card-lg shadow-sheet"
+                : "absolute left-0 top-full z-20 mt-2 h-[28.75rem] w-96 rounded-card shadow-[0_1rem_2.75rem_-1rem_rgba(21,32,46,0.35)]",
             )}
           >
-            <div className="flex items-center justify-between px-5 pt-5 md:hidden">
-              <h2 className="font-serif text-[1.0625rem] font-bold text-ink">지역 선택</h2>
-              <button
-                type="button"
-                aria-label="닫기"
-                onClick={() => setOpen(false)}
-                className="flex size-8 items-center justify-center rounded-full text-lg text-ink-3 transition hover:bg-paper hover:text-ink"
-              >
-                <X />
-              </button>
-            </div>
+            {isSheet && (
+              <div className="flex items-center justify-between px-5 pt-5">
+                <h2 className="font-serif text-[1.0625rem] font-bold text-ink">지역 선택</h2>
+                <button
+                  type="button"
+                  aria-label="닫기"
+                  onClick={() => setOpen(false)}
+                  className="flex size-8 items-center justify-center rounded-full text-lg text-ink-3 transition hover:bg-paper hover:text-ink"
+                >
+                  <X />
+                </button>
+              </div>
+            )}
 
             <RegionSelectPanel
               multiple={multiple}
