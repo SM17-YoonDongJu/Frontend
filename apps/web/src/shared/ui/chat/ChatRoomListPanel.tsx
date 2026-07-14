@@ -172,7 +172,7 @@ export function ChatRoomListPanel({
                   />
                 </button>
                 {!isCollapsed && (
-                  <ul className="overflow-hidden rounded-card border border-line bg-card shadow-[0px_1px_1px_rgba(21,32,46,0.03)] md:rounded-none md:border-0 md:bg-transparent md:shadow-none">
+                  <ul className="overflow-hidden rounded-card border border-line bg-card shadow-card md:rounded-none md:border-0 md:bg-transparent md:shadow-none">
                     {sectionRooms.map((room) => (
                       <li
                         key={room.chatRoomId}
@@ -201,7 +201,7 @@ export function ChatRoomListPanel({
       ) : (
         /* Figma 663:3663 — 모바일은 방 목록을 흰 카드로 감싸고, 데스크톱(95:4571)은 패널에 바로 얹음 */
         <div className="flex-1 overflow-y-auto px-5 pb-5 md:px-0 md:pb-0">
-          <ul className="overflow-hidden rounded-card border border-line bg-card shadow-[0px_1px_1px_rgba(21,32,46,0.03)] md:rounded-none md:border-0 md:bg-transparent md:shadow-none">
+          <ul className="overflow-hidden rounded-card border border-line bg-card shadow-card md:rounded-none md:border-0 md:bg-transparent md:shadow-none">
             {filteredRooms.map((room) => (
               <li key={room.chatRoomId} className="border-b border-line-2 last:border-b-0">
                 <ChatRoomListItem
@@ -238,7 +238,7 @@ function ChatRoomsEmpty({ action }: { action?: ChatEmptyAction }) {
     <div className="flex flex-1 flex-col items-center justify-center px-6 pb-16 text-center">
       {/* 두 말풍선 일러스트 — 뒤 회색(점 3개) + 앞 골드 */}
       <div className="relative h-[4.875rem] w-[7.5rem]" aria-hidden>
-        <div className="absolute left-[0.375rem] top-5 flex h-[3.625rem] w-[4.625rem] items-center justify-center gap-1 rounded-[1.125rem] rounded-bl-[0.25rem] border border-line bg-card shadow-[0px_4px_6px_rgba(21,32,46,0.06)]">
+        <div className="absolute left-[0.375rem] top-5 flex h-[3.625rem] w-[4.625rem] items-center justify-center gap-1 rounded-[1.125rem] rounded-bl-[0.25rem] border border-line bg-card shadow-raised">
           <span className="size-1.5 rounded-[0.1875rem] bg-line" />
           <span className="size-1.5 rounded-[0.1875rem] bg-line" />
           <span className="size-1.5 rounded-[0.1875rem] bg-line" />

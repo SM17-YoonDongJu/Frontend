@@ -48,9 +48,13 @@
   --font-serif: var(--font-gowun-batang), "Gowun Batang", serif;
   --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
 
-  /* 그림자 → shadow-* 유틸 (카드 표면 미세 그림자) */
-  --shadow-card: 0 0.0625rem 0.0625rem rgba(21, 32, 46, 0.03);
-  --shadow-sheet: 0 -1rem 3rem -0.75rem rgba(21, 32, 46, 0.35);
+  /* 그림자 → shadow-* 유틸 */
+  --shadow-card: 0 0.0625rem 0.0625rem rgba(21, 32, 46, 0.03); /* 카드 표면 미세 그림자 */
+  --shadow-raised: 0 0.25rem 0.375rem rgba(21, 32, 46, 0.06); /* 카드 위로 살짝 뜬 요소 */
+  --shadow-float: 0 0.125rem 0.5rem rgba(21, 32, 46, 0.12); /* 본문 위를 떠다니는 칩·버튼 */
+  --shadow-popover: 0 1rem 2.75rem -1rem rgba(21, 32, 46, 0.35); /* 트리거 아래 팝오버 */
+  --shadow-sheet: 0 -1rem 3rem -0.75rem rgba(21, 32, 46, 0.35); /* 하단 시트(위로 뻗음) */
+  --shadow-modal: 0 2rem 5rem -1.5rem rgba(21, 32, 46, 0.5); /* 오버레이 모달 */
 }
 
 /* shadcn semantic 토큰 → #12 팔레트 매핑 (stock shadcn 컴포넌트용. light 전용) */
