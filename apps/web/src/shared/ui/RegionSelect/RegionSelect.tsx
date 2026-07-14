@@ -153,7 +153,7 @@ export function RegionSelect(props: RegionSelectProps) {
               "flex flex-col overflow-hidden border border-line bg-card outline-none",
               isSheet
                 ? "fixed inset-x-0 bottom-0 z-50 mx-auto h-[80dvh] max-w-[30rem] rounded-t-card-lg shadow-sheet"
-                : "absolute left-0 top-full z-20 mt-2 h-[28.75rem] w-96 rounded-card shadow-[0_1rem_2.75rem_-1rem_rgba(21,32,46,0.35)]",
+                : "absolute left-0 top-full z-20 mt-2 h-[28.75rem] w-96 rounded-card shadow-popover",
             )}
           >
             {isSheet && (

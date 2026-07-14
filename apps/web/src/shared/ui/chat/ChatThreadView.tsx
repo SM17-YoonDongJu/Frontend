@@ -146,7 +146,7 @@ export function ChatThreadView({
             scrollToBottom(true);
             setShowJump(false);
           }}
-          className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-line bg-card px-3.5 py-1.5 text-[0.75rem] font-semibold text-ink shadow-[0px_2px_8px_rgba(21,32,46,0.12)] transition hover:bg-paper-2"
+          className="absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border border-line bg-card px-3.5 py-1.5 text-[0.75rem] font-semibold text-ink shadow-float transition hover:bg-paper-2"
         >
           새 메시지
           <ChevronDown className="text-[0.875rem]" />
