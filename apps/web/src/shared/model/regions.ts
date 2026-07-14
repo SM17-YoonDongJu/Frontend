@@ -159,8 +159,11 @@ const SIDO_BY_SHORT_NAME = new Map(SIDO_LIST.map((sido) => [sido.shortName, sido
 /**
  * 저장된 라벨을 선택 값으로 되돌린다. "서울 강남구" · "서울 전체" · 시·도 단위 "서울" 모두 받는다.
  * 사전에 없는 시·군·구("서울 강남")는 시·도 전체로, 시·도조차 못 찾으면 null로 떨어뜨린다.
+ * 지역은 API에서 nullish(`Me.region`)로 올 수 있어 "값 없음"을 "선택 없음"으로 받는다.
  */
-export function parseRegionLabel(label: string): RegionValue | null {
+export function parseRegionLabel(label: string | null | undefined): RegionValue | null {
+  if (!label) return null;
+
   const [head = "", ...rest] = label.trim().split(/\s+/);
   const sido = SIDO_BY_SHORT_NAME.get(head) ?? SIDO_BY_NAME.get(head);
   if (!sido) return null;
@@ -176,7 +179,9 @@ export function formatRegionList(values: RegionValue[]): string {
   return values.map(formatRegionLabel).join(LIST_SEPARATOR);
 }
 
-export function parseRegionList(text: string): RegionValue[] {
+export function parseRegionList(text: string | null | undefined): RegionValue[] {
+  if (!text) return [];
+
   const parsed = text
     .split("·")
     .map(parseRegionLabel)
