@@ -4,7 +4,7 @@ import { MessageSquare } from "@/shared/ui/icons/MessageSquare";
 import { User } from "@/shared/ui/icons/User";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
-import type { NotificationType } from "../_model/notification.schema";
+import type { NotificationType } from "../model/notification.schema";
 
 interface IconStyle {
   Icon: ComponentType<{ className?: string }>;

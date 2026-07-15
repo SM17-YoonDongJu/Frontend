@@ -56,6 +56,68 @@ export function groupNotificationsByDate(
   }));
 }
 
+export type PopoverNotificationGroup = "TODAY" | "THIS_WEEK" | "EARLIER";
+
+export const POPOVER_GROUP_LABEL: Record<PopoverNotificationGroup, string> = {
+  TODAY: "오늘",
+  THIS_WEEK: "이번 주",
+  EARLIER: "이전",
+};
+
+const POPOVER_GROUP_ORDER: PopoverNotificationGroup[] = ["TODAY", "THIS_WEEK", "EARLIER"];
+
+export interface PopoverNotificationSection {
+  group: PopoverNotificationGroup;
+  label: string;
+  items: Notification[];
+}
+
+/** createdAt이 속한 팝오버 그룹(오늘/이번 주/이전)을 판정한다. 어제는 이번 주에 포함한다. */
+export function resolvePopoverGroup(
+  createdAt: string,
+  now: Date = new Date(),
+): PopoverNotificationGroup {
+  const dayDiff = Math.round((startOfDay(now) - startOfDay(new Date(createdAt))) / (MS_PER_HOUR * 24));
+
+  if (dayDiff <= 0) return "TODAY";
+  if (dayDiff <= 6) return "THIS_WEEK";
+  return "EARLIER";
+}
+
+/** 알림 목록을 팝오버 그룹별 섹션으로 묶는다. 비어 있는 그룹은 제외한다. */
+export function groupNotificationsForPopover(
+  notifications: Notification[],
+  now: Date = new Date(),
+): PopoverNotificationSection[] {
+  const buckets = new Map<PopoverNotificationGroup, Notification[]>();
+
+  for (const notification of notifications) {
+    const group = resolvePopoverGroup(notification.createdAt, now);
+    const bucket = buckets.get(group) ?? [];
+    bucket.push(notification);
+    buckets.set(group, bucket);
+  }
+
+  return POPOVER_GROUP_ORDER.filter((group) => buckets.has(group)).map((group) => ({
+    group,
+    label: POPOVER_GROUP_LABEL[group],
+    items: buckets.get(group) ?? [],
+  }));
+}
+
+const WEEKDAY_LABELS = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+
+/** 팝오버 시간 표기. 오늘은 "N시간 전"/"N분 전", 이번 주는 요일, 이전은 "MM.DD". */
+export function formatPopoverTime(createdAt: string, now: Date = new Date()): string {
+  const group = resolvePopoverGroup(createdAt, now);
+
+  if (group === "THIS_WEEK") {
+    return WEEKDAY_LABELS[new Date(createdAt).getDay()] ?? "";
+  }
+
+  return formatRelativeTime(createdAt, now);
+}
+
 /** 상대시간 표기. 오늘 그룹은 "N시간 전"/"N분 전", 어제는 "N일 전", 이전은 "MM.DD". */
 export function formatRelativeTime(createdAt: string, now: Date = new Date()): string {
   const created = new Date(createdAt);

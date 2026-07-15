@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ChevronLeft } from "@/shared/ui/icons/ChevronLeft";
-import { useReadAllNotifications } from "../_api/use-read-all-notifications";
+import { useReadAllNotifications } from "@/shared/api/use-read-all-notifications";
 import { NotificationBoundary } from "./NotificationBoundary";
 import { NotificationList } from "./NotificationList";
 

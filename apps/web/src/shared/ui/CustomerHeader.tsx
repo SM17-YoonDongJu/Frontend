@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { Scale } from "@/shared/ui/icons/Scale";
-import { Bell } from "@/shared/ui/icons/Bell";
 import { User } from "@/shared/ui/icons/User";
 import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
+import { NotificationBellMenu } from "@/shared/ui/NotificationBellMenu";
 
 /** 고객 페이지 상단 네비게이션 항목 (경로는 placeholder — 실 라우팅은 후속). */
 const NAV_ITEMS = [
@@ -40,13 +40,7 @@ export function CustomerHeader() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Link
-            href="/notifications"
-            aria-label="알림"
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-ink-2 transition hover:bg-paper hover:text-ink"
-          >
-            <Bell />
-          </Link>
+          <NotificationBellMenu settingsHref="/customer/mypage?panel=notifications" />
           {/* 계정 메뉴 트리거 — 드롭다운 토글은 후속(클라이언트 컴포넌트) */}
           <button
             type="button"

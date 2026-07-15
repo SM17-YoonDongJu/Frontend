@@ -1,7 +1,7 @@
 "use client";
 
-import { useNotificationList } from "../_api/use-notification-list";
-import { groupNotificationsByDate } from "../_model/notification-group";
+import { useNotificationList } from "@/shared/api/use-notification-list";
+import { groupNotificationsByDate } from "@/shared/model/notification-group";
 import { NotificationCard } from "./NotificationCard";
 import { NotificationEmpty } from "./NotificationEmpty";
 
