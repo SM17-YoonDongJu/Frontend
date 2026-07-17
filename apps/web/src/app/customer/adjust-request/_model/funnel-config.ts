@@ -4,8 +4,9 @@ import {
   step2TreatmentSchema,
   step3DateSchema,
   step4InsuranceSchema,
-  step5DocumentSchema,
-  step6ConsentSchema,
+  step5QuestionSchema,
+  step6DocumentSchema,
+  step7ConsentSchema,
 } from "./report-request.schema";
 
 /** 단계 식별자. 위치를 인코딩하지 않아 순서가 바뀌어도 그대로 쓴다. */
@@ -14,6 +15,7 @@ export type FunnelStepKey =
   | "treatment"
   | "date"
   | "insurance"
+  | "question"
   | "document"
   | "consent";
 
@@ -29,8 +31,9 @@ export const FUNNEL_STEPS: FunnelStep[] = [
   { key: "treatment", title: "사건 상세", schema: step2TreatmentSchema },
   { key: "date", title: "사고 일자", schema: step3DateSchema },
   { key: "insurance", title: "보험금·보험", schema: step4InsuranceSchema },
-  { key: "document", title: "서류 업로드", schema: step5DocumentSchema },
-  { key: "consent", title: "확인", schema: step6ConsentSchema },
+  { key: "question", title: "전할 말", schema: step5QuestionSchema },
+  { key: "document", title: "서류 업로드", schema: step6DocumentSchema },
+  { key: "consent", title: "확인", schema: step7ConsentSchema },
 ];
 
 export const FUNNEL_TOTAL = FUNNEL_STEPS.length;

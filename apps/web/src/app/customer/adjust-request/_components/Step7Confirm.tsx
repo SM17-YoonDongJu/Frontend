@@ -20,7 +20,7 @@ function SummaryRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function Step6Confirm() {
+export function Step7Confirm() {
   const { watch, setValue, formState } = useFormContext<AdjustRequestDraft>();
   const { errors } = formState;
   const v = watch();
@@ -42,6 +42,7 @@ export function Step6Confirm() {
       ? `${v.insuranceOffered.toLocaleString()}원`
       : "-";
   const docCount = v.documentUrls?.length ?? 0;
+  const question = v.question?.trim();
 
   return (
     <section className="flex flex-col gap-5">
@@ -66,6 +67,7 @@ export function Step6Confirm() {
         <SummaryRow label="제안받은 보험금" value={offered} />
         <SummaryRow label="가입 보험·특약" value={v.enrolledInsurance || "-"} />
         <SummaryRow label="업로드 서류" value={`${docCount}건`} />
+        {question && <SummaryRow label="전할 말" value={question} />}
       </div>
 
       <div className="flex flex-col gap-3">

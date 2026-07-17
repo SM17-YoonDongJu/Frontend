@@ -14,8 +14,9 @@ import { Step1AccidentType } from "./_components/Step1AccidentType";
 import { Step2TreatmentDetail } from "./_components/Step2TreatmentDetail";
 import { Step3AccidentDate } from "./_components/Step3AccidentDate";
 import { Step4OfferedAmount } from "./_components/Step4OfferedAmount";
-import { Step5Documents } from "./_components/Step5Documents";
-import { Step6Confirm } from "./_components/Step6Confirm";
+import { Step5Question } from "./_components/Step5Question";
+import { Step6Documents } from "./_components/Step6Documents";
+import { Step7Confirm } from "./_components/Step7Confirm";
 import { useDraftPrompt, clearDraft } from "./_hooks/use-draft";
 import { useFunnel } from "./_hooks/use-funnel";
 import { FUNNEL_STEPS, firstIncompleteStep } from "./_model/funnel-config";
@@ -29,8 +30,9 @@ const STEP_COMPONENTS: Record<FunnelStepKey, ComponentType> = {
   treatment: Step2TreatmentDetail,
   date: Step3AccidentDate,
   insurance: Step4OfferedAmount,
-  document: Step5Documents,
-  consent: Step6Confirm,
+  question: Step5Question,
+  document: Step6Documents,
+  consent: Step7Confirm,
 };
 
 function AdjustRequestFunnel() {
