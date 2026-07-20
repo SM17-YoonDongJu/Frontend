@@ -46,6 +46,27 @@ test("상담을 수락하면 수락한 제안만 남는다", async ({ page }) =>
   await expect(firstCard).toBeVisible();
 });
 
+test("상담 수락 확인을 취소하면 제안이 그대로 유지된다", async ({ page }) => {
+  await page.goto(PATH);
+
+  const firstCard = page.getByRole("listitem").filter({ hasText: "김도현" });
+  await expect(firstCard).toBeVisible();
+
+  await firstCard.getByRole("button", { name: "상담 수락" }).click();
+
+  // 다른 제안이 함께 종료된다는 안내가 보인다
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("함께 종료되는 상담 2건")).toBeVisible();
+
+  await dialog.getByRole("button", { name: "취소" }).click();
+  await expect(dialog).toHaveCount(0);
+
+  // 채택 요청이 나가지 않아 모든 제안이 남는다
+  await expect(page.getByText("정우성")).toBeVisible();
+  await expect(page.getByText("윤지후")).toBeVisible();
+});
+
 test("상세 보기를 누르면 리포트 상세로 이동한다", async ({ page }) => {
   await page.goto(PATH);
 
