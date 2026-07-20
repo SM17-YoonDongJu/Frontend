@@ -1,10 +1,14 @@
 "use client";
 
+import { useMemo } from "react";
+import { ReportCard } from "@/app/customer/_shared/components/ReportCard";
 import { useReportListInfinite } from "../_api/use-report-list-infinite";
 
 export function ReportListView() {
   const { data } = useReportListInfinite();
 
+  // InfiniteData → 화면 소비용 파생값.
+  const list = useMemo(() => data.pages.flatMap((page) => page.list), [data.pages]);
   // useSuspenseInfiniteQuery는 최소 1페이지 보장(initialPageParam) → totalElements는 첫 페이지 기준.
   const totalCount = data.pages[0]!.pagination.totalElements;
 
@@ -18,6 +22,14 @@ export function ReportListView() {
           {totalCount}건
         </span>
       </header>
+
+      <ul className="mt-6 flex flex-col gap-3">
+        {list.map((report) => (
+          <li key={report.reportId}>
+            <ReportCard report={report} />
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
