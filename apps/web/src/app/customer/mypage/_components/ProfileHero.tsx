@@ -1,6 +1,6 @@
+import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
 import type { Me } from "../_model/types";
-import { ProfileAvatar } from "./ProfileAvatar";
 
 interface ProfileHeroProps {
   profile: Me;
@@ -11,10 +11,12 @@ interface ProfileHeroProps {
 export function ProfileHero({ profile, onEdit }: ProfileHeroProps) {
   return (
     <section className="flex items-center gap-6 rounded-[1.25rem] bg-navy p-6.5">
-      <ProfileAvatar
-        avatarUrl={profile.avatarUrl}
-        nickname={profile.nickname}
-        className="size-16 text-[1.625rem]"
+      <Avatar
+        src={profile.avatarUrl}
+        name={profile.nickname}
+        label={`${profile.nickname} 프로필 사진`}
+        tone="glass"
+        className="text-[4rem] font-bold [--avatar-initial:0.406em]"
       />
 
       <div className="min-w-0 flex-1">
