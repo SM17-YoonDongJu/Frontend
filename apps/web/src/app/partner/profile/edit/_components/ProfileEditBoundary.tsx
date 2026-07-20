@@ -1,34 +1,22 @@
 "use client";
 
-import { QueryErrorResetBoundary } from "@tanstack/react-query";
-import { Suspense, useEffect, useState } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { ProfileEditError } from "./ProfileEditError";
+import { AsyncBoundary } from "@/shared/ui/AsyncBoundary";
 import { ProfileEditSkeleton } from "./ProfileEditSkeleton";
 import { ProfileEditView } from "./ProfileEditView";
-import type { FallbackProps } from "react-error-boundary";
 
-function ProfileEditErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
-  return <ProfileEditError code={(error as Error).name} onRetry={resetErrorBoundary} />;
-}
+const ERROR_MESSAGES = {
+  FORBIDDEN: { title: "접근 권한이 없어요", desc: "손해사정사만 프로필을 수정할 수 있어요." },
+};
 
 export function ProfileEditBoundary() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return <ProfileEditSkeleton />;
-
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          FallbackComponent={ProfileEditErrorFallback}
-        >
-          <Suspense fallback={<ProfileEditSkeleton />}>
-            <ProfileEditView />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    <AsyncBoundary
+      fallback={<ProfileEditSkeleton />}
+      errorLayout="page"
+      errorTitle="프로필을 불러오지 못했어요"
+      errorMessages={ERROR_MESSAGES}
+    >
+      <ProfileEditView />
+    </AsyncBoundary>
   );
 }
