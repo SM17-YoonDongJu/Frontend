@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
+import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
@@ -47,7 +48,6 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
     feeBasis,
   } = proposal;
   const viewed = isViewed(adjusterId);
-  const avatarLabel = nickname.trim().charAt(0) || "?";
   const estimateRange = formatEstimateRange(estimateMinAmount, estimateMaxAmount);
   const credential = formatCredential(career, speciality);
 
@@ -68,12 +68,7 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
       )}
     >
       <div className="flex items-start gap-[0.8125rem]">
-        <span
-          aria-hidden
-          className="flex size-12 shrink-0 items-center justify-center rounded-full bg-navy font-serif text-[1.2625rem] text-white"
-        >
-          {avatarLabel}
-        </span>
+        <Avatar name={nickname} className="text-[3rem]" />
         <div className="flex min-w-0 flex-1 flex-col gap-[0.1875rem] self-stretch">
           <div className="flex items-center gap-1.5">
             <p className="truncate text-[0.8875rem] font-bold text-ink">

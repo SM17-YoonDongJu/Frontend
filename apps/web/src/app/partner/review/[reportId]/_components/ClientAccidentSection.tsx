@@ -1,3 +1,4 @@
+import { Avatar } from "@/shared/ui/Avatar";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 import { User } from "@/shared/ui/icons/User";
 import type { ReviewClient } from "../_model/types";
@@ -8,8 +9,6 @@ export interface ClientAccidentSectionProps {
 }
 
 export function ClientAccidentSection({ client, isMasked }: ClientAccidentSectionProps) {
-  const initial = client.maskedName.charAt(0);
-
   return (
     <div>
       <div className="flex items-center justify-between gap-2">
@@ -21,12 +20,11 @@ export function ClientAccidentSection({ client, isMasked }: ClientAccidentSectio
       </div>
 
       <div className="mt-4 flex items-center gap-3 rounded-card border border-line-2 bg-paper-2 p-4">
-        <span
-          aria-hidden
-          className="flex size-12 shrink-0 items-center justify-center rounded-full bg-navy font-serif text-lg text-gold"
-        >
-          {initial}
-        </span>
+        <Avatar
+          name={client.maskedName}
+          tone="gold"
+          className="text-[3rem] [--avatar-initial:0.375em]"
+        />
         <div className="text-[0.875rem]">
           <p>
             <span className="font-semibold text-ink">{client.maskedName}</span>

@@ -9,7 +9,7 @@ import { RegionSelect } from "@/shared/ui/RegionSelect/RegionSelect";
 import { joinInfoLabel } from "../_model/profile-format";
 import type { Me } from "../_model/types";
 import { useProfileSettingsForm } from "../_hooks/use-profile-settings-form";
-import { ProfileAvatar } from "./ProfileAvatar";
+import { Avatar } from "@/shared/ui/Avatar";
 
 interface ProfileSettingsFormProps {
   profile: Me;
@@ -51,10 +51,12 @@ export function ProfileSettingsForm({
     <div className="flex flex-col gap-6">
       <div className="flex items-center gap-3.5">
         <div className="relative shrink-0">
-          <ProfileAvatar
-            avatarUrl={avatarUrl}
-            nickname={profile.nickname}
-            className="size-14 bg-navy text-[1.375rem]"
+          <Avatar
+            src={avatarUrl}
+            name={profile.nickname}
+            label={`${profile.nickname} 프로필 사진`}
+            size="lg"
+            className="font-bold [--avatar-initial:0.393em]"
           />
           {variant === "sheet" && (
             <label className="absolute -bottom-0.5 -right-0.5 flex size-6 cursor-pointer items-center justify-center rounded-full bg-gold text-white shadow-sm transition hover:brightness-[.96]">

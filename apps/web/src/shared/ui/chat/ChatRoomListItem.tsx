@@ -63,7 +63,7 @@ export function ChatRoomListItem({
         <Avatar
           src={avatarUrl}
           name={name}
-          className="md:size-[2.625rem] md:text-[1.1rem]"
+          className="md:text-[2.625rem]"
         />
         {matched && (
           <span

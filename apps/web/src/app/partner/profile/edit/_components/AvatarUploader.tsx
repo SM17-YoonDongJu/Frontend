@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { getInitial } from "@/shared/lib/initial";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/Button";
 import { Pencil } from "@/shared/ui/icons/Pencil";
@@ -67,7 +68,7 @@ export function AvatarUploader({ value, onChange, onUploadingChange, nickname }:
   }
 
   const shownImage = preview ?? value;
-  const initial = nickname.trim().charAt(0) || "?";
+  const initial = getInitial(nickname);
 
   return (
     <div className="flex flex-col items-center gap-2 lg:items-stretch">
