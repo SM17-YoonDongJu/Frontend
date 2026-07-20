@@ -5,7 +5,7 @@ import { ReportCard } from "@/app/customer/_shared/components/ReportCard";
 import { useReportListInfinite } from "../_api/use-report-list-infinite";
 
 export function ReportListView() {
-  const { data } = useReportListInfinite();
+  const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useReportListInfinite();
 
   // InfiniteData → 화면 소비용 파생값.
   const list = useMemo(() => data.pages.flatMap((page) => page.list), [data.pages]);
@@ -30,6 +30,19 @@ export function ReportListView() {
           </li>
         ))}
       </ul>
+
+      {hasNextPage && (
+        <div className="mt-4">
+          <button
+            type="button"
+            onClick={() => fetchNextPage()}
+            disabled={isFetchingNextPage}
+            className="w-full rounded-button border border-line bg-card py-3 text-[0.875rem] font-semibold text-ink-2 transition hover:brightness-[.98] disabled:cursor-not-allowed disabled:opacity-[.42]"
+          >
+            {isFetchingNextPage ? "불러오는 중…" : "더보기"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
