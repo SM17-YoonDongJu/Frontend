@@ -1,7 +1,7 @@
 import { API_BASE_URL } from "@/shared/api/config";
 import { fetchJson } from "@/shared/api/fetch-json";
 import type { ReportListFilter } from "@/shared/api/query-keys";
-import { reportListSchema } from "../_model/report-list.schema";
+import { reportListSchema } from "@/app/customer/_shared/model/report-list.schema";
 import type { ReportList } from "../_model/types";
 
 export function getReportList(filter?: ReportListFilter): Promise<ReportList> {

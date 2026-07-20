@@ -103,7 +103,7 @@ function RecentReportCard({ report }: { report: ReportListItem }) {
         <OfferRangeBar
           min={claimedMinAmount}
           max={claimedMaxAmount}
-          offeredAmount={offeredAmount}
+          offeredAmount={offeredAmount ?? null}
         />
       </div>
 
