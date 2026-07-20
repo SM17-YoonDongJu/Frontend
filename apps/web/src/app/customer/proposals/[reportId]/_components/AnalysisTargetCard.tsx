@@ -1,3 +1,5 @@
+import { FileText } from "@/shared/ui/icons/FileText";
+
 interface AnalysisTargetCardProps {
   accidentType: string;
   reportNo: string;
@@ -17,7 +19,7 @@ export function AnalysisTargetCard({
         aria-hidden
         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-card bg-gold-2/15 text-gold-2"
       >
-        <DocumentIcon />
+        <FileText className="text-[1.25rem]" />
       </span>
       <div className="min-w-0">
         <div className="flex items-baseline gap-2">
@@ -29,26 +31,5 @@ export function AnalysisTargetCard({
         </p>
       </div>
     </section>
-  );
-}
-
-function DocumentIcon() {
-  return (
-    <svg
-      width="20"
-      height="20"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
-      <path d="M14 3v5h5" />
-      <path d="M9 13h6" />
-      <path d="M9 17h6" />
-    </svg>
   );
 }
