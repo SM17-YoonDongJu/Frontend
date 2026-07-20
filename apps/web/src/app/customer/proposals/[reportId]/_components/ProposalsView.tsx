@@ -10,10 +10,18 @@ export function ProposalsView({ reportId }: { reportId: string }) {
   const { target } = proposalList;
   const proposals = proposalList.list;
   const proposalCount = proposalList.pagination.totalElements;
+  const newCount = proposals.filter((proposal) => proposal.isNew).length;
 
   return (
     <div className="mx-auto w-full max-w-[47.5rem] px-4 py-8">
-      <h1 className="font-serif text-[1.625rem] font-bold leading-tight text-ink">받은 제안</h1>
+      <div className="flex items-center gap-2.5">
+        <h1 className="font-serif text-[1.625rem] font-bold leading-tight text-ink">받은 제안</h1>
+        {newCount > 0 && (
+          <span className="rounded-pill bg-terra px-2.5 py-1 text-[0.75rem] font-bold text-white">
+            신규 {newCount}
+          </span>
+        )}
+      </div>
       <p className="mt-2 text-[0.875rem] text-ink-3">
         내 리포트를 검토한 손해사정사들의 상담 제안이에요.
       </p>
