@@ -1,18 +1,19 @@
 "use client";
 
-import type { ReviewIssue, ReviewIssueStatus } from "../_model/types";
+import type { ReviewIssue, IssueReviewStatus } from "../_model/types";
+import type { DraftIssue } from "../_hooks/use-review-draft";
 import { IssueCard } from "./IssueCard";
 import { IssueAddForm } from "./IssueAddForm";
 
 export interface IssueBoardActions {
-  setStatus: (id: string, status: ReviewIssueStatus) => void;
-  editIssue: (id: string, patch: Partial<ReviewIssue>) => void;
+  setStatus: (key: string, status: IssueReviewStatus) => void;
+  editIssue: (key: string, patch: Partial<ReviewIssue>) => void;
   addIssue: (title: string, description: string, impactAmount: number | null) => void;
-  removeIssue: (id: string) => void;
+  removeIssue: (key: string) => void;
 }
 
 export interface IssueBoardProps {
-  issues: ReviewIssue[];
+  issues: DraftIssue[];
   actions: IssueBoardActions;
 }
 
@@ -34,12 +35,12 @@ export function IssueBoard({ issues, actions }: IssueBoardProps) {
         <ol className="mt-4 space-y-3">
           {issues.map((issue, index) => (
             <IssueCard
-              key={issue.issueId}
+              key={issue.key}
               issue={issue}
               index={index}
-              onSetStatus={(status) => actions.setStatus(issue.issueId, status)}
-              onPatch={(patch) => actions.editIssue(issue.issueId, patch)}
-              onRemove={() => actions.removeIssue(issue.issueId)}
+              onSetStatus={(status) => actions.setStatus(issue.key, status)}
+              onPatch={(patch) => actions.editIssue(issue.key, patch)}
+              onRemove={() => actions.removeIssue(issue.key)}
             />
           ))}
         </ol>

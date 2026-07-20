@@ -6,7 +6,7 @@ import type { ReviewedReports } from "../_model/types";
 
 /**
  * GET /adjusters/me/reviewed-reports?status=&month=&page=&size=
- * status 미지정(전체=ALL)이면 파라미터 생략.
+ * page는 0부터. status 미지정(전체=ALL)이면 파라미터 생략.
  */
 export function getReviewedReports(
   filter: ReviewedReportsFilter | undefined,
@@ -18,9 +18,8 @@ export function getReviewedReports(
   params.set("page", String(page));
   if (filter?.size != null) params.set("size", String(filter.size));
 
-  const query = params.toString();
   return fetchJson(
-    `${API_BASE_URL}/adjusters/me/reviewed-reports${query ? `?${query}` : ""}`,
+    `${API_BASE_URL}/adjusters/me/reviewed-reports?${params.toString()}`,
     reviewedReportsSchema,
   );
 }

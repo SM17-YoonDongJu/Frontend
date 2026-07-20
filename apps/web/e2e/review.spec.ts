@@ -175,19 +175,23 @@ test("데스크톱에서 카드를 선택하면 프리뷰 패널로 검수 상�
   }).toPass({ timeout: 10000 });
 });
 
-test("데스크톱에서 보류를 누르면 카드가 보류 상태로 바뀐다", async ({ page, isMobile }) => {
+test("데스크톱에서 보류 사유를 선택하면 카드가 보류 상태로 바뀐다", async ({ page, isMobile }) => {
   test.skip(isMobile, "데스크톱 전용 보류 동작");
   await page.goto(PATH);
 
   await expect(visibleText(page, "미리보기 중")).toBeVisible();
 
-  await expect(async () => {
-    await page.getByRole("button", { name: "보류", exact: true }).click();
-    await expect(
-      page
-        .getByRole("listitem")
-        .filter({ hasText: "우측 슬관절 인대 파열 · 등급 재산정" })
-        .getByText("보류"),
-    ).toBeVisible();
-  }).toPass({ timeout: 10000 });
+  // 프리뷰 패널의 보류 → 사유 선택 다이얼로그
+  await page.getByRole("button", { name: "보류", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "검수 보류 사유 선택" });
+  await expect(dialog).toBeVisible();
+
+  await dialog.getByRole("button", { name: "자료 보완 필요" }).click();
+
+  await expect(
+    page
+      .getByRole("listitem")
+      .filter({ hasText: "우측 슬관절 인대 파열 · 등급 재산정" })
+      .getByText("보류"),
+  ).toBeVisible({ timeout: 10000 });
 });

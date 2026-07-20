@@ -7,8 +7,8 @@ import {
 
 const FILTER_OPTIONS: { value: SelectableReviewStatus | null; label: string }[] = [
   { value: null, label: "전체" },
-  { value: "CONSULTATION", label: "상담 전환" },
-  { value: "CLOSED", label: "종결" },
+  { value: "COUNSELING", label: "상담 전환" },
+  { value: "ACCEPTED", label: "채택" },
 ];
 
 export function ReviewHistoryFilterBar() {
