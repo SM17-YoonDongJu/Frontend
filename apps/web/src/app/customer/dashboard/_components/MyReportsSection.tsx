@@ -4,8 +4,8 @@ import Link from "next/link";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { useReportList } from "../_api/use-report-list";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
+import { ReportCard } from "@/app/customer/_shared/components/ReportCard";
 import { EmptyState } from "./EmptyState";
-import { ReportCard } from "./ReportCard";
 
 const VISIBLE_REPORT_COUNT = 4;
 

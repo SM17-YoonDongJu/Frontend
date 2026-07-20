@@ -6,8 +6,8 @@ import {
   getAccidentTone,
   REPORT_STATUS_META,
 } from "@/app/customer/_shared/model/report-status";
-import { DASHBOARD_LINKS } from "../_model/dashboard-links";
-import type { ReportListItem } from "../_model/types";
+import { reportDetailHref } from "@/app/customer/_shared/model/report-routes";
+import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
 
 function toManwon(won: number): string {
   return Math.round(won / 10_000).toLocaleString("ko-KR");
@@ -57,7 +57,7 @@ export function ReportCard({ report }: { report: ReportListItem }) {
         <div className="flex items-center gap-3">
           <span className="text-[0.78125rem] text-ink-3">제안 {proposalCount}건</span>
           <Link
-            href={DASHBOARD_LINKS.report(reportId)}
+            href={reportDetailHref(reportId)}
             className={buttonVariants({ variant: "outline", size: "sm" })}
           >
             리포트 보기
