@@ -12,6 +12,8 @@ interface AsyncBoundaryProps {
   errorLayout: ErrorLayout;
   errorTitle?: string;
   errorMessages?: Record<string, { title: string; desc: string }>;
+  /** 에러 상태에만 붙는 에지 여백 등. 스켈레톤·성공은 각자 여백을 가지므로 여기서 주입. */
+  errorClassName?: string;
 }
 
 export function AsyncBoundary({
@@ -20,6 +22,7 @@ export function AsyncBoundary({
   errorLayout,
   errorTitle,
   errorMessages,
+  errorClassName,
 }: AsyncBoundaryProps) {
   if (!useHydrated()) return fallback;
 
@@ -35,6 +38,7 @@ export function AsyncBoundary({
               code={(error as Error).name}
               messages={errorMessages}
               onRetry={resetErrorBoundary}
+              className={errorClassName}
             />
           )}
         >

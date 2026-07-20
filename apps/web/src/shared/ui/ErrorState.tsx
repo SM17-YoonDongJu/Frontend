@@ -8,6 +8,8 @@ export interface ErrorStateProps {
   code?: string;
   messages?: Record<string, { title: string; desc: string }>;
   onRetry: () => void;
+  /** 에지 여백 등 바깥 배치용. 레이아웃 자체는 layout이 소유하고, 여백만 호출부가 주입. */
+  className?: string;
 }
 
 const WRAPPER: Record<ErrorLayout, string> = {
@@ -24,7 +26,7 @@ const COMPACT: Record<ErrorLayout, boolean> = {
   flow: false,
 };
 
-export function ErrorState({ layout, title, code, messages, onRetry }: ErrorStateProps) {
+export function ErrorState({ layout, title, code, messages, onRetry, className }: ErrorStateProps) {
   const known = code ? messages?.[code] : undefined;
   const heading = known?.title ?? title ?? "정보를 불러오지 못했어요";
   const description = known?.desc ?? "잠시 후 다시 시도해 주세요.";
@@ -33,7 +35,7 @@ export function ErrorState({ layout, title, code, messages, onRetry }: ErrorStat
   return (
     <div
       role="alert"
-      className={`flex flex-col items-center text-center ${WRAPPER[layout]}`}
+      className={`flex flex-col items-center text-center ${WRAPPER[layout]}${className ? ` ${className}` : ""}`}
     >
       {compact ? (
         <>
