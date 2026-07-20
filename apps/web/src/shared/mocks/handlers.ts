@@ -1,4 +1,5 @@
 ﻿import { delay, http, HttpResponse } from "msw";
+import { toSnakeKey } from "@/shared/api/case-convert";
 import { API_BASE_URL } from "@/shared/api/config";
 import { consumeReissue, isAccessTokenExpired } from "@/shared/mocks/auth-token-state";
 
@@ -706,9 +707,9 @@ export const handlers = [
       speciality?: string;
       affiliation?: string;
       region?: string;
-      registrationImageUrl?: string;
-      licenseNo?: string | null;
-      licenseImageUrl?: string | null;
+      registration_image_url?: string;
+      license_no?: string | null;
+      license_image_url?: string | null;
     };
 
     if (
@@ -716,7 +717,7 @@ export const handlers = [
       !body.speciality ||
       !body.affiliation ||
       !body.region ||
-      !body.registrationImageUrl
+      !body.registration_image_url
     ) {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
@@ -724,7 +725,7 @@ export const handlers = [
       );
     }
 
-    if (!body.licenseNo && !body.licenseImageUrl) {
+    if (!body.license_no && !body.license_image_url) {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "자격증 번호 또는 사본 중 하나는 필수입니다." },
         { status: 400 },
@@ -745,7 +746,7 @@ export const handlers = [
       submittedAt: new Date().toISOString(),
       name: body.name,
       speciality: body.speciality,
-      licenseNo: body.licenseNo ?? null,
+      licenseNo: body.license_no ?? null,
       documents: [
         { type: "LICENSE", status: "PENDING" },
         { type: "REGISTRATION", status: "PENDING" },
@@ -898,11 +899,11 @@ export const handlers = [
 
     const body = (await request.json().catch(() => ({}))) as {
       content?: string;
-      attachmentIds?: string[];
+      attachment_ids?: string[];
     };
     const content = typeof body.content === "string" ? body.content : "";
-    // 업로드해 둔 첨부를 attachmentIds로 회수(⚠️ 명세없음-초안)
-    const attachments = (body.attachmentIds ?? [])
+    // 업로드해 둔 첨부를 attachment_ids로 회수(⚠️ 명세없음-초안)
+    const attachments = (body.attachment_ids ?? [])
       .map((id) => uploadedChatAttachments.get(id))
       .filter((attachment): attachment is MockChatAttachment => Boolean(attachment));
     const createdAt = new Date().toISOString();
@@ -1104,9 +1105,9 @@ export const handlers = [
 
     const body = (await request.json().catch(() => ({}))) as {
       provider?: string;
-      socialToken?: string;
+      social_token?: string;
       nickname?: string;
-      userType?: string;
+      user_type?: string;
       email?: string;
     };
 
@@ -1117,7 +1118,7 @@ export const handlers = [
       );
     }
 
-    if (!body.provider || !body.socialToken || !body.userType) {
+    if (!body.provider || !body.social_token || !body.user_type) {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
         { status: 400 },
@@ -1145,8 +1146,8 @@ export const handlers = [
         data: {
           userId: crypto.randomUUID(),
           nickname: body.nickname,
-          // 응답 역할은 명세대로 role(요청 userType 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
-          role: body.userType === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
+          // 응답 역할은 명세대로 role(요청 user_type 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
+          role: body.user_type === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
           accessToken: `mock-access-${crypto.randomUUID()}`,
           refreshToken: `mock-refresh-${crypto.randomUUID()}`,
         },
@@ -1264,8 +1265,9 @@ export const handlers = [
     }
 
     for (const key of Object.keys(NOTIFICATION_SETTINGS)) {
-      if (typeof body[key] === "boolean") {
-        NOTIFICATION_SETTINGS[key] = body[key];
+      const wireKey = toSnakeKey(key);
+      if (typeof body[wireKey] === "boolean") {
+        NOTIFICATION_SETTINGS[key] = body[wireKey];
       }
     }
 
@@ -1339,7 +1341,7 @@ export const handlers = [
       );
     }
 
-    if (typeof body.insurerName !== "string" || typeof body.productName !== "string") {
+    if (typeof body.insurer_name !== "string" || typeof body.product_name !== "string") {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "보험사·상품명을 입력해 주세요." },
         { status: 400 },
@@ -1349,15 +1351,15 @@ export const handlers = [
     const id = crypto.randomUUID();
     MOCK_INSURANCES.push({
       id,
-      insurerName: body.insurerName,
-      productName: body.productName,
-      policyNo: typeof body.policyNo === "string" ? body.policyNo : null,
-      enrolledAt: typeof body.enrolledAt === "string" ? body.enrolledAt : null,
+      insurerName: body.insurer_name,
+      productName: body.product_name,
+      policyNo: typeof body.policy_no === "string" ? body.policy_no : null,
+      enrolledAt: typeof body.enrolled_at === "string" ? body.enrolled_at : null,
       coverages: Array.isArray(body.coverages) ? body.coverages : [],
       // CONTRACT(직접 입력 시 초기 matchStatus 백엔드 확인 필요): 서버가 즉시 fuzzy 매칭하는지 비동기 대기인지 미확정 → 대기(PENDING)로 둔다.
       matchStatus: "PENDING",
       // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 미등재 필드. 증권 업로드 없이 직접 입력 → 미등록.
-      policyFileUrl: typeof body.policyFileUrl === "string" ? body.policyFileUrl : null,
+      policyFileUrl: typeof body.policy_file_url === "string" ? body.policy_file_url : null,
     });
 
     // 확정 응답: 201 + data는 생성 id 하나뿐(전체 객체 아님). 목록은 훅이 invalidate로 재조회한다.
@@ -1489,7 +1491,8 @@ export const handlers = [
     }
 
     for (const field of ["nickname", "email", "phone", "avatarUrl", "region"] as const) {
-      if (field in body) MOCK_ME[field] = body[field];
+      const wireKey = toSnakeKey(field);
+      if (wireKey in body) MOCK_ME[field] = body[wireKey];
     }
 
     // userId는 GET 기준 uuid string으로 유지한다(명세는 PATCH 응답에서 number — 드리프트. FE는 응답을 폐기하므로 무관).
@@ -1677,7 +1680,8 @@ export const handlers = [
       "careers",
     ] as const;
     for (const field of ADJUSTER_PROFILE_MUTABLE_FIELDS) {
-      if (field in body) ADJUSTER_PROFILE[field] = body[field];
+      const wireKey = toSnakeKey(field);
+      if (wireKey in body) ADJUSTER_PROFILE[field] = body[wireKey];
     }
     ADJUSTER_PROFILE.updatedAt = new Date().toISOString();
 
@@ -1706,9 +1710,9 @@ export const handlers = [
   // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
   http.post(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(600);
-    const body = (await request.json()) as { accidentType?: string };
+    const body = (await request.json()) as { accident_type?: string };
 
-    if (body.accidentType !== "medical_indemnity") {
+    if (body.accident_type !== "medical_indemnity") {
       return HttpResponse.json(
         { status: "400", code: "UNSUPPORTED_OPERATION", message: "현재 실손 의료비만 분석 가능합니다." },
         { status: 400 },
