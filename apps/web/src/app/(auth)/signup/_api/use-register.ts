@@ -26,8 +26,8 @@ export function getRegisterErrorCode(error: unknown): RegisterErrorCode | null {
     : null;
 }
 
-// 성공 시 user.me 캐시만 무효화. accessToken/refreshToken 저장은 이번 범위 외 —
-// 호출부(UI)가 mutate onSuccess로 처리한다(반환 data에 토큰 포함).
+// 성공 시 user.me 캐시만 무효화. 토큰은 HttpOnly 쿠키(Set-Cookie)로 세팅되므로 FE 저장 로직 없음 —
+// 응답 data는 { userId, nickname, role }뿐(토큰 미포함).
 export function useRegister() {
   const queryClient = useQueryClient();
 

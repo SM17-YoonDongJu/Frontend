@@ -324,19 +324,19 @@ const NOTIFICATION_SETTINGS: Record<string, boolean> = {
   kakaoPlusFriend: false,
 };
 
-// 본인 정보 목 상태 — GET/PATCH /users/me 공유.
-// GET 확정 응답은 userId(uuid string)·nickname·email·role·createdAt 5필드뿐(userType 없음 → FE가 role에서 파생).
-// CONTRACT(확장 등재 요청 중, 이슈 #105): phone·avatarUrl·socialProvider·region은 백엔드 미채택 — 실서버는 주지 않는다.
-// 마이페이지 화면 검증용으로만 목이 제공하며, 스키마는 nullish로 키 부재를 흡수한다("미등록" 표시).
+// 본인 정보 목 상태 — GET/PATCH /users/me 공유. 명세 응답 그대로 snake_case 키로 보관(계약 거울).
+// 확정 응답(2026-07-14): user_id·nickname·phone_number·role·gender·region[]·avatar_url·created_at(userType 없음 → FE가 role 파생).
+// CONTRACT(명세없음-확장): email·social_provider는 명세 GET 응답에 없다 — 최근 로그인 마스킹·가입경로 표시용으로만 목이 제공(스키마 nullish).
 const MOCK_ME: Record<string, unknown> = {
-  userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
+  user_id: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
   nickname: "윤서",
+  phone_number: "010-1234-5678",
+  gender: "F",
+  region: ["서울 강남구"],
+  avatar_url: null,
+  created_at: "2024-03-02T09:00:00Z",
   email: "yunseo@example.com",
-  createdAt: "2024-03-02T09:00:00Z",
-  phone: "010-1234-5678",
-  avatarUrl: null,
-  socialProvider: "kakao",
-  region: "서울 강남구",
+  social_provider: "kakao",
 };
 
 /**
@@ -422,7 +422,7 @@ const ADJUSTER_MYPAGE = {
 // 손해사정사 자격 신청 상태(이슈 #44) — POST가 세우고 GET .../me가 읽는 모듈 스코프 상태.
 // 기본 null(미신청 → GET 404 POST_NOT_FOUND → NOT_APPLIED → 폼).
 type MockDocumentReview = {
-  type: "LICENSE" | "REGISTRATION";
+  type: "LICENSE" | "REGISTRATION" | "ID_CARD";
   status: "PENDING" | "APPROVED" | "RESUBMIT_REQUIRED";
 };
 type MockAdjusterApplication = {
@@ -453,6 +453,7 @@ function buildAdjusterApplication(
     documents: [
       { type: "LICENSE", status: "PENDING" },
       { type: "REGISTRATION", status: "PENDING" },
+      { type: "ID_CARD", status: "PENDING" },
     ],
     rejectedAt: null,
     rejectReason: null,
@@ -471,6 +472,7 @@ function buildAdjusterApplication(
       documents: [
         { type: "LICENSE", status: "APPROVED" },
         { type: "REGISTRATION", status: "RESUBMIT_REQUIRED" },
+        { type: "ID_CARD", status: "APPROVED" },
       ],
       rejectedAt: "2026-07-07T13:20:00Z",
       rejectReason:
@@ -704,7 +706,7 @@ export const handlers = [
 
     const body = (await request.json().catch(() => ({}))) as {
       name?: string;
-      speciality?: string;
+      specialities?: string[];
       affiliation?: string;
       region?: string;
       registration_image_url?: string;
@@ -714,7 +716,8 @@ export const handlers = [
 
     if (
       !body.name ||
-      !body.speciality ||
+      !body.specialities ||
+      body.specialities.length === 0 ||
       !body.affiliation ||
       !body.region ||
       !body.registration_image_url
@@ -745,11 +748,13 @@ export const handlers = [
       status: "PENDING",
       submittedAt: new Date().toISOString(),
       name: body.name,
-      speciality: body.speciality,
+      // GET .../me 응답은 speciality 단수(명세) — 요청 specialities 배열의 첫 값을 보관.
+      speciality: body.specialities[0] ?? "",
       licenseNo: body.license_no ?? null,
       documents: [
         { type: "LICENSE", status: "PENDING" },
         { type: "REGISTRATION", status: "PENDING" },
+        { type: "ID_CARD", status: "PENDING" },
       ],
       rejectedAt: null,
       rejectReason: null,
@@ -759,7 +764,7 @@ export const handlers = [
       {
         status: "201",
         message: "자격 인증 신청이 접수되었습니다.",
-        data: { applicationId: adjusterApplicationState.applicationId, status: "PENDING" },
+        data: camelToSnakeDeep({ applicationId: adjusterApplicationState.applicationId, status: "PENDING" }),
       },
       { status: 201 },
     );
@@ -806,7 +811,7 @@ export const handlers = [
       return HttpResponse.json({
         status: "200",
         message: "정상 처리되었습니다.",
-        data: buildAdjusterApplication(status),
+        data: camelToSnakeDeep(buildAdjusterApplication(status)),
       });
     }
 
@@ -820,7 +825,7 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: adjusterApplicationState,
+      data: camelToSnakeDeep(adjusterApplicationState),
     });
   }),
 
@@ -1053,9 +1058,17 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "로그인 성공",
-      data: isNewUser
-        ? { userId: null, isNewUser: true, signupTicket: `mock-signup-ticket-${crypto.randomUUID()}` }
-        : { userId: crypto.randomUUID(), isNewUser: false, signupTicket: null },
+      // 응답 필드 snake_case(명세): user_id·is_new_user·signup_ticket·previously_withdrawn.
+      data: camelToSnakeDeep(
+        isNewUser
+          ? {
+              userId: null,
+              isNewUser: true,
+              signupTicket: `mock-signup-ticket-${crypto.randomUUID()}`,
+              previouslyWithdrawn: false,
+            }
+          : { userId: crypto.randomUUID(), isNewUser: false, signupTicket: null, previouslyWithdrawn: false },
+      ),
     });
   }),
 
@@ -1097,8 +1110,10 @@ export const handlers = [
     });
   }),
 
-  // 회원가입 (#43) — 전역 봉투 거울. 성공 201 + data(토큰 포함).
-  // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 2자 미만→400 VALIDATION_ERROR,
+  // 회원가입 (#43, 명세 2026-07-09 개정) — 전역 봉투 거울. 성공 201.
+  // 토큰은 HttpOnly 쿠키(Set-Cookie access_token 30분/refresh_token 14일)로만 내려가고 body엔 없음 → data = { user_id, nickname, role }.
+  // birth_date·phone_number·gender는 명세상 필수지만 현행 가입 폼이 수집하지 못해(Figma 개편 후속) 목은 검증하지 않는다.
+  // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 1자 미만·30자 초과→400 VALIDATION_ERROR,
   //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD, x-mock-failure:social→500 EXTERNAL_API_ERROR.
   http.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {
     await delay(600);
@@ -1108,7 +1123,6 @@ export const handlers = [
       social_token?: string;
       nickname?: string;
       user_type?: string;
-      email?: string;
     };
 
     if (request.headers.get("x-mock-failure") === "social") {
@@ -1125,9 +1139,9 @@ export const handlers = [
       );
     }
 
-    if (!body.nickname || body.nickname.length < 2 || body.nickname.length > 20) {
+    if (!body.nickname || body.nickname.length < 1 || body.nickname.length > 30) {
       return HttpResponse.json(
-        { status: "400", code: "VALIDATION_ERROR", message: "닉네임은 2~20자로 입력해 주세요." },
+        { status: "400", code: "VALIDATION_ERROR", message: "이름은 1~30자로 입력해 주세요." },
         { status: 400 },
       );
     }
@@ -1143,14 +1157,12 @@ export const handlers = [
       {
         status: "201",
         message: "회원가입이 완료되었습니다.",
-        data: {
+        // 응답 역할은 명세대로 role(요청 user_type 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
+        data: camelToSnakeDeep({
           userId: crypto.randomUUID(),
           nickname: body.nickname,
-          // 응답 역할은 명세대로 role(요청 user_type 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
           role: body.user_type === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
-          accessToken: `mock-access-${crypto.randomUUID()}`,
-          refreshToken: `mock-refresh-${crypto.randomUUID()}`,
-        },
+        }),
       },
       { status: 201 },
     );
@@ -1464,9 +1476,8 @@ export const handlers = [
     });
   }),
 
-  // 본인 정보 수정 (이슈 #105) — PATCH /users/me (확정 스펙)
-  // 확정 body는 nickname·email뿐이지만 phone·avatarUrl·region도 머지한다(확장 등재 요청 중 — 실서버는 무시할 수 있음).
-  // 응답은 확정대로 부분 필드(userId·nickname·email)만 — 전체를 주면 setQueryData 캐시 오염이 드러나지 않는다.
+  // 본인 정보 수정 — PATCH /users/me (확정 스펙 2026-07-14). body(하나 이상): phone_number·region[]·avatar_url.
+  // 응답은 명세대로 me 전체 객체(snake). FE는 응답을 폐기하고 GET 재조회로 갱신한다.
   http.patch(`${API_BASE_URL}/users/me`, async ({ request }) => {
     await delay(500);
 
@@ -1487,20 +1498,15 @@ export const handlers = [
       );
     }
 
-    for (const field of ["nickname", "email", "phone", "avatarUrl", "region"] as const) {
-      const wireKey = toSnakeKey(field);
-      if (wireKey in body) MOCK_ME[field] = body[wireKey];
+    // 요청 body는 이미 snake_case(fetch-json 변환). 명세 허용 필드만 머지.
+    for (const key of ["phone_number", "region", "avatar_url"] as const) {
+      if (key in body) MOCK_ME[key] = body[key];
     }
 
-    // userId는 GET 기준 uuid string으로 유지한다(명세는 PATCH 응답에서 number — 드리프트. FE는 응답을 폐기하므로 무관).
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
-        userId: MOCK_ME.userId,
-        nickname: MOCK_ME.nickname,
-        email: MOCK_ME.email,
-      },
+      data: { ...MOCK_ME, role: resolveMockRole() },
     });
   }),
 

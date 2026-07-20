@@ -11,8 +11,8 @@ const ACTION_CLASS =
 /** PC 연락처·계정 카드 — 휴대폰/지역 2행. 변경 시 프로필 설정 모달로 이동. */
 export function ContactAccountCard({ profile, onEdit }: ContactAccountCardProps) {
   const rows = [
-    { label: "휴대폰", value: profile.phone ?? "미등록" },
-    { label: "지역", value: profile.region ?? "미설정" },
+    { label: "휴대폰", value: profile.phoneNumber ?? "미등록" },
+    { label: "지역", value: profile.region.length > 0 ? profile.region.join(" · ") : "미설정" },
   ];
 
   return (
