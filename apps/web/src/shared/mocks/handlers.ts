@@ -1912,10 +1912,22 @@ export const handlers = [
   // 제안 매칭(채택·거절) 통합 (이슈 #48) — PATCH /reports/:reportId/proposals/:proposalId {status}.
   //   ACCEPTED: 대상 방 매칭완료 + 형제(같은 reportId) 방 자동종료(REJECTED·CLOSED) 캐스케이드.
   //   REJECTED: 대상 방만 종료. 이미 확정된 방 재PATCH → 409.
+  //   x-mock-failure:match-proposal → 500 INTERNAL_SERVER_ERROR (실패 토스트 E2E용).
   http.patch(
     `${API_BASE_URL}/reports/:reportId/proposals/:proposalId`,
     async ({ request, params }) => {
       await delay(400);
+
+      if (request.headers.get("x-mock-failure") === "match-proposal") {
+        return HttpResponse.json(
+          {
+            status: "500",
+            code: "INTERNAL_SERVER_ERROR",
+            message: "서버 오류가 발생했습니다.",
+          },
+          { status: 500 },
+        );
+      }
 
       const reportId = typeof params.reportId === "string" ? params.reportId : "";
       const proposalId =
