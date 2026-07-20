@@ -35,6 +35,11 @@ test("상담을 수락하면 수락한 제안만 남는다", async ({ page }) =>
 
   await firstCard.getByRole("button", { name: "상담 수락" }).click();
 
+  // 확인 모달을 거쳐야 채택된다(#122)
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "매칭 완료" }).click();
+
   // 수락 시 같은 사건의 다른 제안은 자동 종료 → 목록에서 제외
   await expect(page.getByText("정우성")).toHaveCount(0);
   await expect(page.getByText("윤지후")).toHaveCount(0);
