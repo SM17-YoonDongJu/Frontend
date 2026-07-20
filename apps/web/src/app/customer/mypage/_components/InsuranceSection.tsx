@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { useAddInsurance } from "../_api/use-add-insurance";
 import { useInsuranceList } from "../_api/use-insurance-list";
 import { Plus } from "@/shared/ui/icons/Plus";
+import { toast } from "@/shared/ui/toast";
 import { InsuranceCard } from "./InsuranceCard";
 import { InsuranceDirectInput } from "./InsuranceDirectInput";
 import { InsuranceEmpty } from "./InsuranceEmpty";
@@ -19,7 +20,13 @@ export function InsuranceSection() {
 
   // TODO(#105): 단일 필드 직접 입력 → 보험사·상품 분리 매핑 백엔드 확정 전 잠정(동일 값 전달).
   const handleAdd = (value: string) =>
-    addInsurance({ insurerName: value, productName: value });
+    addInsurance(
+      { insurerName: value, productName: value },
+      {
+        onError: () =>
+          toast.error("보험 추가에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      },
+    );
 
   return (
     <section className="rounded-card border border-line bg-card p-6 shadow-[0_1px_1px_rgba(21,32,46,0.03)]">
