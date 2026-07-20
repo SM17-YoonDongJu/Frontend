@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Suspense } from "react";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { Button, buttonVariants } from "@/shared/ui/Button";
+import { toast } from "@/shared/ui/toast";
 import { useDraftPreview } from "../_api/use-draft-preview";
 import { useHoldReview } from "../_api/use-hold-review";
 import type { ReviewListItem } from "../../_shared/model/types";
@@ -130,7 +131,12 @@ function DraftContent({ item }: { item: ReviewListItem }) {
           variant="outline"
           className="flex-1"
           loading={hold.isPending}
-          onClick={() => hold.mutate(item.reportId)}
+          onClick={() =>
+            hold.mutate(item.reportId, {
+              onError: () =>
+                toast.error("사건 보류에 실패했어요. 잠시 후 다시 시도해 주세요."),
+            })
+          }
         >
           보류
         </Button>
