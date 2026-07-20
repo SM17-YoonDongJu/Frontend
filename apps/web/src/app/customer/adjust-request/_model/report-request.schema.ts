@@ -56,7 +56,16 @@ export const step4InsuranceSchema = z
     message: "제안받은 보험금을 입력하거나 '아직 제안받지 않았어요'를 선택하세요.",
   });
 
-export const step5DocumentSchema = z.object({
+export const QUESTION_MAX_LENGTH = 500;
+
+export const step5QuestionSchema = z.object({
+  question: z
+    .string()
+    .max(QUESTION_MAX_LENGTH, `${QUESTION_MAX_LENGTH}자까지 입력할 수 있어요.`)
+    .nullish(), // 손해사정사에게 전할 말, 선택
+});
+
+export const step6DocumentSchema = z.object({
   documentUrls: z.array(z.url()).nullish(), // 업로드된 증빙 url, 선택
 });
 
@@ -65,7 +74,7 @@ export const uploadDocumentResponseSchema = z.object({
   url: z.url(),
 });
 
-export const step6ConsentSchema = z.object({
+export const step7ConsentSchema = z.object({
   agreedToPrivacy: z.literal(true, { message: "민감정보 처리에 동의해 주세요." }),
   agreedToTerms: z.literal(true, { message: "필수 고지사항을 확인해 주세요." }),
 });
@@ -111,6 +120,7 @@ export const adjustRequestDraftSchema = z.object({
   hospitalizations: z.array(hospitalizationSchema).optional(),
   insuranceNotOffered: z.boolean().optional(),
   insuranceOffered: z.number().int().min(0).nullish(),
+  question: z.string().max(QUESTION_MAX_LENGTH).nullish(),
   documentUrls: z.array(z.url()).nullish(),
   documentSlots: documentSlotsSchema.optional(), // 슬롯→업로드 결과(복원용). 제출은 documentUrls로 평면화.
   agreedToPrivacy: z.boolean().optional(),
@@ -170,6 +180,6 @@ export function toCreateReportBody(
     description: null,
     additionalInformation: serializeAdditionalInformation(draft),
     documentUrls: draft.documentUrls ?? null,
-    question: null,
+    question: draft.question?.trim() || null,
   });
 }

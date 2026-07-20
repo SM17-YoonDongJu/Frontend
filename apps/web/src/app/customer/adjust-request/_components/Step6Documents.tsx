@@ -52,7 +52,7 @@ function fileNameFromUrl(url: string): string {
   }
 }
 
-export function Step5Documents() {
+export function Step6Documents() {
   const { getValues, setValue, watch } = useFormContext<AdjustRequestDraft>();
   const upload = useUploadDocument();
 

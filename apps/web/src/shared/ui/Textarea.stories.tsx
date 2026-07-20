@@ -29,3 +29,24 @@ export const Default: Story = {
   args: { value: "", onChange: () => {} },
   render: () => <Demo />,
 };
+
+function InsideCounterDemo() {
+  const [value, setValue] = useState("");
+  return (
+    <div className="w-[32rem]">
+      <Textarea
+        value={value}
+        onChange={setValue}
+        maxLength={500}
+        rows={8}
+        counterPlacement="inside"
+        resizable={false}
+      />
+    </div>
+  );
+}
+
+export const InsideCounter: Story = {
+  args: { value: "", onChange: () => {} },
+  render: () => <InsideCounterDemo />,
+};
