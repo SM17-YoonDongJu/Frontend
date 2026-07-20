@@ -218,7 +218,12 @@ export function CustomerChatThreadContent({
         disabled={sendMessage.isPending}
         closed={!isChatWritable(group)}
         sendFailed={sendMessage.isError}
-        onPickFile={(file) => sendAttachment.mutate(file)}
+        onPickFile={(file) =>
+          sendAttachment.mutate(file, {
+            onError: () =>
+              toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요."),
+          })
+        }
         attachPending={sendAttachment.isPending}
       />
 
