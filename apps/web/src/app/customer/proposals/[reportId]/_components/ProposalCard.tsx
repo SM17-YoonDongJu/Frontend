@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
+import { MatchConfirmModal } from "@/shared/ui/chat/MatchConfirmModal";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { Star } from "@/shared/ui/icons/Star";
@@ -14,6 +16,8 @@ import type { Proposal } from "../../../_shared/model/proposal.schema";
 interface ProposalCardProps {
   reportId: string;
   proposal: Proposal;
+  /** 수락 시 함께 종료되는 같은 리포트의 다른 제안 사정사 이름. */
+  otherProposalNames: string[];
 }
 
 const manWonFormatter = new Intl.NumberFormat("ko-KR");
@@ -28,10 +32,11 @@ function formatCredential(career?: number | null, speciality?: string | null) {
   return [career != null ? `경력 ${career}년` : null, speciality].filter(Boolean).join(" · ");
 }
 
-export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
+export function ProposalCard({ reportId, proposal, otherProposalNames }: ProposalCardProps) {
   const router = useRouter();
   const { isViewed, markViewed } = useViewedProposals();
   const matchProposal = useMatchProposal(reportId);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const {
     proposalId,
@@ -56,8 +61,16 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
     router.push(`/customer/report/${reportId}`);
   };
 
+  // 채택 시 같은 리포트의 다른 제안이 자동 종료·되돌릴 수 없어 확인 모달을 거친다(채팅 화면과 동일 정책)
   const acceptConsult = () => {
-    matchProposal.mutate({ proposalId, status: "ACCEPTED" });
+    setConfirmOpen(true);
+  };
+
+  const confirmAccept = () => {
+    matchProposal.mutate(
+      { proposalId, status: "ACCEPTED" },
+      { onSuccess: () => setConfirmOpen(false) },
+    );
   };
 
   return (
@@ -130,6 +143,15 @@ export function ProposalCard({ reportId, proposal }: ProposalCardProps) {
           상담 수락
         </Button>
       </div>
+
+      <MatchConfirmModal
+        open={confirmOpen}
+        adjusterName={nickname}
+        endingConsultations={otherProposalNames.map((name) => ({ name }))}
+        pending={matchProposal.isPending}
+        onConfirm={confirmAccept}
+        onCancel={() => setConfirmOpen(false)}
+      />
     </article>
   );
 }

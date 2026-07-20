@@ -10,23 +10,28 @@ export function ProposalsView({ reportId }: { reportId: string }) {
   const { target } = proposalList;
   const proposals = proposalList.list;
   const proposalCount = proposalList.pagination.totalElements;
+  const newCount = proposals.filter((proposal) => proposal.isNew).length;
 
   return (
-    <div className="mx-auto w-full max-w-[47.5rem] px-4 py-8">
-      <p className="text-[0.8125rem] font-semibold text-gold-ink">받은 제안</p>
-      <h1 className="mt-1 font-serif text-[1.625rem] font-bold leading-tight text-ink">
-        제안 {proposalCount}건이 도착했어요
-      </h1>
+    <div className="mx-auto w-full max-w-[47.5rem] px-5 py-8">
+      <div className="flex items-center gap-2.5">
+        <h1 className="font-serif text-[1.625rem] font-bold leading-tight text-ink">받은 제안</h1>
+        {newCount > 0 && (
+          <span className="rounded-pill bg-terra px-2.5 py-1 text-[0.75rem] font-bold text-white">
+            신규 {newCount}
+          </span>
+        )}
+      </div>
       <p className="mt-2 text-[0.875rem] text-ink-3">
-        검수 펼침된 리포트를 본 손해사정사들의 상담 제안입니다.
+        내 리포트를 검토한 손해사정사들의 상담 제안이에요.
       </p>
 
       {target && (
         <div className="mt-6">
           <AnalysisTargetCard
+            reportId={reportId}
             accidentType={target.accidentType}
             reportNo={target.reportNo}
-            receivedAt={target.receivedAt}
             proposalCount={proposalCount}
           />
         </div>
@@ -37,8 +42,7 @@ export function ProposalsView({ reportId }: { reportId: string }) {
       </div>
 
       <p className="mt-8 rounded-card border border-line bg-paper-2 px-4 py-3 text-[0.78125rem] leading-relaxed text-ink-3">
-        검토 범위는 추정·참고용이며 결과를 보장하지 않습니다. 상담은 해당 손해사정사에게
-        전달되며, 검토 의견은 가입자님의 판단을 돕기 위한 참고 자료입니다.
+        제안 수락 시 해당 사정사에게 리포트와 연락처가 전달됩니다.
       </p>
     </div>
   );

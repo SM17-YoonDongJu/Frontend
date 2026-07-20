@@ -16,9 +16,7 @@ const PATH = `/customer/proposals/${REPORT_ID}`;
 test("진입하면 받은 제안 목록과 분석 대상 정보가 보인다", async ({ page }) => {
   await page.goto(PATH);
 
-  await expect(
-    page.getByRole("heading", { name: /제안 3건이 도착했어요/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "받은 제안" })).toBeVisible();
 
   // 분석 대상(proposals 응답 target)
   await expect(page.getByText("No.20260520-017")).toBeVisible();
@@ -37,10 +35,36 @@ test("상담을 수락하면 수락한 제안만 남는다", async ({ page }) =>
 
   await firstCard.getByRole("button", { name: "상담 수락" }).click();
 
+  // 확인 모달을 거쳐야 채택된다(#122)
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "매칭 완료" }).click();
+
   // 수락 시 같은 사건의 다른 제안은 자동 종료 → 목록에서 제외
   await expect(page.getByText("정우성")).toHaveCount(0);
   await expect(page.getByText("윤지후")).toHaveCount(0);
   await expect(firstCard).toBeVisible();
+});
+
+test("상담 수락 확인을 취소하면 제안이 그대로 유지된다", async ({ page }) => {
+  await page.goto(PATH);
+
+  const firstCard = page.getByRole("listitem").filter({ hasText: "김도현" });
+  await expect(firstCard).toBeVisible();
+
+  await firstCard.getByRole("button", { name: "상담 수락" }).click();
+
+  // 다른 제안이 함께 종료된다는 안내가 보인다
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByText("함께 종료되는 상담 2건")).toBeVisible();
+
+  await dialog.getByRole("button", { name: "취소" }).click();
+  await expect(dialog).toHaveCount(0);
+
+  // 채택 요청이 나가지 않아 모든 제안이 남는다
+  await expect(page.getByText("정우성")).toBeVisible();
+  await expect(page.getByText("윤지후")).toBeVisible();
 });
 
 test("상세 보기를 누르면 리포트 상세로 이동한다", async ({ page }) => {
