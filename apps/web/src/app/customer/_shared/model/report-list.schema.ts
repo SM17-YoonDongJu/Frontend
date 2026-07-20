@@ -9,7 +9,6 @@ export const reportListStatusSchema = z.enum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
-  "MATCHED",
   "CLOSED",
 ]);
 

@@ -9,7 +9,7 @@ const STATUS_LABELS: Record<string, string> = {
   AWAITING_INSPECTION: "검수 대기 중",
   AWAITING_ADOPTION: "채택 대기 중",
   COUNSELING: "상담 중",
-  MATCHED: "매칭 완료",
+  CLOSED: "종결",
 };
 
 interface SubmitCompleteProps {

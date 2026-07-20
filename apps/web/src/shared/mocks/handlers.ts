@@ -1,5 +1,5 @@
 ﻿import { delay, http, HttpResponse } from "msw";
-import { toSnakeKey } from "@/shared/api/case-convert";
+import { camelToSnakeDeep, toSnakeKey } from "@/shared/api/case-convert";
 import { API_BASE_URL } from "@/shared/api/config";
 import { consumeReissue, isAccessTokenExpired } from "@/shared/mocks/auth-token-state";
 
@@ -1593,10 +1593,10 @@ export const handlers = [
       return HttpResponse.json({
         status: "200",
         message: "정상 처리되었습니다.",
-        data: {
+        data: camelToSnakeDeep({
           list: [],
           pagination: { page, size: 10, totalElements: 0, totalPages: 0, hasNext: false },
-        },
+        }),
       });
     }
 
@@ -1611,7 +1611,7 @@ export const handlers = [
     const list = [
       {
         reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
-        status: "MATCHED",
+        status: "CLOSED",
         accidentType: "교통사고",
         createdAt: "2026-05-20T09:00:00Z",
         reportNo: "20260520-017",
@@ -1642,7 +1642,7 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
+      data: camelToSnakeDeep({
         list,
         pagination: {
           page,
@@ -1651,7 +1651,7 @@ export const handlers = [
           totalPages: 1,
           hasNext: false,
         },
-      },
+      }),
     });
   }),
 
@@ -1710,11 +1710,31 @@ export const handlers = [
   // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
   http.post(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(600);
-    const body = (await request.json()) as { accident_type?: string };
+    // 요청 body는 fetchJson이 camel→snake 변환해 보냄 — 명세 필드명 그대로 읽는다.
+    const body = (await request.json()) as {
+      accident_type?: string;
+      documents?: Array<{
+        s3_url?: string;
+        name?: string;
+        report_type?: string;
+        file_type?: string;
+      }>;
+    };
 
     if (body.accident_type !== "medical_indemnity") {
       return HttpResponse.json(
         { status: "400", code: "UNSUPPORTED_OPERATION", message: "현재 실손 의료비만 분석 가능합니다." },
+        { status: 400 },
+      );
+    }
+
+    // documents는 선택이나, 있으면 각 항목의 s3_url·name·report_type은 필수(명세 Document).
+    if (
+      Array.isArray(body.documents) &&
+      body.documents.some((doc) => !doc?.s3_url || !doc?.name || !doc?.report_type)
+    ) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "문서 메타(s3_url·name·report_type)가 누락되었습니다." },
         { status: 400 },
       );
     }
@@ -1895,7 +1915,7 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
+      data: camelToSnakeDeep({
         target: {
           accidentType: "교통사고 · 후유장해",
           reportNo: "20260520-017",
@@ -1909,7 +1929,7 @@ export const handlers = [
           totalPages: 1,
           hasNext: false,
         },
-      },
+      }),
     });
   }),
 
@@ -1964,13 +1984,13 @@ export const handlers = [
         return HttpResponse.json({
           status: "200",
           message: "매칭이 완료되었습니다.",
-          data: {
+          data: camelToSnakeDeep({
             reportId,
             proposalId,
             adjusterId: target.adjusterId,
             reportStatus: "CLOSED",
             reviewStatus: "ACCEPTED",
-          },
+          }),
         });
       }
 
@@ -1980,13 +2000,13 @@ export const handlers = [
       return HttpResponse.json({
         status: "200",
         message: "제안을 거절했습니다.",
-        data: {
+        data: camelToSnakeDeep({
           reportId,
           proposalId,
           adjusterId: target.adjusterId,
           reportStatus: "AWAITING_ADOPTION",
           reviewStatus: "REJECTED",
-        },
+        }),
       });
     },
   ),
@@ -2194,9 +2214,9 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
+      data: camelToSnakeDeep({
         reportId: responseReportId,
-        status: isCustomerSample ? "MATCHED" : "AWAITING_INSPECTION",
+        status: isCustomerSample ? "CLOSED" : "AWAITING_INSPECTION",
         accidentType: "교통사고(후유장해)",
         treatment: "우측 슬관절 후방십자인대 파열",
         claimedMinAmount: isCustomerSample ? 13_500_000 : 12_000_000,
@@ -2209,33 +2229,34 @@ export const handlers = [
           "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
           "대법원 2019다○○○○ (후유장해 인과관계 판단)",
         ],
-        issue: [
+        issues: [
           {
+            issueId: "issue-1",
             title: "장해등급 과소 산정 가능",
-            opinion: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
-            status: "TRUSTED",
-            tag: "약관 제12조",
+            description: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
+            aiStatus: "TRUSTED",
             impactAmount: 350,
             tags: ["약관 제12조", "분쟁조정 2023-1456"],
           },
           {
+            issueId: "issue-2",
             title: "외모추상 특약 청구 누락",
-            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
-            status: "CONFIRMED",
-            tag: "특약 제5조",
+            description: "누락분 청구 검토가 가장 확실한 출발점이에요.",
+            aiStatus: "CONFIRMED",
             impactAmount: 200,
             tags: ["특약 약관 §4", "유사사례 1456"],
           },
           {
+            issueId: "issue-3",
             title: "진행 방향",
-            opinion: "추가 의료자료 확보 → 재산정 순서를 권해요.",
-            status: "INFO",
-            tag: "분쟁조정 절차",
+            description: "추가 의료자료 확보 → 재산정 순서를 권해요.",
+            aiStatus: "INFO",
+            tags: ["분쟁조정 절차"],
           },
         ],
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
-        reportNo: "20260520-017",
+        caseNo: "20260520-017",
         adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
@@ -2342,7 +2363,7 @@ export const handlers = [
             isNew: false,
           },
         ],
-      },
+      }),
     });
   }),
 
