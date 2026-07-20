@@ -8,6 +8,7 @@ import type {
   UpdateNotificationSettingsBody,
 } from "@/shared/model/notification-settings.schema";
 import { Toggle } from "@/shared/ui/Toggle";
+import { toast } from "@/shared/ui/toast";
 
 type ToggleField = Extract<keyof NotificationSettings, "receivedProposal" | "kakaoPlusFriend">;
 
@@ -46,7 +47,12 @@ export function NotificationSettingsCard({ ref }: NotificationSettingsCardProps)
               checked={settings?.[row.field] ?? false}
               disabled={!settings || isPending}
               onChange={(checked) =>
-                mutate({ [row.field]: checked } as UpdateNotificationSettingsBody)
+                mutate({ [row.field]: checked } as UpdateNotificationSettingsBody, {
+                  onError: () =>
+                    toast.error(
+                      "알림 설정 저장에 실패했어요. 잠시 후 다시 시도해 주세요.",
+                    ),
+                })
               }
             />
           </li>
