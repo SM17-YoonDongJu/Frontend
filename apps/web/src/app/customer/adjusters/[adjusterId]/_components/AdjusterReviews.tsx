@@ -1,3 +1,4 @@
+import { Avatar } from "@/shared/ui/Avatar";
 import { StarRating } from "@/shared/ui/StarRating";
 import { ProfileCard } from "./ProfileCard";
 import type { AdjusterReview } from "../_model/types";
@@ -43,12 +44,11 @@ export function AdjusterReviews({ reviews, averageRating, reviewCount }: Adjuste
               className="rounded-card border border-line bg-card p-4 shadow-xs lg:p-5"
             >
               <div className="flex items-center gap-3">
-                <span
-                  aria-hidden
-                  className="flex size-9 shrink-0 items-center justify-center rounded-full bg-navy text-sm font-semibold text-white"
-                >
-                  {review.nickname.trim().charAt(0) || "?"}
-                </span>
+                <Avatar
+                  name={review.nickname}
+                  size="sm"
+                  className="font-sans font-semibold [--avatar-initial:0.389em]"
+                />
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-ink">{review.nickname}</p>
                   <p className="mt-0.5 text-xs text-ink-3">

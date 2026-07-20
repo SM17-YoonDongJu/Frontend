@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Avatar } from "@/shared/ui/Avatar";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { useProposalList } from "@/app/customer/_shared/api/use-proposal-list";
 import { useReportList } from "../_api/use-report-list";
@@ -44,12 +45,7 @@ function ProposalsPreview({ reportId, count }: { reportId: string; count: number
             href={DASHBOARD_LINKS.proposals(reportId)}
             className={`flex items-center gap-[0.6875rem] py-[0.8125rem] transition hover:opacity-80 ${index > 0 ? "border-t border-line-2" : ""}`}
           >
-            <span
-              aria-hidden
-              className="flex size-[2.125rem] shrink-0 items-center justify-center rounded-full bg-navy font-serif text-[0.9rem] text-white"
-            >
-              {proposal.nickname.trim().charAt(0)}
-            </span>
+            <Avatar name={proposal.nickname} className="text-[2.125rem]" />
             <div className="min-w-0 flex-1">
               <p className="truncate text-[0.84375rem] font-bold text-ink">
                 {proposal.nickname} 사정사

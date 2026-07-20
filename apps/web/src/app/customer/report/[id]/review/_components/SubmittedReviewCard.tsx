@@ -1,3 +1,4 @@
+import { Avatar } from "@/shared/ui/Avatar";
 import { StarRating } from "@/shared/ui/StarRating";
 
 export function SubmittedReviewCard({
@@ -11,9 +12,7 @@ export function SubmittedReviewCard({
 }) {
   return (
     <div className="flex items-start gap-3 rounded-card border border-line bg-card p-4 text-left">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-navy font-serif text-[0.9375rem] text-white">
-        {[...nickname][0] ?? "?"}
-      </div>
+      <Avatar name={nickname} size="sm" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="text-[0.875rem] font-bold text-ink">{nickname} 님</span>
