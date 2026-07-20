@@ -20,6 +20,7 @@ import { MatchRejectConfirmModal } from "@/shared/ui/chat/MatchRejectConfirmModa
 import { MatchStatusBadge } from "@/shared/ui/chat/MatchStatusBadge";
 import { MessageInputBar } from "@/shared/ui/chat/MessageInputBar";
 import { ROOM_STATUS_META } from "@/shared/ui/chat/room-status";
+import { toast } from "@/shared/ui/toast";
 import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
 
 export interface CustomerChatThreadContentProps {
@@ -89,12 +90,20 @@ export function CustomerChatThreadContent({
   const confirmReject = () =>
     match.mutate(
       { proposalId: room.proposalId, status: "REJECTED" },
-      { onSuccess: () => setRejectOpen(false) },
+      {
+        onSuccess: () => setRejectOpen(false),
+        onError: () =>
+          toast.error("매칭 거절에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      },
     );
   const confirmMatch = () =>
     match.mutate(
       { proposalId: room.proposalId, status: "ACCEPTED" },
-      { onSuccess: () => setConfirmOpen(false) },
+      {
+        onSuccess: () => setConfirmOpen(false),
+        onError: () =>
+          toast.error("매칭 완료에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      },
     );
 
   const actions =
