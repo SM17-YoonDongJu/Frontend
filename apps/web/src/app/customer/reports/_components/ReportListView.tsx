@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { ReportCard } from "@/app/customer/_shared/components/ReportCard";
 import { useReportListInfinite } from "../_api/use-report-list-infinite";
+import { ReportListEmpty } from "./ReportListEmpty";
 
 export function ReportListView() {
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useReportListInfinite();
@@ -23,25 +24,31 @@ export function ReportListView() {
         </span>
       </header>
 
-      <ul className="mt-6 flex flex-col gap-3">
-        {list.map((report) => (
-          <li key={report.reportId}>
-            <ReportCard report={report} />
-          </li>
-        ))}
-      </ul>
+      {list.length === 0 ? (
+        <ReportListEmpty />
+      ) : (
+        <>
+          <ul className="mt-6 flex flex-col gap-3">
+            {list.map((report) => (
+              <li key={report.reportId}>
+                <ReportCard report={report} />
+              </li>
+            ))}
+          </ul>
 
-      {hasNextPage && (
-        <div className="mt-4">
-          <button
-            type="button"
-            onClick={() => fetchNextPage()}
-            disabled={isFetchingNextPage}
-            className="w-full rounded-button border border-line bg-card py-3 text-[0.875rem] font-semibold text-ink-2 transition hover:brightness-[.98] disabled:cursor-not-allowed disabled:opacity-[.42]"
-          >
-            {isFetchingNextPage ? "불러오는 중…" : "더보기"}
-          </button>
-        </div>
+          {hasNextPage && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+                className="w-full rounded-button border border-line bg-card py-3 text-[0.875rem] font-semibold text-ink-2 transition hover:brightness-[.98] disabled:cursor-not-allowed disabled:opacity-[.42]"
+              >
+                {isFetchingNextPage ? "불러오는 중…" : "더보기"}
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
