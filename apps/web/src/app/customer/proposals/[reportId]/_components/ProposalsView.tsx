@@ -24,6 +24,7 @@ export function ProposalsView({ reportId }: { reportId: string }) {
       {target && (
         <div className="mt-6">
           <AnalysisTargetCard
+            reportId={reportId}
             accidentType={target.accidentType}
             reportNo={target.reportNo}
             proposalCount={proposalCount}
