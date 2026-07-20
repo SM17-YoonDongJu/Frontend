@@ -13,7 +13,7 @@ export function ProposalsView({ reportId }: { reportId: string }) {
   const newCount = proposals.filter((proposal) => proposal.isNew).length;
 
   return (
-    <div className="mx-auto w-full max-w-[47.5rem] px-4 py-8">
+    <div className="mx-auto w-full max-w-[47.5rem] px-5 py-8">
       <div className="flex items-center gap-2.5">
         <h1 className="font-serif text-[1.625rem] font-bold leading-tight text-ink">받은 제안</h1>
         {newCount > 0 && (
