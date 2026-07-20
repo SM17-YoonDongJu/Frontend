@@ -13,12 +13,9 @@ export function ProposalsView({ reportId }: { reportId: string }) {
 
   return (
     <div className="mx-auto w-full max-w-[47.5rem] px-4 py-8">
-      <p className="text-[0.8125rem] font-semibold text-gold-ink">받은 제안</p>
-      <h1 className="mt-1 font-serif text-[1.625rem] font-bold leading-tight text-ink">
-        제안 {proposalCount}건이 도착했어요
-      </h1>
+      <h1 className="font-serif text-[1.625rem] font-bold leading-tight text-ink">받은 제안</h1>
       <p className="mt-2 text-[0.875rem] text-ink-3">
-        검수 펼침된 리포트를 본 손해사정사들의 상담 제안입니다.
+        내 리포트를 검토한 손해사정사들의 상담 제안이에요.
       </p>
 
       {target && (

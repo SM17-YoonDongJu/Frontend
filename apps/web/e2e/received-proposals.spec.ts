@@ -16,9 +16,7 @@ const PATH = `/customer/proposals/${REPORT_ID}`;
 test("진입하면 받은 제안 목록과 분석 대상 정보가 보인다", async ({ page }) => {
   await page.goto(PATH);
 
-  await expect(
-    page.getByRole("heading", { name: /제안 3건이 도착했어요/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "받은 제안" })).toBeVisible();
 
   // 분석 대상(proposals 응답 target)
   await expect(page.getByText("No.20260520-017")).toBeVisible();
