@@ -26,7 +26,6 @@ export function ProposalsView({ reportId }: { reportId: string }) {
           <AnalysisTargetCard
             accidentType={target.accidentType}
             reportNo={target.reportNo}
-            receivedAt={target.receivedAt}
             proposalCount={proposalCount}
           />
         </div>

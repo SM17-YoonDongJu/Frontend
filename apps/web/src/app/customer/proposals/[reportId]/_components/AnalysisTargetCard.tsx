@@ -3,14 +3,12 @@ import { FileText } from "@/shared/ui/icons/FileText";
 interface AnalysisTargetCardProps {
   accidentType: string;
   reportNo: string;
-  receivedAt: string;
   proposalCount: number;
 }
 
 export function AnalysisTargetCard({
   accidentType,
   reportNo,
-  receivedAt,
   proposalCount,
 }: AnalysisTargetCardProps) {
   return (
@@ -22,12 +20,9 @@ export function AnalysisTargetCard({
         <FileText className="text-[1.25rem]" />
       </span>
       <div className="min-w-0">
-        <div className="flex items-baseline gap-2">
-          <p className="truncate text-[1rem] font-semibold text-ink">{accidentType}</p>
-          <span className="shrink-0 text-[0.8125rem] text-ink-3">No.{reportNo}</span>
-        </div>
+        <p className="truncate text-[1rem] font-semibold text-ink">{accidentType} 리포트</p>
         <p className="mt-1 text-[0.8125rem] text-ink-3">
-          접수 {receivedAt} · 손해사정사 {proposalCount}명이 검수 의견을 보냈어요
+          No.{reportNo} · 제안 {proposalCount}건
         </p>
       </div>
     </section>
