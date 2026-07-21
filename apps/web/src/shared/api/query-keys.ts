@@ -5,6 +5,12 @@ export interface ReportListFilter {
   page?: number;
 }
 
+// 내 리포트 목록(무한 조회, 이슈 #128). page는 useInfiniteQuery의 pageParam이 관리 → 키에서 제외.
+export interface ReportListInfiniteFilter {
+  status?: string;
+  size?: number;
+}
+
 export interface ReviewListFilter {
   status?: string;
   accidentType?: string;
@@ -22,6 +28,8 @@ export interface ReviewedReportsFilter {
 
 export const reportKeys = createQueryKeys("report", {
   list: (filter?: ReportListFilter) => [{ filter: filter ?? {} }],
+  // 내 리포트 목록(무한 조회, 이슈 #128). dashboard용 list(suspense query)와 캐시 분리.
+  listInfinite: (filter?: ReportListInfiniteFilter) => [{ filter: filter ?? {} }],
   // 고객이 받은 제안 목록(이슈 #78). page는 useInfiniteQuery의 pageParam이 관리 → 파라미터 없음.
   receivedProposals: null,
   detail: (reportId: string) => [reportId],

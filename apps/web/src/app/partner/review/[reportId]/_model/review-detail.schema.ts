@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { reviewIssueSchema } from "./review-issue.schema";
 
-/** 리포트 생명주기 상태. */
+/** 리포트 생명주기 상태 (ERD REPORTS.status 5상태). */
 export const reviewReportStatusSchema = z.enum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
   "CLOSED",
+  "NOT_SELECTED",
 ]);
 
 /** 검수 방향(작업본 상태). */

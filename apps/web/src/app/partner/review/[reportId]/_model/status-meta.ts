@@ -9,6 +9,7 @@ export const REPORT_STATUS_META: Record<ReviewReportStatus, { label: string; ton
   AWAITING_ADOPTION: { label: "채택 대기", tone: "navy" },
   COUNSELING: { label: "상담 중", tone: "green" },
   CLOSED: { label: "종결", tone: "neutral" },
+  NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral" },
 };
 
 /** 쟁점 검수 방향 표시 라벨. 미검수는 null(라벨 없음). */

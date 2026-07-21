@@ -7,6 +7,7 @@ export const reportStatusSchema = z.enum([
   "AWAITING_ADOPTION",
   "COUNSELING",
   "CLOSED",
+  "NOT_SELECTED",
 ]);
 
 export const issueStatusSchema = z.enum(["CONFIRMED", "TRUSTED", "INFO"]);

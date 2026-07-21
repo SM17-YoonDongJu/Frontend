@@ -1,15 +1,16 @@
 import { z } from "zod";
 
 /**
- * 고객 검수 내역/받은 제안 목록 정본(이슈 #78 전용).
- * 대시보드의 report-list.schema.ts와 별도 — 이 화면만의 확장 필드(title, confirmed 범위, rating)를 포함.
- * 봉투(status/message/code)는 fetchJson이 해제 — 여기선 data 페이로드만 모델링.
+ * 고객 리포트 목록 정본 — 대시보드·받은 제안·검수 내역·내 리포트 목록 공유(이슈 #128 통합).
+ * 과거 dashboard/_model/report-list.schema.ts(12필드)와 이 파일(16필드)이 이중 정의였던 것을
+ * 이 단일본으로 통합. 봉투(status/message/code)는 fetchJson이 해제 — 여기선 data 페이로드만 모델링.
  */
 export const reportListStatusSchema = z.enum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
   "CLOSED",
+  "NOT_SELECTED",
 ]);
 
 export const reportListItemSchema = z.object({
@@ -31,6 +32,13 @@ export const reportListItemSchema = z.object({
   rating: z.number().nullable().optional(),
   // 받은 제안 목록 "NEW N" 배지용 신규 도착 제안 수(이슈 #78).
   newProposalCount: z.number().int().optional(),
+
+  // CONTRACT(naming-dictionary §확정 #24 / list 응답 미포함, FE 임시 추가 — 드리프트 항목 10): offeredAmount 보험사 제안금액.
+  // 구 dashboard 스키마에서 통합 보존 — optional로 완화(대시보드 외 화면은 미사용).
+  offeredAmount: z.number().int().nonnegative().nullable().optional(),
+  // CONTRACT(상세 GET /reports/{id}의 정식 필드 treatment / list 응답 미포함, FE 임시 추가 — 드리프트 항목 10): 진료 항목.
+  // 구 dashboard 스키마에서 통합 보존 — optional로 완화.
+  treatment: z.string().nullable().optional(),
 });
 
 export const paginationSchema = z.object({
@@ -50,3 +58,8 @@ export type ReportListItemStatus = z.infer<typeof reportListStatusSchema>;
 export type ReportListItem = z.infer<typeof reportListItemSchema>;
 export type Pagination = z.infer<typeof paginationSchema>;
 export type ReportListResponse = z.infer<typeof reportListSchema>;
+
+// 구 dashboard/_model 이름 호환 별칭(통합 후 기존 소비처 무변경 보장, 이슈 #128).
+export { reportListStatusSchema as reportStatusSchema };
+export type ReportStatus = z.infer<typeof reportListStatusSchema>;
+export type ReportList = z.infer<typeof reportListSchema>;

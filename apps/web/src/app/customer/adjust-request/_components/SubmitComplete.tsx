@@ -4,12 +4,13 @@ import Link from "next/link";
 import { Button } from "@/shared/ui/Button";
 import type { CreateReportResponse } from "../_model/types";
 
-/** 리포트 프로세스 상태 라벨 (naming-dictionary §4). */
+/** 리포트 프로세스 상태 라벨 — ERD REPORTS.status 기준. */
 const STATUS_LABELS: Record<string, string> = {
   AWAITING_INSPECTION: "검수 대기 중",
   AWAITING_ADOPTION: "채택 대기 중",
   COUNSELING: "상담 중",
   CLOSED: "종결",
+  NOT_SELECTED: "선택 받지 못함",
 };
 
 interface SubmitCompleteProps {

@@ -1751,13 +1751,20 @@ export const handlers = [
     });
   }),
 
-  // 고객 리포트 목록 (대시보드) — :reportId·pending-review와 충돌 없게 정확 경로.
+  // 고객 리포트 목록 (대시보드 + 내 리포트 목록) — :reportId·pending-review와 충돌 없게 정확 경로.
   // §9 드리프트 필드 선반영(reportNo·claimedMin/Max·proposalCount·reviewedAt·adjusterNickname).
   http.get(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(400);
 
     const url = new URL(request.url, "http://localhost");
-    const page = Number(url.searchParams.get("page") ?? "0");
+    // page 파라미터 유무로 소비처 분기:
+    //  - 없음: 대시보드(useReportList) — 전체 목록 1페이지, 기존 2건 그대로(집계·E2E 불변).
+    //  - 있음: 내 리포트 목록(useReportListInfinite) — page/size 페이지네이션(1-based).
+    const rawPage = url.searchParams.get("page");
+    const isPaged = rawPage !== null;
+    const page = Number(rawPage ?? "1");
+    // 무한 목록 기본 size는 5 — 목 8건이 2페이지(5+3)로 나뉘어 더보기·hasNext를 실사용처럼 검증.
+    const size = Number(url.searchParams.get("size") ?? (isPaged ? "5" : "10"));
 
     // 빈 상태(0건) 주입 — E2E 빈 상태 검증용(x-mock-failure 패턴 미러)
     if (request.headers.get("x-mock-scenario") === "reports-empty") {
@@ -1766,7 +1773,7 @@ export const handlers = [
         message: "정상 처리되었습니다.",
         data: camelToSnakeDeep({
           list: [],
-          pagination: { page, size: 10, totalElements: 0, totalPages: 0, hasNext: false },
+          pagination: { page, size, totalElements: 0, totalPages: 0, hasNext: false },
         }),
       });
     }
@@ -1779,7 +1786,8 @@ export const handlers = [
       );
     }
 
-    const list = [
+    // 대시보드가 집계·미리보기로 쓰는 기존 2건 — 항상 목록 맨 앞(page 1 앞부분) 유지.
+    const HEAD_REPORTS = [
       {
         reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
         status: "CLOSED",
@@ -1810,17 +1818,128 @@ export const handlers = [
       },
     ];
 
+    // page 미지정(대시보드): 기존 응답 그대로 — 2건·hasNext:false·totalPages:1.
+    if (!isPaged) {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: camelToSnakeDeep({
+          list: HEAD_REPORTS,
+          pagination: {
+            page: 1,
+            size,
+            totalElements: HEAD_REPORTS.length,
+            totalPages: 1,
+            hasNext: false,
+          },
+        }),
+      });
+    }
+
+    // 내 리포트 목록(무한 조회): 2페이지 이상 분량. 앞 2건은 HEAD_REPORTS 그대로.
+    const REPORT_LIST_SOURCE = [
+      ...HEAD_REPORTS,
+      {
+        reportId: "b2c9d0e1-3f4a-4b5c-8d6e-7f8a9b0c1d2e",
+        status: "COUNSELING",
+        accidentType: "골절",
+        createdAt: "2026-05-08T09:00:00Z",
+        reportNo: "20260508-005",
+        claimedMinAmount: 5_500_000,
+        claimedMaxAmount: 7_200_000,
+        proposalCount: 3,
+        reviewedAt: "2026-05-10T14:00:00Z",
+        adjusterNickname: "이서준",
+        offeredAmount: 6_000_000,
+        treatment: "입원",
+      },
+      {
+        reportId: "c3d0e1f2-4a5b-4c6d-9e7f-8a9b0c1d2e3f",
+        status: "AWAITING_ADOPTION",
+        accidentType: "교통사고",
+        createdAt: "2026-04-30T09:00:00Z",
+        reportNo: "20260430-118",
+        claimedMinAmount: 9_800_000,
+        claimedMaxAmount: 12_400_000,
+        proposalCount: 5,
+        reviewedAt: "2026-05-02T11:20:00Z",
+        adjusterNickname: "박지훈",
+        offeredAmount: 10_500_000,
+        treatment: "통원",
+      },
+      {
+        reportId: "d4e1f2a3-5b6c-4d7e-8f9a-9b0c1d2e3f4a",
+        status: "CLOSED",
+        accidentType: "실손",
+        createdAt: "2026-04-22T09:00:00Z",
+        reportNo: "20260422-077",
+        claimedMinAmount: 1_800_000,
+        claimedMaxAmount: 2_600_000,
+        proposalCount: 1,
+        reviewedAt: "2026-04-24T09:30:00Z",
+        adjusterNickname: "최유나",
+        offeredAmount: 2_100_000,
+        treatment: "통원",
+      },
+      {
+        reportId: "e5f2a3b4-6c7d-4e8f-9a0b-0c1d2e3f4a5b",
+        status: "AWAITING_INSPECTION",
+        accidentType: "골절",
+        createdAt: "2026-04-15T09:00:00Z",
+        reportNo: "20260415-031",
+        claimedMinAmount: 4_100_000,
+        claimedMaxAmount: 5_900_000,
+        proposalCount: 0,
+        reviewedAt: null,
+        adjusterNickname: null,
+        offeredAmount: null,
+        treatment: null,
+      },
+      {
+        reportId: "f6a3b4c5-7d8e-4f9a-8b1c-1d2e3f4a5b6c",
+        status: "CLOSED",
+        accidentType: "교통사고",
+        createdAt: "2026-04-03T09:00:00Z",
+        reportNo: "20260403-208",
+        claimedMinAmount: 7_300_000,
+        claimedMaxAmount: 9_100_000,
+        proposalCount: 4,
+        reviewedAt: "2026-04-05T16:45:00Z",
+        adjusterNickname: "정하윤",
+        offeredAmount: 8_000_000,
+        treatment: "입원",
+      },
+      {
+        reportId: "a7b4c5d6-8e9f-4a0b-9c2d-2e3f4a5b6c7d",
+        status: "NOT_SELECTED",
+        accidentType: "실손",
+        createdAt: "2026-03-26T09:00:00Z",
+        reportNo: "20260326-142",
+        claimedMinAmount: 2_900_000,
+        claimedMaxAmount: 3_700_000,
+        proposalCount: 2,
+        reviewedAt: "2026-03-28T10:00:00Z",
+        adjusterNickname: "강도윤",
+        offeredAmount: 3_200_000,
+        treatment: "통원",
+      },
+    ];
+
+    const start = (page - 1) * size;
+    const paged = REPORT_LIST_SOURCE.slice(start, start + size);
+    const totalPages = Math.max(1, Math.ceil(REPORT_LIST_SOURCE.length / size));
+
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
-        list,
+        list: paged,
         pagination: {
           page,
-          size: 10,
-          totalElements: list.length,
-          totalPages: 1,
-          hasNext: false,
+          size,
+          totalElements: REPORT_LIST_SOURCE.length,
+          totalPages,
+          hasNext: start + size < REPORT_LIST_SOURCE.length,
         },
       }),
     });
@@ -2579,7 +2698,7 @@ export const handlers = [
         ? params.reportId
         : crypto.randomUUID();
 
-    // MATCHED 클릭스루용 안정 uuid — 상세→리뷰 작성 왕복 시 동일 MATCHED 응답 보장.
+    // 리뷰 클릭스루용 안정 uuid — 상세→리뷰 작성 왕복 시 동일 CLOSED(종결) 응답 보장.
     const isCustomerSample =
       reportId === "test-id-123" || reportId === DASHBOARD_PROPOSABLE_REPORT_ID;
 
