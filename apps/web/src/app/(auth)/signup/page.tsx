@@ -113,13 +113,11 @@ function SignupFunnel() {
 
       <div className="mx-auto flex w-full flex-1 flex-col pb-8 pt-6 sm:pt-10 md:max-w-[35rem] md:px-5 md:pb-16 md:pt-12">
       {funnel.step !== "done" && (
-        <div className="md:hidden">
-          <SignupProgress
-            current={funnel.stepNumber}
-            total={funnel.total}
-            onBack={funnel.step === "terms" ? () => funnel.goTo("role") : undefined}
-          />
-        </div>
+        <SignupProgress
+          current={funnel.stepNumber}
+          total={funnel.total}
+          onBack={funnel.step === "terms" ? () => funnel.goTo("role") : undefined}
+        />
       )}
 
       <div className="mt-6 flex flex-1 flex-col justify-center">

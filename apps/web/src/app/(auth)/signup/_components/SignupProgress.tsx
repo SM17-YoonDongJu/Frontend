@@ -29,10 +29,10 @@ export function SignupProgress({ current, total, onBack }: SignupProgressProps) 
         value={current}
         max={total}
         label="회원가입 진행"
-        className="h-1.5 flex-1"
+        className="h-1.5 flex-1 md:hidden"
       />
 
-      <span className="w-9 shrink-0 text-right text-xs font-bold text-ink-3">
+      <span className="w-9 shrink-0 text-right text-xs font-bold text-ink-3 md:hidden">
         {current}/{total}
       </span>
     </div>
