@@ -1716,6 +1716,8 @@ export const handlers = [
   // 고객 홈 대시보드 BFF (이슈 #142) — GET /users/me/dashboard. 🏷 백엔드 확정 대기.
   //   x-mock-scenario=unauthenticated → 401 LOGIN_REQUIRED.
   //   x-mock-scenario=dashboard-onboarding → report_count 0(온보딩 분기), 나머지 null/0.
+  //   x-mock-scenario=dashboard-inspecting → 검수 중(제안 0건): activeReport AWAITING_INSPECTION·firstReviewedAt null, proposalSummary null(제안 비교 숨김), todos 0.
+  //   x-mock-scenario=dashboard-closed → 전부 종료: activeReport·proposalSummary null(타임라인·제안 비교 숨김), todos 0. reportCount>0라 온보딩 아님.
   http.get(`${API_BASE_URL}/users/me/dashboard`, async ({ request }) => {
     await delay(400);
 
@@ -1732,6 +1734,40 @@ export const handlers = [
         message: "정상 처리되었습니다.",
         data: camelToSnakeDeep({
           reportCount: 0,
+          activeReport: null,
+          proposalSummary: null,
+          todos: { unreadProposalCount: 0, unreadReviewCompleteCount: 0, unreadChat: null },
+        }),
+      });
+    }
+
+    if (request.headers.get("x-mock-scenario") === "dashboard-inspecting") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: camelToSnakeDeep({
+          reportCount: 3,
+          activeReport: {
+            reportId: DASHBOARD_AWAITING_REPORT_ID,
+            title: "발목 인대 손상",
+            accidentType: "medical_indemnity",
+            status: "AWAITING_INSPECTION",
+            createdAt: "2026-07-18T09:00:00Z",
+            firstReviewedAt: null,
+            proposalCount: 0,
+          },
+          proposalSummary: null,
+          todos: { unreadProposalCount: 0, unreadReviewCompleteCount: 0, unreadChat: null },
+        }),
+      });
+    }
+
+    if (request.headers.get("x-mock-scenario") === "dashboard-closed") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: camelToSnakeDeep({
+          reportCount: 3,
           activeReport: null,
           proposalSummary: null,
           todos: { unreadProposalCount: 0, unreadReviewCompleteCount: 0, unreadChat: null },
