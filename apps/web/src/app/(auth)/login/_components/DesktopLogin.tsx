@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Scale } from "@/shared/ui/icons/Scale";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
+import { AuthHeader } from "../../_shared/ui/AuthHeader";
 import type { RecentLogin, SocialProvider } from "../../_shared/hooks/use-recent-login";
 import { LoginHero } from "./LoginHero";
 import { RecentLoginCard } from "./RecentLoginCard";
@@ -15,17 +15,6 @@ interface DesktopLoginProps {
   pendingProvider: SocialProvider | null;
 }
 
-function BrandMark() {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span className="flex size-[1.875rem] items-center justify-center rounded-lg bg-gold text-white">
-        <Scale className="size-[1.1875rem]" />
-      </span>
-      <span className="font-serif text-[1.25rem] font-bold tracking-[-0.025rem] text-ink">바른보상</span>
-    </span>
-  );
-}
-
 export function DesktopLogin({
   mode,
   recentLogin,
@@ -35,20 +24,21 @@ export function DesktopLogin({
 }: DesktopLoginProps) {
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="flex w-full items-center justify-between border-b border-line-2 bg-card px-14 pt-5 pb-[1.3125rem]">
-        <BrandMark />
-        {mode === "returning" && (
-          <span className="flex items-center gap-2.5 text-[0.8125rem]">
-            <span className="font-medium text-ink-3">처음이신가요?</span>
-            <Link
-              href="/signup"
-              className="rounded-button border border-line px-[0.9375rem] py-[0.5625rem] font-semibold text-ink transition hover:bg-paper"
-            >
-              회원가입
-            </Link>
-          </span>
-        )}
-      </header>
+      <AuthHeader
+        right={
+          mode === "returning" ? (
+            <span className="flex items-center gap-2.5 text-[0.8125rem]">
+              <span className="font-medium text-ink-3">처음이신가요?</span>
+              <Link
+                href="/signup"
+                className="rounded-button border border-line px-[0.9375rem] py-[0.5625rem] font-semibold text-ink transition hover:bg-paper"
+              >
+                회원가입
+              </Link>
+            </span>
+          ) : undefined
+        }
+      />
 
       <div className="flex flex-1 justify-center px-5 pt-[4.4375rem] pb-20">
         <div className="flex w-full max-w-[30rem] flex-col items-center gap-[1.125rem]">
