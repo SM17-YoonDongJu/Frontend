@@ -512,18 +512,19 @@ interface MockChatRoom {
   avatarUrl: string | null;
   reportId: string;
   caseNo: string;
-  roomStatus: "REQUESTED" | "ACTIVE" | "CLOSED";
+  roomStatus: "ACTIVE" | "CLOSED";
   lastMessageAt: string;
   proposalId: string;
   matchStatus: MockMatchStatus;
   reportTypeLabel: string;
+  unreadCount: number;
 }
 
-interface MockChatAttachment {
-  attachmentId: string;
-  fileName: string;
-  mimeType: string;
+// 메시지 첨부(GET/POST messages 응답 shape) — 조회용 url·원본명·MIME.
+interface MockMessageAttachment {
   url: string;
+  name: string;
+  contentType: string;
 }
 
 interface MockChatMessage {
@@ -531,11 +532,48 @@ interface MockChatMessage {
   senderId: string;
   content: string;
   createdAt: string;
-  attachments?: MockChatAttachment[];
+  attachment?: MockMessageAttachment;
 }
 
-// 업로드된 첨부 임시 보관 — 메시지 전송 시 attachmentIds로 회수(⚠️ 명세없음-초안, TEMP §3-3)
-const uploadedChatAttachments = new Map<string, MockChatAttachment>();
+// 업로드된 첨부 임시 보관(key→메타) — 메시지 전송 시 attachment_key로 회수해 url 부여.
+const uploadedChatAttachments = new Map<string, MockMessageAttachment>();
+
+// 첨부 MIME으로 message_type 파생(서버 규칙: 이미지→IMAGE, 그 외 첨부→FILE, 없으면 TEXT).
+function deriveMessageType(attachment?: MockMessageAttachment) {
+  if (!attachment) return "TEXT";
+  return attachment.contentType.startsWith("image/") ? "IMAGE" : "FILE";
+}
+
+// MockChatRoom → GET /chats 응답 room(camel; camelToSnakeDeep가 snake로 변환).
+function toChatRoomDto(room: MockChatRoom) {
+  return {
+    chatRoomId: room.chatRoomId,
+    reportId: room.reportId,
+    reportReviewId: room.proposalId,
+    status: room.roomStatus,
+    reviewStatus: room.matchStatus,
+    counterpart: { userId: room.adjusterId, name: room.adjusterName },
+    lastMessage: room.lastMessage,
+    lastMessageAt: room.lastMessageAt,
+    unreadCount: room.unreadCount,
+    caseNo: room.caseNo,
+    reportTypeLabel: room.reportTypeLabel,
+    avatarUrl: room.avatarUrl,
+  };
+}
+
+// MockChatMessage → GET/POST messages 응답 message(camel).
+function toChatMessageDto(message: MockChatMessage) {
+  return {
+    messageId: message.messageId,
+    senderId: message.senderId,
+    messageType: deriveMessageType(message.attachment),
+    content: message.content ? message.content : null,
+    attachment: message.attachment ?? null,
+    isMine: message.senderId === MOCK_ME_ID,
+    createdAt: message.createdAt,
+  };
+}
 
 // 비교 그룹 검증: 3방 모두 동일 reportId·caseNo, COUNSELING(비교중)으로 시작. adjusterName만 상이.
 const chatRooms: MockChatRoom[] = [
@@ -553,6 +591,7 @@ const chatRooms: MockChatRoom[] = [
     proposalId: CHAT_PROPOSAL_1_ID,
     matchStatus: "COUNSELING",
     reportTypeLabel: "후유장해",
+    unreadCount: 2,
   },
   {
     chatRoomId: CHAT_ROOM_2_ID,
@@ -568,6 +607,7 @@ const chatRooms: MockChatRoom[] = [
     proposalId: CHAT_PROPOSAL_2_ID,
     matchStatus: "COUNSELING",
     reportTypeLabel: "후유장해",
+    unreadCount: 0,
   },
   {
     chatRoomId: CHAT_ROOM_3_ID,
@@ -583,6 +623,7 @@ const chatRooms: MockChatRoom[] = [
     proposalId: CHAT_PROPOSAL_3_ID,
     matchStatus: "COUNSELING",
     reportTypeLabel: "후유장해",
+    unreadCount: 0,
   },
 ];
 
@@ -841,13 +882,13 @@ export const handlers = [
     }
 
     // 빈 상태(대화 없음) 검증용 — E2E override
-    const items =
+    const source =
       request.headers.get("x-mock-empty") === "chat-list" ? [] : chatRooms;
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { items },
+      data: camelToSnakeDeep({ rooms: source.map(toChatRoomDto) }),
     });
   }),
 
@@ -869,14 +910,19 @@ export const handlers = [
       if (cursorIndex !== -1) end = cursorIndex;
     }
     const start = Math.max(0, end - size);
-    const list = all.slice(start, end);
+    const page = all.slice(start, end);
     // 더 오래된 페이지가 남아 있으면 이번 페이지 첫 메시지를 다음 커서로
-    const nextCursor = start > 0 ? (list[0]?.messageId ?? null) : null;
+    const hasNext = start > 0;
+    const nextCursor = hasNext ? (page[0]?.messageId ?? null) : null;
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { list, nextCursor },
+      data: camelToSnakeDeep({
+        messages: page.map(toChatMessageDto),
+        nextCursor,
+        hasNext,
+      }),
     });
   }),
 
@@ -902,15 +948,41 @@ export const handlers = [
       );
     }
 
+    // fetch-json이 요청 body를 snake로 변환 → { content, attachment: { attachment_key, name, content_type } }
     const body = (await request.json().catch(() => ({}))) as {
       content?: string;
-      attachment_ids?: string[];
+      attachment?: {
+        attachment_key?: string;
+        name?: string;
+        content_type?: string;
+      };
     };
     const content = typeof body.content === "string" ? body.content : "";
-    // 업로드해 둔 첨부를 attachment_ids로 회수(⚠️ 명세없음-초안)
-    const attachments = (body.attachment_ids ?? [])
-      .map((id) => uploadedChatAttachments.get(id))
-      .filter((attachment): attachment is MockChatAttachment => Boolean(attachment));
+
+    // 첨부는 업로드 응답 메타(key)를 전달받아 저장 url을 회수(없으면 key로 합성).
+    let attachment: MockMessageAttachment | undefined;
+    if (body.attachment?.attachment_key) {
+      const key = body.attachment.attachment_key;
+      const stored = uploadedChatAttachments.get(key);
+      attachment = {
+        url:
+          stored?.url ??
+          `https://mock.local/chat-uploads/${encodeURIComponent(key)}`,
+        name: body.attachment.name ?? stored?.name ?? "첨부 파일",
+        contentType:
+          body.attachment.content_type ??
+          stored?.contentType ??
+          "application/octet-stream",
+      };
+    }
+
+    if (!content && !attachment) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "content 또는 attachment 중 하나는 필수입니다." },
+        { status: 400 },
+      );
+    }
+
     const createdAt = new Date().toISOString();
     const messageId = crypto.randomUUID();
 
@@ -919,11 +991,11 @@ export const handlers = [
       senderId: MOCK_ME_ID,
       content,
       createdAt,
-      ...(attachments.length > 0 ? { attachments } : {}),
+      ...(attachment ? { attachment } : {}),
     });
 
     if (room) {
-      room.lastMessage = content || `📎 ${attachments[0]?.fileName ?? "첨부 파일"}`;
+      room.lastMessage = content || `📎 ${attachment?.name ?? "첨부 파일"}`;
       room.lastMessageAt = createdAt;
       room.updatedAt = createdAt;
     }
@@ -932,13 +1004,21 @@ export const handlers = [
       {
         status: "201",
         message: "전송되었습니다.",
-        data: { messageId, chatRoomId, senderId: MOCK_ME_ID, content, createdAt },
+        data: camelToSnakeDeep({
+          messageId,
+          chatRoomId,
+          senderId: MOCK_ME_ID,
+          messageType: deriveMessageType(attachment),
+          content: content ? content : null,
+          attachment: attachment ?? null,
+          createdAt,
+        }),
       },
       { status: 201 },
     );
   }),
 
-  // 첨부 업로드 (이슈 #48) — ⚠️ 명세없음-초안(TEMP §3-3). multipart file → attachmentId 발급.
+  // 첨부 업로드 (POST /chats/{id}/attachments) — multipart file → key 메타 발급(private S3 가정).
   http.post(`${API_BASE_URL}/chats/:chatRoomId/attachments`, async ({ request, params }) => {
     await delay(500);
 
@@ -965,51 +1045,127 @@ export const handlers = [
         { status: 400 },
       );
     }
-    const mimeType =
+    const contentType =
       file?.type ||
       request.headers.get("x-mock-file-type") ||
       "application/octet-stream";
 
-    const attachment: MockChatAttachment = {
-      attachmentId: crypto.randomUUID(),
-      fileName,
-      mimeType,
-      url: `https://mock.local/chat-uploads/${chatRoomId}/${encodeURIComponent(fileName)}`,
-    };
-    uploadedChatAttachments.set(attachment.attachmentId, attachment);
+    // key 규칙: chat/{roomId}/{uuid}_{원본명}. 조회 url은 저장 후 GET/POST가 presigned로 내려준다.
+    const attachmentKey = `chat/${chatRoomId}/${crypto.randomUUID()}_${fileName}`;
+    const size = file?.size ?? 1024;
+    uploadedChatAttachments.set(attachmentKey, {
+      url: `https://mock.local/chat-uploads/${encodeURIComponent(attachmentKey)}`,
+      name: fileName,
+      contentType,
+    });
 
     return HttpResponse.json(
-      { status: "201", message: "업로드되었습니다.", data: attachment },
+      {
+        status: "201",
+        message: "업로드되었습니다.",
+        data: camelToSnakeDeep({ attachmentKey, name: fileName, contentType, size }),
+      },
       { status: 201 },
     );
   }),
 
-  // 상담 종료 (이슈 #48) — ACTIVE→CLOSED. 이미 CLOSED면 409 DUPLICATE_RESOURCE(Notion 채팅 종료 명세).
-  http.patch(`${API_BASE_URL}/chats/:chatRoomId/close`, async ({ params }) => {
+  // 상담 수락 (PATCH /chats/{id}/accept) — 내 제안 ACCEPTED·방 CLOSED·형제 방 REJECTED+CLOSED·리포트 CLOSED.
+  http.patch(`${API_BASE_URL}/chats/:chatRoomId/accept`, async ({ params }) => {
     await delay(300);
 
     const chatRoomId = String(params.chatRoomId);
     const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
-
     if (!room) {
       return HttpResponse.json(
         { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
         { status: 404 },
       );
     }
-    if (room.roomStatus === "CLOSED") {
+    // 파이프라인(report_review) 방·COUNSELING만 수락 가능. 그 외 409.
+    if (room.matchStatus !== "COUNSELING") {
       return HttpResponse.json(
-        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 종료된 상담입니다." },
+        { status: "409", code: "UNSUPPORTED_OPERATION", message: "이미 결정된 상담입니다." },
         { status: 409 },
       );
     }
 
+    room.matchStatus = "ACCEPTED";
+    room.roomStatus = "CLOSED";
+    // 형제 방(같은 리포트) 자동 종료 — 서버 캐스케이드 미러.
+    chatRooms
+      .filter((r) => r.reportId === room.reportId && r.chatRoomId !== room.chatRoomId)
+      .forEach((r) => {
+        r.matchStatus = "REJECTED";
+        r.roomStatus = "CLOSED";
+      });
+
+    return HttpResponse.json({
+      status: "200",
+      message: "상담을 수락했습니다.",
+      data: camelToSnakeDeep({
+        chatRoomId,
+        chatRoomStatus: "CLOSED",
+        reviewStatus: "ACCEPTED",
+        reportId: room.reportId,
+        reportStatus: "CLOSED",
+      }),
+    });
+  }),
+
+  // 상담 거절 (PATCH /chats/{id}/reject) — 내 제안 REJECTED·방 CLOSED·리포트 AWAITING_ADOPTION. 형제 유지.
+  http.patch(`${API_BASE_URL}/chats/:chatRoomId/reject`, async ({ params }) => {
+    await delay(300);
+
+    const chatRoomId = String(params.chatRoomId);
+    const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
+    if (!room) {
+      return HttpResponse.json(
+        { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+    if (room.matchStatus !== "COUNSELING") {
+      return HttpResponse.json(
+        { status: "409", code: "UNSUPPORTED_OPERATION", message: "이미 결정된 상담입니다." },
+        { status: 409 },
+      );
+    }
+
+    room.matchStatus = "REJECTED";
     room.roomStatus = "CLOSED";
 
     return HttpResponse.json({
       status: "200",
-      message: "상담을 종료했습니다.",
-      data: { chatRoomId, status: "CLOSED" },
+      message: "상담을 거절했습니다.",
+      data: camelToSnakeDeep({
+        chatRoomId,
+        chatRoomStatus: "CLOSED",
+        reviewStatus: "REJECTED",
+        reportId: room.reportId,
+        reportStatus: "AWAITING_ADOPTION",
+      }),
+    });
+  }),
+
+  // 읽음 처리 (POST /chats/{id}/read) — unread_count 0으로 리셋.
+  http.post(`${API_BASE_URL}/chats/:chatRoomId/read`, async ({ params }) => {
+    await delay(150);
+
+    const chatRoomId = String(params.chatRoomId);
+    const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
+    if (!room) {
+      return HttpResponse.json(
+        { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    room.unreadCount = 0;
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: camelToSnakeDeep({ chatRoomId, readAt: new Date().toISOString() }),
     });
   }),
 

@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
 import { useChatMessages } from "@/shared/api/chat/use-chat-messages";
-import { isChatWritable, toMatchGroup } from "@/shared/api/chat/match-status";
+import { toMatchGroup } from "@/shared/api/chat/match-status";
+import { useAcceptChat } from "@/shared/api/chat/use-accept-chat";
+import { useReadChat } from "@/shared/api/chat/use-read-chat";
+import { useRejectChat } from "@/shared/api/chat/use-reject-chat";
 import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
-import { useMe } from "@/shared/api/use-me";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
 import { X } from "@/shared/ui/icons/X";
@@ -20,7 +22,6 @@ import { MatchRejectConfirmModal } from "@/shared/ui/chat/MatchRejectConfirmModa
 import { MatchStatusBadge } from "@/shared/ui/chat/MatchStatusBadge";
 import { MessageInputBar } from "@/shared/ui/chat/MessageInputBar";
 import { ROOM_STATUS_META } from "@/shared/ui/chat/room-status";
-import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
 
 export interface CustomerChatThreadContentProps {
   chatRoomId: string;
@@ -31,7 +32,7 @@ export interface CustomerChatThreadContentProps {
 }
 
 /**
- * customer 전용 채팅 스레드. 매칭(채택·거절) 배선 전담.
+ * customer 전용 채팅 스레드. 매칭 수락(accept)·거절(reject) 배선 전담.
  * partner용 ChatThreadContent(상담 종료)와 분리 — 매칭 상태가 partner 경로로 새지 않게 fork.
  */
 export function CustomerChatThreadContent({
@@ -40,62 +41,61 @@ export function CustomerChatThreadContent({
   reportBasePath,
 }: CustomerChatThreadContentProps) {
   const router = useRouter();
-  const { data: me } = useMe();
   const { data: rooms } = useChatList();
   const { messages, hasOlder, loadOlder, loadingOlder } = useChatMessages(chatRoomId);
   const sendMessage = useSendChatMessage(chatRoomId);
   const sendAttachment = useSendChatAttachment(chatRoomId);
-
-  const room = rooms.find((item) => item.chatRoomId === chatRoomId);
-  const match = useMatchProposal(room?.reportId ?? "");
+  const accept = useAcceptChat(chatRoomId);
+  const reject = useRejectChat(chatRoomId);
+  const { mutate: markRead } = useReadChat(chatRoomId);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
 
-  const currentUserId = String(me.userId);
+  useEffect(() => {
+    markRead();
+  }, [markRead, chatRoomId]);
+
+  const room = rooms.find((item) => item.chatRoomId === chatRoomId);
 
   if (!room) {
     return (
       <div className="flex h-full flex-col">
         <ChatThreadView
-        messages={messages}
-        currentUserId={currentUserId}
-        hasOlder={hasOlder}
-        onLoadOlder={loadOlder}
-        loadingOlder={loadingOlder}
-      />
+          messages={messages}
+          hasOlder={hasOlder}
+          onLoadOlder={loadOlder}
+          loadingOlder={loadingOlder}
+        />
       </div>
     );
   }
 
-  const group = toMatchGroup(room.matchStatus, room.roomStatus);
-  const reportHref = `${reportBasePath}/${room.reportId}`;
+  const group = toMatchGroup(room.reviewStatus, room.status);
+  const reportHref = room.reportId ? `${reportBasePath}/${room.reportId}` : "#";
+  const matchPending = accept.isPending || reject.isPending;
 
-  const siblings = rooms.filter((item) => item.reportId === room.reportId);
+  const siblings = room.reportId
+    ? rooms.filter((item) => item.reportId === room.reportId)
+    : [room];
   const comparingCount = siblings.filter(
-    (item) => toMatchGroup(item.matchStatus, item.roomStatus) === "comparing",
+    (item) => toMatchGroup(item.reviewStatus, item.status) === "comparing",
   ).length;
   const endingConsultations = siblings
     .filter(
       (item) =>
-        item.proposalId !== room.proposalId &&
-        toMatchGroup(item.matchStatus, item.roomStatus) === "comparing",
+        item.chatRoomId !== room.chatRoomId &&
+        toMatchGroup(item.reviewStatus, item.status) === "comparing",
     )
-    .map((item) => ({ name: item.adjusterName }));
+    .map((item) => ({ name: item.counterpart.name }));
 
-  const subtitle = `${room.caseNo} · ${SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.roomStatus].label}`;
+  const subtitle = `${room.caseNo} · ${SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.status].label}`;
 
   // 거절도 비가역이라 완료와 대칭으로 확인 모달을 거친다
   const rejectMatch = () => setRejectOpen(true);
   const confirmReject = () =>
-    match.mutate(
-      { proposalId: room.proposalId, status: "REJECTED" },
-      { onSuccess: () => setRejectOpen(false) },
-    );
+    reject.mutate(undefined, { onSuccess: () => setRejectOpen(false) });
   const confirmMatch = () =>
-    match.mutate(
-      { proposalId: room.proposalId, status: "ACCEPTED" },
-      { onSuccess: () => setConfirmOpen(false) },
-    );
+    accept.mutate(undefined, { onSuccess: () => setConfirmOpen(false) });
 
   const actions =
     group === "comparing" ? (
@@ -104,7 +104,7 @@ export function CustomerChatThreadContent({
         <button
           type="button"
           onClick={() => setConfirmOpen(true)}
-          disabled={match.isPending}
+          disabled={matchPending}
           className="flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
         >
           매칭 완료
@@ -113,7 +113,7 @@ export function CustomerChatThreadContent({
         <button
           type="button"
           onClick={rejectMatch}
-          disabled={match.isPending}
+          disabled={matchPending}
           className="flex items-center gap-1.5 rounded-full bg-terra px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
         >
           매칭 거절
@@ -137,7 +137,7 @@ export function CustomerChatThreadContent({
         <button
           type="button"
           onClick={rejectMatch}
-          disabled={match.isPending}
+          disabled={matchPending}
           className="rounded-button bg-terra-soft px-2.5 py-2 text-[0.75rem] font-bold text-terra transition hover:brightness-[.97] disabled:cursor-not-allowed disabled:opacity-[.42]"
         >
           매칭 거절
@@ -145,7 +145,7 @@ export function CustomerChatThreadContent({
         <button
           type="button"
           onClick={() => setConfirmOpen(true)}
-          disabled={match.isPending}
+          disabled={matchPending}
           className="flex items-center gap-1 rounded-button bg-navy px-2.5 py-2 text-[0.75rem] font-bold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
         >
           <CheckCircle className="text-[0.9375rem]" />
@@ -165,9 +165,9 @@ export function CustomerChatThreadContent({
   return (
     <div className="flex h-full flex-col">
       <ChatThreadHeader
-        name={room.adjusterName}
+        name={room.counterpart.name}
         caseNo={room.caseNo}
-        roomStatus={room.roomStatus}
+        roomStatus={room.status}
         reportHref={reportHref}
         subtitle={subtitle}
         badge={group === "matched" ? <MatchStatusBadge group={group} /> : undefined}
@@ -198,7 +198,6 @@ export function CustomerChatThreadContent({
 
       <ChatThreadView
         messages={messages}
-        currentUserId={currentUserId}
         hasOlder={hasOlder}
         onLoadOlder={loadOlder}
         loadingOlder={loadingOlder}
@@ -207,7 +206,7 @@ export function CustomerChatThreadContent({
       <MessageInputBar
         onSend={(content) => sendMessage.mutate({ content })}
         disabled={sendMessage.isPending}
-        closed={!isChatWritable(group)}
+        closed={room.status === "CLOSED"}
         sendFailed={sendMessage.isError}
         onPickFile={(file) => sendAttachment.mutate(file)}
         attachPending={sendAttachment.isPending}
@@ -215,17 +214,17 @@ export function CustomerChatThreadContent({
 
       <MatchConfirmModal
         open={confirmOpen}
-        adjusterName={room.adjusterName}
+        adjusterName={room.counterpart.name}
         endingConsultations={endingConsultations}
-        pending={match.isPending}
+        pending={matchPending}
         onConfirm={confirmMatch}
         onCancel={() => setConfirmOpen(false)}
       />
 
       <MatchRejectConfirmModal
         open={rejectOpen}
-        adjusterName={room.adjusterName}
-        pending={match.isPending}
+        adjusterName={room.counterpart.name}
+        pending={matchPending}
         onConfirm={confirmReject}
         onCancel={() => setRejectOpen(false)}
       />
