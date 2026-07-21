@@ -42,7 +42,7 @@ function AdjusterRecommendRow({ adjuster }: { adjuster: AdjusterListItem }) {
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
-          <span className="truncate text-sm font-semibold text-ink">{adjuster.name} 사정사</span>
+          <span className="truncate text-sm font-semibold text-ink">{adjuster.name}</span>
           {specialty && (
             <span className="shrink-0 rounded-tag bg-line-2 px-1.5 py-0.5 text-[0.6875rem] font-medium text-ink-2">
               {specialty}
