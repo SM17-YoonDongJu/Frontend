@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import type { UserType } from "@/shared/model/user";
+import { AuthHeader } from "../_shared/ui/AuthHeader";
 import { getRegisterErrorCode, useRegister } from "./_api/use-register";
 import { AdjusterNotice } from "./_components/AdjusterNotice";
 import { CompleteStep } from "./_components/CompleteStep";
@@ -93,7 +95,23 @@ function SignupFunnel() {
   if (!social) return null;
 
   return (
-    <div className="flex min-h-dvh w-full flex-col pb-8 pt-6 sm:pt-10">
+    <div className="flex min-h-dvh w-full flex-col">
+      <AuthHeader
+        className="hidden md:flex"
+        right={
+          <span className="flex items-center gap-2.5 text-[0.8125rem]">
+            <span className="font-medium text-ink-3">이미 계정이 있으신가요?</span>
+            <Link
+              href="/login"
+              className="rounded-button border border-line px-[0.9375rem] py-[0.5625rem] font-semibold text-ink transition hover:bg-paper"
+            >
+              로그인
+            </Link>
+          </span>
+        }
+      />
+
+      <div className="mx-auto flex w-full flex-1 flex-col pb-8 pt-6 sm:pt-10 md:max-w-[35rem] md:px-5 md:pb-16 md:pt-12">
       {funnel.step !== "done" && (
         <SignupProgress
           current={funnel.stepNumber}
@@ -103,7 +121,7 @@ function SignupFunnel() {
       )}
 
       <div className="mt-6 flex flex-1 flex-col justify-center">
-        <div className="rounded-card-lg border border-line bg-card p-6 sm:p-8">
+        <div className="rounded-card-lg border border-line bg-card p-6 sm:p-8 md:p-9 md:shadow-modal">
         {funnel.step === "role" && (
           <RoleSelectStep
             selected={selectedUserType}
@@ -131,6 +149,7 @@ function SignupFunnel() {
           />
         )}
         </div>
+      </div>
       </div>
 
       {showAdjusterNotice && (

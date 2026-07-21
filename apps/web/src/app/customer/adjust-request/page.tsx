@@ -101,7 +101,7 @@ function AdjustRequestFunnel() {
   }
 
   return (
-    <div className="mx-auto min-h-[100dvh] w-full max-w-[47.5rem] px-4 pb-28 pt-5 sm:pb-12 sm:pt-8">
+    <div className="mx-auto min-h-[100dvh] w-full max-w-[45rem] px-4 pb-28 pt-5 sm:pb-12 sm:pt-8 md:px-10">
       <FunnelProgress
         current={funnel.currentStep}
         total={funnel.total}
@@ -111,7 +111,7 @@ function AdjustRequestFunnel() {
       />
 
       <FormProvider {...form}>
-        <div className="mt-6 sm:rounded-card-lg sm:border sm:border-line sm:bg-card sm:p-6">
+        <div className="mt-6 sm:rounded-card-lg sm:border sm:border-line sm:bg-card sm:p-6 md:p-8">
           <StepView />
         </div>
       </FormProvider>
