@@ -1280,7 +1280,7 @@ export const handlers = [
 
   // 회원가입 (#43, 명세 2026-07-09 개정) — 전역 봉투 거울. 성공 201.
   // 토큰은 HttpOnly 쿠키(Set-Cookie access_token 30분/refresh_token 14일)로만 내려가고 body엔 없음 → data = { user_id, nickname, role }.
-  // birth_date·phone_number·gender는 명세상 필수지만 현행 가입 폼이 수집하지 못해(Figma 개편 후속) 목은 검증하지 않는다.
+  // birth_date·phone_number·gender는 폼 확정(2026-07-21)으로 미전송 — 목도 검증하지 않는다(백엔드 완화 확인 대기).
   // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 1자 미만·30자 초과→400 VALIDATION_ERROR,
   //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD, x-mock-failure:social→500 EXTERNAL_API_ERROR.
   http.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {

@@ -1,16 +1,14 @@
 import { z } from "zod";
-import { genderSchema, userTypeSchema } from "@/shared/model/user";
+import { userTypeSchema } from "@/shared/model/user";
 
-// POST /auth/register 요청 body — Notion 명세(2026-07-09 개정) 7필드가 단일 진실. 이메일 미수집.
-// provider·socialToken(가입 티켓 JWT)·nickname(실명 1~30자)·birthDate(YYYY-MM-DD)·phoneNumber·gender(빈 문자열 허용)·userType 전부 필수.
+// POST /auth/register 요청 body — 현행 가입 폼이 수집하는 필드만 전송(사용자 확정 2026-07-21). 이메일 미수집.
+// CONTRACT: 명세(2026-07-09 개정)는 birth_date·phone_number·gender까지 필수 7필드 — 폼 미수집으로 미전송,
+// 백엔드에 선택 완화/제거 확인 필요.
 // 약관 동의(이용약관/개인정보/마케팅)는 프론트 게이트 전용이며 body 미제출(#43 확정).
 export const registerBodySchema = z.object({
   provider: z.enum(["kakao", "naver"]),
   socialToken: z.string(),
   nickname: z.string().min(1).max(30),
-  birthDate: z.string(),
-  phoneNumber: z.string(),
-  gender: z.union([genderSchema, z.literal("")]),
   userType: userTypeSchema,
 });
 
@@ -45,10 +43,5 @@ export function toRegisterBody(draft: SignupDraft): RegisterBody {
     socialToken: draft.socialToken,
     nickname: draft.nickname,
     userType: draft.userType,
-    // CONTRACT: 가입 폼 입력 부재 — Figma 개편 후속 이슈. birthDate·phoneNumber·gender는
-    // 현행 가입 폼(소셜 티켓 기반)이 수집하지 않아 빈 값으로 전송한다(임시). 폼 필드 신설 후 실값 매핑.
-    birthDate: "",
-    phoneNumber: "",
-    gender: "",
   });
 }
