@@ -23,7 +23,7 @@
 |------|------|----|
 | 변수·필드·함수·훅 | camelCase | `reportId`, `useReportList` |
 | 컴포넌트·타입·zod 추론 타입 | PascalCase | `ReportCard`, `ReportDetail` |
-| 상수·enum 값 | UPPER_SNAKE | `STALE_TIME_AUTH`, `MATCHED` |
+| 상수·enum 값 | UPPER_SNAKE | `STALE_TIME_AUTH`, `CLOSED` |
 | zod 스키마 | `<domain>Schema` | `reportDetailSchema` |
 | 라우트 세그먼트 폴더 | kebab(영문 슬러그) | `report-request` |
 
@@ -76,10 +76,11 @@
 - 사진 업로드: `POST /uploads`(S3 private, JPG/PNG) → 결과 URL을 `avatarUrl`로 PATCH
 
 ### report — `POST /reports` (분석 신청)
-`productId` · `accidentType`(영문 enum, §4) · `accidentDate` · `diagnosis` · `offeredAmount`(int, 보험사 제안금액·N) · `hospitalizations`(N, 객체배열 `{hospitalStart, hospitalEnd(N), hospitalReason(N)}`) · `description`(N 사고경위) · `additionalInformation`(N) · `documentUrls`(string[] N) · `question`(N 자연어)
+`productId` · `accidentType`(영문 enum, §4) · `accidentDate` · `diagnosis` · `offeredAmount`(int, 보험사 제안금액·N) · `hospitalizations`(N, 객체배열 `{hospitalStart, hospitalEnd(N), hospitalReason(N)}`) · `description`(N 사고경위) · `additionalInformation`(N) · `documents`(N, 객체배열 `{s3Url, name, reportType, fileType}` — ~~documentUrls string[]~~ 폐기, #130) · `question`(N 자연어)
 → resp(202 비동기): `reportId` · `status`(`AWAITING_INSPECTION`)
 
-- `GET /reports/{reportID}` (상세): `reportId` · `status` · `accidentType` · `treatment` · `claimedMinAmount` · `claimedMaxAmount` · `offeredAmount` · `applicableGuarantees`(string[]) · `omittedSpecialContract`(string[]) · `basisTermsPrecedents`(string[]) · `issue`(객체배열 `{title, opinion, status(CONFIRMED/TRUSTED/INFO), tag}`) · `question` · `adjusterId`(nullable) · `reviewComment`(N) · `reviewedAt`(N) · `adjuster`(N `{nickname, career}`)
+- `GET /reports/{reportID}` (상세, #130 정합): `reportId` · `caseNo` · `status` · `accidentType` · `claimedMinAmount` · `claimedMaxAmount` · `offeredAmount` · `applicableGuarantees`(string[]) · `omittedSpecialContract`(string[]) · `basisTermsPrecedents`(string[]) · `issues`(객체배열 `{title, description, aiStatus, tags}` — ~~issue[].opinion/status/tag~~ 폐기) · `question` · `adjusterId`(nullable) · `reviewComment`(N) · `reviewedAt`(N) · `adjuster`(N `{nickname, career}`)
+- `GET /reports/{reportID}/review` (검수 화면, #130 신설 경로): `caseNo` · `client{...}` · `claim{...}` 중첩 · `attachments[]{attachmentId, mimeType, ...}` · `aiEstimate{min,max}` · `adjusterEstimate{min,max}` · `issues[]{aiTitle, aiDescription, reviewStatus, ...}` · `review` · `started` · `progress{...}`
 - `GET /reports?status={status}&page={page}` (목록/프로세스): items[]{ `reportId` · `status` · `accidentType` · `createdAt` } + `page` · `totalPages` · `totalCount`
 - `GET /reports/pending-review?status&accidentType&region&page&size` (검수 대기 목록·활성 사정사 전용·403 FORBIDDEN): `data.list[]{ reportId · accidentType · status · createdAt }` + `data.pagination{ page · size · totalElements · totalPages · hasNext }`. 쿼리 `accidentType`·`region` 필터 지원(page 기본 1)
 - `PATCH /reports/{reportID}` (검수 반영): `applicableGuarantees`(N) · `omittedSpecialContract`(N) · `issues`(N, 객체배열 `{issueId, reviewStatus(ACCEPTED/MODIFIED/EXCLUDED), adjusterOpinion, modifiedReason, excludedReason}`) · `review`(string 사정사 의견) · `status`(N)
@@ -101,10 +102,10 @@ items[]{ `paymentId` · `amount`(int) · `type`(`SUBSCRIPTION`) · `status`(`PAI
 
 | 분류 | 값 | 출처 |
 |------|----|----|
-| 리포트 프로세스(`status`) | `AWAITING_INSPECTION` 검수대기 · `AWAITING_ADOPTION` 채택대기 · `COUNSELING` 상담중 · `MATCHED` 매칭완료 | `GET /reports` |
+| 리포트 프로세스(`status`) | `AWAITING_INSPECTION` 검수대기 · `AWAITING_ADOPTION` 채택대기 · `COUNSELING` 상담중 · `CLOSED` 종결 (~~MATCHED~~ 폐기, #130) | `GET /reports` |
 | 사고유형(`accidentType`) | `medical_indemnity` 실손 · `traffic` 교통사고 · `disability` 후유장해 · `cancer_diagnosis` 암·진단비 · `fire` 화재 · `liability` 배상책임 · `other` 기타 (※ lower_snake) | `POST /reports` |
-| 검수 쟁점(`reviewStatus`) | `PENDING` 미검토 · `ACCEPTED` 인정 · `MODIFIED` 수정 · `EXCLUDED` 제외 | `PATCH /reports/{id}` (issues[]) |
-| 받은 제안(`status`) | `COMPLETED` 채택 · `CONSULTATION` 상담중 · `SENT` 발송 (서버 계산값) | `GET /reports/{id}/proposals` |
+| 검수 쟁점(`reviewStatus`) | `ACCEPTED` 인정 · `MODIFIED` 수정 · `EXCLUDED` 제외 · `ADDED` 신규 · `null` 미검수 (~~PENDING~~ 폐기, #130) | `GET /reports/{id}/review` (issues[]) |
+| 받은 제안·검수(`reviewStatus`) | `SENT` 발송 · `COUNSELING` 상담중 · `REJECTED` 거절 · `ACCEPTED` 채택 (~~COMPLETED/CONSULTATION/NOT_SELECTED~~ 폐기, #130) | `GET /reports/{id}/proposals` 외 |
 | 매칭(`status`) | `AWAITING_ADOPTION` | `POST /matches` |
 | 결제(`status`/`type`) | status `PAID` / type `SUBSCRIPTION` | `GET /payments/history` |
 | 구독(`status`/`tier`) | status `ACTIVE` / tier `BASIC`·`PRO` | `POST /subscriptions` |
@@ -127,17 +128,17 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 
 | 개념 | 식별자 | 타입 | 비고 |
 |------|--------|------|------|
-| 제안 식별자 | `adjusterId` | uuid | 별도 proposalId 없음(reportId당 사정사 1제안). 거절·프로필 이동 키 |
+| 제안 식별자 | `proposalId` | uuid | 채택·거절 통합 PATCH의 경로 파라미터(#130). `adjusterId`는 프로필 이동 키 |
 | 사정사 이름 | `nickname` | string | 아바타 없음 → 첫 글자 폴백 |
 | 평점 | `rating` | number | 예 4.8 |
 | 제안 요약 | `proposalSummary` | string | 카드 메시지로 표시 |
-| 제안 상태 | `status` | enum | `COMPLETED`·`CONSULTATION`·`SENT` (서버 계산값) |
+| 제안 상태 | `status` | enum | `SENT`·`COUNSELING`·`REJECTED`·`ACCEPTED` (#130 정합) |
 | 제출일 | `submittedAt` | iso datetime | |
 | 페이지네이션 | `pagination` | `{page,size,totalElements,totalPages,hasNext}` | page 기본 1 |
 
 - **쿼리키:** `proposal.list(reportId)` — `createQueryKeys('proposal', …)`. staleTime `STALE_TIME_LIST`(0, 폴링) / gcTime `GC_TIME_DEFAULT`.
 - **분석 대상 정보**(사고유형·접수일 등 기능1)는 별도 `GET /reports/{reportId}` 사용.
-- **거절:** 사유 없이 바로 거절. `PATCH /reports/{reportId}/proposals/{adjusterId}/reject`(body 없음) → resp `{reportId, adjusterId, rejected}`. 거절 성공 시 해당 제안은 목록에서 제외 → FE는 `proposal.list` 갱신.
+- **채택·거절(통합, #130):** `PATCH /reports/{reportId}/proposals/{proposalId}` body `{status: ACCEPTED|REJECTED}` → resp `{reportId, proposalId, adjusterId, reportStatus, reviewStatus}`. (~~/reject 전용 경로~~ 폐기)
 
 ## 6. 상수
 
@@ -254,7 +255,7 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 |------|--------|
 | 검수 내역 훅 | `useReviewedReports` |
 | 쿼리키 | `reportKeys.reviewedReports(status, page)` |
-| 상태 필터 파라미터 | `status`(`ALL`/`SENT`/`CONSULTATION`/`NOT_SELECTED`/`CLOSED`) |
+| 상태 필터 파라미터 | `status`(`ALL`/`SENT`/`COUNSELING`/`REJECTED`/`ACCEPTED` — #130 정합) |
 
 ⚠️ 카드용 사고유형·`confirmedMin/MaxAmount`·평점(`rating`)은 명세 list[]에 미존재 → zod optional + MSW 목킹, 백엔드 확장 요청. 상세 이동 키(reportId) 미존재 → placeholder 보류.
 

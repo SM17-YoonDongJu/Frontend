@@ -3,7 +3,7 @@ import {
   accidentTypeSchema,
   SUPPORTED_ACCIDENT_TYPE,
 } from "@/shared/model/accident-type";
-import { documentSlotsSchema } from "./document-slots";
+import { documentSlotsSchema, flattenDocuments } from "./document-slots";
 
 /** 손해사정 요청 퍼널 입력 스키마. 도메인 = report (슬러그만 adjust-request). */
 
@@ -79,6 +79,18 @@ export const step7ConsentSchema = z.object({
   agreedToTerms: z.literal(true, { message: "필수 고지사항을 확인해 주세요." }),
 });
 
+/**
+ * POST /reports body의 documents[] 항목. 명세(37b30798…570d) Document:
+ * s3_url·name·report_type·file_type 전부 Y(요청 시 camel→snake 자동 변환).
+ */
+export const documentSchema = z.object({
+  s3Url: z.url(),
+  name: z.string().min(1),
+  reportType: z.string().min(1),
+  // CONTRACT: 명세는 file_type 필수(.pdf/.jpg 등)이나 업로드 url에 확장자가 없을 수 있어 빈 문자열 허용.
+  fileType: z.string(),
+});
+
 /** POST /reports 요청 body (naming-dictionary §3). */
 export const createReportBodySchema = z.object({
   productId: z.uuid().optional(), // 퍼널에 상품선택 없음 → 생략
@@ -97,7 +109,7 @@ export const createReportBodySchema = z.object({
     .nullable(),
   description: z.string().nullable(),
   additionalInformation: z.string().nullable(),
-  documentUrls: z.array(z.url()).nullable(),
+  documents: z.array(documentSchema).nullable(),
   question: z.string().nullable(),
 });
 
@@ -164,6 +176,7 @@ export function toCreateReportBody(
   draft: AdjustRequestDraftInput,
 ): z.infer<typeof createReportBodySchema> {
   const stays = draft.hospitalizations ?? [];
+  const documents = flattenDocuments(draft.documentSlots, draft.documentUrls ?? []);
 
   return createReportBodySchema.parse({
     accidentType: draft.accidentType ?? SUPPORTED_ACCIDENT_TYPE,
@@ -179,7 +192,7 @@ export function toCreateReportBody(
       : null,
     description: null,
     additionalInformation: serializeAdditionalInformation(draft),
-    documentUrls: draft.documentUrls ?? null,
+    documents: documents.length ? documents : null,
     question: draft.question?.trim() || null,
   });
 }

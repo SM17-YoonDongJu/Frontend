@@ -21,14 +21,14 @@ export function ClientAccidentSection({ client, isMasked }: ClientAccidentSectio
 
       <div className="mt-4 flex items-center gap-3 rounded-card border border-line-2 bg-paper-2 p-4">
         <Avatar
-          name={client.maskedName}
+          name={client.nickname}
           tone="gold"
           className="text-[3rem] [--avatar-initial:0.375em]"
         />
         <div className="text-[0.875rem]">
           <p>
-            <span className="font-semibold text-ink">{client.maskedName}</span>
-            <span className="text-ink-3"> · {client.ageBand} · {client.gender}</span>
+            <span className="font-semibold text-ink">{client.nickname}</span>
+            <span className="text-ink-3"> · {client.birthDate} · {client.gender}</span>
           </p>
           <p className="mt-0.5 text-ink-3">
             {client.region} · 가입 {client.joinedAt}

@@ -18,8 +18,9 @@ export function useProfileSettingsForm({
   profile,
   onSaved,
 }: UseProfileSettingsFormParams) {
-  const [phone, setPhone] = useState(profile.phone ?? "");
-  const [region, setRegion] = useState(profile.region ?? "");
+  const [phone, setPhone] = useState(profile.phoneNumber ?? "");
+  // UI는 단일 지역 선택 — 명세 region은 배열이라 첫 항목만 편집하고 저장 시 배열로 감싼다.
+  const [region, setRegion] = useState(profile.region[0] ?? "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatarUrl);
 
   const { mutate: updateMe, isPending: isSaving } = useUpdateMe();
@@ -33,8 +34,8 @@ export function useProfileSettingsForm({
   const save = () => {
     updateMe(
       {
-        phone,
-        region,
+        phoneNumber: phone,
+        region: region ? [region] : [],
         ...(avatarUrl && avatarUrl !== profile.avatarUrl
           ? { avatarUrl }
           : {}),

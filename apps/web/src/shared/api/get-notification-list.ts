@@ -1,4 +1,3 @@
-// CONTRACT: 명세없음-초안(.pr-assets/api-spec-draft-notifications.md)
 import { API_BASE_URL } from "@/shared/api/config";
 import { fetchJson } from "@/shared/api/fetch-json";
 import {

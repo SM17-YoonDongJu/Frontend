@@ -9,8 +9,6 @@ import { MessageBubble } from "./MessageBubble";
 
 export interface ChatThreadViewProps {
   messages: ChatMessage[];
-  /** mine/theirs 판별 기준 — senderId 문자열 비교 */
-  currentUserId: string;
   /** 더 오래된 메시지가 남아 있는지(커서) — 상단 도달 시 loadOlder 호출 */
   hasOlder?: boolean;
   onLoadOlder?: () => void;
@@ -21,7 +19,6 @@ const NEAR_BOTTOM_PX = 80;
 
 export function ChatThreadView({
   messages,
-  currentUserId,
   hasOlder,
   onLoadOlder,
   loadingOlder,
@@ -59,7 +56,7 @@ export function ChatThreadView({
       el.scrollTop += el.scrollHeight - prev.scrollHeight;
     } else if (prev.lastId && lastId !== prev.lastId) {
       // 새 메시지 append — 내 메시지거나 하단 근처면 따라가고, 위를 보는 중이면 점프 버튼
-      const mine = messages[messages.length - 1]?.senderId === currentUserId;
+      const mine = messages[messages.length - 1]?.isMine ?? false;
       if (mine || isNearBottom()) scrollToBottom();
       else setShowJump(true);
     } else if (!prev.firstId) {
@@ -68,7 +65,7 @@ export function ChatThreadView({
     }
 
     edgeRef.current = { firstId, lastId, scrollHeight: el?.scrollHeight ?? 0 };
-  }, [messages, currentUserId]);
+  }, [messages]);
 
   // 상단 센티널 — 보이면 이전 대화 로드(무한 스크롤)
   useEffect(() => {
@@ -130,8 +127,8 @@ export function ChatThreadView({
                 <MessageBubble
                   content={message.content}
                   createdAt={message.createdAt}
-                  mine={message.senderId === currentUserId}
-                  attachments={message.attachments}
+                  mine={message.isMine}
+                  attachment={message.attachment}
                 />
               </Fragment>
             );

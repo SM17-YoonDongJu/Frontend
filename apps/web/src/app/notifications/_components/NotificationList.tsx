@@ -7,7 +7,7 @@ import { NotificationEmpty } from "./NotificationEmpty";
 
 export function NotificationList() {
   const { data } = useNotificationList();
-  const notifications = data.list;
+  const notifications = data.items;
 
   if (notifications.length === 0) {
     return <NotificationEmpty />;
@@ -22,7 +22,7 @@ export function NotificationList() {
           <h2 className="text-[0.75rem] font-bold text-ink-3">{section.label}</h2>
           <ul className="flex flex-col gap-[0.5625rem]">
             {section.items.map((notification) => (
-              <li key={notification.notificationId}>
+              <li key={notification.id}>
                 <NotificationCard notification={notification} />
               </li>
             ))}

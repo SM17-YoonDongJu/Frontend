@@ -1,17 +1,17 @@
 "use client";
 
 import { Megaphone } from "@/shared/ui/icons/Megaphone";
-import { useDashboard } from "../_api/use-dashboard";
+import { useAdjusterHome } from "../_api/use-home";
 import { SectionCard } from "./SectionCard";
 
 export function ActivityStats() {
-  const { data } = useDashboard();
-  const { activity } = data;
+  const { data } = useAdjusterHome();
+  const { summary } = data;
 
   const rows = [
-    { label: "검수 완료", value: `${activity.completedCount}건` },
-    { label: "상담 전환", value: `${activity.consultationConvertedCount}건` },
-    { label: "고객 평점", value: activity.averageRating.toFixed(1) },
+    { label: "검수 완료", value: `${summary.monthlyCompletedCount}건` },
+    { label: "상담 전환", value: `${summary.consultationConvertedCount}건` },
+    { label: "고객 평점", value: summary.rating.average.toFixed(1) },
   ];
 
   return (

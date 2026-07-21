@@ -1,18 +1,18 @@
 import type { z } from "zod";
 import type { adjusterProfileSchema } from "./profile.schema";
 import type {
-  dashboardSummarySchema,
-  dashboardActivitySchema,
-  dashboardSchema,
-  inProgressStatusSchema,
-  inProgressCaseSchema,
-  inProgressListSchema,
-} from "./dashboard.schema";
+  adjusterHomeSchema,
+  homeAdjusterSchema,
+  homeInProgressCaseSchema,
+  homeInProgressSchema,
+  homeRatingSchema,
+  homeSummarySchema,
+} from "./home.schema";
 
 export type AdjusterProfile = z.infer<typeof adjusterProfileSchema>;
-export type DashboardSummary = z.infer<typeof dashboardSummarySchema>;
-export type DashboardActivity = z.infer<typeof dashboardActivitySchema>;
-export type Dashboard = z.infer<typeof dashboardSchema>;
-export type InProgressStatus = z.infer<typeof inProgressStatusSchema>;
-export type InProgressCase = z.infer<typeof inProgressCaseSchema>;
-export type InProgressList = z.infer<typeof inProgressListSchema>;
+export type HomeAdjuster = z.infer<typeof homeAdjusterSchema>;
+export type HomeRating = z.infer<typeof homeRatingSchema>;
+export type HomeSummary = z.infer<typeof homeSummarySchema>;
+export type HomeInProgressCase = z.infer<typeof homeInProgressCaseSchema>;
+export type HomeInProgress = z.infer<typeof homeInProgressSchema>;
+export type AdjusterHome = z.infer<typeof adjusterHomeSchema>;

@@ -5,7 +5,7 @@ import { FileText } from "@/shared/ui/icons/FileText";
 import { Pencil } from "@/shared/ui/icons/Pencil";
 import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
 import { Star } from "@/shared/ui/icons/Star";
-import { useDashboard } from "../_api/use-dashboard";
+import { useAdjusterHome } from "../_api/use-home";
 
 interface SummaryTile {
   icon: ReactNode;
@@ -15,7 +15,7 @@ interface SummaryTile {
 }
 
 export function MobileSummaryGrid() {
-  const { data } = useDashboard();
+  const { data } = useAdjusterHome();
   const { summary } = data;
 
   const tiles: SummaryTile[] = [
@@ -41,7 +41,7 @@ export function MobileSummaryGrid() {
       icon: <Star />,
       chipClass: "bg-gold-soft text-gold-ink",
       label: "고객 평점",
-      value: summary.averageRating.toFixed(1),
+      value: summary.rating.average.toFixed(1),
     },
   ];
 

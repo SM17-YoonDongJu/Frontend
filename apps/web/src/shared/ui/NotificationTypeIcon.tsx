@@ -18,6 +18,12 @@ const ICON_STYLE_BY_TYPE: Record<NotificationType, IconStyle> = {
   CONSULT_ACCEPTED: { Icon: User, boxClassName: "bg-paper-2", iconClassName: "text-ink-2" },
   ANALYSIS_COMPLETE: { Icon: FileText, boxClassName: "bg-gold-soft", iconClassName: "text-gold-ink" },
   IDENTITY_VERIFIED: { Icon: ShieldCheck, boxClassName: "bg-green-soft", iconClassName: "text-green" },
+  CHAT_MESSAGE: { Icon: MessageSquare, boxClassName: "bg-paper-2", iconClassName: "text-ink-2" },
+  SETTLEMENT_NOTICE: { Icon: FileText, boxClassName: "bg-paper-2", iconClassName: "text-ink-2" },
+  PROPOSAL_CLOSED: { Icon: MessageSquare, boxClassName: "bg-paper-2", iconClassName: "text-ink-2" },
+  NEW_REVIEW_REQUEST: { Icon: FileText, boxClassName: "bg-gold-soft", iconClassName: "text-gold-ink" },
+  REVIEW_DEADLINE_SOON: { Icon: Check, boxClassName: "bg-gold-soft", iconClassName: "text-gold-ink" },
+  CONSULT_REQUESTED: { Icon: User, boxClassName: "bg-paper-2", iconClassName: "text-ink-2" },
 };
 
 interface NotificationTypeIconProps {

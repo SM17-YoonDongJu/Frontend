@@ -14,12 +14,13 @@ export function ReviewHistoryView() {
 
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useReviewedReports({
     status: status ?? undefined,
+    size: 10,
   });
 
-  // InfiniteData → 화면 소비용 파생값. summary는 페이지 불변이라 첫 페이지 기준.
-  const list = useMemo(() => data.pages.flatMap((page) => page.list), [data.pages]);
+  // InfiniteData → 화면 소비용 파생값. stats는 페이지 불변이라 첫 페이지 기준.
+  const list = useMemo(() => data.pages.flatMap((page) => page.items), [data.pages]);
   // useSuspenseInfiniteQuery는 최소 1페이지 보장(initialPageParam).
-  const summary = data.pages[0]!.summary;
+  const stats = data.pages[0]!.stats;
 
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[25.125rem] flex-col bg-paper">
@@ -34,7 +35,7 @@ export function ReviewHistoryView() {
         </button>
         <h1 className="flex-1 text-[0.9375rem] font-bold text-ink">검수 내역</h1>
         <span className="pr-1.5 text-[0.78125rem] font-bold text-gold-ink">
-          {summary.totalCount}건
+          {stats.totalCount}건
         </span>
       </header>
 
@@ -42,7 +43,7 @@ export function ReviewHistoryView() {
 
       <ReviewHistoryList
         items={list}
-        totalCount={summary.totalCount}
+        totalCount={stats.totalCount}
         hasActiveFilter={status !== null}
         onResetFilter={() => setStatus(null)}
       />

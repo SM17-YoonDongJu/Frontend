@@ -1,83 +1,144 @@
 import { z } from "zod";
-import { matchStatusSchema } from "./match-status";
 
-// 채팅 도메인 계약(봉투 내부 data만 모델링 — fetch-json이 봉투 해제).
-// senderId: 노션 명세 그대로 uuid(string). mine/theirs는 현재 사용자 식별자와 문자열 비교.
-// ⚠️ userId uuid 전환 백엔드 확인 요청 — use-me의 userId는 number(§7-2)라 String 변환 후 비교.
+// 채팅 도메인 계약(봉투 내부 data만 — fetch-json이 봉투 해제·snake→camel 변환).
+// mine/theirs 판별은 서버 isMine(GET/POST messages)로 정합 — senderId 문자열 비교 제거.
 
-export const roomStatusSchema = z.enum(["REQUESTED", "ACTIVE", "CLOSED"]);
+export const roomStatusSchema = z.enum(["ACTIVE", "CLOSED"]);
+
+// review_status — 파이프라인(사정사 검수) 방만. 사정사 검색으로 만든 방은 null.
+export const reviewStatusSchema = z.enum([
+  "SENT",
+  "COUNSELING",
+  "ACCEPTED",
+  "REJECTED",
+]);
+
+export const chatCounterpartSchema = z.object({
+  userId: z.uuid(),
+  name: z.string(),
+});
 
 export const chatRoomSchema = z.object({
-  chatRoomId: z.string().uuid(),
+  chatRoomId: z.uuid(),
+  reportId: z.uuid().nullable(), // 사정사 검색 방은 null(공유 리포트 버튼 숨김)
+  reportReviewId: z.uuid().nullable(), // report_reviews.id — accept/reject 대상(검색 방은 null)
+  status: roomStatusSchema,
+  reviewStatus: reviewStatusSchema.nullable(),
+  counterpart: chatCounterpartSchema,
   lastMessage: z.string().nullable(),
-  updatedAt: z.string(),
+  lastMessageAt: z.string(),
+  unreadCount: z.number().int(),
 
-  // B군: ⚠️ 명세 수정 예정(ERD 근거, MSW 선반영). participants[]는 ERD 6/24 폐기 → 사용 금지.
-  adjusterId: z.string().uuid(), // ⚠️ 명세 수정 예정: CHATROOM.adjuster_id
-  adjusterName: z.string(), // ⚠️ 명세 수정 예정: ADJUSTER_PROFILES.name (상대 표시명·역할 중립)
-  avatarUrl: z.string().nullable(), // ⚠️ 명세 수정 예정: USERS.avatar_url
-  reportId: z.string().uuid(), // ⚠️ 명세 수정 예정: CHATROOM.report_id (공유 리포트 열기 키)
-  caseNo: z.string(), // ⚠️ 명세 수정 예정: REPORTS.case_no (표시 "#20260520-017")
-  roomStatus: roomStatusSchema, // ⚠️ 명세 수정 예정: CHATROOM.status
-  lastMessageAt: z.string(), // ⚠️ 명세 수정 예정: 정렬 기준(desc). updatedAt 대체
-
-  proposalId: z.string().uuid(), // ⚠️ 명세 확장(GET /chats): report_reviews.id — 매칭 PATCH 대상
-  matchStatus: matchStatusSchema, // ⚠️ 명세 확장: 방의 제안 상태(비교/매칭/종료 파생 원천)
-  reportTypeLabel: z.string(), // ⚠️ 명세 확장: 배너 "후유장해 건" 표시용
+  // CONTRACT: 명세 확장 — GET /chats 확정 필드 아님(MSW 선반영). 표시용 사건번호·유형·아바타.
+  //   공유리포트(GET /chats/{id}/shared-report)로 이관 여부 백엔드 확인 필요.
+  caseNo: z.string(),
+  reportTypeLabel: z.string(),
+  avatarUrl: z.string().nullable(),
 });
 
 export const chatListSchema = z.object({
-  items: z.array(chatRoomSchema),
+  rooms: z.array(chatRoomSchema),
 });
 
-// ⚠️ 명세없음-초안(TEMP §3-3) — 첨부 테이블·업로드 API 백엔드 확정 전 MSW 선반영
-export const chatAttachmentSchema = z.object({
-  attachmentId: z.string().uuid(),
-  fileName: z.string(),
-  mimeType: z.string(),
+// 메시지 첨부(GET/POST messages 응답) — 조회용 단기 presigned url·원본명·MIME.
+export const messageAttachmentSchema = z.object({
   url: z.string(),
+  name: z.string(),
+  contentType: z.string(),
 });
+
+export const messageTypeSchema = z.enum(["TEXT", "IMAGE", "FILE", "SYSTEM"]);
 
 export const chatMessageSchema = z.object({
-  messageId: z.string().uuid(),
-  senderId: z.string(), // ⚠️ userId uuid 전환 백엔드 확인 요청 — 명세는 uuid, use-me.userId는 number
-  content: z.string(),
-  createdAt: z.string(), // ISO — 날짜 구분선·시각 표기 원천(sentAt 아님)
-  attachments: z.array(chatAttachmentSchema).optional(), // ⚠️ 명세없음-초안
-});
-
-export const chatMessagesSchema = z.object({
-  list: z.array(chatMessageSchema),
-  nextCursor: z.string().nullable(),
-});
-
-export const sendChatMessageBodySchema = z.object({
-  content: z.string(), // 첨부만 보낼 땐 빈 문자열 허용
-  attachmentIds: z.array(z.string().uuid()).optional(), // ⚠️ 명세없음-초안(TEMP §3-3)
-});
-
-export const sendChatMessageResponseSchema = z.object({
-  messageId: z.string().uuid(),
-  chatRoomId: z.string().uuid(),
-  senderId: z.string(),
-  content: z.string(),
+  messageId: z.uuid(),
+  senderId: z.string(), // 명세 uuid. 낙관적 임시 메시지도 채운다.
+  messageType: messageTypeSchema,
+  content: z.string().nullable(), // 첨부(IMAGE/FILE) 메시지는 null 가능
+  attachment: messageAttachmentSchema.nullable(),
+  isMine: z.boolean(),
   createdAt: z.string(),
 });
 
-// PATCH /chats/{chatRoomId}/close 응답 (Notion 채팅 종료 명세: ACTIVE→CLOSED)
-export const closeChatResponseSchema = z.object({
-  chatRoomId: z.string().uuid(),
-  status: z.literal("CLOSED"),
+export const chatMessagesSchema = z.object({
+  messages: z.array(chatMessageSchema),
+  nextCursor: z.string().nullable(),
+  hasNext: z.boolean(),
+});
+
+// 전송 요청 — content·attachment 중 최소 1개. 첨부는 업로드 응답 메타(key)를 전달.
+export const sendChatMessageAttachmentSchema = z.object({
+  attachmentKey: z.string(),
+  name: z.string(),
+  contentType: z.string(),
+});
+
+export const sendChatMessageBodySchema = z
+  .object({
+    content: z.string().optional(),
+    attachment: sendChatMessageAttachmentSchema.optional(),
+  })
+  .refine((body) => Boolean(body.content) || Boolean(body.attachment), {
+    message: "content 또는 attachment 중 하나는 필요합니다.",
+  });
+
+export const sendChatMessageResponseSchema = z.object({
+  messageId: z.uuid(),
+  chatRoomId: z.uuid(),
+  senderId: z.string(),
+  messageType: messageTypeSchema,
+  content: z.string().nullable(),
+  attachment: messageAttachmentSchema.nullable(),
+  createdAt: z.string(),
+});
+
+// 첨부 업로드 응답(POST /chats/{id}/attachments) — key 기반. 메시지 전송에 attachment로 연결.
+export const uploadChatAttachmentResponseSchema = z.object({
+  attachmentKey: z.string(),
+  name: z.string(),
+  contentType: z.string(),
+  size: z.number().int(),
+});
+
+// 상담 수락(PATCH accept) — 내 제안 ACCEPTED · 리포트 CLOSED · 방 CLOSED(형제 방도 CLOSED).
+export const acceptChatResponseSchema = z.object({
+  chatRoomId: z.uuid(),
+  chatRoomStatus: z.literal("CLOSED"),
+  reviewStatus: z.literal("ACCEPTED"),
+  reportId: z.uuid(),
+  reportStatus: z.string(),
+});
+
+// 상담 거절(PATCH reject) — 내 제안 REJECTED · 리포트 AWAITING_ADOPTION · 방 CLOSED.
+export const rejectChatResponseSchema = z.object({
+  chatRoomId: z.uuid(),
+  chatRoomStatus: z.literal("CLOSED"),
+  reviewStatus: z.literal("REJECTED"),
+  reportId: z.uuid(),
+  reportStatus: z.string(),
+});
+
+// 읽음 처리(POST read) — 이후 unread_count 0.
+export const readChatResponseSchema = z.object({
+  chatRoomId: z.uuid(),
+  readAt: z.string(),
 });
 
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
-export type CloseChatResponse = z.infer<typeof closeChatResponseSchema>;
-export type ChatAttachment = z.infer<typeof chatAttachmentSchema>;
+export type ReviewStatus = z.infer<typeof reviewStatusSchema>;
+export type ChatCounterpart = z.infer<typeof chatCounterpartSchema>;
 export type ChatRoom = z.infer<typeof chatRoomSchema>;
 export type ChatList = z.infer<typeof chatListSchema>;
+export type MessageAttachment = z.infer<typeof messageAttachmentSchema>;
+export type MessageType = z.infer<typeof messageTypeSchema>;
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 export type ChatMessages = z.infer<typeof chatMessagesSchema>;
 export type SendChatMessageBody = z.infer<typeof sendChatMessageBodySchema>;
 export type SendChatMessageResponse = z.infer<
   typeof sendChatMessageResponseSchema
 >;
+export type UploadChatAttachmentResponse = z.infer<
+  typeof uploadChatAttachmentResponseSchema
+>;
+export type AcceptChatResponse = z.infer<typeof acceptChatResponseSchema>;
+export type RejectChatResponse = z.infer<typeof rejectChatResponseSchema>;
+export type ReadChatResponse = z.infer<typeof readChatResponseSchema>;
