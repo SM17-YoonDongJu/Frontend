@@ -25,10 +25,14 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
+          persist-credentials: false
 
       - name: last-audit 태그 확인 및 커밋 수 계산
         id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          gh auth setup-git
           if ! git rev-parse -q --verify refs/tags/last-audit >/dev/null; then
             echo "last-audit 태그가 없어 현재 HEAD(${GITHUB_SHA})에 생성하고 종료합니다."
             git tag last-audit HEAD
@@ -117,6 +121,9 @@ jobs:
 
       - name: last-audit 태그 이동
         if: steps.gate.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          gh auth setup-git
           git tag -f last-audit HEAD
           git push -f origin last-audit
