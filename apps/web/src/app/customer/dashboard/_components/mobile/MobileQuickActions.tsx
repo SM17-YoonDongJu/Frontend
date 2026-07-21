@@ -1,45 +1,49 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { MessageCircle } from "@/shared/ui/icons/MessageCircle";
-import { Upload } from "@/shared/ui/icons/Upload";
+import { FileText } from "@/shared/ui/icons/FileText";
+import { Plus } from "@/shared/ui/icons/Plus";
+import { Search } from "@/shared/ui/icons/Search";
 import { DASHBOARD_LINKS } from "@/app/customer/dashboard/_model/dashboard-links";
 
 interface QuickAction {
   href: string;
   icon: ReactNode;
-  title: string;
-  description: string;
+  label: string;
 }
 
 const QUICK_ACTIONS: QuickAction[] = [
   {
     href: DASHBOARD_LINKS.newAnalysis,
-    icon: <Upload className="text-[1.25rem]" />,
-    title: "문서로 시작",
-    description: "진단서·증권 업로드",
+    icon: <Plus className="text-[1rem]" />,
+    label: "새 분석",
   },
   {
-    href: DASHBOARD_LINKS.chat,
-    icon: <MessageCircle className="text-[1.25rem]" />,
-    title: "보상 상담",
-    description: "궁금한 점 질문",
+    href: DASHBOARD_LINKS.allReports,
+    icon: <FileText className="text-[1rem]" />,
+    label: "내 리포트",
+  },
+  {
+    href: DASHBOARD_LINKS.adjusterFinder,
+    icon: <Search className="text-[1rem]" />,
+    label: "사정사 찾기",
   },
 ];
 
 export function MobileQuickActions() {
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-3 gap-2">
       {QUICK_ACTIONS.map((action) => (
         <Link
           key={action.href}
           href={action.href}
-          className="rounded-card border border-line bg-card p-4 shadow-[0px_1px_1px_rgba(21,32,46,0.03)] transition hover:brightness-[.98]"
+          className="flex flex-col items-center rounded-input border border-line bg-card px-[0.3125rem] py-[0.8125rem] transition hover:brightness-[.98]"
         >
-          <span className="flex size-[2.375rem] items-center justify-center rounded-button bg-gold-soft text-gold-ink">
+          <span className="flex size-[2.125rem] items-center justify-center rounded-chip bg-gold-soft text-gold-ink">
             {action.icon}
           </span>
-          <p className="mt-3.5 text-sm font-bold text-ink">{action.title}</p>
-          <p className="mt-1 text-[0.75rem] text-ink-3">{action.description}</p>
+          <span className="mt-[0.4375rem] text-[0.6875rem] font-semibold text-ink-2">
+            {action.label}
+          </span>
         </Link>
       ))}
     </div>
