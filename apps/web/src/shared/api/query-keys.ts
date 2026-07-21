@@ -91,6 +91,8 @@ export const adjusterKeys = createQueryKeys("adjuster", {
   // 헤더/인사말용 축약 프로필 — meProfile(전체 프로필)과 응답 shape가 달라 키 분리
   meProfileSummary: () => ["me", "profile", "summary"],
   home: (inProgressLimit?: number) => [{ inProgressLimit: inProgressLimit ?? 5 }],
+  // 홈 추천 손해사정사(이슈 #142) — 평점순 첫 페이지. 목록 화면 list(무한 조회)와 캐시 분리.
+  recommended: null,
   mypage: () => ["me", "mypage"],
   list: (filter?: AdjusterListFilter) => [{ filter: filter ?? {} }],
   detail: (adjusterId: string) => [adjusterId],
