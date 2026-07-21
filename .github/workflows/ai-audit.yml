@@ -67,13 +67,15 @@ jobs:
 
       - name: 프롬프트 조립
         if: steps.gate.outputs.run == 'true'
+        env:
+          AUDIT_COUNT: ${{ steps.gate.outputs.count }}
         run: |
           {
             cat .github/ai-audit-prompt.md
             echo
             echo "---"
             echo
-            echo "## 이번 점검 대상: last-audit..HEAD (${{ steps.gate.outputs.count }}커밋)"
+            echo "## 이번 점검 대상: last-audit..HEAD (${AUDIT_COUNT}커밋)"
             echo
             echo "## 새로 추가된 page.tsx"
             if [ -s /tmp/audit/new-pages.txt ]; then cat /tmp/audit/new-pages.txt; else echo "(없음)"; fi
@@ -112,9 +114,10 @@ jobs:
         if: steps.gate.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          AUDIT_COUNT: ${{ steps.gate.outputs.count }}
         run: |
           {
-            echo "## 🤖 정기 코드 점검 — last-audit 이후 ${{ steps.gate.outputs.count }}커밋 (${GITHUB_SHA::7})"
+            echo "## 🤖 정기 코드 점검 — last-audit 이후 ${AUDIT_COUNT}커밋 (${GITHUB_SHA::7})"
             echo
             cat /tmp/audit/result.md
             echo
