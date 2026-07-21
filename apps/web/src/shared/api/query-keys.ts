@@ -42,6 +42,8 @@ export const reportKeys = createQueryKeys("report", {
 
 export const userKeys = createQueryKeys("user", {
   me: null,
+  // 고객 홈 대시보드 BFF(이슈 #142) — GET /users/me/dashboard. 홈 초기 렌더 조합 데이터.
+  dashboard: null,
   // 고객 마이페이지(이슈 #105) — 활동 카운트·보험 목록. insurance 도메인 미신설(user 배치).
   activitySummary: null,
   insurances: null,
