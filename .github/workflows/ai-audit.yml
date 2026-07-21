@@ -79,12 +79,16 @@ jobs:
             if [ -s /tmp/audit/new-pages.txt ]; then cat /tmp/audit/new-pages.txt; else echo "(없음)"; fi
             echo
             echo "## 추적 이슈 #${TRACKING_ISSUE} 본문"
+            echo '<UNTRUSTED_DATA source="issue-body">'
             cat /tmp/audit/issue-body.md
+            echo '</UNTRUSTED_DATA>'
             echo
             echo "## diff (last-audit..HEAD)"
+            echo '<UNTRUSTED_DATA source="diff">'
             echo '```diff'
             cat /tmp/audit/diff.patch
             echo '```'
+            echo '</UNTRUSTED_DATA>'
           } > /tmp/audit/prompt.md
           wc -c /tmp/audit/prompt.md
 
