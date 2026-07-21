@@ -22,6 +22,7 @@ import { MatchRejectConfirmModal } from "@/shared/ui/chat/MatchRejectConfirmModa
 import { MatchStatusBadge } from "@/shared/ui/chat/MatchStatusBadge";
 import { MessageInputBar } from "@/shared/ui/chat/MessageInputBar";
 import { ROOM_STATUS_META } from "@/shared/ui/chat/room-status";
+import { toast } from "@/shared/ui/toast";
 
 export interface CustomerChatThreadContentProps {
   chatRoomId: string;
@@ -93,9 +94,17 @@ export function CustomerChatThreadContent({
   // 거절도 비가역이라 완료와 대칭으로 확인 모달을 거친다
   const rejectMatch = () => setRejectOpen(true);
   const confirmReject = () =>
-    reject.mutate(undefined, { onSuccess: () => setRejectOpen(false) });
+    reject.mutate(undefined, {
+      onSuccess: () => setRejectOpen(false),
+      onError: () =>
+        toast.error("매칭 거절에 실패했어요. 잠시 후 다시 시도해 주세요."),
+    });
   const confirmMatch = () =>
-    accept.mutate(undefined, { onSuccess: () => setConfirmOpen(false) });
+    accept.mutate(undefined, {
+      onSuccess: () => setConfirmOpen(false),
+      onError: () =>
+        toast.error("매칭 완료에 실패했어요. 잠시 후 다시 시도해 주세요."),
+    });
 
   const actions =
     group === "comparing" ? (
@@ -208,7 +217,12 @@ export function CustomerChatThreadContent({
         disabled={sendMessage.isPending}
         closed={room.status === "CLOSED"}
         sendFailed={sendMessage.isError}
-        onPickFile={(file) => sendAttachment.mutate(file)}
+        onPickFile={(file) =>
+          sendAttachment.mutate(file, {
+            onError: () =>
+              toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요."),
+          })
+        }
         attachPending={sendAttachment.isPending}
       />
 

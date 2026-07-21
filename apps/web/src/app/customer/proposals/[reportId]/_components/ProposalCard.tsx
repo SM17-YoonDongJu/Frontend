@@ -9,6 +9,7 @@ import { MatchConfirmModal } from "@/shared/ui/chat/MatchConfirmModal";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { Star } from "@/shared/ui/icons/Star";
+import { toast } from "@/shared/ui/toast";
 import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
 import { useViewedProposals } from "../_hooks/use-viewed-proposals";
 import type { Proposal } from "../../../_shared/model/proposal.schema";
@@ -69,7 +70,11 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
   const confirmAccept = () => {
     matchProposal.mutate(
       { proposalId, status: "ACCEPTED" },
-      { onSuccess: () => setConfirmOpen(false) },
+      {
+        onSuccess: () => setConfirmOpen(false),
+        onError: () =>
+          toast.error("제안 채택에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      },
     );
   };
 

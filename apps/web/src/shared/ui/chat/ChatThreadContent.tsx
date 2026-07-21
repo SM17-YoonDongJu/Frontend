@@ -8,6 +8,7 @@ import { useReadChat } from "@/shared/api/chat/use-read-chat";
 import { useRejectChat } from "@/shared/api/chat/use-reject-chat";
 import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
+import { toast } from "@/shared/ui/toast";
 import { ChatThreadHeader } from "./ChatThreadHeader";
 import { ChatThreadView } from "./ChatThreadView";
 import { MessageInputBar } from "./MessageInputBar";
@@ -50,7 +51,12 @@ export function ChatThreadContent({
           roomStatus={room.status}
           reportHref={room.reportId ? `${reportBasePath}/${room.reportId}` : "#"}
           onBack={() => router.push(chatBasePath)}
-          onClose={() => endChat.mutate()}
+          onClose={() =>
+            endChat.mutate(undefined, {
+              onError: () =>
+                toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요."),
+            })
+          }
           closePending={endChat.isPending}
         />
       )}
@@ -67,7 +73,12 @@ export function ChatThreadContent({
         disabled={sendMessage.isPending}
         closed={closed}
         sendFailed={sendMessage.isError}
-        onPickFile={(file) => sendAttachment.mutate(file)}
+        onPickFile={(file) =>
+          sendAttachment.mutate(file, {
+            onError: () =>
+              toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요."),
+          })
+        }
         attachPending={sendAttachment.isPending}
       />
     </div>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { Button, buttonVariants } from "@/shared/ui/Button";
+import { toast } from "@/shared/ui/toast";
 import { useDraftPreview } from "../_api/use-draft-preview";
 import { useHoldReview } from "../_api/use-hold-review";
 import type { ReviewListItem } from "../../_shared/model/types";
@@ -146,7 +147,11 @@ function DraftContent({ item }: { item: ReviewListItem }) {
           onConfirm={(reason, reasonDetail) => {
             hold.mutate(
               { reportId: item.reportId, reason, reasonDetail },
-              { onSuccess: () => setHoldOpen(false) },
+              {
+                onSuccess: () => setHoldOpen(false),
+                onError: () =>
+                  toast.error("사건 보류에 실패했어요. 잠시 후 다시 시도해 주세요."),
+              },
             );
           }}
           onClose={() => setHoldOpen(false)}

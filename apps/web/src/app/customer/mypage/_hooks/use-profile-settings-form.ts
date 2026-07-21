@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useUpdateMe } from "@/shared/api/use-update-me";
 import { useUploadFile } from "@/shared/api/use-upload-file";
+import { toast } from "@/shared/ui/toast";
 import type { Me } from "../_model/types";
 
 interface UseProfileSettingsFormParams {
@@ -40,7 +41,11 @@ export function useProfileSettingsForm({
           ? { avatarUrl }
           : {}),
       },
-      { onSuccess: onSaved },
+      {
+        onSuccess: onSaved,
+        onError: () =>
+          toast.error("프로필 저장에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      },
     );
   };
 
