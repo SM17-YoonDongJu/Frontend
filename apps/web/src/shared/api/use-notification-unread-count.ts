@@ -1,4 +1,3 @@
-// CONTRACT: 명세없음-초안(.pr-assets/api-spec-draft-notifications.md)
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
@@ -16,7 +15,7 @@ export function useNotificationUnreadCount() {
     queryFn: getNotificationList,
     staleTime: STALE_TIME_AUTH,
     gcTime: GC_TIME_DEFAULT,
-    select: (list) => list.list.filter((notification) => !notification.isRead).length,
+    select: (list) => list.unreadCount,
   });
 
   return data;
