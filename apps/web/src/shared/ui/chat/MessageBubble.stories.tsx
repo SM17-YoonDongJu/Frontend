@@ -41,18 +41,15 @@ export const Conversation: Story = {
   ),
 };
 
-/** 첨부 파일 칩(⚠️ 명세없음-초안) — 파일명·아이콘 표시 */
+/** 첨부 파일 칩 — 파일명·아이콘 표시 */
 export const WithAttachment: Story = {
   args: {
     content: "요청하신 진단서 보내드려요.",
     mine: true,
-    attachments: [
-      {
-        attachmentId: "00000000-0000-4000-8000-00000000a001",
-        fileName: "진단서.pdf",
-        mimeType: "application/pdf",
-        url: "https://mock.local/chat-uploads/진단서.pdf",
-      },
-    ],
+    attachment: {
+      url: "https://mock.local/chat-uploads/진단서.pdf",
+      name: "진단서.pdf",
+      contentType: "application/pdf",
+    },
   },
 };

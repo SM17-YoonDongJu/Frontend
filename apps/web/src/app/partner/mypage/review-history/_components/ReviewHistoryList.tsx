@@ -24,7 +24,7 @@ export function ReviewHistoryList({ items, totalCount, hasActiveFilter, onResetF
   return (
     <ul className="flex flex-col gap-3 px-5 pt-3 pb-5">
       {items.map((item) => (
-        <li key={item.caseId}>
+        <li key={item.reportId}>
           <ReviewedCaseCard item={item} />
         </li>
       ))}

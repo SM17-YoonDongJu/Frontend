@@ -6,55 +6,39 @@ import { accidentTypeSchema } from "@/shared/model/accident-type";
  * 봉투(status/message/code)는 fetchJson이 해제 — 여기선 data 페이로드만 모델링.
  */
 
-/** list[].status — 명세 Query status의 ALL(전체)을 제외한 실제 상태값. */
+/** items[].status — 사정사 검수 상태(방향). 명세 Query status의 ALL(전체)은 제외. */
 export const reviewStatusSchema = z.enum([
   "SENT",
-  "CONSULTATION",
-  "NOT_SELECTED",
-  "CLOSED",
+  "COUNSELING",
+  "REJECTED",
+  "ACCEPTED",
 ]);
 
 export const reviewedReportItemSchema = z.object({
-  caseId: z.string(),
+  reportId: z.uuid(),
+  caseNo: z.string(),
   title: z.string(),
-  sentDate: z.string(),
+  accidentType: accidentTypeSchema,
+  region: z.string(),
   status: reviewStatusSchema,
-  statusLabel: z.string(),
-  hasOpinion: z.boolean(),
-
-  // ⚠️ 명세없음-1: list[]에 없음(Figma 카드 요구). FE optional + MSW 채움, 백엔드 list 확장 대기.
-  accidentType: accidentTypeSchema.optional(),
-  confirmedMinAmount: z.number().int().nullable().optional(),
-  confirmedMaxAmount: z.number().int().nullable().optional(),
-  rating: z.number().nullable().optional(),
+  reviewedAt: z.string(),
 });
 
-export const reviewSummarySchema = z.object({
+export const reviewStatsSchema = z.object({
   monthlyReviewCount: z.number().int(),
   previousMonthReviewCount: z.number().int(),
-  consultationConversionRate: z.number(),
   consultationConvertedCount: z.number().int(),
+  // 0.0~1.0 비율(백분율 아님). 상담 전환 티켓 미구현으로 현재 항상 0.
+  consultationConversionRate: z.number(),
   totalCount: z.number().int(),
 });
 
-/** 서버 에코(data.filter) — 요청 필터 반영값. */
-export const reviewFilterEchoSchema = z.object({
-  status: z.string(),
-  month: z.string(),
-});
-
-export const paginationSchema = z.object({
+/** = data 페이로드. 페이지 메타는 명세대로 data 최상위에 평면(page는 0부터). */
+export const reviewedReportsSchema = z.object({
+  stats: reviewStatsSchema,
+  items: z.array(reviewedReportItemSchema),
   page: z.number().int(),
   size: z.number().int(),
   totalElements: z.number().int(),
   totalPages: z.number().int(),
-  hasNext: z.boolean(),
-});
-
-/** = data 페이로드. */
-export const reviewedReportsSchema = z.object({
-  summary: reviewSummarySchema,
-  filter: reviewFilterEchoSchema,
-  list: z.array(reviewedReportItemSchema),
-  pagination: paginationSchema,
 });

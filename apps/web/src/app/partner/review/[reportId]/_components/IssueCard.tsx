@@ -4,31 +4,38 @@ import { cn } from "@/shared/lib/utils";
 import { Input } from "@/shared/ui/Input";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 import { Scale } from "@/shared/ui/icons/Scale";
-import type { ReviewIssue, ReviewIssueStatus } from "../_model/types";
+import type { ReviewIssue, IssueReviewStatus } from "../_model/types";
+import type { DraftIssue } from "../_hooks/use-review-draft";
 import { IssueStatusControl } from "./IssueStatusControl";
 import { IssueModifyForm } from "./IssueModifyForm";
 import { IssueExcludeForm } from "./IssueExcludeForm";
 
 function formatImpact(won: number | null): string | null {
   if (won == null || won === 0) return null;
-  const manwon = Math.round(won / 10_000).toLocaleString("ko-KR");
-  return won > 0 ? `+약 ${manwon}만` : `-약 ${Math.abs(Number(manwon.replace(/,/g, ""))).toLocaleString("ko-KR")}만`;
+  const manwon = Math.round(Math.abs(won) / 10_000).toLocaleString("ko-KR");
+  return won > 0 ? `+약 ${manwon}만` : `-약 ${manwon}만`;
 }
 
 export interface IssueCardProps {
-  issue: ReviewIssue;
+  issue: DraftIssue;
   index: number;
-  onSetStatus: (status: ReviewIssueStatus) => void;
+  onSetStatus: (status: IssueReviewStatus) => void;
   onPatch: (patch: Partial<ReviewIssue>) => void;
   onRemove: () => void;
 }
 
 export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: IssueCardProps) {
-  const impact = formatImpact(issue.impactAmount);
-  const impactTone =
-    issue.impactAmount != null && issue.impactAmount < 0 ? "text-terra" : "text-green";
-  const isPending = issue.reviewStatus === "PENDING";
-  const isModified = issue.reviewStatus === "MODIFIED";
+  const isNew = issue.issueId === null;
+  const status = issue.reviewStatus;
+  const isModified = status === "MODIFIED";
+  const isExcluded = status === "EXCLUDED";
+  const isPending = status === null;
+
+  const title = issue.modifiedTitle ?? issue.aiTitle ?? "";
+  const description = issue.aiDescription ?? issue.modifiedDescription ?? "";
+  const impactValue = issue.modifiedImpactAmount ?? issue.impactAmount;
+  const impact = formatImpact(impactValue);
+  const impactTone = impactValue != null && impactValue < 0 ? "text-terra" : "text-green";
 
   return (
     <li
@@ -45,20 +52,20 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
           </span>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="text-[0.9375rem] font-semibold text-ink">{issue.title}</h3>
+              <h3 className="text-[0.9375rem] font-semibold text-ink">{title}</h3>
               {impact && (
                 <span className={cn("text-[0.8125rem] font-semibold", impactTone)}>{impact}</span>
               )}
-              {issue.isNew && <StatusBadge tone="gold">신규</StatusBadge>}
+              {isNew && <StatusBadge tone="gold">신규</StatusBadge>}
             </div>
           </div>
         </div>
-        <IssueStatusControl value={issue.reviewStatus} onChange={onSetStatus} />
+        {!isNew && <IssueStatusControl value={status} onChange={onSetStatus} />}
       </div>
 
-      {!isModified && (
+      {!isModified && description && (
         <p className="mt-2.5 pl-[2.125rem] text-[0.84375rem] leading-relaxed text-ink-2">
-          {issue.description}
+          {description}
         </p>
       )}
 
@@ -75,8 +82,8 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
       )}
 
       <div className="mt-3 pl-[2.125rem]">
-        {isModified && <IssueModifyForm issue={issue} onPatch={onPatch} />}
-        {issue.reviewStatus === "EXCLUDED" && <IssueExcludeForm issue={issue} onPatch={onPatch} />}
+        {!isNew && isModified && <IssueModifyForm issue={issue} onPatch={onPatch} />}
+        {!isNew && isExcluded && <IssueExcludeForm issue={issue} onPatch={onPatch} />}
 
         <div className="mt-3 flex items-start gap-2">
           <span
@@ -96,7 +103,7 @@ export function IssueCard({ issue, index, onSetStatus, onPatch, onRemove }: Issu
           />
         </div>
 
-        {issue.isNew && (
+        {isNew && (
           <button
             type="button"
             onClick={onRemove}

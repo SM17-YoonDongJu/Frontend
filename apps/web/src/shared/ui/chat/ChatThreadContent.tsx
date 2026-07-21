@@ -1,12 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
 import { useChatMessages } from "@/shared/api/chat/use-chat-messages";
-import { useCloseChat } from "@/shared/api/chat/use-close-chat";
+import { useReadChat } from "@/shared/api/chat/use-read-chat";
+import { useRejectChat } from "@/shared/api/chat/use-reject-chat";
 import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
-import { useMe } from "@/shared/api/use-me";
 import { toast } from "@/shared/ui/toast";
 import { ChatThreadHeader } from "./ChatThreadHeader";
 import { ChatThreadView } from "./ChatThreadView";
@@ -26,39 +27,42 @@ export function ChatThreadContent({
   reportBasePath,
 }: ChatThreadContentProps) {
   const router = useRouter();
-  const { data: me } = useMe();
   const { data: rooms } = useChatList();
   const { messages, hasOlder, loadOlder, loadingOlder } = useChatMessages(chatRoomId);
   const sendMessage = useSendChatMessage(chatRoomId);
   const sendAttachment = useSendChatAttachment(chatRoomId);
-  const closeChat = useCloseChat(chatRoomId);
+  // 상담 종료 UX는 명세상 reject(방 종료)로 매핑. 형제 방 유지·서버 미러.
+  const endChat = useRejectChat(chatRoomId);
+  const { mutate: markRead } = useReadChat(chatRoomId);
+
+  useEffect(() => {
+    markRead();
+  }, [markRead, chatRoomId]);
 
   const room = rooms.find((item) => item.chatRoomId === chatRoomId);
-  const closed = room?.roomStatus === "CLOSED";
-  const currentUserId = String(me.userId);
+  const closed = room?.status === "CLOSED";
 
   return (
     <div className="flex h-full flex-col">
       {room && (
         <ChatThreadHeader
-          name={room.adjusterName}
+          name={room.counterpart.name}
           caseNo={room.caseNo}
-          roomStatus={room.roomStatus}
-          reportHref={`${reportBasePath}/${room.reportId}`}
+          roomStatus={room.status}
+          reportHref={room.reportId ? `${reportBasePath}/${room.reportId}` : "#"}
           onBack={() => router.push(chatBasePath)}
           onClose={() =>
-            closeChat.mutate(undefined, {
+            endChat.mutate(undefined, {
               onError: () =>
                 toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요."),
             })
           }
-          closePending={closeChat.isPending}
+          closePending={endChat.isPending}
         />
       )}
 
       <ChatThreadView
         messages={messages}
-        currentUserId={currentUserId}
         hasOlder={hasOlder}
         onLoadOlder={loadOlder}
         loadingOlder={loadingOlder}

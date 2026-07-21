@@ -1,4 +1,8 @@
 import type { ZodType } from "zod";
+import {
+  camelToSnakeDeep,
+  snakeToCamelDeep,
+} from "@/shared/api/case-convert";
 import { ERROR_CODES, getErrorCode } from "@/shared/api/error-codes";
 import { reissueTokens } from "@/shared/api/reissue";
 
@@ -36,7 +40,7 @@ async function requestJson<T>(
     throw err;
   }
 
-  return schema.parse(isEnvelope(json) ? json.data : json);
+  return schema.parse(snakeToCamelDeep(isEnvelope(json) ? json.data : json));
 }
 
 function redirectToLogin(): void {
@@ -56,6 +60,17 @@ export async function fetchJson<T>(
   init?: FetchJsonInit,
 ): Promise<T> {
   const { skipTokenReissue = false, ...requestInit } = init ?? {};
+
+  // JSON body만 snake_case로 변환 — FormData·비JSON 문자열은 그대로 보낸다.
+  if (typeof requestInit.body === "string") {
+    try {
+      requestInit.body = JSON.stringify(
+        camelToSnakeDeep(JSON.parse(requestInit.body)),
+      );
+    } catch {
+      // JSON이 아닌 문자열 body는 변환하지 않는다
+    }
+  }
 
   try {
     return await requestJson(url, schema, requestInit);

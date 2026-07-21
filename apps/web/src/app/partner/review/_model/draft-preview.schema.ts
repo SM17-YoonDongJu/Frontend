@@ -9,10 +9,10 @@ export const draftPreviewSchema = z.object({
   claimedMaxAmount: z.number().int(),
   offeredAmount: z.number().int().nullable(),
   omittedSpecialContract: z.array(z.string()),
-  issue: z.array(
+  issues: z.array(
     z.object({
       title: z.string(),
-      tag: z.string().nullable().optional(),
+      tags: z.array(z.string()).optional().default([]),
     }),
   ),
 });

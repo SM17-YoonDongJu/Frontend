@@ -50,7 +50,7 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
     <Document>
       <Page size="A4" style={s.page}>
         <Text style={s.crumb}>
-          {report.accidentType} · {report.treatment} · 검수 의견 {report.issue.length}건
+          {report.accidentType} · {report.treatment} · 검수 의견 {report.issues.length}건
         </Text>
         <Text style={s.title}>{REPORT_TITLE}</Text>
 
@@ -80,19 +80,19 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
           )}
         </View>
 
-        {report.issue.length > 0 && (
+        {report.issues.length > 0 && (
           <View style={s.section}>
             <Text style={s.h2}>검토 의견 및 보완 사항</Text>
-            {report.issue.map((it, i) => (
+            {report.issues.map((it, i) => (
               <View key={i} style={i === 0 ? undefined : s.issue}>
                 <View style={s.issueHead}>
                   <Text style={s.issueTitle}>
                     {i + 1}. {it.title}
                   </Text>
-                  <Text style={s.badge}>{ISSUE_LABEL[it.status]}</Text>
+                  <Text style={s.badge}>{ISSUE_LABEL[it.aiStatus]}</Text>
                 </View>
-                <Text style={{ marginTop: 2 }}>{it.opinion}</Text>
-                {it.tag && <Text style={s.tag}>{it.tag}</Text>}
+                <Text style={{ marginTop: 2 }}>{it.description}</Text>
+                {it.tags?.[0] && <Text style={s.tag}>{it.tags[0]}</Text>}
               </View>
             ))}
           </View>

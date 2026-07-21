@@ -1,19 +1,19 @@
 import { API_BASE_URL } from "@/shared/api/config";
 import { fetchJson } from "@/shared/api/fetch-json";
-import { chatAttachmentSchema } from "./chat.schema";
-import type { ChatAttachment } from "./chat.schema";
+import { uploadChatAttachmentResponseSchema } from "./chat.schema";
+import type { UploadChatAttachmentResponse } from "./chat.schema";
 
-// ⚠️ 명세없음-초안(TEMP §3-3) — multipart 업로드 후 attachmentId를 받아 메시지 전송에 사용
+// POST /chats/{id}/attachments — multipart file 업로드 후 key 메타를 받아 메시지 전송에 attachment로 연결.
 export function uploadChatAttachment(
   chatRoomId: string,
   file: File,
-): Promise<ChatAttachment> {
+): Promise<UploadChatAttachmentResponse> {
   const formData = new FormData();
   formData.append("file", file);
 
   return fetchJson(
     `${API_BASE_URL}/chats/${chatRoomId}/attachments`,
-    chatAttachmentSchema,
+    uploadChatAttachmentResponseSchema,
     {
       method: "POST",
       body: formData,

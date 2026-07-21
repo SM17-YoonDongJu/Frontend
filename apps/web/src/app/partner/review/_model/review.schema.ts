@@ -9,10 +9,21 @@ export const reviewSummarySchema = z.object({
   inProgressCount: z.number().int().optional(),
 });
 
-/** 보류 토글 응답. 출처: API 명세 PATCH /reports/{reportId}/hold. */
+/** 보류 사유. 출처: API 명세 POST /reports/{reportId}/hold body.reason. */
+export const holdReasonSchema = z.enum([
+  "NEED_MORE_DOCUMENTS",
+  "OUT_OF_SPECIALTY",
+  "SCHEDULE_CONFLICT",
+  "OTHER",
+]);
+
+/** 보류 응답(멱등). 출처: API 명세 POST /reports/{reportId}/hold. */
 export const holdReviewSchema = z.object({
   reportId: z.uuid(),
   held: z.boolean(),
+  reason: holdReasonSchema,
+  reasonDetail: z.string().nullable(),
 });
 
+export type HoldReason = z.infer<typeof holdReasonSchema>;
 export type HoldReview = z.infer<typeof holdReviewSchema>;

@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { Button, buttonVariants } from "@/shared/ui/Button";
 import { toast } from "@/shared/ui/toast";
 import { useDraftPreview } from "../_api/use-draft-preview";
 import { useHoldReview } from "../_api/use-hold-review";
 import type { ReviewListItem } from "../../_shared/model/types";
+import { HoldReasonDialog } from "./HoldReasonDialog";
 
 const toManwon = (won: number) => Math.round(won / 10_000).toLocaleString("ko-KR");
 
@@ -30,6 +31,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
   const { data } = useDraftPreview(item.reportId);
   const router = useRouter();
   const hold = useHoldReview();
+  const [holdOpen, setHoldOpen] = useState(false);
 
   const offered = data.offeredAmount ?? 0;
   const fillStart =
@@ -37,9 +39,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
       ? Math.min(95, Math.max(0, Math.round((offered / data.claimedMaxAmount) * 100)))
       : 0;
 
-  const tags = [
-    ...new Set(data.issue.map((issue) => issue.tag).filter((tag): tag is string => !!tag)),
-  ];
+  const tags = [...new Set(data.issues.flatMap((issue) => issue.tags))];
 
   return (
     <div className="space-y-3">
@@ -79,11 +79,11 @@ function DraftContent({ item }: { item: ReviewListItem }) {
 
       <div className="rounded-card-lg border border-line bg-card p-5">
         <h3 className="text-[0.9375rem] font-bold text-ink">
-          AI가 짚은 쟁점 <span className="text-gold">{data.issue.length}건</span>
+          AI가 짚은 쟁점 <span className="text-gold">{data.issues.length}건</span>
         </h3>
 
         <ol className="mt-3 space-y-3">
-          {data.issue.map((issue, index) => (
+          {data.issues.map((issue, index) => (
             <li key={`${issue.title}-${index}`} className="flex gap-3">
               <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-gold-soft text-xs font-bold text-gold-ink">
                 {index + 1}
@@ -131,12 +131,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
           variant="outline"
           className="flex-1"
           loading={hold.isPending}
-          onClick={() =>
-            hold.mutate(item.reportId, {
-              onError: () =>
-                toast.error("사건 보류에 실패했어요. 잠시 후 다시 시도해 주세요."),
-            })
-          }
+          onClick={() => setHoldOpen(true)}
         >
           보류
         </Button>
@@ -145,6 +140,23 @@ function DraftContent({ item }: { item: ReviewListItem }) {
       <p className="text-center text-xs text-ink-3">
         검수를 시작하면 의뢰인에게 배정 알림이 전송됩니다.
       </p>
+
+      {holdOpen && (
+        <HoldReasonDialog
+          isPending={hold.isPending}
+          onConfirm={(reason, reasonDetail) => {
+            hold.mutate(
+              { reportId: item.reportId, reason, reasonDetail },
+              {
+                onSuccess: () => setHoldOpen(false),
+                onError: () =>
+                  toast.error("사건 보류에 실패했어요. 잠시 후 다시 시도해 주세요."),
+              },
+            );
+          }}
+          onClose={() => setHoldOpen(false)}
+        />
+      )}
     </div>
   );
 }

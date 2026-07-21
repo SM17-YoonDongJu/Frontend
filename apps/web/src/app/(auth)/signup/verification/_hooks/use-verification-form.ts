@@ -205,10 +205,11 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
     setErrors(allErrors);
     if (Object.keys(allErrors).length > 0 || isUploading || apply.isPending) return;
 
-    // phone·specialties는 명세 미정의 확장 필드(백엔드 정의 요청 중). 데스크톱에선 빈 값.
+    // 자격 구분은 명세 `specialities`(배열) — UI 단일 선택값을 배열 1개로 감싼다.
+    // phone·specialties(전문분야)는 명세 미정의 확장 필드(백엔드 정의 요청 중). 데스크톱에선 빈 값.
     const body: AdjusterApplicationExtendedBody = {
       name: name.trim(),
-      speciality: speciality as Speciality,
+      specialities: [speciality as Speciality],
       licenseNo: licenseNo.trim() || null,
       licenseImageUrl: license.url ?? null,
       career: career ? Number(career.replace(/\D/g, "")) || null : null,

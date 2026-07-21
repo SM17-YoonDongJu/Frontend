@@ -88,7 +88,7 @@ test("전체보기를 누르면 검수 대기 목록으로 이동한다", async 
 });
 
 test("대시보드 요약 로드에 실패하면 섹션 에러가 표시된다", async ({ page }) => {
-  await page.setExtraHTTPHeaders({ "x-mock-failure": "dashboard" });
+  await page.setExtraHTTPHeaders({ "x-mock-failure": "home" });
   await page.goto(PATH);
 
   // useSuspenseQuery 기본 재시도(3회)·백오프를 지나 에러 바운더리에 도달할 때까지 여유를 둔다.

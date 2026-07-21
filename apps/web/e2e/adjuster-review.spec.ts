@@ -80,15 +80,18 @@ test("쟁점을 인정·수정·제외하면 진행현황과 카운트가 즉시
   await completeButton.click();
 
   const req = await patchRequest;
+  // fetch 레이어가 camel→snake 변환해 전송 → 와이어 바디는 snake_case.
   const body = req.postDataJSON() as {
     status?: string;
     review?: string;
-    issues?: { issueId?: string; reviewStatus?: string }[];
+    issues?: { issue_id?: string | null; review_status?: string }[];
   };
-  expect(body.status).toBe("AWAITING_ADOPTION");
+  // status는 서버가 파생 — 클라이언트 전송 금지(#130).
+  expect(body).not.toHaveProperty("status");
   expect(Array.isArray(body.issues)).toBe(true);
-  expect(body.issues?.[0]).toHaveProperty("issueId");
-  expect(body.issues?.[0]).toHaveProperty("reviewStatus");
+  expect(body.issues?.length).toBe(3);
+  expect(body.issues?.[0]).toHaveProperty("issue_id");
+  expect(body.issues?.[0]).toHaveProperty("review_status");
   expect(body.review).toContain("후유장해");
 
   await expect(

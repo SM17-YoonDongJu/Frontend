@@ -55,7 +55,7 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
     }
     clearReviewDraft(reportId);
     router.push(
-      `/partner/review/${reportId}/complete?caseId=${encodeURIComponent(data.caseId)}`,
+      `/partner/review/${reportId}/complete?caseId=${encodeURIComponent(data.caseNo)}`,
     );
   }
 
@@ -64,11 +64,11 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
       <div className="border-b border-line bg-card">
         <div className="mx-auto w-full max-w-6xl px-6 py-5">
           <ReviewHeader
-            caseId={data.caseId}
-            treatment={data.treatment}
+            caseNo={data.caseNo}
+            diagnosis={data.claim.diagnosis}
             accidentType={data.accidentType}
-            region={data.client.region}
-            clientName={data.client.maskedName}
+            region={data.region}
+            clientName={data.client.nickname}
             onSaveDraft={handleSaveDraft}
             isSaving={isSavingDraft}
           />
@@ -80,22 +80,23 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
           <section className="space-y-5 rounded-card-lg border border-line bg-card p-6">
             <ClientAccidentSection client={data.client} isMasked={data.isMasked} />
             <ClaimInfoSection
-              accidentType={data.accidentType}
-              treatment={data.treatment}
-              accidentDate={data.accidentDate}
-              hospitalizations={data.hospitalizations}
+              accidentType={data.claim.accidentType}
+              diagnosis={data.claim.diagnosis}
+              accidentDate={data.claim.accidentDate}
+              hospitalization={data.claim.hospitalization}
               offeredAmount={data.offeredAmount}
-              insuranceName={data.insuranceName}
+              insurerName={data.claim.insurerName}
+              productName={data.claim.productName}
               applicableGuarantees={data.applicableGuarantees}
             />
-            <AccidentNarrativeSection description={data.description} />
+            <AccidentNarrativeSection description={data.claim.description} />
             <AttachmentSection attachments={data.attachments} />
           </section>
           <EstimatedRangeSection
-            aiMin={data.claimedMinAmount}
-            aiMax={data.claimedMaxAmount}
-            confirmedMin={state.confirmedMinAmount}
-            confirmedMax={state.confirmedMaxAmount}
+            aiMin={data.aiEstimate.min}
+            aiMax={data.aiEstimate.max}
+            confirmedMin={state.estimateMin}
+            confirmedMax={state.estimateMax}
             onChangeRange={actions.setRange}
           />
           <IssueBoard issues={state.issues} actions={actions} />
@@ -106,8 +107,8 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
           <ReviewSidebar
             progress={derived.progress}
             counts={derived.counts}
-            confirmedMin={state.confirmedMinAmount}
-            confirmedMax={state.confirmedMaxAmount}
+            confirmedMin={state.estimateMin}
+            confirmedMax={state.estimateMax}
             reflectedIssueCount={derived.reflectedIssueCount}
             hasOpinion={derived.hasOpinion}
             isSubmitting={submitReview.isPending && !isSavingDraft}

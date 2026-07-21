@@ -26,9 +26,8 @@ interface SendContext {
 export function useSendChatMessage(chatRoomId: string) {
   const queryClient = useQueryClient();
   const { data: me } = useMe();
-  // mine 판별 기준(ChatThreadView currentUserId)과 동일 소스로 정합.
-  // ⚠️ userId uuid 전환 백엔드 확인 요청 — 실서버 senderId 타입 확정 시 함께 정리.
-  const optimisticSenderId = String(me.userId);
+  // 낙관적 임시 메시지의 senderId(표시용). mine 판별은 isMine 플래그가 담당.
+  const optimisticSenderId = me.userId;
   const messagesKey = chatKeys.messages(chatRoomId).queryKey;
   const listKey = chatKeys.list.queryKey;
 
@@ -50,18 +49,25 @@ export function useSendChatMessage(chatRoomId: string) {
       queryClient.setQueryData<ChatMessagesCache>(messagesKey, (current) => {
         if (!current) return current;
         const [latest, ...older] = current.pages;
-        const base: ChatMessages = latest ?? { list: [], nextCursor: null };
+        const base: ChatMessages = latest ?? {
+          messages: [],
+          nextCursor: null,
+          hasNext: false,
+        };
         return {
           ...current,
           pages: [
             {
               ...base,
-              list: [
-                ...base.list,
+              messages: [
+                ...base.messages,
                 {
                   messageId: crypto.randomUUID(),
                   senderId: optimisticSenderId,
-                  content: body.content,
+                  messageType: "TEXT",
+                  content: body.content ?? "",
+                  attachment: null,
+                  isMine: true,
                   createdAt: now,
                 },
               ],
@@ -74,9 +80,9 @@ export function useSendChatMessage(chatRoomId: string) {
       queryClient.setQueryData<ChatList>(listKey, (current) => {
         if (!current) return current;
         return {
-          items: current.items.map((room) =>
+          rooms: current.rooms.map((room) =>
             room.chatRoomId === chatRoomId
-              ? { ...room, lastMessage: body.content, lastMessageAt: now }
+              ? { ...room, lastMessage: body.content ?? room.lastMessage, lastMessageAt: now }
               : room,
           ),
         };

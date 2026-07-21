@@ -10,11 +10,12 @@ const CUSTOMER_ME: Me = {
   email: "customer@example.com",
   userType: "insured_person",
   createdAt: "2026-01-01T00:00:00.000Z",
-  phone: null,
+  phoneNumber: null,
+  gender: null,
   avatarUrl: null,
   role: "USER",
   socialProvider: "kakao",
-  region: null
+  region: []
 };
 
 const ADJUSTER_ME: Me = {

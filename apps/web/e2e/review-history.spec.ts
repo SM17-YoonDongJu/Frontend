@@ -29,20 +29,20 @@ test("진입하면 검수한 사건 카드가 유형·사건번호·완료일·�
   await expect(firstCard.getByText("상담 전환")).toBeVisible();
 });
 
-test("종결 필터를 누르면 종결 사건만 남고 칩이 활성화되며 URL에 status가 반영된다", async ({ page }) => {
+test("채택 필터를 누르면 채택 사건만 남고 칩이 활성화되며 URL에 status가 반영된다", async ({ page }) => {
   await page.goto(PATH);
   await expect(page.getByRole("heading", { name: "검수 내역" })).toBeVisible();
 
-  const closedChip = page.getByRole("button", { name: "종결" });
+  const acceptedChip = page.getByRole("button", { name: "채택" });
 
   await expect(async () => {
-    await closedChip.click();
-    await expect(page).toHaveURL(/status=CLOSED/);
+    await acceptedChip.click();
+    await expect(page).toHaveURL(/status=ACCEPTED/);
   }).toPass({ timeout: 10000 });
 
-  await expect(closedChip).toHaveAttribute("aria-pressed", "true");
+  await expect(acceptedChip).toHaveAttribute("aria-pressed", "true");
 
-  // 종결(CLOSED) 사건은 남고, 상담 전환(CONSULTATION) 전용 사건은 사라진다.
+  // 채택(ACCEPTED) 사건은 남고, 상담 전환(COUNSELING) 전용 사건은 사라진다.
   await expect(page.getByText("일실수입 과소 산정")).toBeVisible();
   await expect(page.getByText("견관절 회전근개 파열")).toHaveCount(0);
 });

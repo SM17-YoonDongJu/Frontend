@@ -1,4 +1,5 @@
 ﻿import { delay, http, HttpResponse } from "msw";
+import { camelToSnakeDeep, toSnakeKey } from "@/shared/api/case-convert";
 import { API_BASE_URL } from "@/shared/api/config";
 import { consumeReissue, isAccessTokenExpired } from "@/shared/mocks/auth-token-state";
 
@@ -234,27 +235,27 @@ const PENDING_REVIEWS = [
   { reportId: crypto.randomUUID(), accidentType: "fire", status: "CLOSED", createdAt: "2026-06-12T15:20:00Z", caseId: "024", title: "가재도구 손해액 산정", region: "광주 서구", claimedMinAmount: 8_500_000, claimedMaxAmount: 12_000_000, offerHeadroom: 1_800_000, issueCount: 1, held: false },
 ];
 
-// 검수 내역 목 데이터 (이슈 #59) — GET /adjusters/me/reviewed-reports.
-// 명세 6필드(caseId·title·sentDate·status·statusLabel·hasOpinion) + ⚠️명세없음-1 4필드
-// (accidentType·confirmedMin/MaxAmount·rating: FE optional, 백엔드 list 확장 대기)를 채움.
+// 검수 내역 목 데이터 (이슈 #59/#130) — GET /adjusters/me/reviewed-reports.
+// 명세 items[] 7필드(report_id·case_no·title·accident_type·region·status·reviewed_at) 거울.
+// status enum: SENT/COUNSELING/REJECTED/ACCEPTED.
 const REVIEWED_REPORTS = [
-  { caseId: "20260605-021", title: "후유장해 · 십자인대 파열 등급 재산정", sentDate: "2026-06-05", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 14_000_000, confirmedMaxAmount: 17_500_000, rating: 4.9 },
-  { caseId: "20260603-018", title: "교통사고 · 일실수입 과소 산정", sentDate: "2026-06-03", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "traffic", confirmedMinAmount: 24_000_000, confirmedMaxAmount: 30_000_000, rating: 5.0 },
-  { caseId: "20260530-014", title: "실손 의료비 · 비급여 도수치료 한도 분쟁", sentDate: "2026-05-30", status: "SENT", statusLabel: "전송 완료", hasOpinion: false, accidentType: "medical_indemnity", confirmedMinAmount: 3_200_000, confirmedMaxAmount: 4_800_000, rating: null },
-  { caseId: "20260528-009", title: "후유장해 · 요추 추간판탈출 특약 누락", sentDate: "2026-05-28", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 9_000_000, confirmedMaxAmount: 14_000_000, rating: 4.7 },
-  { caseId: "20260525-006", title: "암·진단비 · 유사암 분류 쟁점", sentDate: "2026-05-25", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "cancer_diagnosis", confirmedMinAmount: 20_000_000, confirmedMaxAmount: 20_000_000, rating: 4.8 },
-  { caseId: "20260522-003", title: "교통사고 · 경추 염좌 향후 치료비 미반영", sentDate: "2026-05-22", status: "NOT_SELECTED", statusLabel: "미선정", hasOpinion: false, accidentType: "traffic", confirmedMinAmount: 6_000_000, confirmedMaxAmount: 9_000_000, rating: null },
-  { caseId: "20260520-017", title: "후유장해 · 견관절 회전근개 파열", sentDate: "2026-05-20", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 11_000_000, confirmedMaxAmount: 15_500_000, rating: 4.9 },
-  { caseId: "20260518-011", title: "화재 · 가재도구 손해액 산정", sentDate: "2026-05-18", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "fire", confirmedMinAmount: 8_500_000, confirmedMaxAmount: 12_000_000, rating: 4.6 },
-  { caseId: "20260515-008", title: "배상책임 · 대인 사고 위자료 쟁점", sentDate: "2026-05-15", status: "SENT", statusLabel: "전송 완료", hasOpinion: false, accidentType: "liability", confirmedMinAmount: 5_000_000, confirmedMaxAmount: 7_000_000, rating: null },
-  { caseId: "20260512-004", title: "실손 의료비 · 통원 한도 적용", sentDate: "2026-05-12", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "medical_indemnity", confirmedMinAmount: 2_800_000, confirmedMaxAmount: 3_600_000, rating: 4.5 },
-  { caseId: "20260509-002", title: "후유장해 · 안면부 외모추상 장해", sentDate: "2026-05-09", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "disability", confirmedMinAmount: 16_000_000, confirmedMaxAmount: 22_000_000, rating: 5.0 },
-  { caseId: "20260506-015", title: "교통사고 · 다발성 늑골 골절", sentDate: "2026-05-06", status: "NOT_SELECTED", statusLabel: "미선정", hasOpinion: false, accidentType: "traffic", confirmedMinAmount: 18_000_000, confirmedMaxAmount: 24_000_000, rating: null },
-  { caseId: "20260503-010", title: "암·진단비 · 재진단암 인정 범위", sentDate: "2026-05-03", status: "CONSULTATION", statusLabel: "상담 전환", hasOpinion: true, accidentType: "cancer_diagnosis", confirmedMinAmount: 30_000_000, confirmedMaxAmount: 30_000_000, rating: 4.8 },
-  { caseId: "20260430-005", title: "실손 의료비 · 비급여 주사료 분쟁", sentDate: "2026-04-30", status: "CLOSED", statusLabel: "종결", hasOpinion: true, accidentType: "medical_indemnity", confirmedMinAmount: 1_400_000, confirmedMaxAmount: 1_750_000, rating: 4.4 },
+  { reportId: "b0000000-0000-4000-8000-000000000021", caseNo: "20260605-021", title: "후유장해 · 십자인대 파열 등급 재산정", accidentType: "disability", region: "서울 강남구", status: "COUNSELING", reviewedAt: "2026-06-05T09:12:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000018", caseNo: "20260603-018", title: "교통사고 · 일실수입 과소 산정", accidentType: "traffic", region: "경기 성남시", status: "ACCEPTED", reviewedAt: "2026-06-03T14:03:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000014", caseNo: "20260530-014", title: "실손 의료비 · 비급여 도수치료 한도 분쟁", accidentType: "medical_indemnity", region: "인천 연수구", status: "SENT", reviewedAt: "2026-05-30T10:20:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000009", caseNo: "20260528-009", title: "후유장해 · 요추 추간판탈출 특약 누락", accidentType: "disability", region: "서울 송파구", status: "COUNSELING", reviewedAt: "2026-05-28T11:40:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000006", caseNo: "20260525-006", title: "암·진단비 · 유사암 분류 쟁점", accidentType: "cancer_diagnosis", region: "서울 종로구", status: "ACCEPTED", reviewedAt: "2026-05-25T09:05:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000003", caseNo: "20260522-003", title: "교통사고 · 경추 염좌 향후 치료비 미반영", accidentType: "traffic", region: "서울 마포구", status: "REJECTED", reviewedAt: "2026-05-22T16:30:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000017", caseNo: "20260520-017", title: "후유장해 · 견관절 회전근개 파열", accidentType: "disability", region: "경기 수원시", status: "COUNSELING", reviewedAt: "2026-05-20T13:15:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000011", caseNo: "20260518-011", title: "화재 · 가재도구 손해액 산정", accidentType: "fire", region: "광주 서구", status: "ACCEPTED", reviewedAt: "2026-05-18T10:00:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000008", caseNo: "20260515-008", title: "배상책임 · 대인 사고 위자료 쟁점", accidentType: "liability", region: "부산 해운대구", status: "SENT", reviewedAt: "2026-05-15T15:50:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000004", caseNo: "20260512-004", title: "실손 의료비 · 통원 한도 적용", accidentType: "medical_indemnity", region: "대구 수성구", status: "COUNSELING", reviewedAt: "2026-05-12T09:40:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000002", caseNo: "20260509-002", title: "후유장해 · 안면부 외모추상 장해", accidentType: "disability", region: "서울 강서구", status: "ACCEPTED", reviewedAt: "2026-05-09T11:25:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000015", caseNo: "20260506-015", title: "교통사고 · 다발성 늑골 골절", accidentType: "traffic", region: "경기 고양시", status: "REJECTED", reviewedAt: "2026-05-06T08:40:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000010", caseNo: "20260503-010", title: "암·진단비 · 재진단암 인정 범위", accidentType: "cancer_diagnosis", region: "서울 용산구", status: "COUNSELING", reviewedAt: "2026-05-03T14:10:00" },
+  { reportId: "b0000000-0000-4000-8000-000000000005", caseNo: "20260430-005", title: "실손 의료비 · 비급여 주사료 분쟁", accidentType: "medical_indemnity", region: "부산 부산진구", status: "ACCEPTED", reviewedAt: "2026-04-30T10:35:00" },
 ] as const;
 
-// 알림 목록 목 데이터 (이슈 #49) — ⚠️ 명세없음-초안(.pr-assets/api-spec-draft-notifications.md).
+// 알림 목록 목 데이터 (명세 Done, BE PR #117) — items+unread_count+페이지네이션.
 // createdAt은 달력 기준(오늘/어제 고정) → 조회 시각과 무관하게 오늘·어제·이전 세 그룹이 항상 나온다.
 // read-all 호출 시 isRead를 모듈 상태로 전부 true 반영.
 // 오늘 항목: 오늘 자정 기준 hoursBack 시간 전, 단 자정을 넘지 않게 클램프(새벽 조회 시에도 오늘 유지).
@@ -273,11 +274,12 @@ function yesterdayAt(hour: number): string {
 }
 
 const NOTIFICATIONS = [
-  { notificationId: "d0000000-0000-4000-8000-000000000001", type: "REVIEW_COMPLETE", title: "검수가 완료됐어요", body: "김도현 사정사님이 리포트를 검수했어요.", isRead: false, createdAt: todayAgo(2) },
-  { notificationId: "d0000000-0000-4000-8000-000000000002", type: "RECEIVED_PROPOSAL", title: "새 제안 2건 도착", body: "교통사고 리포트에 상담 제안이 왔어요.", isRead: false, createdAt: todayAgo(5) },
-  { notificationId: "d0000000-0000-4000-8000-000000000003", type: "CONSULT_ACCEPTED", title: "상담이 수락됐어요", body: "정우성 사정사님이 상담을 수락했어요.", isRead: true, createdAt: yesterdayAt(15) },
-  { notificationId: "d0000000-0000-4000-8000-000000000004", type: "ANALYSIS_COMPLETE", title: "분석이 완료됐어요", body: "제출하신 서류 분석 리포트가 준비됐어요.", isRead: true, createdAt: yesterdayAt(11) },
-  { notificationId: "d0000000-0000-4000-8000-000000000005", type: "IDENTITY_VERIFIED", title: "본인 인증 완료", body: "계정 본인 인증이 완료됐어요.", isRead: true, createdAt: "2026-05-18T09:00:00Z" },
+  { id: "d0000000-0000-4000-8000-000000000001", type: "REVIEW_COMPLETE", title: "검수가 완료됐어요", body: "김도현 사정사님이 리포트를 검수했어요.", isRead: false, createdAt: todayAgo(2) },
+  { id: "d0000000-0000-4000-8000-000000000002", type: "RECEIVED_PROPOSAL", title: "새 제안 2건 도착", body: "교통사고 리포트에 상담 제안이 왔어요.", isRead: false, createdAt: todayAgo(5) },
+  { id: "d0000000-0000-4000-8000-000000000006", type: "CHAT_MESSAGE", title: "새 메시지가 도착했어요", body: null, isRead: true, createdAt: yesterdayAt(18) },
+  { id: "d0000000-0000-4000-8000-000000000003", type: "CONSULT_ACCEPTED", title: "상담이 수락됐어요", body: "정우성 사정사님이 상담을 수락했어요.", isRead: true, createdAt: yesterdayAt(15) },
+  { id: "d0000000-0000-4000-8000-000000000004", type: "ANALYSIS_COMPLETE", title: "분석이 완료됐어요", body: "제출하신 서류 분석 리포트가 준비됐어요.", isRead: true, createdAt: yesterdayAt(11) },
+  { id: "d0000000-0000-4000-8000-000000000005", type: "IDENTITY_VERIFIED", title: "본인 인증 완료", body: "계정 본인 인증이 완료됐어요.", isRead: true, createdAt: "2026-05-18T09:00:00Z" },
 ];
 
 // 고객 대시보드 — 받은 제안이 연결된 리포트(①)의 안정 uuid.
@@ -310,32 +312,36 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
 };
 
 // 알림 설정 (이슈 #46) — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체.
-// 확정 6필드(백엔드 2026-07-13): newReviewRequest·consultMessage·settlementNotice·reviewComplete·receivedProposal·marketing.
+// 명세 V21 10필드 — 응답은 camelToSnakeDeep로 snake 미러.
 const NOTIFICATION_SETTINGS: Record<string, boolean> = {
   newReviewRequest: true,
   consultMessage: true,
   settlementNotice: false,
+  reviewDeadlineSoon: true,
   reviewComplete: true,
   receivedProposal: true,
+  consultAccepted: true,
+  analysisComplete: true,
+  identityVerified: true,
   marketing: false,
   // CONTRACT(확장 등재 요청 중, 이슈 #105): 카카오톡 플러스 친구 알림 — 백엔드 미채택으로 실서버 응답엔 이 키가 없다.
   // Figma에 토글 행이 있어 FE 동작 검증용으로만 목이 제공한다(스키마는 nullish → false로 부재 방어).
   kakaoPlusFriend: false,
 };
 
-// 본인 정보 목 상태 — GET/PATCH /users/me 공유.
-// GET 확정 응답은 userId(uuid string)·nickname·email·role·createdAt 5필드뿐(userType 없음 → FE가 role에서 파생).
-// CONTRACT(확장 등재 요청 중, 이슈 #105): phone·avatarUrl·socialProvider·region은 백엔드 미채택 — 실서버는 주지 않는다.
-// 마이페이지 화면 검증용으로만 목이 제공하며, 스키마는 nullish로 키 부재를 흡수한다("미등록" 표시).
+// 본인 정보 목 상태 — GET/PATCH /users/me 공유. 명세 응답 그대로 snake_case 키로 보관(계약 거울).
+// 확정 응답(2026-07-14): user_id·nickname·phone_number·role·gender·region[]·avatar_url·created_at(userType 없음 → FE가 role 파생).
+// CONTRACT(명세없음-확장): email·social_provider는 명세 GET 응답에 없다 — 최근 로그인 마스킹·가입경로 표시용으로만 목이 제공(스키마 nullish).
 const MOCK_ME: Record<string, unknown> = {
-  userId: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
+  user_id: "d1d1d1d1-1024-4aaa-8aaa-000000001024",
   nickname: "윤서",
+  phone_number: "010-1234-5678",
+  gender: "F",
+  region: ["서울 강남구"],
+  avatar_url: null,
+  created_at: "2024-03-02T09:00:00Z",
   email: "yunseo@example.com",
-  createdAt: "2024-03-02T09:00:00Z",
-  phone: "010-1234-5678",
-  avatarUrl: null,
-  socialProvider: "kakao",
-  region: "서울 강남구",
+  social_provider: "kakao",
 };
 
 /**
@@ -421,7 +427,7 @@ const ADJUSTER_MYPAGE = {
 // 손해사정사 자격 신청 상태(이슈 #44) — POST가 세우고 GET .../me가 읽는 모듈 스코프 상태.
 // 기본 null(미신청 → GET 404 POST_NOT_FOUND → NOT_APPLIED → 폼).
 type MockDocumentReview = {
-  type: "LICENSE" | "REGISTRATION";
+  type: "LICENSE" | "REGISTRATION" | "ID_CARD";
   status: "PENDING" | "APPROVED" | "RESUBMIT_REQUIRED";
 };
 type MockAdjusterApplication = {
@@ -452,6 +458,7 @@ function buildAdjusterApplication(
     documents: [
       { type: "LICENSE", status: "PENDING" },
       { type: "REGISTRATION", status: "PENDING" },
+      { type: "ID_CARD", status: "PENDING" },
     ],
     rejectedAt: null,
     rejectReason: null,
@@ -470,6 +477,7 @@ function buildAdjusterApplication(
       documents: [
         { type: "LICENSE", status: "APPROVED" },
         { type: "REGISTRATION", status: "RESUBMIT_REQUIRED" },
+        { type: "ID_CARD", status: "APPROVED" },
       ],
       rejectedAt: "2026-07-07T13:20:00Z",
       rejectReason:
@@ -509,18 +517,19 @@ interface MockChatRoom {
   avatarUrl: string | null;
   reportId: string;
   caseNo: string;
-  roomStatus: "REQUESTED" | "ACTIVE" | "CLOSED";
+  roomStatus: "ACTIVE" | "CLOSED";
   lastMessageAt: string;
   proposalId: string;
   matchStatus: MockMatchStatus;
   reportTypeLabel: string;
+  unreadCount: number;
 }
 
-interface MockChatAttachment {
-  attachmentId: string;
-  fileName: string;
-  mimeType: string;
+// 메시지 첨부(GET/POST messages 응답 shape) — 조회용 url·원본명·MIME.
+interface MockMessageAttachment {
   url: string;
+  name: string;
+  contentType: string;
 }
 
 interface MockChatMessage {
@@ -528,11 +537,48 @@ interface MockChatMessage {
   senderId: string;
   content: string;
   createdAt: string;
-  attachments?: MockChatAttachment[];
+  attachment?: MockMessageAttachment;
 }
 
-// 업로드된 첨부 임시 보관 — 메시지 전송 시 attachmentIds로 회수(⚠️ 명세없음-초안, TEMP §3-3)
-const uploadedChatAttachments = new Map<string, MockChatAttachment>();
+// 업로드된 첨부 임시 보관(key→메타) — 메시지 전송 시 attachment_key로 회수해 url 부여.
+const uploadedChatAttachments = new Map<string, MockMessageAttachment>();
+
+// 첨부 MIME으로 message_type 파생(서버 규칙: 이미지→IMAGE, 그 외 첨부→FILE, 없으면 TEXT).
+function deriveMessageType(attachment?: MockMessageAttachment) {
+  if (!attachment) return "TEXT";
+  return attachment.contentType.startsWith("image/") ? "IMAGE" : "FILE";
+}
+
+// MockChatRoom → GET /chats 응답 room(camel; camelToSnakeDeep가 snake로 변환).
+function toChatRoomDto(room: MockChatRoom) {
+  return {
+    chatRoomId: room.chatRoomId,
+    reportId: room.reportId,
+    reportReviewId: room.proposalId,
+    status: room.roomStatus,
+    reviewStatus: room.matchStatus,
+    counterpart: { userId: room.adjusterId, name: room.adjusterName },
+    lastMessage: room.lastMessage,
+    lastMessageAt: room.lastMessageAt,
+    unreadCount: room.unreadCount,
+    caseNo: room.caseNo,
+    reportTypeLabel: room.reportTypeLabel,
+    avatarUrl: room.avatarUrl,
+  };
+}
+
+// MockChatMessage → GET/POST messages 응답 message(camel).
+function toChatMessageDto(message: MockChatMessage) {
+  return {
+    messageId: message.messageId,
+    senderId: message.senderId,
+    messageType: deriveMessageType(message.attachment),
+    content: message.content ? message.content : null,
+    attachment: message.attachment ?? null,
+    isMine: message.senderId === MOCK_ME_ID,
+    createdAt: message.createdAt,
+  };
+}
 
 // 비교 그룹 검증: 3방 모두 동일 reportId·caseNo, COUNSELING(비교중)으로 시작. adjusterName만 상이.
 const chatRooms: MockChatRoom[] = [
@@ -550,6 +596,7 @@ const chatRooms: MockChatRoom[] = [
     proposalId: CHAT_PROPOSAL_1_ID,
     matchStatus: "COUNSELING",
     reportTypeLabel: "후유장해",
+    unreadCount: 2,
   },
   {
     chatRoomId: CHAT_ROOM_2_ID,
@@ -565,6 +612,7 @@ const chatRooms: MockChatRoom[] = [
     proposalId: CHAT_PROPOSAL_2_ID,
     matchStatus: "COUNSELING",
     reportTypeLabel: "후유장해",
+    unreadCount: 0,
   },
   {
     chatRoomId: CHAT_ROOM_3_ID,
@@ -580,6 +628,7 @@ const chatRooms: MockChatRoom[] = [
     proposalId: CHAT_PROPOSAL_3_ID,
     matchStatus: "COUNSELING",
     reportTypeLabel: "후유장해",
+    unreadCount: 0,
   },
 ];
 
@@ -703,20 +752,21 @@ export const handlers = [
 
     const body = (await request.json().catch(() => ({}))) as {
       name?: string;
-      speciality?: string;
+      specialities?: string[];
       affiliation?: string;
       region?: string;
-      registrationImageUrl?: string;
-      licenseNo?: string | null;
-      licenseImageUrl?: string | null;
+      registration_image_url?: string;
+      license_no?: string | null;
+      license_image_url?: string | null;
     };
 
     if (
       !body.name ||
-      !body.speciality ||
+      !body.specialities ||
+      body.specialities.length === 0 ||
       !body.affiliation ||
       !body.region ||
-      !body.registrationImageUrl
+      !body.registration_image_url
     ) {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
@@ -724,7 +774,7 @@ export const handlers = [
       );
     }
 
-    if (!body.licenseNo && !body.licenseImageUrl) {
+    if (!body.license_no && !body.license_image_url) {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "자격증 번호 또는 사본 중 하나는 필수입니다." },
         { status: 400 },
@@ -744,11 +794,13 @@ export const handlers = [
       status: "PENDING",
       submittedAt: new Date().toISOString(),
       name: body.name,
-      speciality: body.speciality,
-      licenseNo: body.licenseNo ?? null,
+      // GET .../me 응답은 speciality 단수(명세) — 요청 specialities 배열의 첫 값을 보관.
+      speciality: body.specialities[0] ?? "",
+      licenseNo: body.license_no ?? null,
       documents: [
         { type: "LICENSE", status: "PENDING" },
         { type: "REGISTRATION", status: "PENDING" },
+        { type: "ID_CARD", status: "PENDING" },
       ],
       rejectedAt: null,
       rejectReason: null,
@@ -758,7 +810,7 @@ export const handlers = [
       {
         status: "201",
         message: "자격 인증 신청이 접수되었습니다.",
-        data: { applicationId: adjusterApplicationState.applicationId, status: "PENDING" },
+        data: camelToSnakeDeep({ applicationId: adjusterApplicationState.applicationId, status: "PENDING" }),
       },
       { status: 201 },
     );
@@ -805,7 +857,7 @@ export const handlers = [
       return HttpResponse.json({
         status: "200",
         message: "정상 처리되었습니다.",
-        data: buildAdjusterApplication(status),
+        data: camelToSnakeDeep(buildAdjusterApplication(status)),
       });
     }
 
@@ -819,7 +871,7 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: adjusterApplicationState,
+      data: camelToSnakeDeep(adjusterApplicationState),
     });
   }),
 
@@ -835,13 +887,13 @@ export const handlers = [
     }
 
     // 빈 상태(대화 없음) 검증용 — E2E override
-    const items =
+    const source =
       request.headers.get("x-mock-empty") === "chat-list" ? [] : chatRooms;
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { items },
+      data: camelToSnakeDeep({ rooms: source.map(toChatRoomDto) }),
     });
   }),
 
@@ -863,14 +915,19 @@ export const handlers = [
       if (cursorIndex !== -1) end = cursorIndex;
     }
     const start = Math.max(0, end - size);
-    const list = all.slice(start, end);
+    const page = all.slice(start, end);
     // 더 오래된 페이지가 남아 있으면 이번 페이지 첫 메시지를 다음 커서로
-    const nextCursor = start > 0 ? (list[0]?.messageId ?? null) : null;
+    const hasNext = start > 0;
+    const nextCursor = hasNext ? (page[0]?.messageId ?? null) : null;
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { list, nextCursor },
+      data: camelToSnakeDeep({
+        messages: page.map(toChatMessageDto),
+        nextCursor,
+        hasNext,
+      }),
     });
   }),
 
@@ -896,15 +953,41 @@ export const handlers = [
       );
     }
 
+    // fetch-json이 요청 body를 snake로 변환 → { content, attachment: { attachment_key, name, content_type } }
     const body = (await request.json().catch(() => ({}))) as {
       content?: string;
-      attachmentIds?: string[];
+      attachment?: {
+        attachment_key?: string;
+        name?: string;
+        content_type?: string;
+      };
     };
     const content = typeof body.content === "string" ? body.content : "";
-    // 업로드해 둔 첨부를 attachmentIds로 회수(⚠️ 명세없음-초안)
-    const attachments = (body.attachmentIds ?? [])
-      .map((id) => uploadedChatAttachments.get(id))
-      .filter((attachment): attachment is MockChatAttachment => Boolean(attachment));
+
+    // 첨부는 업로드 응답 메타(key)를 전달받아 저장 url을 회수(없으면 key로 합성).
+    let attachment: MockMessageAttachment | undefined;
+    if (body.attachment?.attachment_key) {
+      const key = body.attachment.attachment_key;
+      const stored = uploadedChatAttachments.get(key);
+      attachment = {
+        url:
+          stored?.url ??
+          `https://mock.local/chat-uploads/${encodeURIComponent(key)}`,
+        name: body.attachment.name ?? stored?.name ?? "첨부 파일",
+        contentType:
+          body.attachment.content_type ??
+          stored?.contentType ??
+          "application/octet-stream",
+      };
+    }
+
+    if (!content && !attachment) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "content 또는 attachment 중 하나는 필수입니다." },
+        { status: 400 },
+      );
+    }
+
     const createdAt = new Date().toISOString();
     const messageId = crypto.randomUUID();
 
@@ -913,11 +996,11 @@ export const handlers = [
       senderId: MOCK_ME_ID,
       content,
       createdAt,
-      ...(attachments.length > 0 ? { attachments } : {}),
+      ...(attachment ? { attachment } : {}),
     });
 
     if (room) {
-      room.lastMessage = content || `📎 ${attachments[0]?.fileName ?? "첨부 파일"}`;
+      room.lastMessage = content || `📎 ${attachment?.name ?? "첨부 파일"}`;
       room.lastMessageAt = createdAt;
       room.updatedAt = createdAt;
     }
@@ -926,13 +1009,21 @@ export const handlers = [
       {
         status: "201",
         message: "전송되었습니다.",
-        data: { messageId, chatRoomId, senderId: MOCK_ME_ID, content, createdAt },
+        data: camelToSnakeDeep({
+          messageId,
+          chatRoomId,
+          senderId: MOCK_ME_ID,
+          messageType: deriveMessageType(attachment),
+          content: content ? content : null,
+          attachment: attachment ?? null,
+          createdAt,
+        }),
       },
       { status: 201 },
     );
   }),
 
-  // 첨부 업로드 (이슈 #48) — ⚠️ 명세없음-초안(TEMP §3-3). multipart file → attachmentId 발급.
+  // 첨부 업로드 (POST /chats/{id}/attachments) — multipart file → key 메타 발급(private S3 가정).
   http.post(`${API_BASE_URL}/chats/:chatRoomId/attachments`, async ({ request, params }) => {
     await delay(500);
 
@@ -959,51 +1050,127 @@ export const handlers = [
         { status: 400 },
       );
     }
-    const mimeType =
+    const contentType =
       file?.type ||
       request.headers.get("x-mock-file-type") ||
       "application/octet-stream";
 
-    const attachment: MockChatAttachment = {
-      attachmentId: crypto.randomUUID(),
-      fileName,
-      mimeType,
-      url: `https://mock.local/chat-uploads/${chatRoomId}/${encodeURIComponent(fileName)}`,
-    };
-    uploadedChatAttachments.set(attachment.attachmentId, attachment);
+    // key 규칙: chat/{roomId}/{uuid}_{원본명}. 조회 url은 저장 후 GET/POST가 presigned로 내려준다.
+    const attachmentKey = `chat/${chatRoomId}/${crypto.randomUUID()}_${fileName}`;
+    const size = file?.size ?? 1024;
+    uploadedChatAttachments.set(attachmentKey, {
+      url: `https://mock.local/chat-uploads/${encodeURIComponent(attachmentKey)}`,
+      name: fileName,
+      contentType,
+    });
 
     return HttpResponse.json(
-      { status: "201", message: "업로드되었습니다.", data: attachment },
+      {
+        status: "201",
+        message: "업로드되었습니다.",
+        data: camelToSnakeDeep({ attachmentKey, name: fileName, contentType, size }),
+      },
       { status: 201 },
     );
   }),
 
-  // 상담 종료 (이슈 #48) — ACTIVE→CLOSED. 이미 CLOSED면 409 DUPLICATE_RESOURCE(Notion 채팅 종료 명세).
-  http.patch(`${API_BASE_URL}/chats/:chatRoomId/close`, async ({ params }) => {
+  // 상담 수락 (PATCH /chats/{id}/accept) — 내 제안 ACCEPTED·방 CLOSED·형제 방 REJECTED+CLOSED·리포트 CLOSED.
+  http.patch(`${API_BASE_URL}/chats/:chatRoomId/accept`, async ({ params }) => {
     await delay(300);
 
     const chatRoomId = String(params.chatRoomId);
     const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
-
     if (!room) {
       return HttpResponse.json(
         { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
         { status: 404 },
       );
     }
-    if (room.roomStatus === "CLOSED") {
+    // 파이프라인(report_review) 방·COUNSELING만 수락 가능. 그 외 409.
+    if (room.matchStatus !== "COUNSELING") {
       return HttpResponse.json(
-        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 종료된 상담입니다." },
+        { status: "409", code: "UNSUPPORTED_OPERATION", message: "이미 결정된 상담입니다." },
         { status: 409 },
       );
     }
 
+    room.matchStatus = "ACCEPTED";
+    room.roomStatus = "CLOSED";
+    // 형제 방(같은 리포트) 자동 종료 — 서버 캐스케이드 미러.
+    chatRooms
+      .filter((r) => r.reportId === room.reportId && r.chatRoomId !== room.chatRoomId)
+      .forEach((r) => {
+        r.matchStatus = "REJECTED";
+        r.roomStatus = "CLOSED";
+      });
+
+    return HttpResponse.json({
+      status: "200",
+      message: "상담을 수락했습니다.",
+      data: camelToSnakeDeep({
+        chatRoomId,
+        chatRoomStatus: "CLOSED",
+        reviewStatus: "ACCEPTED",
+        reportId: room.reportId,
+        reportStatus: "CLOSED",
+      }),
+    });
+  }),
+
+  // 상담 거절 (PATCH /chats/{id}/reject) — 내 제안 REJECTED·방 CLOSED·리포트 AWAITING_ADOPTION. 형제 유지.
+  http.patch(`${API_BASE_URL}/chats/:chatRoomId/reject`, async ({ params }) => {
+    await delay(300);
+
+    const chatRoomId = String(params.chatRoomId);
+    const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
+    if (!room) {
+      return HttpResponse.json(
+        { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+    if (room.matchStatus !== "COUNSELING") {
+      return HttpResponse.json(
+        { status: "409", code: "UNSUPPORTED_OPERATION", message: "이미 결정된 상담입니다." },
+        { status: 409 },
+      );
+    }
+
+    room.matchStatus = "REJECTED";
     room.roomStatus = "CLOSED";
 
     return HttpResponse.json({
       status: "200",
-      message: "상담을 종료했습니다.",
-      data: { chatRoomId, status: "CLOSED" },
+      message: "상담을 거절했습니다.",
+      data: camelToSnakeDeep({
+        chatRoomId,
+        chatRoomStatus: "CLOSED",
+        reviewStatus: "REJECTED",
+        reportId: room.reportId,
+        reportStatus: "AWAITING_ADOPTION",
+      }),
+    });
+  }),
+
+  // 읽음 처리 (POST /chats/{id}/read) — unread_count 0으로 리셋.
+  http.post(`${API_BASE_URL}/chats/:chatRoomId/read`, async ({ params }) => {
+    await delay(150);
+
+    const chatRoomId = String(params.chatRoomId);
+    const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
+    if (!room) {
+      return HttpResponse.json(
+        { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    room.unreadCount = 0;
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: camelToSnakeDeep({ chatRoomId, readAt: new Date().toISOString() }),
     });
   }),
 
@@ -1052,9 +1219,17 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "로그인 성공",
-      data: isNewUser
-        ? { userId: null, isNewUser: true, signupTicket: `mock-signup-ticket-${crypto.randomUUID()}` }
-        : { userId: crypto.randomUUID(), isNewUser: false, signupTicket: null },
+      // 응답 필드 snake_case(명세): user_id·is_new_user·signup_ticket·previously_withdrawn.
+      data: camelToSnakeDeep(
+        isNewUser
+          ? {
+              userId: null,
+              isNewUser: true,
+              signupTicket: `mock-signup-ticket-${crypto.randomUUID()}`,
+              previouslyWithdrawn: false,
+            }
+          : { userId: crypto.randomUUID(), isNewUser: false, signupTicket: null, previouslyWithdrawn: false },
+      ),
     });
   }),
 
@@ -1078,7 +1253,7 @@ export const handlers = [
     });
   }),
 
-  // 내 알림 목록 (#49) — ⚠️ 명세없음-초안. read-all 반영된 isRead 상태 그대로 반환.
+  // 내 알림 목록 (#49, 명세 Done) — items+unread_count+페이지네이션. read-all 반영된 isRead 상태 그대로 반환.
   http.get(`${API_BASE_URL}/users/me/notifications`, async ({ request }) => {
     await delay(400);
 
@@ -1092,22 +1267,30 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { list: NOTIFICATIONS },
+      data: camelToSnakeDeep({
+        items: NOTIFICATIONS,
+        unreadCount: NOTIFICATIONS.filter((n) => !n.isRead).length,
+        page: 0,
+        size: 20,
+        totalElements: NOTIFICATIONS.length,
+        totalPages: 1,
+      }),
     });
   }),
 
-  // 회원가입 (#43) — 전역 봉투 거울. 성공 201 + data(토큰 포함).
-  // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 2자 미만→400 VALIDATION_ERROR,
+  // 회원가입 (#43, 명세 2026-07-09 개정) — 전역 봉투 거울. 성공 201.
+  // 토큰은 HttpOnly 쿠키(Set-Cookie access_token 30분/refresh_token 14일)로만 내려가고 body엔 없음 → data = { user_id, nickname, role }.
+  // birth_date·phone_number·gender는 폼 확정(2026-07-21)으로 미전송 — 목도 검증하지 않는다(백엔드 완화 확인 대기).
+  // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 1자 미만·30자 초과→400 VALIDATION_ERROR,
   //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD, x-mock-failure:social→500 EXTERNAL_API_ERROR.
   http.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {
     await delay(600);
 
     const body = (await request.json().catch(() => ({}))) as {
       provider?: string;
-      socialToken?: string;
+      social_token?: string;
       nickname?: string;
-      userType?: string;
-      email?: string;
+      user_type?: string;
     };
 
     if (request.headers.get("x-mock-failure") === "social") {
@@ -1117,16 +1300,16 @@ export const handlers = [
       );
     }
 
-    if (!body.provider || !body.socialToken || !body.userType) {
+    if (!body.provider || !body.social_token || !body.user_type) {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
         { status: 400 },
       );
     }
 
-    if (!body.nickname || body.nickname.length < 2 || body.nickname.length > 20) {
+    if (!body.nickname || body.nickname.length < 1 || body.nickname.length > 30) {
       return HttpResponse.json(
-        { status: "400", code: "VALIDATION_ERROR", message: "닉네임은 2~20자로 입력해 주세요." },
+        { status: "400", code: "VALIDATION_ERROR", message: "이름은 1~30자로 입력해 주세요." },
         { status: 400 },
       );
     }
@@ -1142,14 +1325,12 @@ export const handlers = [
       {
         status: "201",
         message: "회원가입이 완료되었습니다.",
-        data: {
+        // 응답 역할은 명세대로 role(요청 user_type 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
+        data: camelToSnakeDeep({
           userId: crypto.randomUUID(),
           nickname: body.nickname,
-          // 응답 역할은 명세대로 role(요청 userType 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
-          role: body.userType === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
-          accessToken: `mock-access-${crypto.randomUUID()}`,
-          refreshToken: `mock-refresh-${crypto.randomUUID()}`,
-        },
+          role: body.user_type === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
+        }),
       },
       { status: 201 },
     );
@@ -1173,36 +1354,70 @@ export const handlers = [
     });
   }),
 
-  // 손해사정사 대시보드 요약·활동통계 (#30) — ⚠️ API 명세 미정(드리프트), MSW 선구현
-  http.get(`${API_BASE_URL}/adjusters/me/dashboard`, async ({ request }) => {
+  // 손해사정사 홈 대시보드 집계 (BFF, #30/#130) — GET /adjusters/me/home.
+  // 기존 /dashboard·/in-progress·/profile-summary 3분할을 1콜로 통합. in_progress_limit(기본 5, 최대 20) 잘라 반환.
+  http.get(`${API_BASE_URL}/adjusters/me/home`, async ({ request }) => {
     await delay(500);
 
-    if (request.headers.get("x-mock-failure") === "dashboard") {
+    if (request.headers.get("x-mock-failure") === "home") {
       return HttpResponse.json(
         { status: "500", code: "INTERNAL_SERVER_ERROR", message: "대시보드를 불러오지 못했습니다." },
         { status: 500 },
       );
     }
 
+    const url = new URL(request.url, "http://localhost");
+    const limit = Math.min(
+      20,
+      Math.max(1, Number(url.searchParams.get("in_progress_limit") ?? "5") || 5),
+    );
+
+    const inProgressItems = [
+      {
+        reportId: "c1000000-0000-4000-8000-000000000022",
+        caseNo: "20260528-022",
+        accidentType: "후유장해",
+        title: "장해등급 재산정 의견 작성 중",
+        reportStatus: "AWAITING_INSPECTION",
+        reviewStatus: null,
+        stageLabel: "검수 중",
+        progressPercent: 65,
+      },
+      {
+        reportId: "c1000000-0000-4000-8000-000000000019",
+        caseNo: "20260527-019",
+        accidentType: "교통사고",
+        title: "검수 완료 · 고객 상담 대기",
+        reportStatus: "AWAITING_ADOPTION",
+        reviewStatus: "SENT",
+        stageLabel: "고객 검토",
+        progressPercent: 100,
+      },
+    ];
+
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
+      data: camelToSnakeDeep({
+        adjuster: {
+          id: "11111111-1111-4111-8111-111111111111",
+          name: "김상정",
+          avatarUrl: null,
+        },
         summary: {
           pendingCount: 4,
           pendingNewCount: 2,
           inProgressCount: 2,
           monthlyCompletedCount: 14,
           totalCompletedCount: 240,
-          averageRating: 4.9,
-          reviewCount: 86,
-        },
-        activity: {
-          completedCount: 14,
           consultationConvertedCount: 9,
-          averageRating: 4.9,
+          rating: { average: 4.9, reviewCount: 86 },
         },
-      },
+        inProgressCases: {
+          total: inProgressItems.length,
+          items: inProgressItems.slice(0, limit),
+        },
+      }),
     });
   }),
 
@@ -1238,7 +1453,7 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { ...NOTIFICATION_SETTINGS },
+      data: camelToSnakeDeep({ ...NOTIFICATION_SETTINGS }),
     });
   }),
 
@@ -1264,15 +1479,16 @@ export const handlers = [
     }
 
     for (const key of Object.keys(NOTIFICATION_SETTINGS)) {
-      if (typeof body[key] === "boolean") {
-        NOTIFICATION_SETTINGS[key] = body[key];
+      const wireKey = toSnakeKey(key);
+      if (typeof body[wireKey] === "boolean") {
+        NOTIFICATION_SETTINGS[key] = body[wireKey];
       }
     }
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { ...NOTIFICATION_SETTINGS },
+      data: camelToSnakeDeep({ ...NOTIFICATION_SETTINGS }),
     });
   }),
 
@@ -1339,7 +1555,7 @@ export const handlers = [
       );
     }
 
-    if (typeof body.insurerName !== "string" || typeof body.productName !== "string") {
+    if (typeof body.insurer_name !== "string" || typeof body.product_name !== "string") {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "보험사·상품명을 입력해 주세요." },
         { status: 400 },
@@ -1349,15 +1565,15 @@ export const handlers = [
     const id = crypto.randomUUID();
     MOCK_INSURANCES.push({
       id,
-      insurerName: body.insurerName,
-      productName: body.productName,
-      policyNo: typeof body.policyNo === "string" ? body.policyNo : null,
-      enrolledAt: typeof body.enrolledAt === "string" ? body.enrolledAt : null,
+      insurerName: body.insurer_name,
+      productName: body.product_name,
+      policyNo: typeof body.policy_no === "string" ? body.policy_no : null,
+      enrolledAt: typeof body.enrolled_at === "string" ? body.enrolled_at : null,
       coverages: Array.isArray(body.coverages) ? body.coverages : [],
       // CONTRACT(직접 입력 시 초기 matchStatus 백엔드 확인 필요): 서버가 즉시 fuzzy 매칭하는지 비동기 대기인지 미확정 → 대기(PENDING)로 둔다.
       matchStatus: "PENDING",
       // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 미등재 필드. 증권 업로드 없이 직접 입력 → 미등록.
-      policyFileUrl: typeof body.policyFileUrl === "string" ? body.policyFileUrl : null,
+      policyFileUrl: typeof body.policy_file_url === "string" ? body.policy_file_url : null,
     });
 
     // 확정 응답: 201 + data는 생성 id 하나뿐(전체 객체 아님). 목록은 훅이 invalidate로 재조회한다.
@@ -1365,43 +1581,6 @@ export const handlers = [
       { status: "201", message: "등록되었습니다.", data: { id } },
       { status: 201 },
     );
-  }),
-
-  // 진행 중 사건 (#30) — ⚠️ API 명세 미정(드리프트), MSW 선구현
-  http.get(`${API_BASE_URL}/adjusters/me/in-progress`, async ({ request }) => {
-    await delay(500);
-
-    if (request.headers.get("x-mock-failure") === "in-progress") {
-      return HttpResponse.json(
-        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "진행 중 사건을 불러오지 못했습니다." },
-        { status: 500 },
-      );
-    }
-
-    return HttpResponse.json({
-      status: "200",
-      message: "정상 처리되었습니다.",
-      data: {
-        list: [
-          {
-            reportId: "c1000000-0000-4000-8000-000000000022",
-            accidentType: "후유장해",
-            caseId: "20260528-022",
-            description: "장해등급 재산정 의견 작성 중",
-            status: "REVIEWING",
-            progress: 65,
-          },
-          {
-            reportId: "c1000000-0000-4000-8000-000000000019",
-            accidentType: "교통사고",
-            caseId: "20260527-019",
-            description: "검수 완료 · 고객 상담 대기",
-            status: "CUSTOMER_REVIEW",
-            progress: 100,
-          },
-        ],
-      },
-    });
   }),
 
   // 액세스 토큰 재발급 (#109) — refresh_token HttpOnly 쿠키만 사용(바디·Authorization 없음), data는 null.
@@ -1465,9 +1644,8 @@ export const handlers = [
     });
   }),
 
-  // 본인 정보 수정 (이슈 #105) — PATCH /users/me (확정 스펙)
-  // 확정 body는 nickname·email뿐이지만 phone·avatarUrl·region도 머지한다(확장 등재 요청 중 — 실서버는 무시할 수 있음).
-  // 응답은 확정대로 부분 필드(userId·nickname·email)만 — 전체를 주면 setQueryData 캐시 오염이 드러나지 않는다.
+  // 본인 정보 수정 — PATCH /users/me (확정 스펙 2026-07-14). body(하나 이상): phone_number·region[]·avatar_url.
+  // 응답은 명세대로 me 전체 객체(snake). FE는 응답을 폐기하고 GET 재조회로 갱신한다.
   http.patch(`${API_BASE_URL}/users/me`, async ({ request }) => {
     await delay(500);
 
@@ -1488,19 +1666,15 @@ export const handlers = [
       );
     }
 
-    for (const field of ["nickname", "email", "phone", "avatarUrl", "region"] as const) {
-      if (field in body) MOCK_ME[field] = body[field];
+    // 요청 body는 이미 snake_case(fetch-json 변환). 명세 허용 필드만 머지.
+    for (const key of ["phone_number", "region", "avatar_url"] as const) {
+      if (key in body) MOCK_ME[key] = body[key];
     }
 
-    // userId는 GET 기준 uuid string으로 유지한다(명세는 PATCH 응답에서 number — 드리프트. FE는 응답을 폐기하므로 무관).
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
-        userId: MOCK_ME.userId,
-        nickname: MOCK_ME.nickname,
-        email: MOCK_ME.email,
-      },
+      data: { ...MOCK_ME, role: resolveMockRole() },
     });
   }),
 
@@ -1590,10 +1764,10 @@ export const handlers = [
       return HttpResponse.json({
         status: "200",
         message: "정상 처리되었습니다.",
-        data: {
+        data: camelToSnakeDeep({
           list: [],
           pagination: { page, size: 10, totalElements: 0, totalPages: 0, hasNext: false },
-        },
+        }),
       });
     }
 
@@ -1608,7 +1782,7 @@ export const handlers = [
     const list = [
       {
         reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
-        status: "MATCHED",
+        status: "CLOSED",
         accidentType: "교통사고",
         createdAt: "2026-05-20T09:00:00Z",
         reportNo: "20260520-017",
@@ -1639,7 +1813,7 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
+      data: camelToSnakeDeep({
         list,
         pagination: {
           page,
@@ -1648,7 +1822,7 @@ export const handlers = [
           totalPages: 1,
           hasNext: false,
         },
-      },
+      }),
     });
   }),
 
@@ -1677,7 +1851,8 @@ export const handlers = [
       "careers",
     ] as const;
     for (const field of ADJUSTER_PROFILE_MUTABLE_FIELDS) {
-      if (field in body) ADJUSTER_PROFILE[field] = body[field];
+      const wireKey = toSnakeKey(field);
+      if (wireKey in body) ADJUSTER_PROFILE[field] = body[wireKey];
     }
     ADJUSTER_PROFILE.updatedAt = new Date().toISOString();
 
@@ -1706,11 +1881,31 @@ export const handlers = [
   // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
   http.post(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(600);
-    const body = (await request.json()) as { accidentType?: string };
+    // 요청 body는 fetchJson이 camel→snake 변환해 보냄 — 명세 필드명 그대로 읽는다.
+    const body = (await request.json()) as {
+      accident_type?: string;
+      documents?: Array<{
+        s3_url?: string;
+        name?: string;
+        report_type?: string;
+        file_type?: string;
+      }>;
+    };
 
-    if (body.accidentType !== "medical_indemnity") {
+    if (body.accident_type !== "medical_indemnity") {
       return HttpResponse.json(
         { status: "400", code: "UNSUPPORTED_OPERATION", message: "현재 실손 의료비만 분석 가능합니다." },
+        { status: 400 },
+      );
+    }
+
+    // documents는 선택이나, 있으면 각 항목의 s3_url·name·report_type은 필수(명세 Document).
+    if (
+      Array.isArray(body.documents) &&
+      body.documents.some((doc) => !doc?.s3_url || !doc?.name || !doc?.report_type)
+    ) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "문서 메타(s3_url·name·report_type)가 누락되었습니다." },
         { status: 400 },
       );
     }
@@ -1776,24 +1971,53 @@ export const handlers = [
     });
   }),
 
-  // 검수 보류 토글 (PC 프리뷰 패널) — 사정사별 보류를 목록 fixture에 반영.
-  http.patch(`${API_BASE_URL}/reports/:reportId/hold`, async ({ params }) => {
+  // 검수 보류 (PC 프리뷰 패널) — POST + reason 필수(멱등). OTHER면 reason_detail 필수.
+  http.post(`${API_BASE_URL}/reports/:reportId/hold`, async ({ request, params }) => {
     await delay(300);
 
     const reportId = typeof params.reportId === "string" ? params.reportId : "";
     const target = PENDING_REVIEWS.find((review) => review.reportId === reportId);
     if (!target) {
       return HttpResponse.json(
-        { status: "404", code: "POST_NOT_FOUND", message: "리포트를 찾을 수 없습니다." },
+        { status: "404", code: "REPORT_NOT_FOUND", message: "리포트를 찾을 수 없습니다." },
         { status: 404 },
       );
     }
 
-    target.held = !target.held;
+    const body = (await request.json().catch(() => ({}))) as {
+      reason?: string;
+      reason_detail?: string | null;
+    };
+    const REASONS = ["NEED_MORE_DOCUMENTS", "OUT_OF_SPECIALTY", "SCHEDULE_CONFLICT", "OTHER"];
+    if (!body.reason) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "보류 사유를 선택해 주세요." },
+        { status: 400 },
+      );
+    }
+    if (!REASONS.includes(body.reason)) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "허용되지 않는 보류 사유입니다." },
+        { status: 400 },
+      );
+    }
+    if (body.reason === "OTHER" && !body.reason_detail) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "기타 사유를 입력해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    target.held = true;
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: { reportId, held: target.held },
+      data: {
+        report_id: reportId,
+        held: true,
+        reason: body.reason,
+        reason_detail: body.reason_detail ?? null,
+      },
     });
   }),
 
@@ -1818,9 +2042,8 @@ export const handlers = [
 
     const url = new URL(request.url, "http://localhost");
     const status = url.searchParams.get("status"); // 없거나 ALL이면 전체
-    const month = url.searchParams.get("month") ?? "";
-    const page = Number(url.searchParams.get("page") ?? "1");
-    const size = Number(url.searchParams.get("size") ?? "10");
+    const page = Number(url.searchParams.get("page") ?? "0"); // 명세: page는 0부터
+    const size = Number(url.searchParams.get("size") ?? "20"); // 명세 기본 20
 
     // 검수 이력 자체 없음(no-data) 시나리오
     const emptyAll = request.headers.get("x-mock-reviewed") === "empty";
@@ -1831,31 +2054,29 @@ export const handlers = [
         ? source
         : source.filter((r) => r.status === status);
 
-    const start = (page - 1) * size;
+    const start = page * size;
     const paged = filtered.slice(start, start + size);
     const totalPages = Math.max(1, Math.ceil(filtered.length / size));
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
-        summary: {
+      // 페이지 메타는 명세대로 data 최상위 평면(pagination 객체·has_next 없음).
+      data: camelToSnakeDeep({
+        stats: {
           monthlyReviewCount: emptyAll ? 0 : 18,
           previousMonthReviewCount: emptyAll ? 0 : 15,
-          consultationConversionRate: emptyAll ? 0 : 62,
-          consultationConvertedCount: emptyAll ? 0 : 9,
+          // 상담 전환 티켓 미구현 — 현재 항상 0(0.0~1.0 비율).
+          consultationConvertedCount: 0,
+          consultationConversionRate: 0,
           totalCount: source.length,
         },
-        filter: { status: status ?? "ALL", month },
-        list: paged,
-        pagination: {
-          page,
-          size,
-          totalElements: filtered.length,
-          totalPages,
-          hasNext: start + size < filtered.length,
-        },
-      },
+        items: paged,
+        page,
+        size,
+        totalElements: filtered.length,
+        totalPages,
+      }),
     });
   }),
 
@@ -1891,7 +2112,7 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
+      data: camelToSnakeDeep({
         target: {
           accidentType: "교통사고 · 후유장해",
           reportNo: "20260520-017",
@@ -1905,7 +2126,7 @@ export const handlers = [
           totalPages: 1,
           hasNext: false,
         },
-      },
+      }),
     });
   }),
 
@@ -1972,13 +2193,13 @@ export const handlers = [
         return HttpResponse.json({
           status: "200",
           message: "매칭이 완료되었습니다.",
-          data: {
+          data: camelToSnakeDeep({
             reportId,
             proposalId,
             adjusterId: target.adjusterId,
             reportStatus: "CLOSED",
             reviewStatus: "ACCEPTED",
-          },
+          }),
         });
       }
 
@@ -1988,13 +2209,13 @@ export const handlers = [
       return HttpResponse.json({
         status: "200",
         message: "제안을 거절했습니다.",
-        data: {
+        data: camelToSnakeDeep({
           reportId,
           proposalId,
           adjusterId: target.adjusterId,
           reportStatus: "AWAITING_ADOPTION",
           reviewStatus: "REJECTED",
-        },
+        }),
       });
     },
   ),
@@ -2180,9 +2401,176 @@ export const handlers = [
     });
   }),
 
-  // 리포트 상세 조회
-  // ⚠️ 명세 드리프트: 고객측(issue: CONFIRMED/TRUSTED/INFO)·사정사측(reviewIssues 리치) 동일 URL.
-  //   양측 스키마가 unknown 키를 strip하므로 superset 응답으로 둘 다 통과시킴.
+  // 검수 화면 조회 (손해사정사) — GET /reports/{reportId}/review. :reportId GET보다 먼저 등록.
+  // started=false면 adjuster_estimate·review·review_status는 null(작업본 미생성).
+  // x-mock-scenario: review-started(작업본 있음) / review-not-found(404).
+  http.get(`${API_BASE_URL}/reports/:reportId/review`, async ({ request, params }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "review-detail") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "검수 정보를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    const rawReportId = typeof params.reportId === "string" ? params.reportId : "";
+    if (request.headers.get("x-mock-scenario") === "review-not-found") {
+      return HttpResponse.json(
+        { status: "404", code: "REPORT_NOT_FOUND", message: "리포트를 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    const isUuid =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawReportId);
+    const reportId = isUuid ? rawReportId : crypto.randomUUID();
+    const started = request.headers.get("x-mock-scenario") === "review-started";
+
+    const issues = [
+      {
+        issueId: "a0000000-0000-4000-8000-000000000001",
+        reviewIssueId: started ? "b0000000-0000-4000-8000-000000000001" : null,
+        aiTitle: "후유장해 등급 재산정",
+        aiDescription:
+          "AI 초안은 14급으로 추정했으나, 관절 운동범위 제한 정도를 고려하면 12급 적용 여지가 있습니다.",
+        aiStatus: "TRUSTED",
+        tags: ["약관 제12조", "분쟁조정 2023-1456"],
+        impactAmount: 3_500_000,
+        reviewStatus: started ? "MODIFIED" : null,
+        adjusterOpinion: started ? "운동범위 측정치 기준 12급 적용이 타당합니다." : null,
+        modifiedTitle: started ? "후유장해 12급 재산정" : null,
+        modifiedDescription: started ? "AMA 기준 재적용 시 12급." : null,
+        modifiedImpactAmount: started ? 5_200_000 : null,
+        modifiedReason: started ? "장해등급 상향" : null,
+        excludedReason: null,
+      },
+      {
+        issueId: "a0000000-0000-4000-8000-000000000002",
+        reviewIssueId: started ? "b0000000-0000-4000-8000-000000000002" : null,
+        aiTitle: "입원 일당 미반영분",
+        aiDescription: "입원 17일 중 초안에 14일만 반영되어 3일분 누락 추정.",
+        aiStatus: "CONFIRMED",
+        tags: ["특약 제5조"],
+        impactAmount: 600_000,
+        reviewStatus: started ? "ACCEPTED" : null,
+        adjusterOpinion: null,
+        modifiedTitle: null,
+        modifiedDescription: null,
+        modifiedImpactAmount: null,
+        modifiedReason: null,
+        excludedReason: null,
+      },
+      {
+        issueId: "a0000000-0000-4000-8000-000000000003",
+        reviewIssueId: started ? "b0000000-0000-4000-8000-000000000003" : null,
+        aiTitle: "외모변형 장해 특약 적용",
+        aiDescription: "수술 흉터 관련 외모변형 장해 특약 청구 가능성 검토 항목.",
+        aiStatus: "INFO",
+        tags: ["외모변형 장해특약"],
+        impactAmount: null,
+        reviewStatus: started ? "EXCLUDED" : null,
+        adjusterOpinion: null,
+        modifiedTitle: null,
+        modifiedDescription: null,
+        modifiedImpactAmount: null,
+        modifiedReason: null,
+        excludedReason: started ? "현 자료로는 외모변형 장해 기준 미충족." : null,
+      },
+    ];
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: camelToSnakeDeep({
+        reportId,
+        caseNo: "20260520-017",
+        title: "후유장해 · 우측 슬관절 후방십자인대 파열 등급 재산정",
+        accidentType: "후유장해",
+        region: "서울 강남",
+        status: started ? "AWAITING_ADOPTION" : "AWAITING_INSPECTION",
+        confidenceLevel: "HIGH",
+        isMasked: true,
+        offeredAmount: 8_500_000,
+        client: {
+          nickname: "윤O서",
+          gender: "여",
+          birthDate: "1991-04-12",
+          region: "서울 강남",
+          joinedAt: "2024-03-01",
+        },
+        claim: {
+          accidentType: "후유장해",
+          diagnosis: "우측 슬관절 후방십자인대 파열",
+          accidentDate: "2026-05-01",
+          hospitalization:
+            "2026-05-02 ~ 2026-05-18 (후방십자인대 파열 수술) · 2026-06-10 ~ 2026-06-21 (재활 재입원)",
+          description:
+            "퇴근길 신호 대기 중 후방 추돌 사고를 당했습니다. 사고 직후 우측 무릎 통증과 부종이 심해 응급실에 내원했고, 정밀검사 결과 후방십자인대 파열 진단을 받아 입원 치료 후 수술을 받았습니다.",
+          additionalInformation: null,
+          productName: "행복드림 종합보험",
+          insurerName: "OO손해보험",
+        },
+        attachments: [
+          {
+            attachmentId: "att-1",
+            name: "진단서",
+            mimeType: "application/pdf",
+            url: "https://cdn.example.com/reports/att-1.pdf",
+            reportType: "DIAGNOSIS",
+            pageCount: 2,
+            issuedBy: "강남세브란스병원",
+            issuedAt: "2026-05-18",
+            aiSummary:
+              "우측 슬관절 후방십자인대 완전 파열, 관절경적 재건술 시행. 향후 장해 잔존 가능성 명시.",
+          },
+          {
+            attachmentId: "att-2",
+            name: "MRI 영상 판독지",
+            mimeType: "application/pdf",
+            url: "https://cdn.example.com/reports/att-2.pdf",
+            reportType: "IMAGING",
+            pageCount: 1,
+            issuedBy: "강남세브란스병원 영상의학과",
+            issuedAt: "2026-05-03",
+            aiSummary: "후방십자인대 연속성 소실 확인, 동반 반월상연골 손상 의심.",
+          },
+          {
+            attachmentId: "att-3",
+            name: "입퇴원 확인서",
+            mimeType: "image/jpeg",
+            url: "https://cdn.example.com/reports/att-3.jpg",
+            reportType: "ADMISSION",
+            pageCount: null,
+            issuedBy: "병원 발행",
+            issuedAt: "2026-05-18",
+            aiSummary: null,
+          },
+        ],
+        aiEstimate: { min: 12_000_000, max: 18_000_000 },
+        adjusterEstimate: started ? { min: 13_000_000, max: 19_000_000 } : null,
+        applicableGuarantees: ["상해후유장해 담보", "골절 진단비 특약", "입원·통원 일당"],
+        omittedSpecialContract: ["외모변형 장해특약"],
+        basisTermsPrecedents: [
+          "약관 제12조 (후유장해 보험금 산정기준)",
+          "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
+          "대법원 2019다○○○○ (후유장해 인과관계 판단)",
+        ],
+        issues,
+        review: started ? "장해율 재산정 필요, 청구 범위 상향 여지 있음." : null,
+        reviewStatus: started ? "SENT" : null,
+        started,
+        progress: {
+          total: 3,
+          accepted: started ? 1 : 0,
+          modified: started ? 1 : 0,
+          excluded: started ? 1 : 0,
+        },
+      }),
+    });
+  }),
+
+  // 리포트 상세 조회 (고객측 — issue: CONFIRMED/TRUSTED/INFO). 파트너 검수는 /review로 분리(#130).
   http.get(`${API_BASE_URL}/reports/:reportId`, async ({ params }) => {
     await delay(500);
 
@@ -2202,9 +2590,9 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
+      data: camelToSnakeDeep({
         reportId: responseReportId,
-        status: isCustomerSample ? "MATCHED" : "AWAITING_INSPECTION",
+        status: isCustomerSample ? "CLOSED" : "AWAITING_INSPECTION",
         accidentType: "교통사고(후유장해)",
         treatment: "우측 슬관절 후방십자인대 파열",
         claimedMinAmount: isCustomerSample ? 13_500_000 : 12_000_000,
@@ -2217,140 +2605,41 @@ export const handlers = [
           "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
           "대법원 2019다○○○○ (후유장해 인과관계 판단)",
         ],
-        issue: [
+        issues: [
           {
+            issueId: "issue-1",
             title: "장해등급 과소 산정 가능",
-            opinion: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
-            status: "TRUSTED",
-            tag: "약관 제12조",
+            description: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
+            aiStatus: "TRUSTED",
             impactAmount: 350,
             tags: ["약관 제12조", "분쟁조정 2023-1456"],
           },
           {
+            issueId: "issue-2",
             title: "외모추상 특약 청구 누락",
-            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
-            status: "CONFIRMED",
-            tag: "특약 제5조",
+            description: "누락분 청구 검토가 가장 확실한 출발점이에요.",
+            aiStatus: "CONFIRMED",
             impactAmount: 200,
             tags: ["특약 약관 §4", "유사사례 1456"],
           },
           {
+            issueId: "issue-3",
             title: "진행 방향",
-            opinion: "추가 의료자료 확보 → 재산정 순서를 권해요.",
-            status: "INFO",
-            tag: "분쟁조정 절차",
+            description: "추가 의료자료 확보 → 재산정 순서를 권해요.",
+            aiStatus: "INFO",
+            tags: ["분쟁조정 절차"],
           },
         ],
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
-        reportNo: "20260520-017",
+        caseNo: "20260520-017",
         adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
           : null,
         reviewedAt: isCustomerSample ? "2026.05.22" : null,
         adjuster: { nickname: "정우성", career: "12년 경력 손해사정사" },
-
-        caseId: "20260531-042",
-        accidentDate: "2026.05.01",
-        insuranceName: "OO손해보험 · 행복드림",
-        hospitalizations: [
-          {
-            hospitalStart: "2026.05.02",
-            hospitalEnd: "2026.05.18",
-            hospitalReason: "후방십자인대 파열 수술",
-          },
-          {
-            hospitalStart: "2026.06.10",
-            hospitalEnd: "2026.06.21",
-            hospitalReason: "재활 및 관절 가동범위 회복 재입원",
-          },
-        ],
-        description:
-          "퇴근길 신호 대기 중 후방 추돌 사고를 당했습니다. 사고 직후 우측 무릎 통증과 부종이 심해 응급실에 내원했고, 정밀검사 결과 후방십자인대 파열 진단을 받아 입원 치료 후 수술을 받았습니다.",
-        client: {
-          maskedName: "윤O서",
-          ageBand: "만 34세",
-          gender: "여",
-          region: "서울 강남",
-          joinedAt: "2024.03",
-        },
-        isMasked: true,
-        attachments: [
-          {
-            id: "att-1",
-            name: "진단서",
-            fileType: "PDF",
-            pageCount: 2,
-            url: "https://cdn.example.com/reports/att-1.pdf",
-            issuedBy: "강남세브란스병원",
-            issuedAt: "2026.05.18",
-            aiSummary:
-              "우측 슬관절 후방십자인대 완전 파열, 관절경적 재건술 시행. 향후 장해 잔존 가능성 명시.",
-          },
-          {
-            id: "att-2",
-            name: "MRI 영상 판독지",
-            fileType: "PDF",
-            pageCount: 1,
-            url: "https://cdn.example.com/reports/att-2.pdf",
-            issuedBy: "강남세브란스병원 영상의학과",
-            issuedAt: "2026.05.03",
-            aiSummary: "후방십자인대 연속성 소실 확인, 동반 반월상연골 손상 의심.",
-          },
-          {
-            id: "att-3",
-            name: "입퇴원 확인서",
-            fileType: "JPG",
-            pageCount: null,
-            url: "https://cdn.example.com/reports/att-3.jpg",
-            issuedBy: "병원 발행",
-            issuedAt: "2026.05.18",
-            aiSummary: null,
-          },
-        ],
-        // ⚠️ 명세 드리프트: 명세 issue는 string[]. 리치 reviewIssues 별도 키로 superset 반환.
-        reviewIssues: [
-          {
-            issueId: "issue-1",
-            title: "후유장해 등급 재산정",
-            description:
-              "AI 초안은 14급으로 추정했으나, 관절 운동범위 제한 정도를 고려하면 12급 적용 여지가 있습니다.",
-            impactAmount: 3_500_000,
-            reviewStatus: "PENDING",
-            modifiedReason: null,
-            excludedReason: null,
-            adjusterOpinion: null,
-            tags: ["약관 제12조", "분쟁조정 2023-1456"],
-            isNew: false,
-          },
-          {
-            issueId: "issue-2",
-            title: "입원 일당 미반영분",
-            description: "입원 17일 중 초안에 14일만 반영되어 3일분 누락 추정.",
-            impactAmount: 600_000,
-            reviewStatus: "PENDING",
-            modifiedReason: null,
-            excludedReason: null,
-            adjusterOpinion: null,
-            tags: ["특약 제5조"],
-            isNew: false,
-          },
-          {
-            issueId: "issue-3",
-            title: "외모변형 장해 특약 적용",
-            description:
-              "수술 흉터 관련 외모변형 장해 특약 청구 가능성 검토 항목.",
-            impactAmount: null,
-            reviewStatus: "PENDING",
-            modifiedReason: null,
-            excludedReason: null,
-            adjusterOpinion: null,
-            tags: ["외모변형 장해특약"],
-            isNew: false,
-          },
-        ],
-      },
+      }),
     });
   }),
 
@@ -2365,16 +2654,21 @@ export const handlers = [
       );
     }
 
-    const body = (await request.json().catch(() => ({}))) as { status?: string };
     const reportId =
       typeof params.reportId === "string"
         ? params.reportId
         : crypto.randomUUID();
 
+    // status는 서버가 파생(클라이언트 미전송). 작업본 최초 반영 시 review_status=SENT.
     return HttpResponse.json({
       status: "200",
-      message: "검수 내용이 반영되었습니다.",
-      data: { reportId, status: body.status ?? "AWAITING_ADOPTION" },
+      message: "정상 처리되었습니다.",
+      data: camelToSnakeDeep({
+        reportId,
+        status: "AWAITING_ADOPTION",
+        reportReviewId: crypto.randomUUID(),
+        reviewStatus: "SENT",
+      }),
     });
   }),
 ];

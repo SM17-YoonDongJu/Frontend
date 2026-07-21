@@ -5,7 +5,7 @@ import { FileText } from "@/shared/ui/icons/FileText";
 import { Pencil } from "@/shared/ui/icons/Pencil";
 import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
 import { Star } from "@/shared/ui/icons/Star";
-import { useDashboard } from "../_api/use-dashboard";
+import { useAdjusterHome } from "../_api/use-home";
 
 interface SummaryCard {
   icon: ReactNode;
@@ -15,7 +15,7 @@ interface SummaryCard {
 }
 
 export function SummaryCards() {
-  const { data } = useDashboard();
+  const { data } = useAdjusterHome();
   const { summary } = data;
 
   const cards: SummaryCard[] = [
@@ -40,8 +40,8 @@ export function SummaryCards() {
     {
       icon: <Star />,
       label: "고객 평점",
-      value: summary.averageRating.toFixed(1),
-      hint: `후기 ${summary.reviewCount}건`,
+      value: summary.rating.average.toFixed(1),
+      hint: `후기 ${summary.rating.reviewCount}건`,
     },
   ];
 
