@@ -32,7 +32,7 @@ export function SignupProgress({ current, total, onBack }: SignupProgressProps) 
         className="h-1.5 flex-1"
       />
 
-      <span className="shrink-0 text-xs font-bold text-ink-3">
+      <span className="w-9 shrink-0 text-right text-xs font-bold text-ink-3">
         {current}/{total}
       </span>
     </div>
