@@ -9,7 +9,7 @@ import { DASHBOARD_LINKS } from "@/app/customer/dashboard/_model/dashboard-links
 import type { ReportListItem } from "@/app/customer/dashboard/_model/types";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { Plus } from "@/shared/ui/icons/Plus";
-import { OfferRangeBar, toManwon } from "./OfferRangeBar";
+import { OfferRangeBar, toManwon } from "../OfferRangeBar";
 
 function formatCreatedAt(iso: string): string {
   const date = new Date(iso);
