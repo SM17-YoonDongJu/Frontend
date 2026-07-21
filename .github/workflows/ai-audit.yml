@@ -94,7 +94,7 @@ jobs:
 
       - name: Codex 설치
         if: steps.gate.outputs.run == 'true'
-        run: npm install -g @openai/codex
+        run: npm install -g @openai/codex@0.144.6
 
       - name: AI 점검 실행 (codex exec)
         if: steps.gate.outputs.run == 'true'
