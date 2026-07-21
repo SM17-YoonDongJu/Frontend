@@ -1,3 +1,4 @@
+import { Avatar } from "@/shared/ui/Avatar";
 import { StarRating } from "@/shared/ui/StarRating";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 
@@ -38,17 +39,11 @@ export function AdjusterProfileHeader({
         </nav>
 
         <div className="flex flex-col items-center gap-2 text-center lg:flex-row lg:items-center lg:gap-7 lg:text-left">
-          <span
-            aria-hidden
-            className="flex size-[5.25rem] shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy text-3xl font-semibold text-white lg:size-24"
-          >
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="" className="size-full object-cover" />
-            ) : (
-              nickname.trim().charAt(0) || "?"
-            )}
-          </span>
+          <Avatar
+            src={avatarUrl}
+            name={nickname}
+            className="text-[5.25rem] font-sans font-semibold [--avatar-initial:0.357em] lg:text-[6rem]"
+          />
 
           <div className="flex min-w-0 flex-col items-center lg:items-start">
             <div className="flex flex-wrap items-center justify-center gap-2 pt-1.5 lg:justify-start lg:gap-3 lg:pt-0">

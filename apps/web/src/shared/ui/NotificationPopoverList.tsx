@@ -6,7 +6,7 @@ import { NotificationPopoverRow } from "./NotificationPopoverRow";
 
 export function NotificationPopoverList() {
   const { data } = useNotificationList();
-  const notifications = data.list;
+  const notifications = data.items;
 
   if (notifications.length === 0) {
     return (
@@ -27,7 +27,7 @@ export function NotificationPopoverList() {
           </h3>
           <ul className="divide-y divide-line-2">
             {section.items.map((notification) => (
-              <li key={notification.notificationId}>
+              <li key={notification.id}>
                 <NotificationPopoverRow notification={notification} />
               </li>
             ))}

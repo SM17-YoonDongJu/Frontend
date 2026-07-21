@@ -4,12 +4,15 @@ import { z } from "zod";
 export const affiliationSchema = z.enum(["INDEPENDENT", "FIRM"]);
 export type AffiliationType = z.infer<typeof affiliationSchema>;
 
-// 자격 구분(명세 speciality) — 전송값은 한글 literal
+// 자격 구분(자격증 유형) — UI 단일 선택값(한글 literal).
+// CONTRACT: POST body 필드는 `specialities`(배열)이며 명세 JSON 예시는 ["traffic","cancer"]를 쓰지만
+// 같은 표의 설명 칸은 "신체/종합"이라 값 체계가 스스로 상충한다(⚠️ 백엔드 확인 필요). 설명 칸(신체/종합)을
+// 단일 진실로 채택해 전송하고, traffic/cancer 계열 코드로 확정되면 이 enum과 전송 매핑을 교체한다.
 export const specialitySchema = z.enum(["신체", "종합"]);
 export type Speciality = z.infer<typeof specialitySchema>;
 
-// 서류 검토 결과
-export const documentTypeSchema = z.enum(["LICENSE", "REGISTRATION"]);
+// 서류 검토 결과 — 명세 documents[].type: LICENSE(자격증 사본)·REGISTRATION(등록증)·ID_CARD(신분증)
+export const documentTypeSchema = z.enum(["LICENSE", "REGISTRATION", "ID_CARD"]);
 export type DocumentType = z.infer<typeof documentTypeSchema>;
 
 export const documentReviewStatusSchema = z.enum([
@@ -30,11 +33,11 @@ export const applicationStatusSchema = z.enum(["PENDING", "APPROVED", "REJECTED"
 export type ApplicationStatus = z.infer<typeof applicationStatusSchema>;
 
 // ── 신청 body ──
-// adjusterApplicationBodySchema = Notion 명세 필드(단일 진실).
-// UI 확장 필드(phone·specialties)는 아래 .extend()로 분리해 명세/확장을 구분한다.
+// adjusterApplicationBodySchema = Notion 명세 필드(단일 진실). 자격 구분은 `specialities`(배열).
+// UI 확장 필드(phone·specialties[전문분야])는 아래 .extend()로 분리해 명세/확장을 구분한다.
 export const adjusterApplicationBodySchema = z.object({
   name: z.string(),
-  speciality: specialitySchema,
+  specialities: z.array(specialitySchema).min(1),
   licenseNo: z.string().nullish(),
   licenseImageUrl: z.string().url().nullish(),
   career: z.number().int().nonnegative().nullish(),

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useUpdateMe } from "@/shared/api/use-update-me";
 import { useUploadFile } from "@/shared/api/use-upload-file";
+import { toast } from "@/shared/ui/toast";
 import type { Me } from "../_model/types";
 
 interface UseProfileSettingsFormParams {
@@ -18,8 +19,9 @@ export function useProfileSettingsForm({
   profile,
   onSaved,
 }: UseProfileSettingsFormParams) {
-  const [phone, setPhone] = useState(profile.phone ?? "");
-  const [region, setRegion] = useState(profile.region ?? "");
+  const [phone, setPhone] = useState(profile.phoneNumber ?? "");
+  // UI는 단일 지역 선택 — 명세 region은 배열이라 첫 항목만 편집하고 저장 시 배열로 감싼다.
+  const [region, setRegion] = useState(profile.region[0] ?? "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatarUrl);
 
   const { mutate: updateMe, isPending: isSaving } = useUpdateMe();
@@ -33,13 +35,17 @@ export function useProfileSettingsForm({
   const save = () => {
     updateMe(
       {
-        phone,
-        region,
+        phoneNumber: phone,
+        region: region ? [region] : [],
         ...(avatarUrl && avatarUrl !== profile.avatarUrl
           ? { avatarUrl }
           : {}),
       },
-      { onSuccess: onSaved },
+      {
+        onSuccess: onSaved,
+        onError: () =>
+          toast.error("프로필 저장에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      },
     );
   };
 

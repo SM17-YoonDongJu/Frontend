@@ -1,11 +1,8 @@
 "use client";
 
-import { QueryErrorResetBoundary } from "@tanstack/react-query";
-import { Suspense, useEffect, useState } from "react";
-import { ErrorBoundary } from "react-error-boundary";
+import { AsyncBoundary } from "@/shared/ui/AsyncBoundary";
 import { DesktopReviewView } from "./DesktopReviewView";
-import { ReviewError } from "./ReviewError";
-import type { FallbackProps } from "react-error-boundary";
+import { REVIEW_ERROR_MESSAGES } from "./review-error-messages";
 
 function DesktopReviewSkeleton() {
   return (
@@ -27,24 +24,15 @@ function DesktopReviewSkeleton() {
   );
 }
 
-function DesktopReviewErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
-  return <ReviewError code={(error as Error).name} onRetry={resetErrorBoundary} />;
-}
-
 export function DesktopReviewBoundary() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return <DesktopReviewSkeleton />;
-
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary onReset={reset} FallbackComponent={DesktopReviewErrorFallback}>
-          <Suspense fallback={<DesktopReviewSkeleton />}>
-            <DesktopReviewView />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    <AsyncBoundary
+      fallback={<DesktopReviewSkeleton />}
+      errorLayout="page"
+      errorTitle="목록을 불러오지 못했어요"
+      errorMessages={REVIEW_ERROR_MESSAGES}
+    >
+      <DesktopReviewView />
+    </AsyncBoundary>
   );
 }

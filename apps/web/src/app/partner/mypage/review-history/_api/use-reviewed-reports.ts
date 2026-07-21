@@ -14,9 +14,9 @@ export function useReviewedReports(filter?: ReviewedReportsFilter) {
   return useSuspenseInfiniteQuery({
     queryKey: reportKeys.reviewedReports(filter).queryKey,
     queryFn: ({ pageParam }) => getReviewedReports(filter, pageParam),
-    initialPageParam: 1,
+    initialPageParam: 0,
     getNextPageParam: (lastPage) =>
-      lastPage.pagination.hasNext ? lastPage.pagination.page + 1 : undefined,
+      lastPage.page + 1 < lastPage.totalPages ? lastPage.page + 1 : undefined,
     retry: false,
     staleTime: STALE_TIME_LIST,
     gcTime: GC_TIME_DEFAULT,

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Avatar } from "@/shared/ui/Avatar";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { useReportList } from "../_api/use-report-list";
@@ -42,12 +43,7 @@ export function ReviewCompleteCard() {
         >
           <CardHeader />
           <div className="mt-3 flex items-center gap-3">
-            <span
-              aria-hidden
-              className="flex size-[2.625rem] shrink-0 items-center justify-center rounded-full bg-navy font-serif text-[1.1rem] text-white"
-            >
-              {(report.adjusterNickname ?? "담").trim().charAt(0)}
-            </span>
+            <Avatar name={report.adjusterNickname ?? "담"} className="text-[2.625rem]" />
             <div className="min-w-0 flex-1">
               <p className="text-[0.875rem] font-bold text-ink">
                 {report.adjusterNickname ?? "담당"} 손해사정사님이

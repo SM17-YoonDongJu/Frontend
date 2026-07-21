@@ -1,17 +1,7 @@
 "use client";
 
-import { QueryErrorResetBoundary } from "@tanstack/react-query";
-import { Suspense, useSyncExternalStore, type ReactNode } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { ChatSectionError } from "./ChatSectionError";
-
-const noopSubscribe = () => () => {};
-const useIsMounted = () =>
-  useSyncExternalStore(
-    noopSubscribe,
-    () => true,
-    () => false,
-  );
+import type { ReactNode } from "react";
+import { AsyncBoundary } from "@/shared/ui/AsyncBoundary";
 
 interface ChatSectionBoundaryProps {
   children: ReactNode;
@@ -19,30 +9,14 @@ interface ChatSectionBoundaryProps {
   errorTitle?: string;
 }
 
-export function ChatSectionBoundary({
-  children,
-  fallback,
-  errorTitle,
-}: ChatSectionBoundaryProps) {
-  const mounted = useIsMounted();
-  if (!mounted) return fallback;
-
+export function ChatSectionBoundary({ children, fallback, errorTitle }: ChatSectionBoundaryProps) {
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ error, resetErrorBoundary }) => (
-            <ChatSectionError
-              title={errorTitle}
-              code={(error as Error).name}
-              onRetry={resetErrorBoundary}
-            />
-          )}
-        >
-          <Suspense fallback={fallback}>{children}</Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    <AsyncBoundary
+      fallback={fallback}
+      errorLayout="fill"
+      errorTitle={errorTitle ?? "대화를 불러오지 못했어요"}
+    >
+      {children}
+    </AsyncBoundary>
   );
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { AdjusterListItem } from "../_model/types";
 import { cn } from "@/shared/lib/utils";
+import { Avatar } from "@/shared/ui/Avatar";
 import { buttonVariants } from "@/shared/ui/Button";
 import { StarRating } from "@/shared/ui/StarRating";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
@@ -29,17 +30,12 @@ export function AdjusterCard({ adjuster }: { adjuster: AdjusterListItem }) {
   return (
     <article className="flex flex-col rounded-card border border-line bg-card p-5 md:p-6">
       <div className="flex gap-4">
-        <span
-          aria-hidden
-          className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy font-serif text-xl font-semibold text-white"
-        >
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt="" className="size-full object-cover" />
-          ) : (
-            name.trim().charAt(0) || "?"
-          )}
-        </span>
+        <Avatar
+          src={avatarUrl}
+          name={name}
+          size="lg"
+          className="font-semibold [--avatar-initial:0.357em]"
+        />
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">

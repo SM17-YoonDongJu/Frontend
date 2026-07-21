@@ -10,7 +10,7 @@ export function useUpdateMe() {
 
   return useMutation({
     mutationFn: (body: UpdateMeBody) => updateMe(body),
-    // PATCH 응답이 부분 필드라 캐시에 직접 쓰면 role·createdAt·phone이 소실된다(setQueryData 금지).
+    // 응답을 폐기하고 GET 재조회로만 갱신한다(단일 소스). setQueryData 미사용.
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.me.queryKey });
     },

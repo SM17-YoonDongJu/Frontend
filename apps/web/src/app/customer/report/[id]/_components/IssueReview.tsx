@@ -15,8 +15,7 @@ const ISSUE_STATUS_META: Record<IssueStatus, { label: string; tone: Tone }> = {
 };
 
 function issueTags(issue: IssueItem): string[] {
-  if (issue.tags?.length) return issue.tags;
-  return issue.tag ? [issue.tag] : [];
+  return issue.tags ?? [];
 }
 
 export interface IssueReviewProps {
@@ -37,7 +36,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
 
       <ol className="mt-4 space-y-4 lg:space-y-3">
         {issues.map((issue, i) => {
-          const meta = ISSUE_STATUS_META[issue.status];
+          const meta = ISSUE_STATUS_META[issue.aiStatus];
           const tags = issueTags(issue);
           const isOpen = openIndex === i;
           const canToggle = tags.length > 0;
@@ -83,7 +82,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
               </button>
 
               <p className="mt-2 pl-[2.125rem] text-[0.75rem] leading-[1.26rem] text-ink-2 lg:pl-0 lg:text-[0.875rem] lg:leading-relaxed">
-                {issue.opinion}
+                {issue.description}
               </p>
 
               {tags.length > 0 && (

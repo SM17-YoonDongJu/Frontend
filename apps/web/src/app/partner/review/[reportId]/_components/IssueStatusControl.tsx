@@ -2,11 +2,11 @@
 
 import { cn } from "@/shared/lib/utils";
 import { ISSUE_STATUS_OPTIONS } from "../_model/status-meta";
-import type { ReviewIssueStatus } from "../_model/types";
+import type { IssueReviewStatus } from "../_model/types";
 
 export interface IssueStatusControlProps {
-  value: ReviewIssueStatus;
-  onChange: (status: ReviewIssueStatus) => void;
+  value: IssueReviewStatus | null;
+  onChange: (status: Exclude<IssueReviewStatus, "ADDED">) => void;
 }
 
 /** 선택 활성 시 상태별 색: 인정=green, 수정=gold, 제외=terra. */

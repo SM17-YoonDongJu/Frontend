@@ -8,32 +8,37 @@ export const userTypeSchema = z.enum(["insured_person", "adjuster"]);
 // 소셜 연결 — auth §4 provider 값 재사용.
 export const socialProviderSchema = z.enum(["kakao", "naver"]);
 
-// GET /users/me 확정 응답은 userId(uuid string)·nickname·email·role·createdAt 5필드뿐(Notion 명세, 2026-07-13).
-// - userType은 응답에 없다 → role에서 파생(USER=피보험자, 그 외=사정사). 소비처(탭바·랜딩 리다이렉트·리포트 상세)는 기존대로 userType 사용.
-// - CONTRACT(명세없음-확장 등재 요청 중, 이슈 #105): phone·avatarUrl·socialProvider·region은 마이페이지가 요구하는
-//   확장 필드로 백엔드 미채택 상태다(초안 .pr-assets/api-spec-draft-user-mypage.md). 키가 없어도 파싱되도록 nullish → null 정규화
-//   (실서버에선 "미등록"으로 표시). 필수(.nullable())로 두면 키 부재 시 파싱이 깨져 화면이 무한 로딩된다.
+// 성별 — GET /users/me·POST /auth/register 공용(M/F/UNKNOWN).
+export const genderSchema = z.enum(["M", "F", "UNKNOWN"]);
+
+// GET /users/me 확정 응답(Notion 명세, 2026-07-14): user_id·nickname·phone_number·role·gender·region[]·avatar_url·created_at.
+// - phoneNumber(사전 phone_number)·region(배열)·avatarUrl·gender는 명세 확정 필드(더 이상 미채택 확장 아님).
+// - region은 문자열 배열(활동/거주 복수). userType은 응답에 없어 role에서 파생(USER=피보험자, 그 외=사정사).
+// - CONTRACT(명세없음-확장): email·socialProvider는 명세 GET 응답에 없다. FE가 최근 로그인 마스킹·가입경로 표시에 쓰므로
+//   nullish 확장으로 유지(실서버 키 부재 시 null). 키가 없어도 파싱되도록 nullish → null 정규화.
 export const meSchema = z
   .object({
     userId: z.string(), // §7-2 해소(#43, 2026-07-05): 전역 uuid(string) 통일.
     nickname: z.string(),
-    email: z.string().nullish(),
     createdAt: z.string(),
     role: userRoleSchema,
-    userType: userTypeSchema.optional(),
-    phone: z.string().nullish(),
+    phoneNumber: z.string().nullish(),
+    gender: genderSchema.nullish(),
+    region: z.array(z.string()).nullish(), // 활동/거주 지역(복수) — 명세 배열.
     avatarUrl: z.string().nullish(),
+    userType: userTypeSchema.optional(),
+    email: z.string().nullish(),
     socialProvider: socialProviderSchema.nullish(),
-    region: z.string().nullish(), // 활동/거주 지역 — 사전 §3 adjuster-applications `region` 재사용.
   })
   .transform((me) => ({
     ...me,
     email: me.email ?? null,
     userType: me.userType ?? deriveUserType(me.role),
-    phone: me.phone ?? null,
+    phoneNumber: me.phoneNumber ?? null,
+    gender: me.gender ?? null,
     avatarUrl: me.avatarUrl ?? null,
     socialProvider: me.socialProvider ?? null,
-    region: me.region ?? null,
+    region: me.region ?? [],
   }));
 
 /** role → userType 파생. 응답에 userType이 없어 FE가 계산한다(ADMIN은 고객 화면 비대상 → 피보험자 취급). */
@@ -43,19 +48,17 @@ function deriveUserType(role: z.infer<typeof userRoleSchema>): UserType {
     : "insured_person";
 }
 
-// CONTRACT(명세없음-확장 등재 요청 중, 이슈 #105): PATCH /users/me 확정 body는 nickname·email뿐.
-// phone·region·avatarUrl 미채택 — 실서버에선 무효 저장될 수 있음(요청은 실패하지 않고 서버가 무시). 등재 요청 중.
+// PATCH /users/me 확정 body(Notion 명세, 하나 이상 포함): phone_number·region[]·avatar_url.
 export const updateMeBodySchema = z
   .object({
-    nickname: z.string(),
-    email: z.string(),
-    phone: z.string(),
+    phoneNumber: z.string(),
+    region: z.array(z.string()),
     avatarUrl: z.string(),
-    region: z.string(),
   })
   .partial();
 
 export type UserType = z.infer<typeof userTypeSchema>;
 export type SocialProvider = z.infer<typeof socialProviderSchema>;
+export type Gender = z.infer<typeof genderSchema>;
 export type Me = z.infer<typeof meSchema>;
 export type UpdateMeBody = z.infer<typeof updateMeBodySchema>;

@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
+import type { ComponentType } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { FieldPath } from "react-hook-form";
 import { Button } from "@/shared/ui/Button";
@@ -13,13 +14,26 @@ import { Step1AccidentType } from "./_components/Step1AccidentType";
 import { Step2TreatmentDetail } from "./_components/Step2TreatmentDetail";
 import { Step3AccidentDate } from "./_components/Step3AccidentDate";
 import { Step4OfferedAmount } from "./_components/Step4OfferedAmount";
-import { Step5Documents } from "./_components/Step5Documents";
-import { Step6Confirm } from "./_components/Step6Confirm";
+import { Step5Question } from "./_components/Step5Question";
+import { Step6Documents } from "./_components/Step6Documents";
+import { Step7Confirm } from "./_components/Step7Confirm";
 import { useDraftPrompt, clearDraft } from "./_hooks/use-draft";
 import { useFunnel } from "./_hooks/use-funnel";
 import { FUNNEL_STEPS, firstIncompleteStep } from "./_model/funnel-config";
+import type { FunnelStepKey } from "./_model/funnel-config";
 import { toCreateReportBody } from "./_model/report-request.schema";
 import type { AdjustRequestDraft, CreateReportResponse } from "./_model/types";
+
+/** 단계 key → 화면. 단계를 추가하면 이 매핑 누락이 타입 에러로 잡힌다. */
+const STEP_COMPONENTS: Record<FunnelStepKey, ComponentType> = {
+  accidentType: Step1AccidentType,
+  treatment: Step2TreatmentDetail,
+  date: Step3AccidentDate,
+  insurance: Step4OfferedAmount,
+  question: Step5Question,
+  document: Step6Documents,
+  consent: Step7Confirm,
+};
 
 function AdjustRequestFunnel() {
   const funnel = useFunnel();
@@ -31,6 +45,7 @@ function AdjustRequestFunnel() {
   const draftPrompt = useDraftPrompt(form);
 
   const step = FUNNEL_STEPS[funnel.currentStep - 1]!; // currentStep은 1..total로 clamp됨
+  const StepView = STEP_COMPONENTS[step.key];
 
   // 단계 가드: 선행 단계 미완 상태로 직접 진입(?step=N) 시 첫 미완 단계로 돌림
   useEffect(() => {
@@ -97,12 +112,7 @@ function AdjustRequestFunnel() {
 
       <FormProvider {...form}>
         <div className="mt-6 sm:rounded-card-lg sm:border sm:border-line sm:bg-card sm:p-6">
-          {funnel.currentStep === 1 && <Step1AccidentType />}
-          {funnel.currentStep === 2 && <Step2TreatmentDetail />}
-          {funnel.currentStep === 3 && <Step3AccidentDate />}
-          {funnel.currentStep === 4 && <Step4OfferedAmount />}
-          {funnel.currentStep === 5 && <Step5Documents />}
-          {funnel.currentStep === 6 && <Step6Confirm />}
+          <StepView />
         </div>
       </FormProvider>
 

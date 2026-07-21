@@ -58,6 +58,7 @@ auth · user · settings · report · review · matching · chat · payment · a
 | HTTP | code | 의미 |
 |------|------|------|
 | 400 | `INVALID_REQUEST` | 요청 형식/구조 이상(깨진 JSON, 타입 불일치) |
+| 400 | `BAD_REQUEST` | ⚠️ register 400이 사용(전역 GlobalExceptionHandler `@Valid` 실패) — INVALID_REQUEST와 이중, 백엔드 단일화 확인 필요 |
 | 400 | `VALIDATION_ERROR` | 필드 값 검증 위반(형식·길이·범위) |
 | 400 | `MISSING_REQUIRED_FIELD` | 필수 입력값 누락 |
 | 400 | `UNSUPPORTED_OPERATION` | 미지원 동작(MVP 미지원 보험사, 미적재 약관 리포트 등) |
@@ -68,7 +69,8 @@ auth · user · settings · report · review · matching · chat · payment · a
 | 401 | `REFRESH_TOKEN_NOT_FOUND` | 서버(Redis)에 저장된 refresh 토큰 없음 — `/auth/reissue` |
 | 403 | `FORBIDDEN` | 인증됐으나 권한 없음(미활성 사정사 채택, 타인 리포트) |
 | 404 | `USER_NOT_FOUND` | 사용자 없음 |
-| 404 | `POST_NOT_FOUND` | 게시물/리포트 없음 |
+| 404 | `POST_NOT_FOUND` | 게시물 없음 |
+| 404 | `REPORT_NOT_FOUND` | 리포트 없음 — `/reports/{id}/review`·`/hold` 404가 사용 |
 | 404 | `SUBSCRIPTION_NOT_FOUND` | 구독 정보 없음 |
 | 409 | `DUPLICATE_RESOURCE` | 중복 생성 시도 |
 | 409 | `CLOSED` | ⚠️ Notion 명세 409 근거·enum 반영 요청 — 종료(CLOSED)된 상담방에 메시지 전송 시도(이슈 #48 채팅) |

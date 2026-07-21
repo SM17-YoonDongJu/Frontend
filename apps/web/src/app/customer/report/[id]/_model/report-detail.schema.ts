@@ -14,12 +14,10 @@ export const issueStatusSchema = z.enum(["CONFIRMED", "TRUSTED", "INFO"]);
 
 export const issueItemSchema = z.object({
   title: z.string(),
-  opinion: z.string(),
-  status: issueStatusSchema,
-  tag: z.string().nullable(),
-  // 명세 GET 응답에 없는 디자인용 필드 — 부재 허용(nullish).
-  impactAmount: z.number().int().nullish(),
+  description: z.string(),
+  aiStatus: issueStatusSchema,
   tags: z.array(z.string()).nullish(),
+  impactAmount: z.number().int().nullish(),
 });
 
 export const reportDetailSchema = z.object({
@@ -33,12 +31,12 @@ export const reportDetailSchema = z.object({
   applicableGuarantees: z.array(z.string()),
   omittedSpecialContract: z.array(z.string()),
   basisTermsPrecedents: z.array(z.string()),
-  issue: z.array(issueItemSchema),
+  issues: z.array(issueItemSchema),
   question: z.string().nullable(),
   adjusterId: z.uuid().nullable(),
   // 명세 GET 응답에 없는 디자인용 필드 — 부재 허용(nullish).
   confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullish(),
-  reportNo: z.string().nullish(),
+  caseNo: z.string().nullish(),
   reviewComment: z.string().nullable(),
   reviewedAt: z.string().nullable(),
   adjuster: z

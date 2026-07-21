@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Camera } from "@/shared/ui/icons/Camera";
 import { Pencil } from "@/shared/ui/icons/Pencil";
 import type { Me } from "../../_model/types";
-import { ProfileAvatar } from "../ProfileAvatar";
+import { Avatar } from "@/shared/ui/Avatar";
 
 interface MobileProfileCardProps {
   profile: Me;
@@ -17,10 +17,12 @@ export function MobileProfileCard({ profile, onEdit, children }: MobileProfileCa
     <section className="overflow-hidden rounded-card-lg bg-navy shadow-xl shadow-navy/40">
       <div className="flex items-center gap-3.5 p-5">
         <div className="relative shrink-0">
-          <ProfileAvatar
-            avatarUrl={profile.avatarUrl}
-            nickname={profile.nickname}
-            className="size-13 text-[1.25rem]"
+          <Avatar
+            src={profile.avatarUrl}
+            name={profile.nickname}
+            label={`${profile.nickname} 프로필 사진`}
+            tone="glass"
+            className="text-[3.25rem] font-bold [--avatar-initial:0.385em]"
           />
           <span className="absolute -bottom-0.5 -right-0.5 flex size-5 items-center justify-center rounded-full border-2 border-navy bg-gold-2 text-navy">
             <Camera className="size-2.5" />

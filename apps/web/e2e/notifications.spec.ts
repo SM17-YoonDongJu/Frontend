@@ -46,7 +46,11 @@ test("알림이 없으면 빈 상태 안내가 보인다", async ({ page }) => {
       if (url.includes("/users/me/notifications") && !url.includes("read-all")) {
         return Promise.resolve(
           new Response(
-            JSON.stringify({ status: "200", message: "정상 처리되었습니다.", data: { list: [] } }),
+            JSON.stringify({
+              status: "200",
+              message: "정상 처리되었습니다.",
+              data: { items: [], unread_count: 0, page: 0, size: 20, total_elements: 0, total_pages: 0 },
+            }),
             { status: 200, headers: { "Content-Type": "application/json" } },
           ),
         );

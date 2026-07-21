@@ -78,7 +78,6 @@ function SignupFunnel() {
       socialToken: social.socialToken,
       userType: selectedUserType,
       nickname: social.nickname,
-      email: social.email,
     });
 
     register.mutate(body, {

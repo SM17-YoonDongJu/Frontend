@@ -79,7 +79,7 @@ export function ChatRoomListPanel({
     const keyword = query.trim().toLowerCase();
     if (!keyword) return rooms;
     return rooms.filter((room) => {
-      const haystack = `${room.adjusterName} ${room.lastMessage ?? ""}`.toLowerCase();
+      const haystack = `${room.counterpart.name} ${room.lastMessage ?? ""}`.toLowerCase();
       return haystack.includes(keyword);
     });
   }, [rooms, query]);
@@ -88,7 +88,7 @@ export function ChatRoomListPanel({
   const comparingRooms = useMemo(
     () =>
       filteredRooms.filter(
-        (room) => toMatchGroup(room.matchStatus, room.roomStatus) === "comparing",
+        (room) => toMatchGroup(room.reviewStatus, room.status) === "comparing",
       ),
     [filteredRooms],
   );
@@ -132,7 +132,7 @@ export function ChatRoomListPanel({
           )}
           {MATCH_GROUP_SECTIONS.map((section) => {
             const sectionRooms = filteredRooms.filter(
-              (room) => toMatchGroup(room.matchStatus, room.roomStatus) === section.key,
+              (room) => toMatchGroup(room.reviewStatus, room.status) === section.key,
             );
             if (sectionRooms.length === 0) return null;
 
@@ -179,13 +179,13 @@ export function ChatRoomListPanel({
                         className="border-b border-line-2 last:border-b-0"
                       >
                         <ChatRoomListItem
-                          name={room.adjusterName}
+                          name={room.counterpart.name}
                           caseNo={room.caseNo}
                           lastMessage={room.lastMessage}
                           lastMessageAt={room.lastMessageAt}
                           avatarUrl={room.avatarUrl}
-                          roomStatus={room.roomStatus}
-                          matchStatus={room.matchStatus}
+                          roomStatus={room.status}
+                          matchStatus={room.reviewStatus ?? undefined}
                           reportTypeLabel={room.reportTypeLabel}
                           href={buildHref(room.chatRoomId)}
                           active={room.chatRoomId === activeChatRoomId}
@@ -205,12 +205,12 @@ export function ChatRoomListPanel({
             {filteredRooms.map((room) => (
               <li key={room.chatRoomId} className="border-b border-line-2 last:border-b-0">
                 <ChatRoomListItem
-                  name={room.adjusterName}
+                  name={room.counterpart.name}
                   caseNo={room.caseNo}
                   lastMessage={room.lastMessage}
                   lastMessageAt={room.lastMessageAt}
                   avatarUrl={room.avatarUrl}
-                  roomStatus={room.roomStatus}
+                  roomStatus={room.status}
                   href={buildHref(room.chatRoomId)}
                   active={room.chatRoomId === activeChatRoomId}
                 />

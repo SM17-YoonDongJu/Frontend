@@ -1,5 +1,7 @@
 "use client";
 
+import { Avatar } from "@/shared/ui/Avatar";
+
 // 공개 검색 카드의 상담 방식 표시(고정) — 프로필 수정 화면에서 편집 대상 아님
 const CONSULT_METHODS = ["전화", "방문"] as const;
 
@@ -20,7 +22,6 @@ export function PreviewCard({
   activityRegion,
   avatarUrl,
 }: PreviewCardProps) {
-  const initial = nickname.trim().charAt(0) || "?";
   const metaParts = [
     career > 0 ? `경력 ${career}년` : null,
     activityRegion.trim() || null,
@@ -38,14 +39,12 @@ export function PreviewCard({
 
       <div className="rounded-card-lg border border-line bg-card p-5">
         <div className="flex items-center gap-3">
-          <div className="flex size-[2.75rem] items-center justify-center overflow-hidden rounded-full bg-ink text-[1rem] font-bold text-white">
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="" className="size-full object-cover" />
-            ) : (
-              initial
-            )}
-          </div>
+          <Avatar
+            src={avatarUrl}
+            name={nickname}
+            tone="ink"
+            className="text-[2.75rem] font-sans font-bold [--avatar-initial:0.364em]"
+          />
           <div className="min-w-0">
             <p className="truncate text-[0.9375rem] font-bold text-ink">{nickname} 손해사정사</p>
             {metaParts.length > 0 && (

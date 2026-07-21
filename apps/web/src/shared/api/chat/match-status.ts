@@ -1,29 +1,15 @@
-import { z } from "zod";
-import type { RoomStatus } from "./chat.schema";
+import type { ReviewStatus, RoomStatus } from "./chat.schema";
 
-// report_reviews.status 원천. GET /reports/{id}/proposals status와 동일 축.
-export const matchStatusSchema = z.enum([
-  "SENT",
-  "COUNSELING",
-  "REJECTED",
-  "ACCEPTED",
-]);
-export type MatchStatus = z.infer<typeof matchStatusSchema>;
-
-// UI 3그룹 파생(비교중 / 매칭완료 / 종료). CLOSED(roomStatus)도 종료로 흡수.
+// UI 3그룹 파생(비교중 / 매칭완료 / 종료). review_status(파이프라인)와 방 status를 합쳐 계산.
 export type MatchGroup = "comparing" | "matched" | "ended";
 
-// 방 종료는 두 축(matchStatus·roomStatus) 중 하나라도 종료면 종료로 본다.
+// ACCEPTED를 CLOSED보다 먼저 본다 — 수락 시 방도 CLOSED지만 표시 그룹은 '매칭 완료'.
+// reviewStatus null(사정사 검색 방)은 매칭 파이프라인이 없어 CLOSED면 종료, 아니면 비교로 취급.
 export function toMatchGroup(
-  matchStatus: MatchStatus,
-  roomStatus: RoomStatus,
+  reviewStatus: ReviewStatus | null,
+  status: RoomStatus,
 ): MatchGroup {
-  if (matchStatus === "ACCEPTED") return "matched";
-  if (matchStatus === "REJECTED" || roomStatus === "CLOSED") return "ended";
+  if (reviewStatus === "ACCEPTED") return "matched";
+  if (reviewStatus === "REJECTED" || status === "CLOSED") return "ended";
   return "comparing";
-}
-
-// 입력 가능 여부: 비교중·매칭완료만 전송 가능. 종료는 read-only.
-export function isChatWritable(group: MatchGroup): boolean {
-  return group !== "ended";
 }

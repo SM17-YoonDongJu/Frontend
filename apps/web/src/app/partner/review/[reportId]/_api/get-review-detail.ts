@@ -4,5 +4,5 @@ import { reviewDetailSchema } from "../_model/review-detail.schema";
 import type { ReviewDetail } from "../_model/types";
 
 export function getReviewDetail(reportId: string): Promise<ReviewDetail> {
-  return fetchJson(`${API_BASE_URL}/reports/${reportId}`, reviewDetailSchema);
+  return fetchJson(`${API_BASE_URL}/reports/${reportId}/review`, reviewDetailSchema);
 }
