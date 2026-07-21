@@ -36,13 +36,19 @@ export function ReportCard({
   const cta = ctaLabel ?? "리포트 보기";
 
   return (
-    <article className="relative overflow-hidden rounded-card border border-line bg-card shadow-card transition hover:shadow-raised">
+    <article
+      className={`relative overflow-hidden rounded-card border border-line shadow-card transition hover:shadow-raised ${
+        meta.muted ? "bg-paper-2" : "bg-card"
+      }`}
+    >
       <span
         aria-hidden
         className={`absolute inset-y-4 left-0 w-1 rounded-full ${REPORT_STATUS_SPINE[meta.tone]}`}
       />
 
-      <div className="py-[1.3125rem] pl-[1.625rem] pr-[1.3125rem]">
+      <div
+        className={`py-[1.3125rem] pl-[1.625rem] pr-[1.3125rem] ${meta.muted ? "opacity-70" : ""}`}
+      >
         <div className="flex items-center gap-2">
           <StatusBadge
             tone={meta.tone}
@@ -60,7 +66,7 @@ export function ReportCard({
 
         <div className="mt-3.5">
           <p className="text-[0.71875rem] font-medium text-ink-3">예상 보상 범위</p>
-          <p className="mt-1 text-ink">
+          <p className={`mt-1 ${meta.muted ? "text-ink-2" : "text-ink"}`}>
             <span className="font-serif text-[1.5rem] leading-none">
               {toManwon(claimedMinAmount)} – {toManwon(claimedMaxAmount)}
             </span>

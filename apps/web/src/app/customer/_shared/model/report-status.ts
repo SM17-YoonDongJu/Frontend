@@ -10,18 +10,18 @@ export type ReportStatusTone = "gold" | "green" | "navy" | "neutral";
 /**
  * 리포트 카드 상태 표시. tone은 상태 배지·좌측 스파인 색을 함께 결정.
  * 라벨은 ERD REPORTS.status 주석 그대로. COUNSELING은 기존 화면 전반 표기를 따라 "상담 중" 유지.
- * 색 의미는 리포트 상세(report/[id]/_model/report-status.ts)와 정렬:
- * 대기=neutral · 사용자 액션 필요=gold · 상담 진행=navy · 완료=green · 미선정=neutral.
+ * 진행 상태만 색을 갖고(대기=neutral · 액션 필요=gold · 상담=navy),
+ * 종료 상태(CLOSED·NOT_SELECTED)는 muted — 카드 전체를 회색 톤으로 가라앉힌다.
  */
 export const REPORT_STATUS_META: Record<
   ReportListStatus,
-  { label: string; tone: ReportStatusTone; showCheck: boolean }
+  { label: string; tone: ReportStatusTone; showCheck: boolean; muted: boolean }
 > = {
-  AWAITING_INSPECTION: { label: "검수 대기", tone: "neutral", showCheck: false },
-  AWAITING_ADOPTION: { label: "채택 대기", tone: "gold", showCheck: false },
-  COUNSELING: { label: "상담 중", tone: "navy", showCheck: false },
-  CLOSED: { label: "종결", tone: "green", showCheck: true },
-  NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral", showCheck: false },
+  AWAITING_INSPECTION: { label: "검수 대기", tone: "neutral", showCheck: false, muted: false },
+  AWAITING_ADOPTION: { label: "채택 대기", tone: "gold", showCheck: false, muted: false },
+  COUNSELING: { label: "상담 중", tone: "navy", showCheck: false, muted: false },
+  CLOSED: { label: "종결", tone: "neutral", showCheck: true, muted: true },
+  NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral", showCheck: false, muted: true },
 };
 
 /** 상태 tone → 카드 좌측 스파인 배경 유틸. */
