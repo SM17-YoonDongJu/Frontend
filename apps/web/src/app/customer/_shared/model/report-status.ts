@@ -5,22 +5,23 @@ export type ReportListStatus =
   | "MATCHED"
   | "CLOSED";
 
-/** 리포트 카드 상태 표시(배지 아님, 아이콘+텍스트). */
+export type ReportStatusTone = "gold" | "green" | "neutral";
+
+/** 리포트 카드 상태 표시. tone은 상태 배지·좌측 스파인 색을 함께 결정. */
 export const REPORT_STATUS_META: Record<
   ReportListStatus,
-  { label: string; className: string; showCheck: boolean }
+  { label: string; tone: ReportStatusTone; showCheck: boolean }
 > = {
-  AWAITING_INSPECTION: { label: "분석 완료", className: "text-gold-ink", showCheck: false },
-  AWAITING_ADOPTION: { label: "채택 대기", className: "text-gold-ink", showCheck: false },
-  COUNSELING: { label: "상담 중", className: "text-ink-2", showCheck: false },
-  MATCHED: { label: "검수 완료", className: "text-green", showCheck: true },
-  CLOSED: { label: "종결", className: "text-green", showCheck: true },
+  AWAITING_INSPECTION: { label: "분석 완료", tone: "gold", showCheck: false },
+  AWAITING_ADOPTION: { label: "채택 대기", tone: "gold", showCheck: false },
+  COUNSELING: { label: "상담 중", tone: "neutral", showCheck: false },
+  MATCHED: { label: "검수 완료", tone: "green", showCheck: true },
+  CLOSED: { label: "종결", tone: "green", showCheck: true },
 };
 
-/** 사고 유형 → 배지 색. Figma: 교통사고 골드, 실손 초록, 그 외 뉴트럴. */
-export function getAccidentTone(accidentType: string): { bg: string; text: string } {
-  if (accidentType.includes("교통")) return { bg: "bg-gold-soft", text: "text-gold-ink" };
-  if (accidentType.includes("실손") || accidentType.includes("의료"))
-    return { bg: "bg-green-soft", text: "text-green" };
-  return { bg: "bg-paper-2", text: "text-ink-2" };
-}
+/** 상태 tone → 카드 좌측 스파인 배경 유틸. */
+export const REPORT_STATUS_SPINE: Record<ReportStatusTone, string> = {
+  gold: "bg-gold",
+  green: "bg-green",
+  neutral: "bg-ink-3/30",
+};

@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 import { ReportCard } from "@/app/customer/_shared/components/ReportCard";
+import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
+import { proposalsCtaLabel } from "@/app/customer/_shared/model/report-title";
 import { useReportListInfinite } from "../_api/use-report-list-infinite";
 import { ReportListEmpty } from "./ReportListEmpty";
 
@@ -14,35 +16,47 @@ export function ReportListView() {
   const totalCount = data.pages[0]!.pagination.totalElements;
 
   return (
-    <div className="mx-auto w-full max-w-[42rem] px-5 pt-6 pb-10 md:px-0 md:pt-10">
-      <header className="flex items-baseline justify-between">
-        <h1 className="font-serif text-[1.625rem] font-bold leading-[1.3] tracking-[-0.0144rem] text-ink">
-          내 리포트
-        </h1>
-        <span className="text-[0.8125rem] font-semibold text-gold-ink">
-          {totalCount}건
-        </span>
+    <div className="mx-auto w-full max-w-[42rem] px-5 pt-6 pb-14 md:px-0 md:pt-10">
+      <header>
+        <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-gold-ink">
+          손해사정 리포트
+        </p>
+        <div className="mt-1.5 flex items-end justify-between gap-3">
+          <h1 className="font-serif text-[1.75rem] font-bold leading-[1.2] tracking-[-0.0144rem] text-ink">
+            내 리포트
+          </h1>
+          <span className="pb-1 text-[0.8125rem] text-ink-3">
+            전체 <span className="font-semibold text-ink-2">{totalCount}</span>건
+          </span>
+        </div>
+        <p className="mt-2 text-[0.8125rem] leading-[1.5] text-ink-3">
+          분석부터 검수, 받은 제안까지 진행 상황을 한눈에 확인하세요.
+        </p>
       </header>
 
       {list.length === 0 ? (
         <ReportListEmpty />
       ) : (
         <>
-          <ul className="mt-6 flex flex-col gap-3">
+          <ul className="mt-6 flex flex-col gap-3.5">
             {list.map((report) => (
               <li key={report.reportId}>
-                <ReportCard report={report} />
+                <ReportCard
+                  report={report}
+                  href={reportProposalsHref(report.reportId)}
+                  ctaLabel={proposalsCtaLabel(report.proposalCount)}
+                />
               </li>
             ))}
           </ul>
 
           {hasNextPage && (
-            <div className="mt-4">
+            <div className="mt-6">
               <button
                 type="button"
                 onClick={() => fetchNextPage()}
                 disabled={isFetchingNextPage}
-                className="w-full rounded-button border border-line bg-card py-3 text-[0.875rem] font-semibold text-ink-2 transition hover:brightness-[.98] disabled:cursor-not-allowed disabled:opacity-[.42]"
+                className="flex w-full items-center justify-center gap-2 rounded-button border border-line bg-paper-2 py-3.5 text-[0.875rem] font-semibold text-ink-2 transition hover:border-gold hover:text-gold-ink disabled:cursor-not-allowed disabled:opacity-[.42]"
               >
                 {isFetchingNextPage ? "불러오는 중…" : "더보기"}
               </button>

@@ -1,4 +1,5 @@
 import { Button } from "@/shared/ui/Button";
+import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 
 const ERROR_MESSAGES: Record<string, { title: string; desc: string }> = {
   LOGIN_REQUIRED: {
@@ -16,10 +17,13 @@ export function ReportListError({ code, onRetry }: { code?: string; onRetry: () 
 
   return (
     <div className="mx-auto flex w-full max-w-[42rem] flex-col items-center px-6 py-20 text-center">
-      <h2 className="text-[1.125rem] font-semibold text-ink">{message.title}</h2>
-      <p className="mt-2 text-[0.875rem] text-ink-3">{message.desc}</p>
+      <span className="flex size-14 items-center justify-center rounded-full bg-terra-soft text-terra">
+        <AlertTriangle className="text-[1.5rem]" />
+      </span>
+      <h2 className="mt-5 font-serif text-[1.25rem] font-bold text-ink">{message.title}</h2>
+      <p className="mt-2 text-[0.875rem] leading-[1.5] text-ink-3">{message.desc}</p>
       {!known && (
-        <Button className="mt-5" onClick={onRetry}>
+        <Button className="mt-6" onClick={onRetry}>
           다시 시도
         </Button>
       )}
