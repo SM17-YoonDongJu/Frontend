@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { User } from "@/shared/ui/icons/User";
-import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { NotificationBellMenu } from "@/shared/ui/NotificationBellMenu";
 
 /** 고객 페이지 상단 네비게이션 항목 (경로는 placeholder — 실 라우팅은 후속). */
@@ -14,7 +13,7 @@ const NAV_ITEMS = [
 
 /**
  * 고객(customer) 페이지 레이아웃 헤더 셸.
- * 서버 컴포넌트 — 로고·네비·알림/계정 자리만. 드롭다운/모바일 메뉴는 후속.
+ * 서버 컴포넌트 — 로고·네비·알림·마이페이지 링크. 모바일 메뉴는 후속.
  */
 export function CustomerHeader() {
   return (
@@ -41,17 +40,13 @@ export function CustomerHeader() {
 
         <div className="flex items-center gap-2">
           <NotificationBellMenu settingsHref="/customer/mypage?panel=notifications" />
-          {/* 계정 메뉴 트리거 — 드롭다운 토글은 후속(클라이언트 컴포넌트) */}
-          <button
-            type="button"
-            aria-label="계정 메뉴"
-            className="flex items-center gap-1"
+          <Link
+            href="/customer/mypage"
+            aria-label="마이페이지"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-paper-2 text-lg text-ink-2 transition hover:bg-paper hover:text-ink"
           >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line bg-paper-2 text-lg text-ink-2 transition hover:bg-paper hover:text-ink">
-              <User />
-            </span>
-            <ChevronDown className="text-ink-3" />
-          </button>
+            <User />
+          </Link>
         </div>
       </div>
     </header>
