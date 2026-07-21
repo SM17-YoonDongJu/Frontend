@@ -3,12 +3,13 @@ import type { ReviewIssueStatus, ReviewReportStatus } from "./types";
 
 type Tone = NonNullable<StatusBadgeProps["tone"]>;
 
-/** 리포트 상태 표시 라벨/톤 (domain-glossary §5). */
+/** 리포트 상태 표시 라벨/톤. 라벨은 ERD REPORTS.status 주석 그대로(COUNSELING만 표기 관행 따라 "상담 중"). */
 export const REPORT_STATUS_META: Record<ReviewReportStatus, { label: string; tone: Tone }> = {
   AWAITING_INSPECTION: { label: "검수 대기", tone: "gold" },
   AWAITING_ADOPTION: { label: "채택 대기", tone: "navy" },
   COUNSELING: { label: "상담 중", tone: "green" },
-  MATCHED: { label: "매칭 완료", tone: "neutral" },
+  CLOSED: { label: "종결", tone: "green" },
+  NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral" },
 };
 
 /** 쟁점 검수 상태 표시 라벨. PENDING은 미검토. */

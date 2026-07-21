@@ -4,7 +4,7 @@ import { expect, test } from "@playwright/test";
  * 모바일 대시보드 홈 E2E (happy-path + 빈 상태, 이슈 #63).
  *
  * 원칙: 핵심 사용자 흐름만 — <md 모바일 홈 렌더 / 주요 진입 링크 이동 / 리포트 0건 빈 상태.
- * 응답은 기본 MSW 핸들러가 제공(GET /users/me 윤서, GET /reports 2건: MATCHED offeredAmount 8_500_000 + AWAITING null).
+ * 응답은 기본 MSW 핸들러가 제공(GET /users/me 윤서, GET /reports 2건: CLOSED offeredAmount 8_500_000 + AWAITING null).
  * 빈 상태는 GET /reports를 빈 리스트 envelope로 override(고가치 — 사용자가 실제 보는 화면).
  * offeredAmount 형식·범위 검증은 zod(nonnegative·nullable)·TS에 위임(미테스트).
  * ≥md 데스크톱 회귀는 dashboard.spec.ts가 담당.
@@ -31,7 +31,7 @@ test.describe("모바일 홈 렌더", () => {
       page.getByRole("heading", { name: /받은 보험금/ }),
     ).toBeVisible();
 
-    // 최근 리포트 카드 — MATCHED 교통사고 claimed 14,000,000~17,500,000 → 1,400 – 1,750 만원.
+    // 최근 리포트 카드 — CLOSED 교통사고 claimed 14,000,000~17,500,000 → 1,400 – 1,750 만원.
     // 데스크톱 리포트 섹션이 DOM에 hidden으로 공존(동일 문자열)하므로 보이는 노드만 지정.
     await expect(
       page.getByText(/1,400\s*–\s*1,750/).filter({ visible: true }),

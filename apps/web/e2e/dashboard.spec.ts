@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
  *
  * 원칙: 핵심 사용자 흐름만 — 진입 시 인사말·진행현황·리포트·검수완료·받은제안 렌더 확인,
  * "새 분석 시작" → /customer/adjust-request 이동.
- * 응답은 기본 MSW 핸들러가 제공(GET /users/me 윤서, GET /reports 2건: MATCHED+AWAITING).
+ * 응답은 기본 MSW 핸들러가 제공(GET /users/me 윤서, GET /reports 2건: CLOSED+AWAITING).
  * 영역 에러격리·빈상태·로딩 등 엣지는 RTL+MSW 통합테스트로 분리.
  */
 
@@ -34,10 +34,10 @@ test("진입하면 인사말·진행현황·리포트·검수완료·받은제�
 
   // 내 리포트 카드(reportNo) — AWAITING 리포트는 이 섹션에만 노출
   await expect(page.getByText("No.20260512-009")).toBeVisible();
-  // MATCHED reportNo는 리포트+검수완료 양쪽에 노출 → 최소 1개
+  // CLOSED reportNo는 리포트+검수완료 양쪽에 노출 → 최소 1개
   await expect(page.getByText(/No\.20260520-017/).first()).toBeVisible();
 
-  // 검수 완료 알림(MATCHED 1건, adjusterNickname 김도현)
+  // 검수 완료 알림(CLOSED 1건, adjusterNickname 김도현)
   await expect(
     page.getByRole("heading", { name: "검수 완료 알림" }),
   ).toBeVisible();

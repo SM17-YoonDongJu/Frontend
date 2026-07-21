@@ -5,7 +5,8 @@ export const reviewReportStatusSchema = z.enum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
-  "MATCHED",
+  "CLOSED",
+  "NOT_SELECTED",
 ]);
 
 // ⚠️ 명세 드리프트: 의뢰인 기본정보는 GET 명세 미존재. MSW 확장 목킹, 비식별(가명정보) 노출.

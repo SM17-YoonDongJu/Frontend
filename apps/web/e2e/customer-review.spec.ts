@@ -4,24 +4,24 @@ import { expect, test } from "@playwright/test";
  * 고객 → 손해사정사 리뷰 등록 E2E (happy-path CUJ, 이슈 #76).
  *
  * 원칙(메모리 fe-e2e-strategy): 핵심 사용자 흐름·통합 happy-path만. 응답은 앱 내장 MSW가 제공.
- * 데이터: DASHBOARD_PROPOSABLE_REPORT_ID(안정 uuid) = 검수완료(MATCHED) 샘플 — 상세 응답이 같은 uuid를
+ * 데이터: DASHBOARD_PROPOSABLE_REPORT_ID(안정 uuid) = 종결(CLOSED) 샘플 — 상세 응답이 같은 uuid를
  *   그대로 echo하므로 상세 CTA(report.reportId 링크)→작성 클릭스루가 목에서 성립. /users/me nickname="윤서"(→ "윤*").
  * 정적 위임(미테스트): DUPLICATE_RESOURCE 409 인라인 alert는 MSW가 adjusterId(매 조회 랜덤 uuid)별로 키잉해
  *   UI로 중복을 강제할 수 없음 → 핸들러 409 분기 + resolveErrorMessage + 인라인 role=alert는 1차 데이터
  *   경계검증 + 정적 레이어에 위임.
  */
 
-const MATCHED_REPORT_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
-const DETAIL_PATH = `/customer/report/${MATCHED_REPORT_ID}`;
+const CLOSED_REPORT_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+const DETAIL_PATH = `/customer/report/${CLOSED_REPORT_ID}`;
 
 test.use({ viewport: { width: 1280, height: 900 } });
 
-test("검수 완료(MATCHED) 리포트 상세에서 리뷰 남기기로 진입해 별점·후기를 등록하면 완료 화면이 뜬다", async ({
+test("종결(CLOSED) 리포트 상세에서 리뷰 남기기로 진입해 별점·후기를 등록하면 완료 화면이 뜬다", async ({
   page,
 }) => {
   await page.goto(DETAIL_PATH);
 
-  // 상세 MATCHED 게이트 → CTA 노출 → 클릭스루로 작성 화면 진입
+  // 상세 CLOSED 게이트 → CTA 노출 → 클릭스루로 작성 화면 진입
   const enterCta = page.getByRole("link", { name: "리뷰 남기기" });
   await expect(enterCta).toBeVisible();
   await expect(async () => {

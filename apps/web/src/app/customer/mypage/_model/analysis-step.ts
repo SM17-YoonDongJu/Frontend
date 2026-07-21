@@ -17,8 +17,8 @@ const STATUS_TO_STEP: Record<ReportListItemStatus, AnalysisStep> = {
   AWAITING_INSPECTION: "INFO_INPUT",
   AWAITING_ADOPTION: "AI_ANALYSIS",
   COUNSELING: "EXPERT_REVIEW",
-  MATCHED: "PROPOSAL_ARRIVED",
   CLOSED: "PROPOSAL_ARRIVED",
+  NOT_SELECTED: "PROPOSAL_ARRIVED",
 };
 
 export function toAnalysisStep(status: string): AnalysisStep {

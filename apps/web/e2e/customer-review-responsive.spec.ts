@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
  *
  * 원칙: 사용자 행동·룩 회귀. 모바일(앱바·풀폭 버튼·30일 안내) / 데스크톱(브레드크럼·확정 보상금·2버튼).
  * + done 새로고침 fallback(스냅샷 유실 시 상세로 복귀) 가드.
- * 응답은 기본 MSW 핸들러(test-id-123 = 검수완료 MATCHED, offeredAmount 850만 원).
+ * 응답은 기본 MSW 핸들러(test-id-123 = 종결 CLOSED, offeredAmount 850만 원).
  * 뷰포트는 각 describe에서 명시 고정해 3개 프로젝트에서 동일 통과.
  */
 

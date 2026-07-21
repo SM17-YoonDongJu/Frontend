@@ -26,7 +26,7 @@ test.describe("내 리포트 목록", () => {
     // 첫 페이지 5건(size 5) — 카드는 article 하나씩.
     await expect(page.getByRole("article")).toHaveCount(5);
 
-    // 맨 앞 MATCHED 교통사고 카드(reportNo 20260520-017, claimed 14,000,000~17,500,000 → 1,400 – 1,750 만원).
+    // 맨 앞 CLOSED 교통사고 카드(reportNo 20260520-017, claimed 14,000,000~17,500,000 → 1,400 – 1,750 만원).
     const firstCard = page
       .getByRole("article")
       .filter({ hasText: "No.20260520-017" });

@@ -14,7 +14,7 @@ export function ReviewCompleteCard() {
   const { isViewed, markViewed } = useViewedReviews();
 
   const completedReviews = reportList.list.filter(
-    (report) => report.status === "MATCHED" && !isViewed(report.reportId),
+    (report) => report.status === "CLOSED" && !isViewed(report.reportId),
   );
 
   const openReview = (reportId: string) => {

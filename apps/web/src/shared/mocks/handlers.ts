@@ -1616,7 +1616,7 @@ export const handlers = [
     const HEAD_REPORTS = [
       {
         reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
-        status: "MATCHED",
+        status: "CLOSED",
         accidentType: "교통사고",
         createdAt: "2026-05-20T09:00:00Z",
         reportNo: "20260520-017",
@@ -1695,7 +1695,7 @@ export const handlers = [
       },
       {
         reportId: "d4e1f2a3-5b6c-4d7e-8f9a-9b0c1d2e3f4a",
-        status: "MATCHED",
+        status: "CLOSED",
         accidentType: "실손",
         createdAt: "2026-04-22T09:00:00Z",
         reportNo: "20260422-077",
@@ -1737,7 +1737,7 @@ export const handlers = [
       },
       {
         reportId: "a7b4c5d6-8e9f-4a0b-9c2d-2e3f4a5b6c7d",
-        status: "COUNSELING",
+        status: "NOT_SELECTED",
         accidentType: "실손",
         createdAt: "2026-03-26T09:00:00Z",
         reportNo: "20260326-142",
@@ -2298,7 +2298,7 @@ export const handlers = [
         ? params.reportId
         : crypto.randomUUID();
 
-    // MATCHED 클릭스루용 안정 uuid — 상세→리뷰 작성 왕복 시 동일 MATCHED 응답 보장.
+    // 리뷰 클릭스루용 안정 uuid — 상세→리뷰 작성 왕복 시 동일 CLOSED(종결) 응답 보장.
     const isCustomerSample =
       reportId === "test-id-123" || reportId === DASHBOARD_PROPOSABLE_REPORT_ID;
 
@@ -2311,7 +2311,7 @@ export const handlers = [
       message: "정상 처리되었습니다.",
       data: {
         reportId: responseReportId,
-        status: isCustomerSample ? "MATCHED" : "AWAITING_INSPECTION",
+        status: isCustomerSample ? "CLOSED" : "AWAITING_INSPECTION",
         accidentType: "교통사고(후유장해)",
         treatment: "우측 슬관절 후방십자인대 파열",
         claimedMinAmount: isCustomerSample ? 13_500_000 : 12_000_000,

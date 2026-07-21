@@ -6,7 +6,6 @@ export const reviewStatusSchema = z.enum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
-  "MATCHED",
   "CLOSED",
   // CONTRACT: 명세없음-임시 — 미채택 탭 대응값 백엔드 협의 중
   "NOT_SELECTED",
