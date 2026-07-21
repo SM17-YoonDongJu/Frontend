@@ -1,36 +1,25 @@
 "use client";
 
-import { QueryErrorResetBoundary } from "@tanstack/react-query";
-import { Suspense, useEffect, useState } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { AdjusterProfileError } from "./AdjusterProfileError";
+import { AsyncBoundary } from "@/shared/ui/AsyncBoundary";
 import { AdjusterProfileSkeleton } from "./AdjusterProfileSkeleton";
 import { AdjusterProfileView } from "./AdjusterProfileView";
-import type { FallbackProps } from "react-error-boundary";
 
-function AdjusterProfileErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
-  return (
-    <AdjusterProfileError code={(error as Error).name} onRetry={resetErrorBoundary} />
-  );
-}
+const ERROR_MESSAGES = {
+  USER_NOT_FOUND: {
+    title: "손해사정사를 찾을 수 없어요",
+    desc: "삭제되었거나 잘못된 주소예요.",
+  },
+};
 
 export function AdjusterProfileBoundary({ adjusterId }: { adjusterId: string }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return <AdjusterProfileSkeleton />;
-
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          FallbackComponent={AdjusterProfileErrorFallback}
-        >
-          <Suspense fallback={<AdjusterProfileSkeleton />}>
-            <AdjusterProfileView adjusterId={adjusterId} />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    <AsyncBoundary
+      fallback={<AdjusterProfileSkeleton />}
+      errorLayout="page"
+      errorTitle="프로필을 불러오지 못했어요"
+      errorMessages={ERROR_MESSAGES}
+    >
+      <AdjusterProfileView adjusterId={adjusterId} />
+    </AsyncBoundary>
   );
 }

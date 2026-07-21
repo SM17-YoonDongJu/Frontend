@@ -1,31 +1,19 @@
 "use client";
 
-import { QueryErrorResetBoundary } from "@tanstack/react-query";
-import { Suspense, useEffect, useState } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { ReviewError } from "./ReviewError";
+import { AsyncBoundary } from "@/shared/ui/AsyncBoundary";
 import { ReviewResults } from "./ReviewResults";
 import { ReviewSkeleton } from "./ReviewSkeleton";
-import type { FallbackProps } from "react-error-boundary";
-
-function ReviewErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
-  return <ReviewError code={(error as Error).name} onRetry={resetErrorBoundary} />;
-}
+import { REVIEW_ERROR_MESSAGES } from "./review-error-messages";
 
 export function ReviewBoundary() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return <ReviewSkeleton />;
-
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary onReset={reset} FallbackComponent={ReviewErrorFallback}>
-          <Suspense fallback={<ReviewSkeleton />}>
-            <ReviewResults />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    <AsyncBoundary
+      fallback={<ReviewSkeleton />}
+      errorLayout="page"
+      errorTitle="목록을 불러오지 못했어요"
+      errorMessages={REVIEW_ERROR_MESSAGES}
+    >
+      <ReviewResults />
+    </AsyncBoundary>
   );
 }

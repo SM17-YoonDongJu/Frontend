@@ -1,6 +1,7 @@
 "use client";
 
-import { ReviewError } from "./_components/ReviewError";
+import { ErrorState } from "@/shared/ui/ErrorState";
+import { REVIEW_ERROR_MESSAGES } from "./_components/review-error-messages";
 
 export default function ReviewRouteError({
   error,
@@ -11,7 +12,13 @@ export default function ReviewRouteError({
 }) {
   return (
     <div className="mx-auto min-h-dvh w-full max-w-[25.125rem] bg-paper">
-      <ReviewError code={error.name} onRetry={reset} />
+      <ErrorState
+        layout="page"
+        title="목록을 불러오지 못했어요"
+        code={error.name}
+        messages={REVIEW_ERROR_MESSAGES}
+        onRetry={reset}
+      />
     </div>
   );
 }
