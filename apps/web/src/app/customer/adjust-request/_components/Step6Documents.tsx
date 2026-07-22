@@ -14,7 +14,6 @@ import {
 } from "../_model/document-slots";
 import type { AdjustRequestDraft } from "../_model/types";
 import { DocumentSlot, type SlotStatus } from "./DocumentSlot";
-import { FileDropzone } from "./FileDropzone";
 import { UploadFileItem, type UploadStatus } from "./UploadFileItem";
 
 const ACCEPT = ".pdf,.jpg,.jpeg,.png";
@@ -31,7 +30,7 @@ interface SlotEntry {
 }
 type SlotMap = Partial<Record<DocumentSlotKey, SlotEntry>>;
 
-/** 기타 서류(데스크톱 드롭존) 항목. file 없음 = 이전 세션 복원 url. */
+/** 기타 서류 항목 — 슬롯에 없는 documentUrls 복원용(신규 추가 경로 없음). */
 interface ExtraItem {
   id: string;
   status: UploadStatus;
@@ -58,7 +57,6 @@ export function Step6Documents() {
 
   const [slots, setSlots] = useState<SlotMap>({});
   const [extras, setExtras] = useState<ExtraItem[]>([]);
-  const [rejected, setRejected] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
   // 복원: documentSlots → 슬롯, 슬롯에 없는 documentUrls → 기타 서류.
@@ -142,27 +140,6 @@ export function Step6Documents() {
     });
   };
 
-  const addExtraFiles = (files: File[]) => {
-    const valid: File[] = [];
-    const bad: string[] = [];
-    for (const f of files) {
-      if (!ACCEPT_MIME.includes(f.type) || f.size > MAX_SIZE) bad.push(f.name);
-      else valid.push(f);
-    }
-    setRejected(bad);
-
-    const newItems: ExtraItem[] = valid.map((f) => ({
-      id: crypto.randomUUID(),
-      status: "uploading",
-      name: f.name,
-      size: f.size,
-      file: f,
-      previewUrl: f.type.startsWith("image/") ? URL.createObjectURL(f) : undefined,
-    }));
-    setExtras((prev) => [...prev, ...newItems]);
-    newItems.forEach(startExtraUpload);
-  };
-
   const removeExtra = (id: string) =>
     setExtras((prev) => {
       const target = prev.find((i) => i.id === id);
@@ -186,15 +163,6 @@ export function Step6Documents() {
           {caseLabel ? `${caseLabel} ` : ""}케이스에 필요한 서류예요. 각 칸에 맞는 파일을 올려주세요 (PDF 또는 이미지,
           최대 20MB).
         </p>
-      </div>
-
-      <div className="hidden sm:block">
-        <FileDropzone
-          onFiles={addExtraFiles}
-          accept={ACCEPT}
-          title="파일을 끌어다 놓거나 각 칸의 ‘올리기’로 업로드"
-          hint="PDF, JPG, PNG"
-        />
       </div>
 
       <div className="flex flex-col gap-2.5">
@@ -224,11 +192,8 @@ export function Step6Documents() {
         </p>
       )}
 
-      {(rejected.length > 0 || extras.length > 0) && (
+      {extras.length > 0 && (
         <div className="flex flex-col gap-2">
-          {rejected.length > 0 && (
-            <p className="text-[0.78125rem] text-terra">업로드 불가(형식·용량): {rejected.join(", ")}</p>
-          )}
           {extras.map((item) => (
             <UploadFileItem
               key={item.id}
