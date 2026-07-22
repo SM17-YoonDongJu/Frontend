@@ -80,13 +80,14 @@ test("권한이 없으면 접근 권한 안내가 보인다", async ({ page }) =
   });
 });
 
-test("로그인이 필요하면 로그인 안내가 보인다", async ({ page }) => {
+test("로그인이 필요하면 로그인 안내 화면으로 이동한다", async ({ page }) => {
   await page.setExtraHTTPHeaders({ "x-mock-failure": "reviewed-unauthorized" });
   await page.goto(PATH);
 
-  await expect(page.getByRole("heading", { name: "로그인이 필요해요" })).toBeVisible({
-    timeout: 15000,
-  });
+  await expect(page).toHaveURL(/\/login-required/, { timeout: 15000 });
+  await expect(
+    page.getByRole("heading", { name: "서비스를 이용하시려면 로그인이 필요합니다" }),
+  ).toBeVisible();
 });
 
 /*

@@ -205,11 +205,13 @@ test.describe("심사 현황 상태 분기", () => {
     await expect(page.getByRole("button", { name: "파트너 영역 진입하기" })).toBeVisible();
   });
 
-  test("401(로그인 필요)이면 로그인 유도가 보인다", async ({ page }) => {
+  test("401(로그인 필요)이면 로그인 안내 화면으로 이동한다", async ({ page }) => {
     await page.setExtraHTTPHeaders({ "x-mock-failure": "application-unauthorized" });
     await page.goto(STATUS_PATH);
-    await expect(page.getByText("로그인이 필요해요. 다시 로그인한 뒤 확인해 주세요.")).toBeVisible();
-    await expect(page.getByRole("button", { name: "로그인하기" })).toBeVisible();
+    await expect(page).toHaveURL(/\/login-required/, { timeout: 15000 });
+    await expect(
+      page.getByRole("heading", { name: "서비스를 이용하시려면 로그인이 필요합니다" }),
+    ).toBeVisible();
   });
 });
 
