@@ -5,7 +5,10 @@ import { Providers } from "@/shared/providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Insurance Platform",
+  title: {
+    default: "Insurance Platform",
+    template: "%s | 바른보상"
+  },
   description: "보험 플랫폼 웹"
 };
 
