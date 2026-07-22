@@ -39,8 +39,10 @@ async function fillThroughConsent(page: import("@playwright/test").Page) {
   await expect(page.getByRole("heading", { name: "손해사정사에게 전할 말이 있나요?" })).toBeVisible();
   await page.getByRole("button", { name: /다음/ }).click();
 
-  // step6 서류 업로드 — 선택 단계, 생략
+  // step6 서류 업로드 — 선택 단계, 생략. 드래그앤드롭 영역 없이 슬롯 "올리기"만 노출(이슈 #144)
   await expect(page.getByRole("heading", { name: "관련 서류를 올려주세요" })).toBeVisible();
+  await expect(page.getByText(/끌어다/)).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "올리기" }).first()).toBeVisible();
   await page.getByRole("button", { name: /다음/ }).click();
 
   // step7 확인
@@ -82,11 +84,46 @@ test("선행 단계 미완 상태로 ?step 직접 진입하면 첫 미완 단계
 
 test("필수값 미입력 시 다음 단계로 진행되지 않는다", async ({ page }) => {
   await page.goto(PATH);
-  // 사고 유형 미선택 상태로 다음 클릭
-  await page.getByRole("button", { name: /다음/ }).click();
+  // 사고 유형 미선택 상태로 다음 클릭 — 하이드레이션 전 클릭 유실 방지로 안내 노출까지 재시도
+  await expect(async () => {
+    await page.getByRole("button", { name: /다음/ }).click();
+    await expect(page.getByText("사고 유형을 선택하세요.")).toBeVisible({ timeout: 2000 });
+  }).toPass({ timeout: 10000 });
   // 여전히 step1
   await expect(page.getByRole("heading", { name: "어떤 사고인가요?" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "어떤 진단을 받으셨나요?" })).toBeHidden();
+});
+
+test("필수값을 채우지 않고 다음을 누르면 필드별 한글 안내가 보이고 영어 기본 메시지는 없다", async ({
+  page,
+}) => {
+  await page.goto(PATH);
+
+  // step1 통과 후 step2에서 아무것도 입력하지 않고 다음 클릭
+  const medicalCard = page.getByRole("radio", { name: /실손 의료비/ });
+  await expect(async () => {
+    await medicalCard.click();
+    await expect(medicalCard).toHaveAttribute("aria-checked", "true");
+  }).toPass({ timeout: 10000 });
+  await page.getByRole("button", { name: /다음/ }).click();
+  await expect(page.getByRole("heading", { name: "어떤 진단을 받으셨나요?" })).toBeVisible();
+  await page.getByRole("button", { name: /다음/ }).click();
+
+  // 필드별 한글 안내 + zod 기본 영어 메시지 부재 + step2 유지
+  await expect(page.getByText("진단명을 입력하세요.")).toBeVisible();
+  await expect(page.getByText("치료 형태를 선택하세요.")).toBeVisible();
+  await expect(page.getByText("비급여 포함 여부를 선택하세요.")).toBeVisible();
+  await expect(page.getByText(/Invalid input|received undefined|expected array/)).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "어떤 진단을 받으셨나요?" })).toBeVisible();
+});
+
+test("잠긴 사고 유형에 마우스를 올리면 지원 예정 툴팁이 보인다", async ({ page }) => {
+  await page.goto(PATH);
+  const trafficCard = page.getByRole("radio", { name: /교통사고/ });
+  await expect(trafficCard).toBeVisible();
+  // 잠긴 카드는 pointer-events-none → 이벤트는 툴팁 래퍼가 받음. 액셔너빌리티 검사 생략(force)
+  await trafficCard.hover({ force: true });
+  await expect(page.getByRole("tooltip")).toHaveText("추후에 지원 예정입니다.");
 });
 
 test("새로고침하면 임시저장된 입력이 복원된다", async ({ page }) => {
