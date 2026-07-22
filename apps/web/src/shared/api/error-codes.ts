@@ -26,6 +26,18 @@ export const ERROR_CODES = {
 
 export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
 
+/** 로그인 안내 화면(/login-required)으로 보내야 하는 인증 에러. EXPIRED_TOKEN은 재발급 루트가 따로 처리. */
+const AUTH_REDIRECT_CODES: ReadonlySet<string> = new Set([
+  ERROR_CODES.LOGIN_REQUIRED,
+  ERROR_CODES.INVALID_TOKEN,
+  ERROR_CODES.REFRESH_TOKEN_NOT_FOUND,
+]);
+
+export function isAuthRedirectError(error: unknown): boolean {
+  const code = getErrorCode(error);
+  return code !== null && AUTH_REDIRECT_CODES.has(code);
+}
+
 /** fetchJson 규약: 서버 실패 봉투의 code가 Error.name에 담긴다(없으면 `HTTP_<status>`). */
 export function getErrorCode(error: unknown): string | null {
   if (!(error instanceof Error)) return null;
