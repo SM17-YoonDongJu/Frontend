@@ -43,11 +43,12 @@ test("액세스 토큰이 만료돼도 자동 재발급 후 대시보드가 정�
 
   await page.goto(DASHBOARD_PATH);
 
-  await expect(page.getByText("윤서 님, 안녕하세요").first()).toBeVisible({
-    timeout: 15000,
-  });
+  // 인사(/users/me)와 내 분석 리포트(/reports)가 모두 재발급 후 재시도로 살아나야 화면이 뜬다.
+  await expect(
+    page.getByRole("heading", { name: "안녕하세요, 윤서님" }).filter({ visible: true }),
+  ).toBeVisible({ timeout: 15000 });
   await expect(page.getByRole("heading", { name: "내 분석 리포트" })).toBeVisible();
-  await expect(page.getByText("No.20260512-009")).toBeVisible();
+  await expect(page.getByText("김도현 사정사").filter({ visible: true })).toBeVisible();
   await expect(page).toHaveURL(/\/customer\/dashboard/);
 });
 
@@ -66,10 +67,10 @@ test("여러 요청이 동시에 만료 응답을 받아도 재발급은 한 번
   await page.goto(DASHBOARD_PATH);
 
   // 인사말(/users/me)과 리포트 목록(/reports)이 모두 재시도로 살아났다 = 두 요청 다 401 → 재발급 → 재시도.
-  await expect(page.getByText("윤서 님, 안녕하세요").first()).toBeVisible({
-    timeout: 15000,
-  });
-  await expect(page.getByText("No.20260512-009")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "안녕하세요, 윤서님" }).filter({ visible: true }),
+  ).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText("김도현 사정사").filter({ visible: true })).toBeVisible();
 
   await expect(async () => {
     expect(await reissueCount(page)).toBe("1");
@@ -109,9 +110,9 @@ test("만료가 아니면 재발급을 호출하지 않고 대시보드가 그�
 
   await page.goto(DASHBOARD_PATH);
 
-  await expect(page.getByText("윤서 님, 안녕하세요").first()).toBeVisible({
-    timeout: 15000,
-  });
+  await expect(
+    page.getByRole("heading", { name: "안녕하세요, 윤서님" }).filter({ visible: true }),
+  ).toBeVisible({ timeout: 15000 });
   expect(await reissueCount(page)).toBeNull();
 });
 

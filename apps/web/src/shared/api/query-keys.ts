@@ -42,6 +42,8 @@ export const reportKeys = createQueryKeys("report", {
 
 export const userKeys = createQueryKeys("user", {
   me: null,
+  // 고객 홈 대시보드 BFF(이슈 #142) — GET /users/me/dashboard. 홈 초기 렌더 조합 데이터.
+  dashboard: null,
   // 고객 마이페이지(이슈 #105) — 활동 카운트·보험 목록. insurance 도메인 미신설(user 배치).
   activitySummary: null,
   insurances: null,
@@ -89,6 +91,8 @@ export const adjusterKeys = createQueryKeys("adjuster", {
   // 헤더/인사말용 축약 프로필 — meProfile(전체 프로필)과 응답 shape가 달라 키 분리
   meProfileSummary: () => ["me", "profile", "summary"],
   home: (inProgressLimit?: number) => [{ inProgressLimit: inProgressLimit ?? 5 }],
+  // 홈 추천 손해사정사(이슈 #142) — 평점순 첫 페이지. 목록 화면 list(무한 조회)와 캐시 분리.
+  recommended: null,
   mypage: () => ["me", "mypage"],
   list: (filter?: AdjusterListFilter) => [{ filter: filter ?? {} }],
   detail: (adjusterId: string) => [adjusterId],

@@ -723,6 +723,41 @@ const chatMessages: Record<string, MockChatMessage[]> = {
   ],
 };
 
+// 고객 홈 대시보드 BFF 목 (이슈 #142) — GET /users/me/dashboard. Figma 시안 값 거울.
+// 제안 3건(320/430/480만원, 평균 410만원)·검수완료 1건·김민준 새 메시지·무릎 십자인대 파열 리포트.
+const DASHBOARD_MOCK = {
+  reportCount: 3,
+  activeReport: {
+    reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
+    title: "무릎 십자인대 파열",
+    accidentType: "medical_indemnity",
+    status: "AWAITING_ADOPTION",
+    createdAt: "2026-07-14T09:00:00Z",
+    firstReviewedAt: "2026-07-16T09:00:00Z",
+    proposalCount: 3,
+  },
+  proposalSummary: {
+    count: 3,
+    minAmount: 3_200_000,
+    maxAmount: 4_800_000,
+    avgAmount: 4_100_000,
+    items: [
+      { proposalId: "c2000000-0000-4000-8000-000000000001", adjusterId: CHAT_ADJUSTER_1_ID, nickname: "김민준", career: 12, speciality: "근골격계", estimateMinAmount: 4_200_000, estimateMaxAmount: 4_800_000 },
+      { proposalId: "c2000000-0000-4000-8000-000000000002", adjusterId: CHAT_ADJUSTER_2_ID, nickname: "이서연", career: 9, speciality: "교통사고", estimateMinAmount: 4_000_000, estimateMaxAmount: 4_300_000 },
+      { proposalId: "c2000000-0000-4000-8000-000000000003", adjusterId: CHAT_ADJUSTER_3_ID, nickname: "박준호", career: 15, speciality: "실손 의료비", estimateMinAmount: 3_000_000, estimateMaxAmount: 3_200_000 },
+    ],
+  },
+  todos: {
+    unreadProposalCount: 3,
+    unreadReviewCompleteCount: 1,
+    unreadChat: {
+      chatRoomId: CHAT_ROOM_1_ID,
+      adjusterNickname: "김민준",
+      lastMessage: "서류 검토가 끝났습니다.",
+    },
+  },
+};
+
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
@@ -1675,6 +1710,75 @@ export const handlers = [
       status: "200",
       message: "정상 처리되었습니다.",
       data: { ...MOCK_ME, role: resolveMockRole() },
+    });
+  }),
+
+  // 고객 홈 대시보드 BFF (이슈 #142) — GET /users/me/dashboard. 🏷 백엔드 확정 대기.
+  //   x-mock-scenario=unauthenticated → 401 LOGIN_REQUIRED.
+  //   x-mock-scenario=dashboard-onboarding → report_count 0(온보딩 분기), 나머지 null/0.
+  //   x-mock-scenario=dashboard-inspecting → 검수 중(제안 0건): activeReport AWAITING_INSPECTION·firstReviewedAt null, proposalSummary null(제안 비교 숨김), todos 0.
+  //   x-mock-scenario=dashboard-closed → 전부 종료: activeReport·proposalSummary null(타임라인·제안 비교 숨김), todos 0. reportCount>0라 온보딩 아님.
+  http.get(`${API_BASE_URL}/users/me/dashboard`, async ({ request }) => {
+    await delay(400);
+
+    if (request.headers.get("x-mock-scenario") === "unauthenticated") {
+      return HttpResponse.json(
+        { status: "401", code: "LOGIN_REQUIRED", message: "로그인이 필요합니다." },
+        { status: 401 },
+      );
+    }
+
+    if (request.headers.get("x-mock-scenario") === "dashboard-onboarding") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: camelToSnakeDeep({
+          reportCount: 0,
+          activeReport: null,
+          proposalSummary: null,
+          todos: { unreadProposalCount: 0, unreadReviewCompleteCount: 0, unreadChat: null },
+        }),
+      });
+    }
+
+    if (request.headers.get("x-mock-scenario") === "dashboard-inspecting") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: camelToSnakeDeep({
+          reportCount: 3,
+          activeReport: {
+            reportId: DASHBOARD_AWAITING_REPORT_ID,
+            title: "발목 인대 손상",
+            accidentType: "medical_indemnity",
+            status: "AWAITING_INSPECTION",
+            createdAt: "2026-07-18T09:00:00Z",
+            firstReviewedAt: null,
+            proposalCount: 0,
+          },
+          proposalSummary: null,
+          todos: { unreadProposalCount: 0, unreadReviewCompleteCount: 0, unreadChat: null },
+        }),
+      });
+    }
+
+    if (request.headers.get("x-mock-scenario") === "dashboard-closed") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: camelToSnakeDeep({
+          reportCount: 3,
+          activeReport: null,
+          proposalSummary: null,
+          todos: { unreadProposalCount: 0, unreadReviewCompleteCount: 0, unreadChat: null },
+        }),
+      });
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: camelToSnakeDeep(DASHBOARD_MOCK),
     });
   }),
 
