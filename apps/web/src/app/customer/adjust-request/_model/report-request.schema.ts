@@ -17,7 +17,7 @@ export const treatmentTypeSchema = z.enum(["ADMISSION", "OUTPATIENT", "MEDICATIO
 export const nonCoveredOptionSchema = z.enum(["INCLUDED", "EXCLUDED", "UNKNOWN"]);
 
 export const step1AccidentTypeSchema = z.object({
-  accidentType: accidentTypeSchema,
+  accidentType: z.enum(accidentTypeSchema.options, { message: "사고 유형을 선택하세요." }),
 });
 
 /** 입원 1건 — "입원 추가하기"로 동적 추가. */
@@ -38,18 +38,36 @@ export const step3DateSchema = z.object({
 });
 
 export const step2TreatmentSchema = z.object({
-  treatmentTypes: z.array(treatmentTypeSchema).min(1, "치료 형태를 선택하세요."),
-  diagnosis: z.array(z.string().min(1)).min(1, "진단명을 입력하세요."),
-  treatmentCount: z.number().int().min(0).nullish(), // 입원·통원 횟수(회), 선택
-  totalTreatmentCost: z.number().int().min(0).nullish(), // 총 치료비 본인부담(원), 선택
-  nonCoveredOption: nonCoveredOptionSchema,
+  treatmentTypes: z
+    .array(treatmentTypeSchema, { message: "치료 형태를 선택하세요." })
+    .min(1, "치료 형태를 선택하세요."),
+  diagnosis: z
+    .array(z.string(), { message: "진단명을 입력하세요." })
+    .refine((rows) => rows.some((r) => r.trim().length > 0), "진단명을 입력하세요."),
+  treatmentCount: z
+    .number({ message: "숫자를 입력하세요." })
+    .int("숫자를 입력하세요.")
+    .min(0, "0 이상의 숫자를 입력하세요.")
+    .nullish(), // 입원·통원 횟수(회), 선택
+  totalTreatmentCost: z
+    .number({ message: "숫자를 입력하세요." })
+    .int("숫자를 입력하세요.")
+    .min(0, "0 이상의 숫자를 입력하세요.")
+    .nullish(), // 총 치료비 본인부담(원), 선택
+  nonCoveredOption: z.enum(nonCoveredOptionSchema.options, {
+    message: "비급여 포함 여부를 선택하세요.",
+  }),
   enrolledInsurance: z.string().nullish(),
 });
 
 export const step4InsuranceSchema = z
   .object({
-    insuranceNotOffered: z.boolean(),
-    insuranceOffered: z.number().int().min(0).nullish(), // 제안받은 보험금(원)
+    insuranceNotOffered: z.boolean().optional(), // 미체크 = 미선택(false 취급)
+    insuranceOffered: z
+      .number({ message: "숫자를 입력하세요." })
+      .int("숫자를 입력하세요.")
+      .min(0, "0 이상의 숫자를 입력하세요.")
+      .nullish(), // 제안받은 보험금(원)
   })
   .refine((v) => v.insuranceNotOffered || v.insuranceOffered != null, {
     path: ["insuranceOffered"],
@@ -66,7 +84,11 @@ export const step5QuestionSchema = z.object({
 });
 
 export const step6DocumentSchema = z.object({
-  documentUrls: z.array(z.url()).nullish(), // 업로드된 증빙 url, 선택
+  documentUrls: z
+    .array(z.url("파일 업로드 상태를 다시 확인해 주세요."), {
+      message: "파일 업로드 상태를 다시 확인해 주세요.",
+    })
+    .nullish(), // 업로드된 증빙 url, 선택
 });
 
 /** POST /uploads 응답 data. */

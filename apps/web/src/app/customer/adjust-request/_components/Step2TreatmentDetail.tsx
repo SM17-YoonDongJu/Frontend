@@ -143,7 +143,7 @@ export function Step2TreatmentDetail() {
         </div>
         {errors.nonCoveredOption && (
           <span className="mt-2 block text-[0.75rem] font-medium text-terra">
-            비급여 포함 여부를 선택하세요.
+            {errors.nonCoveredOption.message}
           </span>
         )}
       </div>
