@@ -36,8 +36,8 @@ test("03 온보딩 데스크톱", async ({ page }) => {
   await page.setExtraHTTPHeaders({ "x-mock-scenario": "dashboard-onboarding" });
   await page.setViewportSize(DESKTOP);
   await page.goto(PATH);
-  await page.getByText("첫 방문을 환영해요, 윤서님").waitFor();
-  await page.getByRole("heading", { name: "어떤 사정사가 함께하나요?" }).waitFor();
+  await page.getByText("첫 방문을 환영해요, 윤서님").filter({ visible: true }).waitFor();
+  await page.getByRole("heading", { name: "어떤 사정사가 함께하나요?" }).filter({ visible: true }).waitFor();
   await page.screenshot({ path: `${DIR}/03-onboarding-desktop.png`, fullPage: true });
 });
 
@@ -45,7 +45,7 @@ test("04 온보딩 모바일", async ({ page }) => {
   await page.setExtraHTTPHeaders({ "x-mock-scenario": "dashboard-onboarding" });
   await page.setViewportSize(MOBILE);
   await page.goto(PATH);
-  await page.getByText("첫 방문을 환영해요, 윤서님").waitFor();
-  await page.getByRole("heading", { name: "어떤 사정사가 함께하나요?" }).waitFor();
+  await page.getByText("첫 방문을 환영해요, 윤서님").filter({ visible: true }).waitFor();
+  await page.getByRole("heading", { name: "어떤 사정사가 함께하나요?" }).filter({ visible: true }).waitFor();
   await page.screenshot({ path: `${DIR}/04-onboarding-mobile.png`, fullPage: true });
 });

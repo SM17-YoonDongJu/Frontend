@@ -94,11 +94,19 @@ test.describe("내 리포트 목록", () => {
 test.describe("대시보드에서 목록 진입", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
-  test("대시보드 전체 보기를 누르면 내 리포트 목록으로 이동한다", async ({ page }) => {
+  test("대시보드 내 분석 리포트의 전체 보기를 누르면 내 리포트 목록으로 이동한다", async ({
+    page,
+  }) => {
     await page.goto(DASHBOARD_PATH);
 
+    // 개편된 대시보드엔 "전체 보기" 링크가 제안 비교·내 분석 리포트 두 섹션에 있어(각각 다른 목적지)
+    // 내 분석 리포트 헤더로 한정해 클릭한다.
+    const reportsHeader = page
+      .getByRole("heading", { name: "내 분석 리포트" })
+      .locator("xpath=ancestor::header[1]");
+
     await expect(async () => {
-      await page.getByRole("link", { name: "전체 보기" }).click();
+      await reportsHeader.getByRole("link", { name: "전체 보기" }).click();
       await expect(page).toHaveURL(/\/customer\/reports/);
     }).toPass({ timeout: 10000 });
 

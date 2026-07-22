@@ -21,19 +21,21 @@ test("온보딩: 리포트 0건이면 온보딩 구성이 보이고 첫 분석 �
   await page.setExtraHTTPHeaders({ "x-mock-scenario": "dashboard-onboarding" });
   await page.goto(PATH);
 
-  // 온보딩 히어로 — 환영 칩 + 헤드라인
-  await expect(page.getByText("첫 방문을 환영해요, 윤서님")).toBeVisible();
+  // 온보딩 히어로 — 환영 칩 + 헤드라인 (이원 트리 hidden 공존 방어로 visible 한정)
   await expect(
-    page.getByRole("heading", { name: /제대로 받고 계신가요/ }),
+    page.getByText("첫 방문을 환영해요, 윤서님").filter({ visible: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: /제대로 받고 계신가요/ }).filter({ visible: true }),
   ).toBeVisible();
   // 사정사 소개 섹션(온보딩 전용 구성)
   await expect(
-    page.getByRole("heading", { name: "어떤 사정사가 함께하나요?" }),
+    page.getByRole("heading", { name: "어떤 사정사가 함께하나요?" }).filter({ visible: true }),
   ).toBeVisible();
 
   // CTA "5분 만에 첫 분석 시작" → 분석 신청 퍼널
   await expect(async () => {
-    await page.getByRole("link", { name: "5분 만에 첫 분석 시작" }).click();
+    await page.getByRole("link", { name: "5분 만에 첫 분석 시작" }).filter({ visible: true }).click();
     await expect(page).toHaveURL(/\/customer\/adjust-request/);
   }).toPass({ timeout: 10000 });
 });
