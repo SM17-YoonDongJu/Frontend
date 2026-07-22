@@ -5,7 +5,7 @@ export function OnboardingCtaBand() {
   return (
     <section className="flex flex-col items-start gap-5 rounded-card-lg border border-line bg-paper-2 px-6 py-8 md:flex-row md:items-center md:justify-between md:px-[2.5625rem] md:py-[2.1875rem]">
       <div>
-        <h2 className="font-serif text-[1.3125rem] font-bold leading-[1.5] text-ink">
+        <h2 className="font-serif text-[1.3125rem] font-bold leading-normal text-ink">
           지금 신청하면 검수 결과를
           <br />
           리포트로 받아볼 수 있어요

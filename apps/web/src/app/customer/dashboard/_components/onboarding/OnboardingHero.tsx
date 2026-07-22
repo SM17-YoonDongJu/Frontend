@@ -47,7 +47,7 @@ export function OnboardingHero() {
           </Link>
           <a
             href={`#${ONBOARDING_STEPS_ANCHOR}`}
-            className="inline-flex items-center justify-center rounded-button border border-white/[0.18] bg-white/[0.08] px-[1.6875rem] py-4 text-[0.9375rem] font-semibold text-white transition hover:bg-white/[0.14]"
+            className="inline-flex items-center justify-center rounded-button border border-white/18 bg-white/8 px-[1.6875rem] py-4 text-[0.9375rem] font-semibold text-white transition hover:bg-white/14"
           >
             진행 과정 알아보기
           </a>
@@ -64,8 +64,8 @@ export function OnboardingHero() {
 
 function TrustChip({ label, highlight }: { label: string; highlight: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-pill border border-white/[0.12] bg-white/[0.06] px-3.5 py-2">
-      <span className="text-[0.78125rem] font-medium text-white/[0.78]">{label}</span>
+    <span className="inline-flex items-center gap-1.5 rounded-pill border border-white/12 bg-white/6 px-3.5 py-2">
+      <span className="text-[0.78125rem] font-medium text-white/78">{label}</span>
       <span className="text-[0.78125rem] font-semibold text-gold-2">{highlight}</span>
     </span>
   );
