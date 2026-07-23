@@ -4,6 +4,7 @@ import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/Button";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
+import { HomeLink } from "./_components/HomeLink";
 
 export const metadata: Metadata = {
   title: "로그인 필요",
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default function LoginRequiredPage() {
   return (
     <main className="flex min-h-dvh items-center justify-center bg-paper px-5 py-10 tracking-[-0.01rem]">
-      <section className="w-full max-w-md rounded-card-lg border border-line bg-card px-7 py-12 text-center shadow-[0_1.75rem_3.5rem_-2.25rem_rgba(24,39,64,0.4)] sm:px-11">
+      <section className="w-full max-w-md rounded-card-lg border border-line bg-card px-7 py-12 text-center shadow-popover sm:px-11">
         <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-gold text-white">
           <Scale className="size-8" />
         </div>
@@ -32,18 +33,13 @@ export default function LoginRequiredPage() {
 
         <div className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-gold-soft px-4 py-3">
           <ShieldCheck className="size-[1.0625rem] shrink-0 text-gold-ink" />
-          <p className="break-keep text-[0.73rem] leading-[1.21rem] text-gold-ink">
+          <p className="whitespace-nowrap text-[0.65rem] leading-[1.21rem] text-gold-ink sm:text-[0.73rem]">
             로그인 후 보시던 페이지로 다시 안내해 드릴게요.
           </p>
         </div>
 
         <div className="mt-8 border-t border-line-2 pt-5">
-          <Link
-            href="/"
-            className="text-[0.8125rem] font-medium text-ink-3 transition hover:text-ink-2"
-          >
-            홈으로 돌아가기
-          </Link>
+          <HomeLink />
         </div>
       </section>
     </main>
