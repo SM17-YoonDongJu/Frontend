@@ -1,4 +1,6 @@
 import { Button } from "@/shared/ui/Button";
+import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
+import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 
 export type ErrorLayout = "card" | "page" | "flow" | "fill";
 
@@ -35,22 +37,39 @@ const DEFAULT_MESSAGES: Record<string, { title: string; desc: string }> = {
 };
 
 export function ErrorState({ layout, title, code, messages, onRetry, className }: ErrorStateProps) {
+  const forbidden = code === "FORBIDDEN";
   const known = code ? (messages?.[code] ?? DEFAULT_MESSAGES[code]) : undefined;
   const heading = known?.title ?? title ?? "정보를 불러오지 못했어요";
   const description = known?.desc ?? "잠시 후 다시 시도해 주세요.";
+  const showRetry = !forbidden && !known;
   const compact = COMPACT[layout];
+
+  const icon = forbidden ? (
+    <span
+      className={`flex items-center justify-center rounded-full bg-gold-soft text-gold-ink ${compact ? "size-10" : "size-14"}`}
+    >
+      <ShieldCheck className={compact ? "text-[1.125rem]" : "text-[1.5rem]"} />
+    </span>
+  ) : (
+    <span
+      className={`flex items-center justify-center rounded-full bg-terra-soft text-terra ${compact ? "size-10" : "size-14"}`}
+    >
+      <AlertTriangle className={compact ? "text-[1.125rem]" : "text-[1.5rem]"} />
+    </span>
+  );
 
   return (
     <div
-      role="alert"
+      role={forbidden ? "status" : "alert"}
       className={`flex flex-col items-center text-center ${WRAPPER[layout]}${className ? ` ${className}` : ""}`}
     >
+      {icon}
       {compact ? (
         <>
-          <h3 className="text-[0.9375rem] font-semibold text-ink">{heading}</h3>
+          <h3 className="mt-3 text-[0.9375rem] font-semibold text-ink">{heading}</h3>
           <p className="mt-1.5 text-[0.8125rem] text-ink-3">{description}</p>
-          {code && <p className="mt-1 text-[0.75rem] text-ink-3">({code})</p>}
-          {!known && (
+          {code && !forbidden && <p className="mt-1 text-[0.75rem] text-ink-3">({code})</p>}
+          {showRetry && (
             <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>
               다시 시도
             </Button>
@@ -58,9 +77,9 @@ export function ErrorState({ layout, title, code, messages, onRetry, className }
         </>
       ) : (
         <>
-          <h2 className="text-[1.125rem] font-semibold text-ink">{heading}</h2>
+          <h2 className="mt-5 text-[1.125rem] font-semibold text-ink">{heading}</h2>
           <p className="mt-2 text-[0.875rem] text-ink-3">{description}</p>
-          {!known && (
+          {showRetry && (
             <Button className="mt-5" onClick={onRetry}>
               다시 시도
             </Button>
