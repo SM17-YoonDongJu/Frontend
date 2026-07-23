@@ -285,6 +285,20 @@ test("종료된 상담 그룹은 기본으로 접혀 있고 헤더를 누르면 
   ).toHaveCount(0);
 });
 
+test("채팅방 URL로 직접 진입하면 목록 응답 없이도 방 헤더·메시지가 보인다", async ({
+  page,
+}) => {
+  // 목록을 비워 단건 조회만으로 렌더되는지 검증(딥링크가 목록 조회에 묶이지 않아야 한다)
+  await page.setExtraHTTPHeaders({ "x-mock-empty": "chat-list" });
+  await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
+
+  await expect(page.getByText(ROOM_KIM).first()).toBeVisible();
+  await expect(
+    page.getByText("안녕하세요, 김도현 손해사정사입니다. 리포트 잘 받았습니다."),
+  ).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeVisible();
+});
+
 test("데스크톱에서는 목록과 스레드가 분할 뷰로 함께 보이고 활성 행이 강조된다", async ({
   page,
   isMobile,
