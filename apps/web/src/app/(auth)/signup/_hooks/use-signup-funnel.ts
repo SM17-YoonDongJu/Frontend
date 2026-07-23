@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback } from "react";
 
 /** 가입 퍼널 단계 키. ?step= 값 겸용. */
-export const SIGNUP_STEPS = ["role", "terms", "done"] as const;
+export const SIGNUP_STEPS = ["role", "terms", "identity", "done"] as const;
 
 export type SignupStep = (typeof SIGNUP_STEPS)[number];
 
@@ -14,7 +14,7 @@ function toStep(value: string | null): SignupStep {
   return SIGNUP_STEPS.find((step) => step === value) ?? "role";
 }
 
-/** ?step=role|terms|done 로 현재 단계 관리. 새로고침 시 위치 유지, 뒤로가기=히스토리. */
+/** ?step=role|terms|identity|done 로 현재 단계 관리. 새로고침 시 위치 유지, 뒤로가기=히스토리. */
 export function useSignupFunnel() {
   const router = useRouter();
   const searchParams = useSearchParams();
