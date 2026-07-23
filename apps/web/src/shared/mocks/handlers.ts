@@ -1542,6 +1542,37 @@ export const handlers = [
     });
   }),
 
+  // 알림 개별 읽음 처리 (#162, 스웨거 확정) — 대상 isRead 갱신, 없는 id는 404 봉투.
+  http.patch(
+    `${API_BASE_URL}/users/me/notifications/:notificationId/read`,
+    async ({ request, params }) => {
+      await delay(400);
+
+      if (request.headers.get("x-mock-failure") === "notification-read") {
+        return HttpResponse.json(
+          { status: "500", code: "INTERNAL_SERVER_ERROR", message: "읽음 처리에 실패했습니다." },
+          { status: 500 },
+        );
+      }
+
+      const notification = NOTIFICATIONS.find((n) => n.id === params.notificationId);
+      if (!notification) {
+        return HttpResponse.json(
+          { status: "404", code: "POST_NOT_FOUND", message: "알림을 찾을 수 없습니다." },
+          { status: 404 },
+        );
+      }
+
+      notification.isRead = true;
+
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: null,
+      });
+    },
+  ),
+
   // 내 알림 목록 (#49, 명세 Done) — items+unread_count+페이지네이션. read-all 반영된 isRead 상태 그대로 반환.
   http.get(`${API_BASE_URL}/users/me/notifications`, async ({ request }) => {
     await delay(400);
