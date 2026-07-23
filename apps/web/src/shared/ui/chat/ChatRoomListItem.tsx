@@ -9,7 +9,8 @@ import { ROOM_STATUS_META } from "./room-status";
 
 export interface ChatRoomListItemProps {
   name: string;
-  caseNo: string;
+  /** 사건번호 — 사정사 검색 방(리포트 없음)은 null */
+  caseNo: string | null;
   lastMessage: string | null;
   lastMessageAt: string;
   avatarUrl: string | null;
@@ -93,7 +94,7 @@ export function ChatRoomListItem({
         <p className="mt-0.5 truncate text-[0.75rem] text-ink-3">
           {lastMessage ?? EMPTY_MESSAGE}
         </p>
-        <span className="sr-only">사건번호 {caseNo}</span>
+        {caseNo && <span className="sr-only">사건번호 {caseNo}</span>}
       </div>
     </Link>
   );

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
 import { useChatMessages } from "@/shared/api/chat/use-chat-messages";
 import { toMatchGroup } from "@/shared/api/chat/match-status";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { useAcceptChat } from "@/shared/api/chat/use-accept-chat";
 import { useReadChat } from "@/shared/api/chat/use-read-chat";
 import { useRejectChat } from "@/shared/api/chat/use-reject-chat";
@@ -89,7 +90,12 @@ export function CustomerChatThreadContent({
     )
     .map((item) => ({ name: item.counterpart.name }));
 
-  const subtitle = `${room.caseNo} · ${SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.roomStatus].label}`;
+  const subtitle = [
+    room.caseNo,
+    SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.roomStatus].label,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   // 거절도 비가역이라 완료와 대칭으로 확인 모달을 거친다
   const rejectMatch = () => setRejectOpen(true);
@@ -190,7 +196,7 @@ export function CustomerChatThreadContent({
         <div className="hidden md:block">
           <ChatComparisonBanner
             variant="comparing"
-            reportTypeLabel={room.reportTypeLabel}
+            reportTypeLabel={accidentTypeLabel(room.reportTypeLabel)}
             comparingCount={comparingCount}
           />
         </div>
@@ -199,7 +205,7 @@ export function CustomerChatThreadContent({
         <div className="hidden md:block">
           <ChatComparisonBanner
             variant="matched"
-            reportTypeLabel={room.reportTypeLabel}
+            reportTypeLabel={accidentTypeLabel(room.reportTypeLabel)}
             progressHref={reportHref}
           />
         </div>

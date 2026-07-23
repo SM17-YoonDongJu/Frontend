@@ -12,13 +12,13 @@ const rooms: ChatRoom[] = [
     counterpart: {
       userId: "aaaaaaaa-1111-1111-1111-111111111111",
       name: "김도현 손해사정사",
+      avatarUrl: null,
     },
     lastMessage: "장해진단서 발급받으시면 바로 검토해드릴게요.",
     lastMessageAt: new Date().toISOString(),
     unreadCount: 2,
     caseNo: "#20260520-017",
-    reportTypeLabel: "후유장해",
-    avatarUrl: null,
+    reportTypeLabel: "disability",
   },
   {
     chatRoomId: "22222222-2222-2222-2222-222222222222",
@@ -29,13 +29,13 @@ const rooms: ChatRoom[] = [
     counterpart: {
       userId: "aaaaaaaa-2222-2222-2222-222222222222",
       name: "정우성 손해사정사",
+      avatarUrl: null,
     },
     lastMessage: "네, 외모추상 특약도 함께 보겠습니다.",
     lastMessageAt: "2026-05-20T09:00:00+09:00",
     unreadCount: 0,
     caseNo: "#20260512-009",
-    reportTypeLabel: "후유장해",
-    avatarUrl: null,
+    reportTypeLabel: "disability",
   },
   {
     chatRoomId: "33333333-3333-3333-3333-333333333333",
@@ -46,13 +46,13 @@ const rooms: ChatRoom[] = [
     counterpart: {
       userId: "aaaaaaaa-3333-3333-3333-333333333333",
       name: "윤지후 손해사정사",
+      avatarUrl: null,
     },
     lastMessage: "상담이 종료되었습니다.",
     lastMessageAt: "2026-04-28T09:00:00+09:00",
     unreadCount: 0,
     caseNo: "#20260428-003",
-    reportTypeLabel: "후유장해",
-    avatarUrl: null,
+    reportTypeLabel: "disability",
   },
 ];
 

@@ -1,4 +1,4 @@
-﻿import { delay, http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { camelToSnakeDeep, toSnakeKey } from "@/shared/api/case-convert";
 import { API_BASE_URL } from "@/shared/api/config";
 import {
@@ -775,7 +775,7 @@ interface MockChatRoom {
   lastMessageAt: string;
   proposalId: string;
   matchStatus: MockMatchStatus;
-  reportTypeLabel: string;
+  reportTypeLabel: string; // accidentType 슬러그(traffic·disability…)
   unreadCount: number;
 }
 
@@ -811,13 +811,16 @@ function toChatRoomDto(room: MockChatRoom) {
     proposalId: room.proposalId,
     roomStatus: room.roomStatus,
     matchStatus: room.matchStatus,
-    counterpart: { userId: room.adjusterId, name: room.adjusterName },
+    counterpart: {
+      userId: room.adjusterId,
+      name: room.adjusterName,
+      avatarUrl: room.avatarUrl,
+    },
     lastMessage: room.lastMessage,
     lastMessageAt: room.lastMessageAt,
     unreadCount: room.unreadCount,
     caseNo: room.caseNo,
     reportTypeLabel: room.reportTypeLabel,
-    avatarUrl: room.avatarUrl,
   };
 }
 
@@ -849,7 +852,7 @@ const chatRooms: MockChatRoom[] = [
     lastMessageAt: "2026-07-01T10:32:00Z",
     proposalId: CHAT_PROPOSAL_1_ID,
     matchStatus: "COUNSELING",
-    reportTypeLabel: "후유장해",
+    reportTypeLabel: "disability",
     unreadCount: 2,
   },
   {
@@ -865,7 +868,7 @@ const chatRooms: MockChatRoom[] = [
     lastMessageAt: "2026-06-30T15:10:00Z",
     proposalId: CHAT_PROPOSAL_2_ID,
     matchStatus: "COUNSELING",
-    reportTypeLabel: "후유장해",
+    reportTypeLabel: "disability",
     unreadCount: 0,
   },
   {
@@ -881,7 +884,7 @@ const chatRooms: MockChatRoom[] = [
     lastMessageAt: "2026-06-20T09:00:00Z",
     proposalId: CHAT_PROPOSAL_3_ID,
     matchStatus: "COUNSELING",
-    reportTypeLabel: "후유장해",
+    reportTypeLabel: "disability",
     unreadCount: 0,
   },
 ];

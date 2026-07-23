@@ -10,7 +10,8 @@ import { ROOM_STATUS_META } from "./room-status";
 
 export interface ChatThreadHeaderProps {
   name: string;
-  caseNo: string;
+  /** 사건번호 — 사정사 검색 방(리포트 없음)은 null */
+  caseNo: string | null;
   roomStatus: RoomStatus;
   reportHref: string;
   /** 모바일 뒤로가기 — 없으면 버튼 미노출 */
@@ -42,7 +43,8 @@ export function ChatThreadHeader({
   closePending,
 }: ChatThreadHeaderProps) {
   const subtitle =
-    subtitleOverride ?? `${caseNo} · ${ROOM_STATUS_META[roomStatus].label}`;
+    subtitleOverride ??
+    [caseNo, ROOM_STATUS_META[roomStatus].label].filter(Boolean).join(" · ");
 
   return (
     <header className="flex items-center gap-2.5 border-b border-line-2 bg-paper px-4 py-3 md:bg-card md:px-5">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { ChatRoom } from "@/shared/api/chat/chat.schema";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import type { MatchGroup } from "@/shared/api/chat/match-status";
 import { toMatchGroup } from "@/shared/api/chat/match-status";
 import { cn } from "@/shared/lib/utils";
@@ -125,7 +126,7 @@ export function ChatRoomListPanel({
           {comparingRooms[0] && (
             // Figma 1011:9251 — 모바일 목록 상단 비교 배너(데스크톱 목록엔 없음)
             <ChatListComparisonBanner
-              reportTypeLabel={comparingRooms[0].reportTypeLabel}
+              reportTypeLabel={accidentTypeLabel(comparingRooms[0].reportTypeLabel)}
               comparingCount={comparingRooms.length}
               className="md:hidden"
             />
@@ -183,10 +184,10 @@ export function ChatRoomListPanel({
                           caseNo={room.caseNo}
                           lastMessage={room.lastMessage}
                           lastMessageAt={room.lastMessageAt}
-                          avatarUrl={room.avatarUrl}
+                          avatarUrl={room.counterpart.avatarUrl}
                           roomStatus={room.roomStatus}
                           matchStatus={room.matchStatus ?? undefined}
-                          reportTypeLabel={room.reportTypeLabel}
+                          reportTypeLabel={accidentTypeLabel(room.reportTypeLabel)}
                           href={buildHref(room.chatRoomId)}
                           active={room.chatRoomId === activeChatRoomId}
                         />
@@ -209,7 +210,7 @@ export function ChatRoomListPanel({
                   caseNo={room.caseNo}
                   lastMessage={room.lastMessage}
                   lastMessageAt={room.lastMessageAt}
-                  avatarUrl={room.avatarUrl}
+                  avatarUrl={room.counterpart.avatarUrl}
                   roomStatus={room.roomStatus}
                   href={buildHref(room.chatRoomId)}
                   active={room.chatRoomId === activeChatRoomId}

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { accidentTypeSchema } from "@/shared/model/accident-type";
 
 // 채팅 도메인 계약(봉투 내부 data만 — fetch-json이 봉투 해제·snake→camel 변환).
 // mine/theirs 판별은 서버 isMine(GET/POST messages)로 정합 — senderId 문자열 비교 제거.
@@ -16,6 +17,7 @@ export const matchStatusSchema = z.enum([
 export const chatCounterpartSchema = z.object({
   userId: z.uuid(),
   name: z.string(),
+  avatarUrl: z.string().nullable().default(null), // 부재 시 null(이니셜 아바타 폴백)
 });
 
 export const chatRoomSchema = z.object({
@@ -28,12 +30,8 @@ export const chatRoomSchema = z.object({
   lastMessage: z.string().nullable(),
   lastMessageAt: z.string(),
   unreadCount: z.number().int(),
-
-  // CONTRACT: 명세 확장 — GET /chats 확정 필드 아님(MSW 선반영). 표시용 사건번호·유형·아바타.
-  //   공유리포트(GET /chats/{id}/shared-report)로 이관 여부 백엔드 확인 필요.
-  caseNo: z.string(),
-  reportTypeLabel: z.string(),
-  avatarUrl: z.string().nullable(),
+  caseNo: z.string().nullable(), // 사정사 검색 방은 리포트 없음
+  reportTypeLabel: accidentTypeSchema, // accidentType 슬러그 — 표시는 accidentTypeLabel()로 변환
 });
 
 export const chatListSchema = z.object({
