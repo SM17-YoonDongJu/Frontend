@@ -55,7 +55,7 @@ export function ReceivedProposalsView() {
         )}
       </div>
 
-      <CustomerBottomNav active="상담" />
+      <CustomerBottomNav active="상담" className="md:hidden" />
     </div>
   );
 }
