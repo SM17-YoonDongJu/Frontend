@@ -27,7 +27,7 @@ export function ReceivedProposalsView() {
           <ReceivedProposalsEmpty />
         ) : (
           <>
-            <ul className="flex flex-col gap-3 px-5 pb-5">
+            <ul className="flex flex-col gap-3 px-5 pb-5 md:grid md:grid-cols-2 md:items-start md:gap-6 md:px-0 md:pb-8">
               {list.map((item) => (
                 <li key={item.reportId}>
                   <ReceivedProposalCard item={item} />
@@ -36,7 +36,7 @@ export function ReceivedProposalsView() {
             </ul>
 
             {hasNextPage && (
-              <div className="px-5 pb-4">
+              <div className="px-5 pb-4 md:mx-auto md:w-full md:max-w-[25.125rem] md:px-0 md:pb-6">
                 <button
                   type="button"
                   onClick={() => fetchNextPage()}
@@ -48,7 +48,7 @@ export function ReceivedProposalsView() {
               </div>
             )}
 
-            <p className="px-5 pb-6 text-center text-[0.6875rem] leading-[1.5] text-ink-3">
+            <p className="px-5 pb-6 text-center text-[0.6875rem] leading-[1.5] text-ink-3 md:px-0 md:text-[0.75rem]">
               요청건을 선택하면 해당 리포트에 도착한 제안 목록으로 이동합니다.
             </p>
           </>
