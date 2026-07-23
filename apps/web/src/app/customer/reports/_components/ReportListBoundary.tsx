@@ -7,8 +7,8 @@ import { ReportListError } from "./ReportListError";
 import { ReportListSkeleton } from "./ReportListSkeleton";
 import { ReportListView } from "./ReportListView";
 
-function ReportListErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
-  return <ReportListError code={(error as Error).name} onRetry={resetErrorBoundary} />;
+function ReportListErrorFallback({ resetErrorBoundary }: FallbackProps) {
+  return <ReportListError onRetry={resetErrorBoundary} />;
 }
 
 export function ReportListBoundary() {

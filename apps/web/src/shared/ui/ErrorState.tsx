@@ -26,8 +26,16 @@ const COMPACT: Record<ErrorLayout, boolean> = {
   flow: false,
 };
 
+/** 화면 공통 기본 문구 — 화면별 messages가 같은 코드를 주면 그쪽이 우선. */
+const DEFAULT_MESSAGES: Record<string, { title: string; desc: string }> = {
+  FORBIDDEN: {
+    title: "접근 권한이 없어요",
+    desc: "지금 계정으로는 이 화면을 볼 수 없어요.",
+  },
+};
+
 export function ErrorState({ layout, title, code, messages, onRetry, className }: ErrorStateProps) {
-  const known = code ? messages?.[code] : undefined;
+  const known = code ? (messages?.[code] ?? DEFAULT_MESSAGES[code]) : undefined;
   const heading = known?.title ?? title ?? "정보를 불러오지 못했어요";
   const description = known?.desc ?? "잠시 후 다시 시도해 주세요.";
   const compact = COMPACT[layout];

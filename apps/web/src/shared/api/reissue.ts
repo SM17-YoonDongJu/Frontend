@@ -13,6 +13,7 @@ async function requestReissue(): Promise<boolean> {
     await fetchJson(`${API_BASE_URL}${REISSUE_PATH}`, reissueSchema, {
       method: "POST",
       skipTokenReissue: true,
+      skipAuthRedirect: true,
     });
     return true;
   } catch {

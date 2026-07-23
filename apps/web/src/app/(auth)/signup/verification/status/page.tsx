@@ -18,7 +18,6 @@ import { ReviewTimeline } from "./_components/ReviewTimeline";
 const FORM_PATH = "/signup/verification";
 const DASHBOARD_PATH = "/customer/dashboard";
 const PARTNER_PATH = "/partner";
-const LOGIN_PATH = "/login";
 
 const REVIEW_CRUMB: BreadcrumbItem[] = [
   { label: "가입", state: "done" },
@@ -52,7 +51,7 @@ function StatusShell({
 
 function StatusContent() {
   const router = useRouter();
-  const { data, isPending, isError, error, refetch } = useAdjusterApplication();
+  const { data, isPending, isError, refetch } = useAdjusterApplication();
 
   // 404(신청 이력 없음 → data null) → 폼으로 유도.
   useEffect(() => {
@@ -76,7 +75,6 @@ function StatusContent() {
   }
 
   if (isError) {
-    const needsLogin = error instanceof Error && error.name === "LOGIN_REQUIRED";
     return (
       <StatusShell breadcrumb={REVIEW_CRUMB}>
         <div className="flex flex-col items-center gap-4 text-center">
@@ -84,17 +82,11 @@ function StatusContent() {
             <AlertTriangle />
           </span>
           <p className="break-keep text-sm text-ink-2">
-            {needsLogin
-              ? "로그인이 필요해요. 다시 로그인한 뒤 확인해 주세요."
-              : "심사 현황을 불러오지 못했어요. 잠시 후 다시 시도해 주세요."}
+            심사 현황을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.
           </p>
-          {needsLogin ? (
-            <Button onClick={() => router.push(LOGIN_PATH)}>로그인하기</Button>
-          ) : (
-            <Button variant="outline" onClick={() => refetch()}>
-              다시 시도
-            </Button>
-          )}
+          <Button variant="outline" onClick={() => refetch()}>
+            다시 시도
+          </Button>
         </div>
       </StatusShell>
     );

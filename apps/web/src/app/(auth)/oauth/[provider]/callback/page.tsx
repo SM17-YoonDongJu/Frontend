@@ -3,6 +3,7 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { getMe } from "@/shared/api/get-me";
+import { consumeReturnPath } from "@/shared/lib/return-path";
 import { Button } from "@/shared/ui/Button";
 import { maskEmail } from "../../../_shared/lib/mask-email";
 import { saveSignupTicket } from "../../../_shared/lib/signup-ticket";
@@ -85,7 +86,7 @@ export default function OauthCallbackPage() {
         saveRecentLogin(recent);
       } catch {}
 
-      router.replace("/");
+      router.replace(consumeReturnPath() ?? "/");
     })();
   }, [data, provider, router, saveRecentLogin]);
 

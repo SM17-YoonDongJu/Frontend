@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 /**
  * 액세스 토큰 자동 재발급·요청 재시도 E2E (이슈 #109).
  *
- * 원칙: 사용자 관점 — 만료돼도 화면이 그대로 뜬다 / 리프레시까지 만료면 로그인 화면으로 돌아간다.
+ * 원칙: 사용자 관점 — 만료돼도 화면이 그대로 뜬다 / 리프레시까지 만료면 로그인 안내 화면으로 이동한다(#145).
  * 만료는 MSW 시나리오 주입(localStorage "mock:tokenExpired": "once" | "refresh-expired").
  * 보호 엔드포인트 GET /users/me·GET /reports가 401 EXPIRED_TOKEN을 주고, POST /auth/reissue 실제 호출
  * 횟수는 localStorage "mock:reissueCount"에 누적된다(단일-flight 관측 채널).
@@ -79,7 +79,7 @@ test("여러 요청이 동시에 만료 응답을 받아도 재발급은 한 번
   expect(expiredResponses).toBeGreaterThanOrEqual(2);
 });
 
-test("리프레시 토큰까지 만료되면 로그인 화면으로 이동하고 최근 로그인 카드가 남는다", async ({
+test("리프레시 토큰까지 만료되면 로그인 안내 화면을 거쳐 로그인 화면에 최근 로그인 카드가 남는다", async ({
   page,
 }) => {
   await injectScenario(page, "refresh-expired");
@@ -99,7 +99,12 @@ test("리프레시 토큰까지 만료되면 로그인 화면으로 이동하고
 
   await page.goto(DASHBOARD_PATH);
 
-  await expect(page).toHaveURL(/\/login/, { timeout: 20000 });
+  await expect(page).toHaveURL(/\/login-required/, { timeout: 20000 });
+  const loginLink = page.getByRole("link", { name: "로그인하러 가기" });
+  await expect(async () => {
+    await loginLink.click();
+    await expect(page).toHaveURL(/\/login(?!-required)/);
+  }).toPass({ timeout: 15000 });
   await expect(page.getByRole("heading", { name: "다시 만나서 반가워요" })).toBeVisible();
   await expect(page.getByRole("button", { name: "카카오로 계속하기" })).toBeVisible();
   await expect(page.getByText("카카오 · yun***@example.com")).toBeVisible();
