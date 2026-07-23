@@ -15,6 +15,7 @@ permissions:
 
 env:
   TRACKING_ISSUE: 119
+  AUDIT_MODEL: gpt-5.6-sol
 
 jobs:
   audit:
@@ -104,6 +105,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           codex exec \
+            --model "$AUDIT_MODEL" \
             --sandbox read-only \
             --skip-git-repo-check \
             --output-last-message /tmp/audit/result.md \
@@ -122,7 +124,7 @@ jobs:
             cat /tmp/audit/result.md
             echo
             echo "---"
-            echo "_[워크플로 실행](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) · codex exec_"
+            echo "_[워크플로 실행](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) · codex exec · ${AUDIT_MODEL}_"
           } > /tmp/audit/comment.md
           gh issue comment "$TRACKING_ISSUE" --body-file /tmp/audit/comment.md
 
