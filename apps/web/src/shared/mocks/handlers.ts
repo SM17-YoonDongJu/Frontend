@@ -1189,6 +1189,27 @@ export const handlers = [
     });
   }),
 
+  // 채팅방 단건 조회 (이슈 #161) — 딥링크 진입용. 목록 응답 없이도 방 헤더 렌더.
+  http.get(`${API_BASE_URL}/chats/:chatRoomId`, async ({ params }) => {
+    await delay(300);
+
+    const room = chatRooms.find(
+      (r) => r.chatRoomId === String(params.chatRoomId),
+    );
+    if (!room) {
+      return HttpResponse.json(
+        { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: camelToSnakeDeep(toChatRoomDto(room)),
+    });
+  }),
+
   // 메시지 히스토리 (이슈 #48) — 커서 페이지네이션(?cursor&size, 기본 30).
   // 최신 size건을 시간순으로 반환, cursor는 "이 메시지보다 오래된 것" 기준. CLOSED 방도 조회 가능.
   http.get(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ request, params }) => {
