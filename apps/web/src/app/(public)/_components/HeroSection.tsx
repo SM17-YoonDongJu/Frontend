@@ -22,7 +22,7 @@ export function HeroSection() {
           </h1>
 
           <p className="mt-6 max-w-[30rem] text-[1.125rem] leading-[1.6875rem] text-ink-2">
-            약관·특약·판례를 분석해 예상 보상 범위와 주요 쟁점을 리포트로 정리합니다. 필요할 땐 독립
+            약관·특약·판례를 분석해 예상 보상 범위와 주요 쟁점을 리포트로 정리합니다. 필요할 땐
             손해사정사로 바로 연결됩니다.
           </p>
 

@@ -7,8 +7,7 @@ import { NotificationBellMenu } from "@/shared/ui/NotificationBellMenu";
 const NAV_ITEMS = [
   { label: "보상 분석 신청", href: "/customer/adjust-request" },
   { label: "손해사정사 찾기", href: "/customer/adjusters" },
-  { label: "내 리포트", href: "#" },
-  { label: "이용 방법", href: "#" }
+  { label: "내 리포트", href: "#" }
 ] as const;
 
 /**

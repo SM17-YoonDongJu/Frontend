@@ -1,0 +1,136 @@
+name: AI Audit
+
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ai-audit
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: write
+
+env:
+  TRACKING_ISSUE: 119
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: false
+
+      - name: last-audit 태그 확인 및 커밋 수 계산
+        id: gate
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh auth setup-git
+          if ! git rev-parse -q --verify refs/tags/last-audit >/dev/null; then
+            echo "last-audit 태그가 없어 현재 HEAD(${GITHUB_SHA})에 생성하고 종료합니다."
+            git tag last-audit HEAD
+            git push origin last-audit
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          COUNT=$(git rev-list --count last-audit..HEAD)
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "last-audit 이후 커밋 수: $COUNT"
+          if [ "$COUNT" -lt 20 ]; then
+            echo "20 미만이므로 AI 점검을 실행하지 않고 종료합니다."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 점검 컨텍스트 수집
+        if: steps.gate.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p /tmp/audit
+          # diff는 프롬프트 폭주 방지로 300KB에서 자른다 (잘리면 말미에 표식)
+          git diff last-audit..HEAD > /tmp/audit/diff-full.patch
+          head -c 300000 /tmp/audit/diff-full.patch > /tmp/audit/diff.patch
+          if [ "$(wc -c < /tmp/audit/diff-full.patch)" -gt 300000 ]; then
+            echo "... (diff가 300KB를 초과해 잘렸습니다. 필요 시 파일을 직접 읽어 확인)" >> /tmp/audit/diff.patch
+          fi
+          git diff --name-only --diff-filter=A last-audit..HEAD -- 'apps/web/src/app/**/page.tsx' > /tmp/audit/new-pages.txt
+          gh issue view "$TRACKING_ISSUE" --json body -q .body > /tmp/audit/issue-body.md
+
+      - name: 프롬프트 조립
+        if: steps.gate.outputs.run == 'true'
+        env:
+          AUDIT_COUNT: ${{ steps.gate.outputs.count }}
+        run: |
+          {
+            cat .github/ai-audit-prompt.md
+            echo
+            echo "---"
+            echo
+            echo "## 이번 점검 대상: last-audit..HEAD (${AUDIT_COUNT}커밋)"
+            echo
+            echo "## 새로 추가된 page.tsx"
+            if [ -s /tmp/audit/new-pages.txt ]; then cat /tmp/audit/new-pages.txt; else echo "(없음)"; fi
+            echo
+            echo "## 추적 이슈 #${TRACKING_ISSUE} 본문"
+            echo '<UNTRUSTED_DATA source="issue-body">'
+            cat /tmp/audit/issue-body.md
+            echo '</UNTRUSTED_DATA>'
+            echo
+            echo "## diff (last-audit..HEAD)"
+            echo '<UNTRUSTED_DATA source="diff">'
+            echo '```diff'
+            cat /tmp/audit/diff.patch
+            echo '```'
+            echo '</UNTRUSTED_DATA>'
+          } > /tmp/audit/prompt.md
+          wc -c /tmp/audit/prompt.md
+
+      - name: Codex 설치
+        if: steps.gate.outputs.run == 'true'
+        run: npm install -g @openai/codex@0.144.6
+
+      - name: AI 점검 실행 (codex exec)
+        if: steps.gate.outputs.run == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          codex exec \
+            --sandbox read-only \
+            --skip-git-repo-check \
+            --output-last-message /tmp/audit/result.md \
+            - < /tmp/audit/prompt.md
+          test -s /tmp/audit/result.md
+
+      - name: 점검 결과 이슈 댓글 등록
+        if: steps.gate.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          AUDIT_COUNT: ${{ steps.gate.outputs.count }}
+        run: |
+          {
+            echo "## 🤖 정기 코드 점검 — last-audit 이후 ${AUDIT_COUNT}커밋 (${GITHUB_SHA::7})"
+            echo
+            cat /tmp/audit/result.md
+            echo
+            echo "---"
+            echo "_[워크플로 실행](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) · codex exec_"
+          } > /tmp/audit/comment.md
+          gh issue comment "$TRACKING_ISSUE" --body-file /tmp/audit/comment.md
+
+      - name: last-audit 태그 이동
+        if: steps.gate.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh auth setup-git
+          git tag -f last-audit HEAD
+          git push -f origin last-audit
