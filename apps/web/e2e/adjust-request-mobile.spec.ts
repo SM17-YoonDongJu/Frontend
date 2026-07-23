@@ -20,6 +20,10 @@ test("모바일 폭에서 진단명 여러 개와 가입보험을 입력해 끝�
   await page.goto(PATH);
   await expect(page.getByRole("heading", { name: "어떤 사고인가요?" })).toBeVisible();
 
+  // 잠긴 유형 탭 → 지원 예정 툴팁(터치 환경 안내, 이슈 #144)
+  await page.getByText("교통사고").click({ force: true });
+  await expect(page.getByRole("tooltip")).toHaveText("추후에 지원 예정입니다.");
+
   // step1 사고 유형 — 실손 의료비만 활성(하이드레이션 전 클릭 유실 방지).
   const medicalCard = page.getByRole("radio", { name: /실손 의료비/ });
   await expect(async () => {
