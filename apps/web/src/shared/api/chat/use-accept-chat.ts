@@ -15,6 +15,9 @@ export function useAcceptChat(chatRoomId: string) {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: chatKeys.list.queryKey });
       queryClient.invalidateQueries({
+        queryKey: chatKeys.detail(chatRoomId).queryKey,
+      });
+      queryClient.invalidateQueries({
         queryKey: reportKeys.detail(data.reportId).queryKey,
       });
       queryClient.invalidateQueries({

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
 import { useChatMessages } from "@/shared/api/chat/use-chat-messages";
+import { useChatRoom } from "@/shared/api/chat/use-chat-room";
 import { toMatchGroup } from "@/shared/api/chat/match-status";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { useAcceptChat } from "@/shared/api/chat/use-accept-chat";
@@ -43,6 +44,8 @@ export function CustomerChatThreadContent({
   reportBasePath,
 }: CustomerChatThreadContentProps) {
   const router = useRouter();
+  const { data: room } = useChatRoom(chatRoomId);
+  // 형제 방 비교(comparingCount·종료 예고)만 목록 유지 — 방 자체는 단건 조회
   const { data: rooms } = useChatList();
   const { messages, hasOlder, loadOlder, loadingOlder } = useChatMessages(chatRoomId);
   const sendMessage = useSendChatMessage(chatRoomId);
@@ -57,28 +60,19 @@ export function CustomerChatThreadContent({
     markRead();
   }, [markRead, chatRoomId]);
 
-  const room = rooms.find((item) => item.chatRoomId === chatRoomId);
-
-  if (!room) {
-    return (
-      <div className="flex h-full flex-col">
-        <ChatThreadView
-          messages={messages}
-          hasOlder={hasOlder}
-          onLoadOlder={loadOlder}
-          loadingOlder={loadingOlder}
-        />
-      </div>
-    );
-  }
-
   const group = toMatchGroup(room.matchStatus, room.roomStatus);
   const reportHref = room.reportId ? `${reportBasePath}/${room.reportId}` : "#";
   const matchPending = accept.isPending || reject.isPending;
 
-  const siblings = room.reportId
+  // 목록 응답에 현재 방이 아직 없어도(딥링크 직진입) 비교 수에 자신은 포함
+  const listSiblings = room.reportId
     ? rooms.filter((item) => item.reportId === room.reportId)
-    : [room];
+    : [];
+  const siblings = listSiblings.some(
+    (item) => item.chatRoomId === room.chatRoomId,
+  )
+    ? listSiblings
+    : [room, ...listSiblings];
   const comparingCount = siblings.filter(
     (item) => toMatchGroup(item.matchStatus, item.roomStatus) === "comparing",
   ).length;
