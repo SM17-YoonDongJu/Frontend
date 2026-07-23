@@ -4,11 +4,13 @@
  * - `mock:tokenExpired` = "once"            → 보호 엔드포인트 첫 호출 401 EXPIRED_TOKEN, 재발급 성공 후 200
  * - `mock:tokenExpired` = "refresh-expired" → 보호 엔드포인트 401 EXPIRED_TOKEN, 재발급도 401 EXPIRED_TOKEN
  * - `mock:reissueCount`                     → /auth/reissue 실제 호출 횟수(단일-flight 검증용)
+ * - `mock:loggedOut` = "true"               → 로그아웃 상태(#155), 보호 엔드포인트가 401 LOGIN_REQUIRED
  *
  * 플래그가 없으면 만료 없음 = 기존 동작 그대로.
  */
 const SCENARIO_KEY = "mock:tokenExpired";
 const REISSUE_COUNT_KEY = "mock:reissueCount";
+const LOGGED_OUT_KEY = "mock:loggedOut";
 
 type TokenScenario = "once" | "refresh-expired";
 
@@ -49,6 +51,14 @@ function readScenario(): TokenScenario | null {
 
 export function isAccessTokenExpired(): boolean {
   return readScenario() !== null;
+}
+
+export function setLoggedOut(): void {
+  write(LOGGED_OUT_KEY, "true");
+}
+
+export function isLoggedOut(): boolean {
+  return read(LOGGED_OUT_KEY) === "true";
 }
 
 export function reissueCallCount(): number {
