@@ -16,7 +16,7 @@ export function ActivityList() {
   return (
     <MobileSection title="보상 활동">
       <MobileMenuRow
-        href="/customer/dashboard"
+        href="/customer/reports"
         icon={<FileText className={ICON_CLASS} />}
         label="내 분석 리포트"
         right={<CountText value={`${counts.reportCount}건`} />}

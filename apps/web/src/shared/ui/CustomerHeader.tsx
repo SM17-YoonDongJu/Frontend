@@ -3,11 +3,11 @@ import { Scale } from "@/shared/ui/icons/Scale";
 import { User } from "@/shared/ui/icons/User";
 import { NotificationBellMenu } from "@/shared/ui/NotificationBellMenu";
 
-/** 고객 페이지 상단 네비게이션 항목 (경로는 placeholder — 실 라우팅은 후속). */
+/** 고객 페이지 상단 네비게이션 항목. */
 const NAV_ITEMS = [
   { label: "보상 분석 신청", href: "/customer/adjust-request" },
   { label: "손해사정사 찾기", href: "/customer/adjusters" },
-  { label: "내 리포트", href: "#" }
+  { label: "내 리포트", href: "/customer/reports" }
 ] as const;
 
 /**
