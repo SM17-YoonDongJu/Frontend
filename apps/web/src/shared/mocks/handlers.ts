@@ -287,6 +287,128 @@ export const DASHBOARD_PROPOSABLE_REPORT_ID =
   "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const DASHBOARD_AWAITING_REPORT_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 
+// 고객 리포트 목 원천 (이슈 #153) — /reports 목록과 /reports/{id}/proposals target·건수가 같은 메타를 보게 모듈 스코프.
+// 대시보드가 집계·미리보기로 쓰는 기존 2건 — 항상 목록 맨 앞(page 1 앞부분) 유지.
+const HEAD_REPORTS = [
+  {
+    reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
+    status: "CLOSED",
+    accidentType: "교통사고",
+    createdAt: "2026-05-20T09:00:00Z",
+    reportNo: "20260520-017",
+    claimedMinAmount: 14_000_000,
+    claimedMaxAmount: 17_500_000,
+    proposalCount: 3,
+    reviewedAt: "2026-05-22T10:14:00Z",
+    adjusterNickname: "김도현",
+    offeredAmount: 8_500_000,
+    treatment: "후유장해",
+  },
+  {
+    reportId: DASHBOARD_AWAITING_REPORT_ID,
+    status: "AWAITING_INSPECTION",
+    accidentType: "실손",
+    createdAt: "2026-05-12T09:00:00Z",
+    reportNo: "20260512-009",
+    claimedMinAmount: 3_200_000,
+    claimedMaxAmount: 4_800_000,
+    proposalCount: 0,
+    reviewedAt: null,
+    adjusterNickname: null,
+    offeredAmount: null,
+    treatment: null,
+  },
+];
+
+// 내 리포트 목록(무한 조회): 2페이지 이상 분량. 앞 2건은 HEAD_REPORTS 그대로.
+const REPORT_LIST_SOURCE = [
+  ...HEAD_REPORTS,
+  {
+    reportId: "b2c9d0e1-3f4a-4b5c-8d6e-7f8a9b0c1d2e",
+    status: "COUNSELING",
+    accidentType: "골절",
+    createdAt: "2026-05-08T09:00:00Z",
+    reportNo: "20260508-005",
+    claimedMinAmount: 5_500_000,
+    claimedMaxAmount: 7_200_000,
+    proposalCount: 3,
+    reviewedAt: "2026-05-10T14:00:00Z",
+    adjusterNickname: "이서준",
+    offeredAmount: 6_000_000,
+    treatment: "입원",
+  },
+  {
+    reportId: "c3d0e1f2-4a5b-4c6d-9e7f-8a9b0c1d2e3f",
+    status: "AWAITING_ADOPTION",
+    accidentType: "교통사고",
+    createdAt: "2026-04-30T09:00:00Z",
+    reportNo: "20260430-118",
+    claimedMinAmount: 9_800_000,
+    claimedMaxAmount: 12_400_000,
+    proposalCount: 5,
+    reviewedAt: "2026-05-02T11:20:00Z",
+    adjusterNickname: "박지훈",
+    offeredAmount: 10_500_000,
+    treatment: "통원",
+  },
+  {
+    reportId: "d4e1f2a3-5b6c-4d7e-8f9a-9b0c1d2e3f4a",
+    status: "CLOSED",
+    accidentType: "실손",
+    createdAt: "2026-04-22T09:00:00Z",
+    reportNo: "20260422-077",
+    claimedMinAmount: 1_800_000,
+    claimedMaxAmount: 2_600_000,
+    proposalCount: 1,
+    reviewedAt: "2026-04-24T09:30:00Z",
+    adjusterNickname: "최유나",
+    offeredAmount: 2_100_000,
+    treatment: "통원",
+  },
+  {
+    reportId: "e5f2a3b4-6c7d-4e8f-9a0b-0c1d2e3f4a5b",
+    status: "AWAITING_INSPECTION",
+    accidentType: "골절",
+    createdAt: "2026-04-15T09:00:00Z",
+    reportNo: "20260415-031",
+    claimedMinAmount: 4_100_000,
+    claimedMaxAmount: 5_900_000,
+    proposalCount: 0,
+    reviewedAt: null,
+    adjusterNickname: null,
+    offeredAmount: null,
+    treatment: null,
+  },
+  {
+    reportId: "f6a3b4c5-7d8e-4f9a-8b1c-1d2e3f4a5b6c",
+    status: "CLOSED",
+    accidentType: "교통사고",
+    createdAt: "2026-04-03T09:00:00Z",
+    reportNo: "20260403-208",
+    claimedMinAmount: 7_300_000,
+    claimedMaxAmount: 9_100_000,
+    proposalCount: 4,
+    reviewedAt: "2026-04-05T16:45:00Z",
+    adjusterNickname: "정하윤",
+    offeredAmount: 8_000_000,
+    treatment: "입원",
+  },
+  {
+    reportId: "a7b4c5d6-8e9f-4a0b-9c2d-2e3f4a5b6c7d",
+    status: "NOT_SELECTED",
+    accidentType: "실손",
+    createdAt: "2026-03-26T09:00:00Z",
+    reportNo: "20260326-142",
+    claimedMinAmount: 2_900_000,
+    claimedMaxAmount: 3_700_000,
+    proposalCount: 2,
+    reviewedAt: "2026-03-28T10:00:00Z",
+    adjusterNickname: "강도윤",
+    offeredAmount: 3_200_000,
+    treatment: "통원",
+  },
+];
+
 // 본인 손해사정사 프로필 — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체
 // (프로필 편집 화면 + 대시보드 헤더·인사말 공용 — 집계 필드 포함 superset, 각 소비자 스키마가 잔여 필드 strip)
 const ADJUSTER_PROFILE: Record<string, unknown> = {
@@ -1791,7 +1913,7 @@ export const handlers = [
 
     const list = [
       {
-        reportId: "a1000000-0000-4000-8000-000000000001",
+        reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
         status: "AWAITING_ADOPTION",
         accidentType: "교통사고",
         title: "교통사고 · 후유장해",
@@ -1890,38 +2012,6 @@ export const handlers = [
       );
     }
 
-    // 대시보드가 집계·미리보기로 쓰는 기존 2건 — 항상 목록 맨 앞(page 1 앞부분) 유지.
-    const HEAD_REPORTS = [
-      {
-        reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
-        status: "CLOSED",
-        accidentType: "교통사고",
-        createdAt: "2026-05-20T09:00:00Z",
-        reportNo: "20260520-017",
-        claimedMinAmount: 14_000_000,
-        claimedMaxAmount: 17_500_000,
-        proposalCount: 2,
-        reviewedAt: "2026-05-22T10:14:00Z",
-        adjusterNickname: "김도현",
-        offeredAmount: 8_500_000,
-        treatment: "후유장해",
-      },
-      {
-        reportId: DASHBOARD_AWAITING_REPORT_ID,
-        status: "AWAITING_INSPECTION",
-        accidentType: "실손",
-        createdAt: "2026-05-12T09:00:00Z",
-        reportNo: "20260512-009",
-        claimedMinAmount: 3_200_000,
-        claimedMaxAmount: 4_800_000,
-        proposalCount: 0,
-        reviewedAt: null,
-        adjusterNickname: null,
-        offeredAmount: null,
-        treatment: null,
-      },
-    ];
-
     // page 미지정(대시보드): 기존 응답 그대로 — 2건·hasNext:false·totalPages:1.
     if (!isPaged) {
       return HttpResponse.json({
@@ -1939,95 +2029,6 @@ export const handlers = [
         }),
       });
     }
-
-    // 내 리포트 목록(무한 조회): 2페이지 이상 분량. 앞 2건은 HEAD_REPORTS 그대로.
-    const REPORT_LIST_SOURCE = [
-      ...HEAD_REPORTS,
-      {
-        reportId: "b2c9d0e1-3f4a-4b5c-8d6e-7f8a9b0c1d2e",
-        status: "COUNSELING",
-        accidentType: "골절",
-        createdAt: "2026-05-08T09:00:00Z",
-        reportNo: "20260508-005",
-        claimedMinAmount: 5_500_000,
-        claimedMaxAmount: 7_200_000,
-        proposalCount: 3,
-        reviewedAt: "2026-05-10T14:00:00Z",
-        adjusterNickname: "이서준",
-        offeredAmount: 6_000_000,
-        treatment: "입원",
-      },
-      {
-        reportId: "c3d0e1f2-4a5b-4c6d-9e7f-8a9b0c1d2e3f",
-        status: "AWAITING_ADOPTION",
-        accidentType: "교통사고",
-        createdAt: "2026-04-30T09:00:00Z",
-        reportNo: "20260430-118",
-        claimedMinAmount: 9_800_000,
-        claimedMaxAmount: 12_400_000,
-        proposalCount: 5,
-        reviewedAt: "2026-05-02T11:20:00Z",
-        adjusterNickname: "박지훈",
-        offeredAmount: 10_500_000,
-        treatment: "통원",
-      },
-      {
-        reportId: "d4e1f2a3-5b6c-4d7e-8f9a-9b0c1d2e3f4a",
-        status: "CLOSED",
-        accidentType: "실손",
-        createdAt: "2026-04-22T09:00:00Z",
-        reportNo: "20260422-077",
-        claimedMinAmount: 1_800_000,
-        claimedMaxAmount: 2_600_000,
-        proposalCount: 1,
-        reviewedAt: "2026-04-24T09:30:00Z",
-        adjusterNickname: "최유나",
-        offeredAmount: 2_100_000,
-        treatment: "통원",
-      },
-      {
-        reportId: "e5f2a3b4-6c7d-4e8f-9a0b-0c1d2e3f4a5b",
-        status: "AWAITING_INSPECTION",
-        accidentType: "골절",
-        createdAt: "2026-04-15T09:00:00Z",
-        reportNo: "20260415-031",
-        claimedMinAmount: 4_100_000,
-        claimedMaxAmount: 5_900_000,
-        proposalCount: 0,
-        reviewedAt: null,
-        adjusterNickname: null,
-        offeredAmount: null,
-        treatment: null,
-      },
-      {
-        reportId: "f6a3b4c5-7d8e-4f9a-8b1c-1d2e3f4a5b6c",
-        status: "CLOSED",
-        accidentType: "교통사고",
-        createdAt: "2026-04-03T09:00:00Z",
-        reportNo: "20260403-208",
-        claimedMinAmount: 7_300_000,
-        claimedMaxAmount: 9_100_000,
-        proposalCount: 4,
-        reviewedAt: "2026-04-05T16:45:00Z",
-        adjusterNickname: "정하윤",
-        offeredAmount: 8_000_000,
-        treatment: "입원",
-      },
-      {
-        reportId: "a7b4c5d6-8e9f-4a0b-9c2d-2e3f4a5b6c7d",
-        status: "NOT_SELECTED",
-        accidentType: "실손",
-        createdAt: "2026-03-26T09:00:00Z",
-        reportNo: "20260326-142",
-        claimedMinAmount: 2_900_000,
-        claimedMaxAmount: 3_700_000,
-        proposalCount: 2,
-        reviewedAt: "2026-03-28T10:00:00Z",
-        adjusterNickname: "강도윤",
-        offeredAmount: 3_200_000,
-        treatment: "통원",
-      },
-    ];
 
     const start = (page - 1) * size;
     const paged = REPORT_LIST_SOURCE.slice(start, start + size);
