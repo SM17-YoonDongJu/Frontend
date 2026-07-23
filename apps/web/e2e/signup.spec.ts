@@ -1,10 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
+import { hideQueryDevtools, selectRegion } from "./_region-helpers";
 
 /**
- * 일반 사용자 회원가입 퍼널 E2E (이슈 #43).
+ * 일반 사용자 회원가입 퍼널 E2E (이슈 #43·#173).
  *
- * 원칙: 핵심 사용자 흐름만 — 역할 선택 → 약관 동의 → 가입 완료(CUJ),
- *   필수 약관 게이트, 전체 동의 토글, 중복 계정 에러(고가치), 약관 상세 왕복, 손해사정사 분기.
+ * 원칙: 핵심 사용자 흐름만 — 역할 선택 → 약관 동의 → 본인 확인 → 가입 완료(CUJ),
+ *   필수 약관 게이트, 전체 동의 토글, 본인 확인 필수값 게이트, 중복 계정 에러(고가치),
+ *   약관 상세 왕복, 손해사정사 분기, 단계 직접 진입 가드.
  * 응답은 기본 MSW 핸들러(POST /auth/register: 성공 201 + 토큰)가 제공.
  *   소셜 컨텍스트(socialToken/nickname/email)는 진입 쿼리로 주입(개발·E2E 경로) —
  *   컨텍스트 없이 직접 진입하면 /login으로 가드되므로 mock 폴백 없음.
@@ -24,18 +26,37 @@ async function selectRole(page: Page, name: RegExp) {
   }).toPass({ timeout: 10000 });
 }
 
-async function goThroughToConsent(page: Page) {
-  await page.goto(PATH);
+async function goThroughToConsent(page: Page, path = PATH) {
+  await page.goto(path);
   await selectRole(page, /일반 사용자/);
   await page.getByRole("button", { name: "시작하기" }).click();
   await expect(page.getByRole("heading", { name: "약관에 동의해주세요" })).toBeVisible();
 }
 
-test("일반 사용자로 역할·약관 동의 후 가입하면 완료 화면과 대시보드 이동 버튼이 보인다", async ({ page }) => {
-  await goThroughToConsent(page);
-
+async function goThroughToIdentity(page: Page, path = PATH) {
+  await goThroughToConsent(page, path);
   await page.getByRole("button", { name: "전체 동의" }).click();
-  await page.getByRole("button", { name: "동의하고 가입" }).click();
+  await page.getByRole("button", { name: "다음" }).click();
+  await expect(page.getByRole("heading", { name: "본인 확인을 해주세요" })).toBeVisible();
+}
+
+async function fillIdentity(page: Page) {
+  await page.getByLabel("이름").fill("윤서");
+  await page.getByRole("radio", { name: "여성" }).click();
+  await page.getByLabel("생년월일").fill("19950615");
+  await page.getByLabel("휴대폰 번호").fill("01012345678");
+  await selectRegion(page, "서울특별시", "강남구", /거주 지역/);
+}
+
+test.beforeEach(async ({ page }) => {
+  await hideQueryDevtools(page);
+});
+
+test("역할·약관 동의·본인 확인을 마치고 가입하면 완료 화면과 대시보드 이동 버튼이 보인다", async ({ page }) => {
+  await goThroughToIdentity(page);
+
+  await fillIdentity(page);
+  await page.getByRole("button", { name: "다음" }).click();
 
   await expect(page.getByRole("heading", { name: "가입이 완료됐어요" })).toBeVisible();
   // 소셜 mock 이메일·닉네임(=이름) 노출
@@ -50,17 +71,30 @@ test("일반 사용자로 역할·약관 동의 후 가입하면 완료 화면�
   }).toPass({ timeout: 10000 });
 });
 
-test("필수 약관에 동의하기 전에는 가입 버튼이 비활성이고, 필수 2개만 체크하면 활성된다", async ({ page }) => {
+test("본인 확인 필수값을 채우지 않으면 검증 메시지가 보이고 다음으로 넘어가지 않는다", async ({ page }) => {
+  await goThroughToIdentity(page);
+
+  await page.getByRole("button", { name: "다음" }).click();
+
+  await expect(page.getByText("이름을 입력해 주세요.")).toBeVisible();
+  await expect(page.getByText("성별을 선택해 주세요.")).toBeVisible();
+  await expect(page.getByText("생년월일을 입력해 주세요.")).toBeVisible();
+  await expect(page.getByText("휴대폰 번호를 입력해 주세요.")).toBeVisible();
+  await expect(page.getByText("지역을 선택해 주세요.")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "본인 확인을 해주세요" })).toBeVisible();
+});
+
+test("필수 약관에 동의하기 전에는 다음 버튼이 비활성이고, 필수 2개만 체크하면 활성된다", async ({ page }) => {
   await goThroughToConsent(page);
 
-  const submit = page.getByRole("button", { name: "동의하고 가입" });
-  await expect(submit).toBeDisabled();
+  const next = page.getByRole("button", { name: "다음" });
+  await expect(next).toBeDisabled();
 
   await page.getByText("(필수) 서비스 이용약관 동의").click();
   await page.getByText("(필수) 개인정보 처리방침 동의").click();
 
   // 마케팅(선택) 미동의여도 활성
-  await expect(submit).toBeEnabled();
+  await expect(next).toBeEnabled();
 });
 
 test("전체 동의를 누르면 마케팅을 포함한 세 항목이 모두 체크된다", async ({ page }) => {
@@ -74,16 +108,14 @@ test("전체 동의를 누르면 마케팅을 포함한 세 항목이 모두 체
 });
 
 test("이미 가입된 계정이면 가입 시 중복 안내가 노출된다", async ({ page }) => {
-  await page.goto(DUPLICATE_PATH);
-  await selectRole(page, /일반 사용자/);
-  await page.getByRole("button", { name: "시작하기" }).click();
+  await goThroughToIdentity(page, DUPLICATE_PATH);
 
-  await page.getByRole("button", { name: "전체 동의" }).click();
-  await page.getByRole("button", { name: "동의하고 가입" }).click();
+  await fillIdentity(page);
+  await page.getByRole("button", { name: "다음" }).click();
 
   await expect(page.getByText("이미 가입된 계정이에요. 로그인으로 진행해 주세요.")).toBeVisible();
-  // 에러 후에도 완료로 넘어가지 않고 약관 화면 유지(재시도 가능)
-  await expect(page.getByRole("button", { name: "동의하고 가입" })).toBeVisible();
+  // 에러 후에도 완료로 넘어가지 않고 본인 확인 화면 유지(재시도 가능)
+  await expect(page.getByRole("heading", { name: "본인 확인을 해주세요" })).toBeVisible();
 });
 
 test("약관 상세보기로 이동했다가 돌아와도 선택한 동의 상태가 유지된다", async ({ page }) => {
@@ -102,6 +134,12 @@ test("약관 상세보기로 이동했다가 돌아와도 선택한 동의 상�
 
   await expect(page.getByRole("heading", { name: "약관에 동의해주세요" })).toBeVisible();
   await expect(page.getByRole("checkbox", { name: /서비스 이용약관/ })).toBeChecked();
+});
+
+test("약관 동의 없이 본인 확인 단계로 직접 진입하면 첫 단계로 되돌아간다", async ({ page }) => {
+  await page.goto(`${PATH}&step=identity`);
+
+  await expect(page.getByRole("heading", { name: "어떤 역할로 시작하시겠어요?" })).toBeVisible();
 });
 
 test("소셜 인증 컨텍스트 없이 직접 진입하면 로그인으로 되돌아간다", async ({ page }) => {

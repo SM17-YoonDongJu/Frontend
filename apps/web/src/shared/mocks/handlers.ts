@@ -1622,11 +1622,13 @@ export const handlers = [
     });
   }),
 
-  // 회원가입 (#43, 명세 2026-07-09 개정) — 전역 봉투 거울. 성공 201.
+  // 회원가입 (#43·#173, 명세 2026-07-09 개정) — 전역 봉투 거울. 성공 201.
   // 토큰은 HttpOnly 쿠키(Set-Cookie access_token 30분/refresh_token 14일)로만 내려가고 body엔 없음 → data = { user_id, nickname, role }.
-  // birth_date·phone_number·gender는 폼 확정(2026-07-21)으로 미전송 — 목도 검증하지 않는다(백엔드 완화 확인 대기).
+  // birth_date·phone_number·gender는 본인 확인 스텝(#173)에서 수집·전송 — dev 백엔드 실측대로 누락 시 400 미러링.
   // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 1자 미만·30자 초과→400 VALIDATION_ERROR,
-  //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD, x-mock-failure:social→500 EXTERNAL_API_ERROR.
+  //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD,
+  //   gender/birth_date/phone_number 누락→400 VALIDATION_ERROR("<필드>: must not be null"),
+  //   x-mock-failure:social→500 EXTERNAL_API_ERROR.
   http.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {
     await delay(600);
 
@@ -1635,6 +1637,9 @@ export const handlers = [
       social_token?: string;
       nickname?: string;
       user_type?: string;
+      gender?: string;
+      birth_date?: string;
+      phone_number?: string;
     };
 
     if (request.headers.get("x-mock-failure") === "social") {
@@ -1647,6 +1652,17 @@ export const handlers = [
     if (!body.provider || !body.social_token || !body.user_type) {
       return HttpResponse.json(
         { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
+        { status: 400 },
+      );
+    }
+
+    // dev 백엔드 실측(#173): 본인 확인 필드 누락 시 "<필드>: must not be null" 400.
+    const missingIdentityField = (["gender", "birth_date", "phone_number"] as const).find(
+      (field) => !body[field],
+    );
+    if (missingIdentityField) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: `${missingIdentityField}: must not be null` },
         { status: 400 },
       );
     }
