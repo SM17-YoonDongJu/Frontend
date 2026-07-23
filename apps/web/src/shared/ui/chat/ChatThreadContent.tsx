@@ -40,7 +40,7 @@ export function ChatThreadContent({
   }, [markRead, chatRoomId]);
 
   const room = rooms.find((item) => item.chatRoomId === chatRoomId);
-  const closed = room?.status === "CLOSED";
+  const closed = room?.roomStatus === "CLOSED";
 
   return (
     <div className="flex h-full flex-col">
@@ -48,7 +48,7 @@ export function ChatThreadContent({
         <ChatThreadHeader
           name={room.counterpart.name}
           caseNo={room.caseNo}
-          roomStatus={room.status}
+          roomStatus={room.roomStatus}
           reportHref={room.reportId ? `${reportBasePath}/${room.reportId}` : "#"}
           onBack={() => router.push(chatBasePath)}
           onClose={() =>

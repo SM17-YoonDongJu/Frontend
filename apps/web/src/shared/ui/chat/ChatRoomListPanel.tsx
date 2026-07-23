@@ -88,7 +88,7 @@ export function ChatRoomListPanel({
   const comparingRooms = useMemo(
     () =>
       filteredRooms.filter(
-        (room) => toMatchGroup(room.reviewStatus, room.status) === "comparing",
+        (room) => toMatchGroup(room.matchStatus, room.roomStatus) === "comparing",
       ),
     [filteredRooms],
   );
@@ -132,7 +132,7 @@ export function ChatRoomListPanel({
           )}
           {MATCH_GROUP_SECTIONS.map((section) => {
             const sectionRooms = filteredRooms.filter(
-              (room) => toMatchGroup(room.reviewStatus, room.status) === section.key,
+              (room) => toMatchGroup(room.matchStatus, room.roomStatus) === section.key,
             );
             if (sectionRooms.length === 0) return null;
 
@@ -184,8 +184,8 @@ export function ChatRoomListPanel({
                           lastMessage={room.lastMessage}
                           lastMessageAt={room.lastMessageAt}
                           avatarUrl={room.avatarUrl}
-                          roomStatus={room.status}
-                          matchStatus={room.reviewStatus ?? undefined}
+                          roomStatus={room.roomStatus}
+                          matchStatus={room.matchStatus ?? undefined}
                           reportTypeLabel={room.reportTypeLabel}
                           href={buildHref(room.chatRoomId)}
                           active={room.chatRoomId === activeChatRoomId}
@@ -210,7 +210,7 @@ export function ChatRoomListPanel({
                   lastMessage={room.lastMessage}
                   lastMessageAt={room.lastMessageAt}
                   avatarUrl={room.avatarUrl}
-                  roomStatus={room.status}
+                  roomStatus={room.roomStatus}
                   href={buildHref(room.chatRoomId)}
                   active={room.chatRoomId === activeChatRoomId}
                 />

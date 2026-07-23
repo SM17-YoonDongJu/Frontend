@@ -71,7 +71,7 @@ export function CustomerChatThreadContent({
     );
   }
 
-  const group = toMatchGroup(room.reviewStatus, room.status);
+  const group = toMatchGroup(room.matchStatus, room.roomStatus);
   const reportHref = room.reportId ? `${reportBasePath}/${room.reportId}` : "#";
   const matchPending = accept.isPending || reject.isPending;
 
@@ -79,17 +79,17 @@ export function CustomerChatThreadContent({
     ? rooms.filter((item) => item.reportId === room.reportId)
     : [room];
   const comparingCount = siblings.filter(
-    (item) => toMatchGroup(item.reviewStatus, item.status) === "comparing",
+    (item) => toMatchGroup(item.matchStatus, item.roomStatus) === "comparing",
   ).length;
   const endingConsultations = siblings
     .filter(
       (item) =>
         item.chatRoomId !== room.chatRoomId &&
-        toMatchGroup(item.reviewStatus, item.status) === "comparing",
+        toMatchGroup(item.matchStatus, item.roomStatus) === "comparing",
     )
     .map((item) => ({ name: item.counterpart.name }));
 
-  const subtitle = `${room.caseNo} · ${SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.status].label}`;
+  const subtitle = `${room.caseNo} · ${SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.roomStatus].label}`;
 
   // 거절도 비가역이라 완료와 대칭으로 확인 모달을 거친다
   const rejectMatch = () => setRejectOpen(true);
@@ -176,7 +176,7 @@ export function CustomerChatThreadContent({
       <ChatThreadHeader
         name={room.counterpart.name}
         caseNo={room.caseNo}
-        roomStatus={room.status}
+        roomStatus={room.roomStatus}
         reportHref={reportHref}
         subtitle={subtitle}
         badge={group === "matched" ? <MatchStatusBadge group={group} /> : undefined}
@@ -215,7 +215,7 @@ export function CustomerChatThreadContent({
       <MessageInputBar
         onSend={(content) => sendMessage.mutate({ content })}
         disabled={sendMessage.isPending}
-        closed={room.status === "CLOSED"}
+        closed={room.roomStatus === "CLOSED"}
         sendFailed={sendMessage.isError}
         onPickFile={(file) =>
           sendAttachment.mutate(file, {

@@ -808,9 +808,9 @@ function toChatRoomDto(room: MockChatRoom) {
   return {
     chatRoomId: room.chatRoomId,
     reportId: room.reportId,
-    reportReviewId: room.proposalId,
-    status: room.roomStatus,
-    reviewStatus: room.matchStatus,
+    proposalId: room.proposalId,
+    roomStatus: room.roomStatus,
+    matchStatus: room.matchStatus,
     counterpart: { userId: room.adjusterId, name: room.adjusterName },
     lastMessage: room.lastMessage,
     lastMessageAt: room.lastMessageAt,

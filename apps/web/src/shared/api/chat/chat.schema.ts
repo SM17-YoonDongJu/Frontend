@@ -5,8 +5,8 @@ import { z } from "zod";
 
 export const roomStatusSchema = z.enum(["ACTIVE", "CLOSED"]);
 
-// review_status — 파이프라인(사정사 검수) 방만. 사정사 검색으로 만든 방은 null.
-export const reviewStatusSchema = z.enum([
+// match_status — 파이프라인(사정사 검수) 방만. 사정사 검색으로 만든 방은 null.
+export const matchStatusSchema = z.enum([
   "SENT",
   "COUNSELING",
   "ACCEPTED",
@@ -21,9 +21,9 @@ export const chatCounterpartSchema = z.object({
 export const chatRoomSchema = z.object({
   chatRoomId: z.uuid(),
   reportId: z.uuid().nullable(), // 사정사 검색 방은 null(공유 리포트 버튼 숨김)
-  reportReviewId: z.uuid().nullable(), // report_reviews.id — accept/reject 대상(검색 방은 null)
-  status: roomStatusSchema,
-  reviewStatus: reviewStatusSchema.nullable(),
+  proposalId: z.uuid().nullable(), // 제안 id — accept/reject 대상(검색 방은 null)
+  roomStatus: roomStatusSchema,
+  matchStatus: matchStatusSchema.nullable(),
   counterpart: chatCounterpartSchema,
   lastMessage: z.string().nullable(),
   lastMessageAt: z.string(),
@@ -124,7 +124,7 @@ export const readChatResponseSchema = z.object({
 });
 
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
-export type ReviewStatus = z.infer<typeof reviewStatusSchema>;
+export type MatchStatus = z.infer<typeof matchStatusSchema>;
 export type ChatCounterpart = z.infer<typeof chatCounterpartSchema>;
 export type ChatRoom = z.infer<typeof chatRoomSchema>;
 export type ChatList = z.infer<typeof chatListSchema>;

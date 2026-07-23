@@ -6,9 +6,9 @@ const rooms: ChatRoom[] = [
   {
     chatRoomId: "11111111-1111-1111-1111-111111111111",
     reportId: "rrrrrrrr-1111-1111-1111-111111111111",
-    reportReviewId: "cccccccc-1111-1111-1111-111111111111",
-    status: "ACTIVE",
-    reviewStatus: "COUNSELING",
+    proposalId: "cccccccc-1111-1111-1111-111111111111",
+    roomStatus: "ACTIVE",
+    matchStatus: "COUNSELING",
     counterpart: {
       userId: "aaaaaaaa-1111-1111-1111-111111111111",
       name: "김도현 손해사정사",
@@ -23,9 +23,9 @@ const rooms: ChatRoom[] = [
   {
     chatRoomId: "22222222-2222-2222-2222-222222222222",
     reportId: "rrrrrrrr-2222-2222-2222-222222222222",
-    reportReviewId: "cccccccc-2222-2222-2222-222222222222",
-    status: "ACTIVE",
-    reviewStatus: "COUNSELING",
+    proposalId: "cccccccc-2222-2222-2222-222222222222",
+    roomStatus: "ACTIVE",
+    matchStatus: "COUNSELING",
     counterpart: {
       userId: "aaaaaaaa-2222-2222-2222-222222222222",
       name: "정우성 손해사정사",
@@ -40,9 +40,9 @@ const rooms: ChatRoom[] = [
   {
     chatRoomId: "33333333-3333-3333-3333-333333333333",
     reportId: "rrrrrrrr-3333-3333-3333-333333333333",
-    reportReviewId: "cccccccc-3333-3333-3333-333333333333",
-    status: "CLOSED",
-    reviewStatus: "REJECTED",
+    proposalId: "cccccccc-3333-3333-3333-333333333333",
+    roomStatus: "CLOSED",
+    matchStatus: "REJECTED",
     counterpart: {
       userId: "aaaaaaaa-3333-3333-3333-333333333333",
       name: "윤지후 손해사정사",
@@ -86,8 +86,8 @@ export const Grouped: Story = {
     activeChatRoomId: "11111111-1111-1111-1111-111111111111",
     rooms: rooms.map((room, index) => ({
       ...room,
-      status: index === 2 ? "CLOSED" : "ACTIVE",
-      reviewStatus:
+      roomStatus: index === 2 ? "CLOSED" : "ACTIVE",
+      matchStatus:
         index === 0 ? "ACCEPTED" : index === 2 ? "REJECTED" : "COUNSELING",
     })),
   },
@@ -100,8 +100,8 @@ export const GroupedComparing: Story = {
     grouped: true,
     rooms: rooms.map((room) => ({
       ...room,
-      status: "ACTIVE",
-      reviewStatus: "COUNSELING",
+      roomStatus: "ACTIVE",
+      matchStatus: "COUNSELING",
     })),
   },
 };
