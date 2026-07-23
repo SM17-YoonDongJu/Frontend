@@ -26,7 +26,10 @@ test.describe("공개 페이지 진입 흐름", () => {
     await page.goto(LANDING);
 
     await expect(async () => {
-      await page.getByRole("navigation").getByRole("link", { name: "서비스 소개" }).click();
+      await page
+        .getByRole("navigation", { name: "주요 메뉴" })
+        .getByRole("link", { name: "서비스 소개" })
+        .click();
       await expect(page).toHaveURL(/\/about$/);
     }).toPass({ timeout: 10000 });
 
@@ -39,7 +42,10 @@ test.describe("공개 페이지 진입 흐름", () => {
     await page.goto(LANDING);
 
     await expect(async () => {
-      await page.getByRole("navigation").getByRole("link", { name: "이용 방법" }).click();
+      await page
+        .getByRole("navigation", { name: "주요 메뉴" })
+        .getByRole("link", { name: "이용 방법" })
+        .click();
       await expect(page).toHaveURL(/\/guide$/);
     }).toPass({ timeout: 10000 });
 
