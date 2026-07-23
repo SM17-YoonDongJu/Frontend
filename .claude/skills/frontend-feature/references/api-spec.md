@@ -38,7 +38,7 @@ auth · user · settings · report · review · matching · chat · payment · a
 쿼리키 factory의 최상위 도메인 키와 이 enum을 일치시킨다. 새 도메인을 임의로 만들지 않는다.
 
 ## 전역 응답 봉투 (모든 엔드포인트 공통 — 안정적, 여기 고정)
-**base url**: `https://example.com` (버저닝 없음 — 백엔드 확정, 실제 값은 env로 주입)
+**base url**: `https://example.com/api/v1` (MVP 플레이스홀더 — 실제 값은 env로 주입)
 
 성공:
 ```json
