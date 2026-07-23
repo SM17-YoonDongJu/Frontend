@@ -12,13 +12,13 @@ export function ReceivedProposalsView() {
   const list = useMemo(() => data.pages.flatMap((page) => page.list), [data.pages]);
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-[25.125rem] flex-col bg-paper">
+    <div className="mx-auto flex min-h-dvh w-full max-w-[25.125rem] flex-col bg-paper md:min-h-0 md:max-w-6xl md:px-6 md:py-10">
       <div className="flex-1">
-        <header className="px-5 pt-6 pb-4">
-          <h1 className="font-serif text-[1.625rem] font-bold leading-[1.3] tracking-[-0.0144rem] text-ink">
+        <header className="px-5 pt-6 pb-4 md:px-0 md:pt-0 md:pb-8">
+          <h1 className="font-serif text-[1.625rem] font-bold leading-[1.3] tracking-[-0.0144rem] text-ink md:text-[2rem]">
             받은 제안
           </h1>
-          <p className="mt-2 text-[0.8125rem] leading-[1.45] text-ink-3">
+          <p className="mt-2 text-[0.8125rem] leading-[1.45] text-ink-3 md:text-[0.9375rem]">
             분석 요청건별로 도착한 제안을 모아 보여드려요.
           </p>
         </header>
