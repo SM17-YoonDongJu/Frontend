@@ -65,7 +65,7 @@ test("최근 로그인 흔적이 있으면 재로그인 화면과 최근 로그�
 });
 
 test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저장된다", async ({ page }) => {
-  await page.goto("/oauth/kakao/callback?code=valid&state=s1");
+  await page.goto("/login/oauth2/code/kakao?code=valid&state=s1");
 
   // 콜백은 "/"로 보내고, 랜딩 가드가 곧바로 역할별 홈으로 다시 보낸다(#108).
   // "/" 체류 시간이 짧아 관측되지 않을 수 있어 최종 도착지인 고객 대시보드로 단언한다.
@@ -81,7 +81,7 @@ test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저�
 });
 
 test("신규 회원 콜백이면 회원가입으로 이동한다", async ({ page }) => {
-  await page.goto("/oauth/kakao/callback?code=new&state=s1");
+  await page.goto("/login/oauth2/code/kakao?code=new&state=s1");
 
   await expect(page).toHaveURL(/\/signup/, { timeout: 15000 });
   // 콜백이 보관한 가입 티켓으로 컨텍스트 가드를 통과해 퍼널 첫 단계가 렌더된다.
@@ -90,7 +90,7 @@ test("신규 회원 콜백이면 회원가입으로 이동한다", async ({ page
 
 test("콜백이 실패하면 에러 안내와 다시 시도 버튼이 보이고 재시도해도 실패가 유지된다", async ({ page }) => {
   // MSW 핸들러가 URL code로 실패를 결정 주입(code=fail-external → 500 EXTERNAL_API_ERROR).
-  await page.goto("/oauth/kakao/callback?code=fail-external&state=s1");
+  await page.goto("/login/oauth2/code/kakao?code=fail-external&state=s1");
 
   const errorMessage = page.getByText(
     "소셜 로그인 연동 중 문제가 발생했어요. 잠시 후 다시 시도해 주세요.",
@@ -103,12 +103,12 @@ test("콜백이 실패하면 에러 안내와 다시 시도 버튼이 보이고 
   // 재시도해도 동일 code로 실패가 유지된다(결정적) — 에러 안내가 그대로 노출되고 이동하지 않는다.
   await retry.click();
   await expect(errorMessage).toBeVisible();
-  await expect(page).toHaveURL(/\/oauth\/kakao\/callback/);
+  await expect(page).toHaveURL(/\/login\/oauth2\/code\/kakao/);
 });
 
 test("인가 코드가 없으면 로그인 화면으로 되돌아간다", async ({ page }) => {
   await page.setExtraHTTPHeaders(UNAUTH_HEADER);
-  await page.goto("/oauth/kakao/callback");
+  await page.goto("/login/oauth2/code/kakao");
 
   await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
   await expect(page.getByRole("heading", { name: "바른보상 시작하기" })).toBeVisible();

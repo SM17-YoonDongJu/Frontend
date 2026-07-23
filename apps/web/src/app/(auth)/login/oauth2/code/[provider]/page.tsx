@@ -3,16 +3,15 @@
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { getMe } from "@/shared/api/get-me";
-import { consumeReturnPath } from "@/shared/lib/return-path";
 import { Button } from "@/shared/ui/Button";
-import { maskEmail } from "../../../_shared/lib/mask-email";
-import { saveSignupTicket } from "../../../_shared/lib/signup-ticket";
+import { maskEmail } from "../../../../_shared/lib/mask-email";
+import { saveSignupTicket } from "../../../../_shared/lib/signup-ticket";
 import { Spinner } from "@/shared/ui/icons/Spinner";
 import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 import {
   useRecentLogin,
   type RecentLogin,
-} from "../../../_shared/hooks/use-recent-login";
+} from "../../../../_shared/hooks/use-recent-login";
 import { useOauthCallback } from "./_api/use-oauth-callback";
 import { oauthProviderSchema, type OauthProvider } from "./_model/oauth-callback.schema";
 
@@ -86,7 +85,7 @@ export default function OauthCallbackPage() {
         saveRecentLogin(recent);
       } catch {}
 
-      router.replace(consumeReturnPath() ?? "/");
+      router.replace("/");
     })();
   }, [data, provider, router, saveRecentLogin]);
 

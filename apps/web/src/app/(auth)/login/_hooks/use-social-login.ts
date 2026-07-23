@@ -32,7 +32,7 @@ export function useSocialLogin() {
 
     const params = new URLSearchParams({
       client_id: CLIENT_ID[provider] ?? "",
-      redirect_uri: `${window.location.origin}/oauth/${provider}/callback`,
+      redirect_uri: `${window.location.origin}/login/oauth2/code/${provider}`,
       response_type: "code",
       state,
     });
