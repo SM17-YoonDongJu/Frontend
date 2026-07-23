@@ -16,7 +16,6 @@ import { Tooltip } from "@/shared/ui/Tooltip";
 import { AccidentTypeCard } from "./AccidentTypeCard";
 import type { AdjustRequestDraft } from "../_model/types";
 
-// 지원 유형(실손 의료비)이 첫 번째로 오도록 배치.
 const ACCIDENT_TYPES: { value: AccidentType; description: string; icon: ReactNode }[] = [
   { value: "medical_indemnity", description: "치료비·통원 보상", icon: <FileText /> },
   { value: "traffic", description: "자동차·이륜차 사고 보상", icon: <TrendingUp /> },
@@ -41,34 +40,47 @@ export function Step1AccidentType() {
         유형에 맞춰 약관·특약을 분석해드려요.
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup">
-        {ACCIDENT_TYPES.map((type) => {
-          const locked = type.value !== SUPPORTED_ACCIDENT_TYPE;
-          const card = (
-            <AccidentTypeCard
-              key={type.value}
-              icon={type.icon}
-              title={accidentTypeLabel(type.value)}
-              description={type.description}
-              selected={selected === type.value}
-              disabled={locked}
-              onSelect={() =>
-                setValue("accidentType", SUPPORTED_ACCIDENT_TYPE, { shouldValidate: true })
-              }
-            />
-          );
-          if (!locked) return card;
-          return (
-            <Tooltip key={type.value} label={LOCKED_TOOLTIP} className="w-full cursor-not-allowed">
-              {card}
-            </Tooltip>
-          );
-        })}
+      <div className="mt-6" role="radiogroup">
+        {ACCIDENT_TYPES.filter((type) => type.value === SUPPORTED_ACCIDENT_TYPE).map((type) => (
+          <AccidentTypeCard
+            key={type.value}
+            icon={type.icon}
+            title={accidentTypeLabel(type.value)}
+            description={type.description}
+            selected={selected === type.value}
+            onSelect={() =>
+              setValue("accidentType", SUPPORTED_ACCIDENT_TYPE, { shouldValidate: true })
+            }
+          />
+        ))}
       </div>
 
       {errors.accidentType && (
         <p className="mt-3 text-[0.75rem] font-medium text-terra">{errors.accidentType.message}</p>
       )}
+
+      <div className="mt-6 flex items-center gap-3" aria-hidden>
+        <span className="h-px flex-1 bg-line" />
+        <span className="text-[0.75rem] font-medium text-ink-3">추후 지원 예정</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {ACCIDENT_TYPES.filter((type) => type.value !== SUPPORTED_ACCIDENT_TYPE).map((type) => (
+          <Tooltip key={type.value} label={LOCKED_TOOLTIP} className="w-full cursor-not-allowed">
+            <AccidentTypeCard
+              icon={type.icon}
+              title={accidentTypeLabel(type.value)}
+              description={type.description}
+              selected={false}
+              disabled
+              onSelect={() =>
+                setValue("accidentType", SUPPORTED_ACCIDENT_TYPE, { shouldValidate: true })
+              }
+            />
+          </Tooltip>
+        ))}
+      </div>
 
       <p className="mt-4 rounded-input bg-paper-2 px-4 py-3 text-[0.78125rem] leading-relaxed text-ink-3">
         현재는 <span className="font-semibold text-ink-2">{accidentTypeLabel(SUPPORTED_ACCIDENT_TYPE)}</span> 유형만
