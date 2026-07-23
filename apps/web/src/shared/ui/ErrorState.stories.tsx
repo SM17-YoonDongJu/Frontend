@@ -37,7 +37,7 @@ export const WithCode: Story = {
   args: { layout: "card", title: "알림을 불러오지 못했어요", code: "INTERNAL_SERVER_ERROR" },
 };
 
-export const Forbidden: Story = {
+export const ForbiddenDefault: Story = {
   args: { layout: "page", code: "FORBIDDEN" },
 };
 

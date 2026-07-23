@@ -16,6 +16,12 @@ const GUIDE = "/guide";
 test.describe("공개 페이지 진입 흐름", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
 
+  // 기본 목은 로그인 유저라 랜딩 게이트가 대시보드로 replace — 클릭이 판별보다 빠를 때만
+  // 통과하는 레이스가 된다(webkit 간헐 실패). 비로그인 주입으로 랜딩을 고정.
+  test.beforeEach(async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
+  });
+
   test("랜딩 헤더의 서비스 소개를 누르면 /about 히어로가 보인다", async ({ page }) => {
     await page.goto(LANDING);
 
@@ -64,6 +70,11 @@ test.describe("이용 방법 FAQ 디스클로저", () => {
 
 test.describe("공개 페이지 CTA", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
+
+  // 기본 목(로그인 유저)이면 /login 진입 가드가 홈으로 되돌려 URL 단언이 레이스가 된다.
+  test.beforeEach(async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
+  });
 
   test("서비스 소개 하단 CTA를 누르면 로그인으로 이동한다", async ({ page }) => {
     await page.goto(ABOUT);

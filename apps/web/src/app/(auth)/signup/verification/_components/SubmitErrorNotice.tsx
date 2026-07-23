@@ -9,7 +9,6 @@ interface SubmitErrorNoticeProps {
 
 const MESSAGES: Record<ApplyAdjusterErrorCode, string> = {
   DUPLICATE_RESOURCE: "이미 자격 인증을 신청하셨어요. 심사 현황에서 진행 상태를 확인할 수 있어요.",
-  LOGIN_REQUIRED: "로그인이 필요해요. 다시 로그인한 뒤 시도해 주세요.",
   EXTERNAL_API_ERROR: "서류 업로드에 문제가 있어요. 파일을 다시 확인해 주세요.",
   MISSING_REQUIRED_FIELD: "필수 항목을 다시 확인해 주세요.",
   VALIDATION_ERROR: "입력 형식을 다시 확인해 주세요.",
