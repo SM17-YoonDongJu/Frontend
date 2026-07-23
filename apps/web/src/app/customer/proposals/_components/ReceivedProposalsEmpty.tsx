@@ -13,7 +13,7 @@ const goldCtaClassName = cn(
 
 export function ReceivedProposalsEmpty() {
   return (
-    <div className="flex flex-col items-center px-10 pt-13 pb-16 text-center">
+    <div className="flex flex-col items-center px-10 pt-13 pb-16 text-center md:pt-20 md:pb-28">
       <span className="flex size-[4.875rem] items-center justify-center rounded-full border border-line bg-paper-2">
         <FileText className="size-9 text-ink-2" />
       </span>

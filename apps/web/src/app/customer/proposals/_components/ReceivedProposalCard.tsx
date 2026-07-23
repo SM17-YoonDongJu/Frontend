@@ -83,7 +83,7 @@ export function ReceivedProposalCard({ item }: { item: ReportListItem }) {
     <Link
       href={`/customer/proposals/${item.reportId}`}
       className={cn(
-        "block rounded-card border p-4 shadow-card transition hover:brightness-[.99]",
+        "block rounded-card border p-4 shadow-card transition hover:brightness-[.99] md:p-5",
         isArrived
           ? "border-line bg-card"
           : isClosed
