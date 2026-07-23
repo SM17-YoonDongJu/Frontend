@@ -3,12 +3,19 @@
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { Suspense, useEffect, useState } from "react";
 import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-import { ReportListError } from "./ReportListError";
+import { ErrorState } from "@/shared/ui/ErrorState";
 import { ReportListSkeleton } from "./ReportListSkeleton";
 import { ReportListView } from "./ReportListView";
 
 function ReportListErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
-  return <ReportListError code={(error as Error).name} onRetry={resetErrorBoundary} />;
+  return (
+    <ErrorState
+      layout="page"
+      title="리포트를 불러오지 못했어요"
+      code={(error as Error).name}
+      onRetry={resetErrorBoundary}
+    />
+  );
 }
 
 export function ReportListBoundary() {

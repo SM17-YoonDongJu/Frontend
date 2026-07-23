@@ -37,12 +37,30 @@ export const WithCode: Story = {
   args: { layout: "card", title: "알림을 불러오지 못했어요", code: "INTERNAL_SERVER_ERROR" },
 };
 
-export const KnownCodeHidesRetry: Story = {
+export const Forbidden: Story = {
+  args: { layout: "page", code: "FORBIDDEN" },
+};
+
+export const ForbiddenCard: Story = {
+  args: { layout: "card", code: "FORBIDDEN" },
+};
+
+export const ForbiddenWithOverride: Story = {
   args: {
     layout: "page",
     code: "FORBIDDEN",
     messages: {
-      FORBIDDEN: { title: "접근 권한이 없어요", desc: "본인 리포트만 확인할 수 있어요." },
+      FORBIDDEN: { title: "접근 권한이 없어요", desc: "활성 손해사정사만 검수 내역을 볼 수 있어요." },
+    },
+  },
+};
+
+export const KnownCodeHidesRetry: Story = {
+  args: {
+    layout: "page",
+    code: "NOT_FOUND",
+    messages: {
+      NOT_FOUND: { title: "리포트를 찾을 수 없어요", desc: "삭제됐거나 주소가 잘못됐어요." },
     },
   },
 };
