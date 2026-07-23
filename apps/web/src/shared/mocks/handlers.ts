@@ -409,6 +409,133 @@ const REPORT_LIST_SOURCE = [
   },
 ];
 
+const toReceivedAt = (iso: string) => iso.slice(0, 10).replaceAll("-", ".");
+
+// 제안 목록 target 파생용 리포트 메타 (이슈 #153) — /reports 원천 + 받은 제안 전용 리포트(#78).
+type ProposalTarget = { accidentType: string; reportNo: string; receivedAt: string };
+
+const PROPOSAL_TARGETS: Record<string, ProposalTarget> = {
+  ...Object.fromEntries(
+    REPORT_LIST_SOURCE.map((report): [string, ProposalTarget] => [
+      report.reportId,
+      {
+        accidentType: report.treatment
+          ? `${report.accidentType} · ${report.treatment}`
+          : report.accidentType,
+        reportNo: report.reportNo,
+        receivedAt: toReceivedAt(report.createdAt),
+      },
+    ]),
+  ),
+  "a1000000-0000-4000-8000-000000000002": {
+    accidentType: "실손 · 도수치료 한도",
+    reportNo: "20260415-031",
+    receivedAt: "2026.04.28",
+  },
+  "a1000000-0000-4000-8000-000000000003": {
+    accidentType: "질병 · 암진단비",
+    reportNo: "20260302-008",
+    receivedAt: "2026.03.10",
+  },
+};
+
+// 리포트 ① 외 proposal_count>0 리포트의 고정 제안 목 (이슈 #153) — 채팅방 미연결 정적 데이터.
+// 리포트의 adjusterNickname을 명단에 포함하고, REJECTED는 목록 필터로 건수가 깨져 시드에 쓰지 않는다.
+type ExtraProposal = {
+  reportId: string;
+  proposalId: string;
+  adjusterId: string;
+  nickname: string;
+  status: "SENT" | "COUNSELING" | "ACCEPTED" | "REJECTED";
+  rating: number;
+  proposalSummary: string;
+  submittedAt: string;
+  speciality: string;
+  career: number;
+  isNew: boolean;
+  isVerified: boolean;
+  estimateMinAmount: number | null;
+  estimateMaxAmount: number | null;
+  feeBasis: string;
+};
+
+const EXTRA_PROPOSAL_SUMMARIES = [
+  "리포트 검토 결과 추가 청구 여지가 있어 상담을 제안드립니다.",
+  "약관·특약 기준으로 산정 금액을 다시 살펴보고 싶습니다.",
+  "유사 사건을 다뤄본 경험이 있어 도움을 드릴 수 있을 것 같습니다.",
+  "제출 서류 기준으로 보완 청구 가능성을 검토해 보겠습니다.",
+  "산정 근거를 함께 확인하며 진행 방향을 안내드리겠습니다.",
+];
+
+function makeExtraProposals(
+  reportId: string,
+  base: number,
+  speciality: string,
+  submittedDate: string,
+  members: { nickname: string; status: "SENT" | "COUNSELING" | "ACCEPTED" }[],
+): ExtraProposal[] {
+  return members.map((member, i) => ({
+    reportId,
+    proposalId: `e1000000-0000-4000-8000-${String(base + i).padStart(12, "0")}`,
+    adjusterId: `e2000000-0000-4000-8000-${String(base + i).padStart(12, "0")}`,
+    nickname: member.nickname,
+    status: member.status,
+    rating: [4.8, 4.6, 4.9, 4.7, 4.5][i % 5] ?? 4.7,
+    proposalSummary:
+      EXTRA_PROPOSAL_SUMMARIES[(base / 100 + i) % 5] ?? "리포트를 검토해 보고 싶습니다.",
+    submittedAt: `${submittedDate}T${String(9 + i).padStart(2, "0")}:00:00+09:00`,
+    speciality,
+    career: [12, 8, 15, 6, 10][i % 5] ?? 10,
+    isNew: i === 0,
+    isVerified: true,
+    estimateMinAmount: null,
+    estimateMaxAmount: null,
+    feeBasis: "상담 시 서면 안내",
+  }));
+}
+
+const EXTRA_PROPOSALS: ExtraProposal[] = [
+  // 골절 20260508-005 — 상담 진행 중 3건
+  ...makeExtraProposals("b2c9d0e1-3f4a-4b5c-8d6e-7f8a9b0c1d2e", 100, "골절 전문", "2026-05-10", [
+    { nickname: "이서준", status: "COUNSELING" },
+    { nickname: "한지원", status: "SENT" },
+    { nickname: "문태호", status: "SENT" },
+  ]),
+  // 교통사고 20260430-118 — 채택 대기 5건
+  ...makeExtraProposals("c3d0e1f2-4a5b-4c6d-9e7f-8a9b0c1d2e3f", 200, "교통사고 전문", "2026-05-02", [
+    { nickname: "박지훈", status: "COUNSELING" },
+    { nickname: "서예린", status: "SENT" },
+    { nickname: "권도윤", status: "SENT" },
+    { nickname: "임채원", status: "SENT" },
+    { nickname: "백승호", status: "SENT" },
+  ]),
+  // 실손 20260422-077 — 종결(채택 1건)
+  ...makeExtraProposals("d4e1f2a3-5b6c-4d7e-8f9a-9b0c1d2e3f4a", 300, "실손 전문", "2026-04-24", [
+    { nickname: "최유나", status: "ACCEPTED" },
+  ]),
+  // 교통사고 20260403-208 — 종결(채택 1 + 미채택 3)
+  ...makeExtraProposals("f6a3b4c5-7d8e-4f9a-8b1c-1d2e3f4a5b6c", 400, "교통사고 전문", "2026-04-05", [
+    { nickname: "정하윤", status: "ACCEPTED" },
+    { nickname: "김세인", status: "SENT" },
+    { nickname: "조민재", status: "SENT" },
+    { nickname: "홍시원", status: "SENT" },
+  ]),
+  // 실손 20260326-142 — 미채택 종료 2건
+  ...makeExtraProposals("a7b4c5d6-8e9f-4a0b-9c2d-2e3f4a5b6c7d", 500, "실손 전문", "2026-03-28", [
+    { nickname: "강도윤", status: "SENT" },
+    { nickname: "신아름", status: "SENT" },
+  ]),
+  // 받은 제안 전용(#78) 실손 · 도수치료 한도 — 종결(채택 1 + 1)
+  ...makeExtraProposals("a1000000-0000-4000-8000-000000000002", 600, "실손 전문", "2026-04-20", [
+    { nickname: "박준호", status: "ACCEPTED" },
+    { nickname: "오민석", status: "SENT" },
+  ]),
+  // 받은 제안 전용(#78) 질병 · 암진단비 — 1건
+  ...makeExtraProposals("a1000000-0000-4000-8000-000000000003", 700, "질병 전문", "2026-03-05", [
+    { nickname: "정다은", status: "SENT" },
+  ]),
+];
+
 // 본인 손해사정사 프로필 — PATCH가 머지로 갱신하는 모듈 스코프 가변 객체
 // (프로필 편집 화면 + 대시보드 헤더·인사말 공용 — 집계 필드 포함 superset, 각 소비자 스키마가 잔여 필드 strip)
 const ADJUSTER_PROFILE: Record<string, unknown> = {
@@ -2304,44 +2431,46 @@ export const handlers = [
     });
   }),
 
-  // 받은 제안 목록 조회 (이슈 #18/#48) — 채팅방(chatRooms)을 원천으로 동기화.
+  // 받은 제안 목록 조회 (이슈 #18/#48) — 리포트 ①은 채팅방(chatRooms)을 원천으로 동기화.
   //   같은 proposalId·status를 노출해 채팅↔proposals 정합 유지.
+  //   그 외 리포트는 proposal_count와 맞춘 고정 제안 목(EXTRA_PROPOSALS)에서 반환 (이슈 #153).
   //   REJECTED 제안은 목록에서 제외(받은제안 카드 UX: 거절 시 제거. ⚠️ 노출 정책 백엔드 확인 중 — TEMP §5-3).
   http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async ({ params }) => {
     await delay(500);
 
     const reportId = typeof params.reportId === "string" ? params.reportId : "";
-    const list = chatRooms
-      .filter((room) => room.reportId === reportId && room.matchStatus !== "REJECTED")
-      .map((room) => {
-        const meta = CHAT_PROPOSAL_META[room.proposalId];
-        return {
-          proposalId: room.proposalId,
-          adjusterId: room.adjusterId,
-          nickname: room.adjusterName.replace(/\s*손해사정사$/, ""),
-          status: room.matchStatus,
-          rating: meta?.rating ?? 4.5,
-          proposalSummary: meta?.proposalSummary ?? "리포트를 검토해 보고 싶습니다.",
-          submittedAt: meta?.submittedAt ?? room.updatedAt,
-          speciality: meta?.speciality,
-          career: meta?.career,
-          isNew: meta?.isNew,
-          isVerified: meta?.isVerified,
-          estimateMinAmount: meta?.estimateMinAmount ?? null,
-          estimateMaxAmount: meta?.estimateMaxAmount ?? null,
-          feeBasis: meta?.feeBasis,
-        };
-      });
+    const list =
+      reportId === DASHBOARD_PROPOSABLE_REPORT_ID
+        ? chatRooms
+            .filter((room) => room.reportId === reportId && room.matchStatus !== "REJECTED")
+            .map((room) => {
+              const meta = CHAT_PROPOSAL_META[room.proposalId];
+              return {
+                proposalId: room.proposalId,
+                adjusterId: room.adjusterId,
+                nickname: room.adjusterName.replace(/\s*손해사정사$/, ""),
+                status: room.matchStatus,
+                rating: meta?.rating ?? 4.5,
+                proposalSummary: meta?.proposalSummary ?? "리포트를 검토해 보고 싶습니다.",
+                submittedAt: meta?.submittedAt ?? room.updatedAt,
+                speciality: meta?.speciality,
+                career: meta?.career,
+                isNew: meta?.isNew,
+                isVerified: meta?.isVerified,
+                estimateMinAmount: meta?.estimateMinAmount ?? null,
+                estimateMaxAmount: meta?.estimateMaxAmount ?? null,
+                feeBasis: meta?.feeBasis,
+              };
+            })
+        : EXTRA_PROPOSALS.filter(
+            (proposal) => proposal.reportId === reportId && proposal.status !== "REJECTED",
+          ).map(({ reportId: _reportId, ...proposal }) => proposal);
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
-        target: {
-          accidentType: "교통사고 · 후유장해",
-          reportNo: "20260520-017",
-          receivedAt: "2026.05.20",
-        },
+        target: PROPOSAL_TARGETS[reportId],
         list,
         pagination: {
           page: 1,
@@ -2384,10 +2513,59 @@ export const handlers = [
 
       const target = chatRooms.find((room) => room.proposalId === proposalId);
       if (!target) {
-        return HttpResponse.json(
-          { status: "404", code: "POST_NOT_FOUND", message: "제안을 찾을 수 없습니다." },
-          { status: 404 },
-        );
+        // 고정 제안 목(EXTRA_PROPOSALS)도 같은 전이 규칙 적용 (이슈 #153) — 채팅방 캐스케이드만 없음.
+        const extra = EXTRA_PROPOSALS.find((proposal) => proposal.proposalId === proposalId);
+        if (!extra) {
+          return HttpResponse.json(
+            { status: "404", code: "POST_NOT_FOUND", message: "제안을 찾을 수 없습니다." },
+            { status: 404 },
+          );
+        }
+        if (extra.status === "ACCEPTED" || extra.status === "REJECTED") {
+          return HttpResponse.json(
+            {
+              status: "409",
+              code: "UNSUPPORTED_OPERATION",
+              message: "이미 처리된 제안입니다.",
+            },
+            { status: 409 },
+          );
+        }
+        if (status === "ACCEPTED") {
+          extra.status = "ACCEPTED";
+          EXTRA_PROPOSALS.filter(
+            (proposal) =>
+              proposal.reportId === extra.reportId && proposal.proposalId !== proposalId,
+          ).forEach((proposal) => {
+            proposal.status = "REJECTED";
+          });
+
+          return HttpResponse.json({
+            status: "200",
+            message: "매칭이 완료되었습니다.",
+            data: camelToSnakeDeep({
+              reportId,
+              proposalId,
+              adjusterId: extra.adjusterId,
+              reportStatus: "CLOSED",
+              reviewStatus: "ACCEPTED",
+            }),
+          });
+        }
+
+        extra.status = "REJECTED";
+
+        return HttpResponse.json({
+          status: "200",
+          message: "제안을 거절했습니다.",
+          data: camelToSnakeDeep({
+            reportId,
+            proposalId,
+            adjusterId: extra.adjusterId,
+            reportStatus: "AWAITING_ADOPTION",
+            reviewStatus: "REJECTED",
+          }),
+        });
       }
       if (target.matchStatus === "ACCEPTED" || target.matchStatus === "REJECTED") {
         // CONTRACT: 명세없음-임시 — 상태전이 위반 전용 code 부재, 근접 enum UNSUPPORTED_OPERATION 사용.
