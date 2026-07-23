@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import type { ChatRoom } from "@/shared/api/chat/chat.schema";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import type { MatchGroup } from "@/shared/api/chat/match-status";
 import { toMatchGroup } from "@/shared/api/chat/match-status";
 import { cn } from "@/shared/lib/utils";
@@ -88,7 +89,7 @@ export function ChatRoomListPanel({
   const comparingRooms = useMemo(
     () =>
       filteredRooms.filter(
-        (room) => toMatchGroup(room.reviewStatus, room.status) === "comparing",
+        (room) => toMatchGroup(room.matchStatus, room.roomStatus) === "comparing",
       ),
     [filteredRooms],
   );
@@ -125,14 +126,14 @@ export function ChatRoomListPanel({
           {comparingRooms[0] && (
             // Figma 1011:9251 — 모바일 목록 상단 비교 배너(데스크톱 목록엔 없음)
             <ChatListComparisonBanner
-              reportTypeLabel={comparingRooms[0].reportTypeLabel}
+              reportTypeLabel={accidentTypeLabel(comparingRooms[0].reportTypeLabel)}
               comparingCount={comparingRooms.length}
               className="md:hidden"
             />
           )}
           {MATCH_GROUP_SECTIONS.map((section) => {
             const sectionRooms = filteredRooms.filter(
-              (room) => toMatchGroup(room.reviewStatus, room.status) === section.key,
+              (room) => toMatchGroup(room.matchStatus, room.roomStatus) === section.key,
             );
             if (sectionRooms.length === 0) return null;
 
@@ -183,10 +184,10 @@ export function ChatRoomListPanel({
                           caseNo={room.caseNo}
                           lastMessage={room.lastMessage}
                           lastMessageAt={room.lastMessageAt}
-                          avatarUrl={room.avatarUrl}
-                          roomStatus={room.status}
-                          matchStatus={room.reviewStatus ?? undefined}
-                          reportTypeLabel={room.reportTypeLabel}
+                          avatarUrl={room.counterpart.avatarUrl}
+                          roomStatus={room.roomStatus}
+                          matchStatus={room.matchStatus ?? undefined}
+                          reportTypeLabel={accidentTypeLabel(room.reportTypeLabel)}
                           href={buildHref(room.chatRoomId)}
                           active={room.chatRoomId === activeChatRoomId}
                         />
@@ -209,8 +210,8 @@ export function ChatRoomListPanel({
                   caseNo={room.caseNo}
                   lastMessage={room.lastMessage}
                   lastMessageAt={room.lastMessageAt}
-                  avatarUrl={room.avatarUrl}
-                  roomStatus={room.status}
+                  avatarUrl={room.counterpart.avatarUrl}
+                  roomStatus={room.roomStatus}
                   href={buildHref(room.chatRoomId)}
                   active={room.chatRoomId === activeChatRoomId}
                 />

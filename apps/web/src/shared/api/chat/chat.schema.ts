@@ -1,12 +1,13 @@
 import { z } from "zod";
+import { accidentTypeSchema } from "@/shared/model/accident-type";
 
 // 채팅 도메인 계약(봉투 내부 data만 — fetch-json이 봉투 해제·snake→camel 변환).
 // mine/theirs 판별은 서버 isMine(GET/POST messages)로 정합 — senderId 문자열 비교 제거.
 
 export const roomStatusSchema = z.enum(["ACTIVE", "CLOSED"]);
 
-// review_status — 파이프라인(사정사 검수) 방만. 사정사 검색으로 만든 방은 null.
-export const reviewStatusSchema = z.enum([
+// match_status — 파이프라인(사정사 검수) 방만. 사정사 검색으로 만든 방은 null.
+export const matchStatusSchema = z.enum([
   "SENT",
   "COUNSELING",
   "ACCEPTED",
@@ -16,24 +17,21 @@ export const reviewStatusSchema = z.enum([
 export const chatCounterpartSchema = z.object({
   userId: z.uuid(),
   name: z.string(),
+  avatarUrl: z.string().nullable().default(null), // 부재 시 null(이니셜 아바타 폴백)
 });
 
 export const chatRoomSchema = z.object({
   chatRoomId: z.uuid(),
   reportId: z.uuid().nullable(), // 사정사 검색 방은 null(공유 리포트 버튼 숨김)
-  reportReviewId: z.uuid().nullable(), // report_reviews.id — accept/reject 대상(검색 방은 null)
-  status: roomStatusSchema,
-  reviewStatus: reviewStatusSchema.nullable(),
+  proposalId: z.uuid().nullable(), // 제안 id — accept/reject 대상(검색 방은 null)
+  roomStatus: roomStatusSchema,
+  matchStatus: matchStatusSchema.nullable(),
   counterpart: chatCounterpartSchema,
   lastMessage: z.string().nullable(),
   lastMessageAt: z.string(),
   unreadCount: z.number().int(),
-
-  // CONTRACT: 명세 확장 — GET /chats 확정 필드 아님(MSW 선반영). 표시용 사건번호·유형·아바타.
-  //   공유리포트(GET /chats/{id}/shared-report)로 이관 여부 백엔드 확인 필요.
-  caseNo: z.string(),
-  reportTypeLabel: z.string(),
-  avatarUrl: z.string().nullable(),
+  caseNo: z.string().nullable(), // 사정사 검색 방은 리포트 없음
+  reportTypeLabel: accidentTypeSchema, // accidentType 슬러그 — 표시는 accidentTypeLabel()로 변환
 });
 
 export const chatListSchema = z.object({
@@ -124,7 +122,7 @@ export const readChatResponseSchema = z.object({
 });
 
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
-export type ReviewStatus = z.infer<typeof reviewStatusSchema>;
+export type MatchStatus = z.infer<typeof matchStatusSchema>;
 export type ChatCounterpart = z.infer<typeof chatCounterpartSchema>;
 export type ChatRoom = z.infer<typeof chatRoomSchema>;
 export type ChatList = z.infer<typeof chatListSchema>;

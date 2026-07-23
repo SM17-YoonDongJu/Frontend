@@ -69,6 +69,7 @@ export const reviewKeys = createQueryKeys("review", {
 
 export const chatKeys = createQueryKeys("chat", {
   list: null,
+  detail: (chatRoomId: string) => [chatRoomId],
   messages: (chatRoomId: string) => [chatRoomId],
 });
 

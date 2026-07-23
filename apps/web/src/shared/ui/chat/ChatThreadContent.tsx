@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useChatList } from "@/shared/api/chat/use-chat-list";
 import { useChatMessages } from "@/shared/api/chat/use-chat-messages";
+import { useChatRoom } from "@/shared/api/chat/use-chat-room";
 import { useReadChat } from "@/shared/api/chat/use-read-chat";
 import { useRejectChat } from "@/shared/api/chat/use-reject-chat";
 import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
@@ -27,7 +27,7 @@ export function ChatThreadContent({
   reportBasePath,
 }: ChatThreadContentProps) {
   const router = useRouter();
-  const { data: rooms } = useChatList();
+  const { data: room } = useChatRoom(chatRoomId);
   const { messages, hasOlder, loadOlder, loadingOlder } = useChatMessages(chatRoomId);
   const sendMessage = useSendChatMessage(chatRoomId);
   const sendAttachment = useSendChatAttachment(chatRoomId);
@@ -39,27 +39,24 @@ export function ChatThreadContent({
     markRead();
   }, [markRead, chatRoomId]);
 
-  const room = rooms.find((item) => item.chatRoomId === chatRoomId);
-  const closed = room?.status === "CLOSED";
+  const closed = room.roomStatus === "CLOSED";
 
   return (
     <div className="flex h-full flex-col">
-      {room && (
-        <ChatThreadHeader
-          name={room.counterpart.name}
-          caseNo={room.caseNo}
-          roomStatus={room.status}
-          reportHref={room.reportId ? `${reportBasePath}/${room.reportId}` : "#"}
-          onBack={() => router.push(chatBasePath)}
-          onClose={() =>
-            endChat.mutate(undefined, {
-              onError: () =>
-                toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요."),
-            })
-          }
-          closePending={endChat.isPending}
-        />
-      )}
+      <ChatThreadHeader
+        name={room.counterpart.name}
+        caseNo={room.caseNo}
+        roomStatus={room.roomStatus}
+        reportHref={room.reportId ? `${reportBasePath}/${room.reportId}` : "#"}
+        onBack={() => router.push(chatBasePath)}
+        onClose={() =>
+          endChat.mutate(undefined, {
+            onError: () =>
+              toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요."),
+          })
+        }
+        closePending={endChat.isPending}
+      />
 
       <ChatThreadView
         messages={messages}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { ReviewStatus, RoomStatus } from "@/shared/api/chat/chat.schema";
+import type { MatchStatus, RoomStatus } from "@/shared/api/chat/chat.schema";
 import { toMatchGroup } from "@/shared/api/chat/match-status";
 import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/ui/Avatar";
@@ -9,7 +9,8 @@ import { ROOM_STATUS_META } from "./room-status";
 
 export interface ChatRoomListItemProps {
   name: string;
-  caseNo: string;
+  /** 사건번호 — 사정사 검색 방(리포트 없음)은 null */
+  caseNo: string | null;
   lastMessage: string | null;
   lastMessageAt: string;
   avatarUrl: string | null;
@@ -17,8 +18,8 @@ export interface ChatRoomListItemProps {
   href: string;
   /** 분할 뷰 활성 행 하이라이트 */
   active?: boolean;
-  /** 검수 상태(customer 그룹 목록). 미전달(partner)이면 roomStatus 기반 렌더 유지 */
-  matchStatus?: ReviewStatus;
+  /** 매칭 상태(customer 그룹 목록). 미전달(partner)이면 roomStatus 기반 렌더 유지 */
+  matchStatus?: MatchStatus;
   /** 사건 유형 라벨(예 "후유장해"). customer 그룹 목록에서 이름 옆 "· {label}" 표시. 미전달(partner)이면 미표시 */
   reportTypeLabel?: string;
 }
@@ -93,7 +94,7 @@ export function ChatRoomListItem({
         <p className="mt-0.5 truncate text-[0.75rem] text-ink-3">
           {lastMessage ?? EMPTY_MESSAGE}
         </p>
-        <span className="sr-only">사건번호 {caseNo}</span>
+        {caseNo && <span className="sr-only">사건번호 {caseNo}</span>}
       </div>
     </Link>
   );
