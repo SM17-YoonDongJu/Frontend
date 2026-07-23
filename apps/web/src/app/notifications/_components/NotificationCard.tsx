@@ -5,19 +5,18 @@ import { NotificationTypeIcon } from "@/shared/ui/NotificationTypeIcon";
 interface NotificationCardProps {
   notification: Notification;
   now?: Date;
+  onRead?: (notificationId: string) => void;
 }
 
-export function NotificationCard({ notification, now }: NotificationCardProps) {
-  const { type, title, body, isRead, createdAt } = notification;
+export function NotificationCard({ notification, now, onRead }: NotificationCardProps) {
+  const { id, type, title, body, isRead, createdAt } = notification;
 
   const surfaceClassName = isRead
     ? "bg-paper-2 border-line-2"
     : "bg-card border-line";
 
-  return (
-    <article
-      className={`relative flex items-start gap-3 rounded-input border px-[0.9375rem] py-3.5 ${surfaceClassName}`}
-    >
+  const content = (
+    <>
       <NotificationTypeIcon type={type} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -38,6 +37,27 @@ export function NotificationCard({ notification, now }: NotificationCardProps) {
           aria-label="읽지 않은 알림"
         />
       )}
-    </article>
+    </>
+  );
+
+  if (isRead || !onRead) {
+    return (
+      <article
+        className={`relative flex items-start gap-3 rounded-input border px-[0.9375rem] py-3.5 ${surfaceClassName}`}
+      >
+        {content}
+      </article>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={() => onRead(id)}
+      aria-label={`${title} 알림 읽음 처리`}
+      className={`relative flex w-full items-start gap-3 rounded-input border px-[0.9375rem] py-3.5 text-left ${surfaceClassName}`}
+    >
+      {content}
+    </button>
   );
 }
