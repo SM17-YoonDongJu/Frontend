@@ -1,11 +1,17 @@
 "use client";
 
-/** 로그아웃 — auth 미구현으로 UI만 제공(후속 이슈에서 POST /auth/logout 연결). */
+import { useLogout } from "@/shared/api/use-logout";
+
+/** 로그아웃 — 세션 종료 후 로그인 화면으로 이동(#155). */
 export function LogoutButton() {
+  const { mutate: logout, isPending } = useLogout();
+
   return (
     <button
       type="button"
-      className="mx-auto block px-4 py-2 text-[0.875rem] text-ink-3 transition hover:text-ink-2 md:hidden"
+      onClick={() => logout()}
+      disabled={isPending}
+      className="mx-auto block px-4 py-2 text-[0.875rem] text-ink-3 transition hover:text-ink-2 disabled:opacity-50 md:hidden"
     >
       로그아웃
     </button>

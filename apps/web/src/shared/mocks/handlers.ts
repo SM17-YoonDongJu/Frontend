@@ -1,7 +1,12 @@
 ﻿import { delay, http, HttpResponse } from "msw";
 import { camelToSnakeDeep, toSnakeKey } from "@/shared/api/case-convert";
 import { API_BASE_URL } from "@/shared/api/config";
-import { consumeReissue, isAccessTokenExpired } from "@/shared/mocks/auth-token-state";
+import {
+  consumeReissue,
+  isAccessTokenExpired,
+  isLoggedOut,
+  setLoggedOut,
+} from "@/shared/mocks/auth-token-state";
 
 // 로드 시점 기준 상대 마감일(로컬 달력 날짜) — 대시보드 "오늘 마감/N일 남음" 검증용
 function addDays(base: Date, days: number): string {
@@ -1709,6 +1714,13 @@ export const handlers = [
   http.get(`${API_BASE_URL}/adjusters/me/mypage`, async ({ request }) => {
     await delay(500);
 
+    if (isLoggedOut()) {
+      return HttpResponse.json(
+        { status: "401", code: "LOGIN_REQUIRED", message: "로그인이 필요합니다." },
+        { status: 401 },
+      );
+    }
+
     if (request.headers.get("x-mock-failure") === "mypage") {
       return HttpResponse.json(
         { status: "500", code: "INTERNAL_SERVER_ERROR", message: "마이페이지를 불러오지 못했습니다." },
@@ -1895,12 +1907,33 @@ export const handlers = [
     );
   }),
 
+  // 로그아웃 (#155) — refresh_token HttpOnly 쿠키 무효화. 바디 없음, data는 null.
+  // 성공 시 로그아웃 상태를 기록해 이후 보호 엔드포인트가 401 LOGIN_REQUIRED를 돌려준다.
+  // E2E 실패 주입: x-mock-failure=logout → 500(서버 실패에도 클라이언트 정리·이동 검증용, 세션은 유지).
+  http.post(`${API_BASE_URL}/auth/logout`, async ({ request }) => {
+    await delay(200);
+
+    if (request.headers.get("x-mock-failure") === "logout") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "로그아웃을 처리하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    setLoggedOut();
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: null,
+    });
+  }),
+
   // 본인 정보 조회 (고객 대시보드 인사말)
   // E2E 역할 게이팅 검증용: localStorage["mock:userType"]="adjuster"면 사정사로 응답(기본 insured_person).
   http.get(`${API_BASE_URL}/users/me`, async ({ request }) => {
     await delay(300);
     // 비로그인 시나리오 주입 — E2E 랜딩(온보딩) 검증용. 기본은 로그인 유저(변경 없음).
-    if (request.headers.get("x-mock-scenario") === "unauthenticated") {
+    if (request.headers.get("x-mock-scenario") === "unauthenticated" || isLoggedOut()) {
       return HttpResponse.json(
         { status: "401", code: "LOGIN_REQUIRED", message: "로그인이 필요합니다." },
         { status: 401 },
@@ -1970,7 +2003,7 @@ export const handlers = [
   http.get(`${API_BASE_URL}/users/me/dashboard`, async ({ request }) => {
     await delay(400);
 
-    if (request.headers.get("x-mock-scenario") === "unauthenticated") {
+    if (request.headers.get("x-mock-scenario") === "unauthenticated" || isLoggedOut()) {
       return HttpResponse.json(
         { status: "401", code: "LOGIN_REQUIRED", message: "로그인이 필요합니다." },
         { status: 401 },
