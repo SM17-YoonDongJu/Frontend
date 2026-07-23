@@ -7,7 +7,7 @@ import { RegionSelect } from "@/shared/ui/RegionSelect/RegionSelect";
 import { Textarea } from "@/shared/ui/Textarea";
 import type { AffiliationType, Speciality } from "../_model/adjuster-application.schema";
 import type { VerificationForm } from "../_hooks/use-verification-form";
-import { ChoiceChips, type ChoiceOption } from "./ChoiceChips";
+import { ChoiceChips, type ChoiceOption } from "../../_shared/ui/ChoiceChips";
 import { SpecialtyChips } from "./SpecialtyChips";
 
 const SPECIALITY_OPTIONS: ChoiceOption<Speciality>[] = [

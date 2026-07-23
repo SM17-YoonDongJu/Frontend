@@ -15,7 +15,7 @@ interface ChoiceChipsProps<T extends string> {
 }
 
 /**
- * 단일 선택 칩 버튼(자격 구분·소속). Figma 131-10583 실측:
+ * 단일 선택 칩 버튼(자격 구분·소속·성별). Figma 131-10583 실측:
  * 선택=네이비 채움+흰 텍스트, 미선택=흰 배경+보더.
  */
 export function ChoiceChips<T extends string>({
