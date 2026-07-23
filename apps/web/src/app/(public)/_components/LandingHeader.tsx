@@ -5,9 +5,7 @@ import { Scale } from "@/shared/ui/icons/Scale";
 
 const NAV_ITEMS = [
   { label: "서비스 소개", href: "/about" },
-  { label: "이용 방법", href: "/guide" },
-  { label: "손해사정사", href: "#" },
-  { label: "요금", href: "#" }
+  { label: "이용 방법", href: "/guide" }
 ] as const;
 
 /**
