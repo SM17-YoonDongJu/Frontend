@@ -4,9 +4,16 @@ function isBrowser(): boolean {
   return typeof window !== "undefined";
 }
 
-/** 내부 경로만 허용 — 절대 URL·프로토콜 상대(`//`) 값은 open redirect라 버린다. */
+/** 내부 경로만 허용 — 절대 URL·프로토콜 상대(`//`·`/\`) 값은 open redirect라 버린다. */
 function isSafeInternalPath(path: string): boolean {
-  return path.startsWith("/") && !path.startsWith("//");
+  if (!path.startsWith("/") || path.startsWith("//") || path.startsWith("/\\")) {
+    return false;
+  }
+  try {
+    return new URL(path, window.location.origin).origin === window.location.origin;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -18,6 +25,13 @@ export function saveReturnPath(path: string): void {
   if (!isBrowser() || !isSafeInternalPath(path)) return;
   try {
     window.sessionStorage.setItem(RETURN_PATH_KEY, path);
+  } catch {}
+}
+
+export function clearReturnPath(): void {
+  if (!isBrowser()) return;
+  try {
+    window.sessionStorage.removeItem(RETURN_PATH_KEY);
   } catch {}
 }
 

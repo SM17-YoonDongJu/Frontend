@@ -101,6 +101,17 @@ export async function fetchJson<T>(
       throw error;
     }
 
-    return await requestJson(url, schema, requestInit);
+    try {
+      return await requestJson(url, schema, requestInit);
+    } catch (retryError) {
+      if (
+        !skipAuthRedirect &&
+        (isAuthRedirectError(retryError) ||
+          getErrorCode(retryError) === ERROR_CODES.EXPIRED_TOKEN)
+      ) {
+        redirectToLoginRequired();
+      }
+      throw retryError;
+    }
   }
 }
