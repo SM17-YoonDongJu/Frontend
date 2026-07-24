@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Chat } from "@/shared/ui/icons/Chat";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { NotificationBellMenu } from "@/shared/ui/NotificationBellMenu";
 import { useProfile } from "../_api/use-profile";
@@ -65,6 +66,13 @@ export function PartnerHeader() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            href="/partner/chat"
+            aria-label="채팅"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-ink-2 transition hover:bg-paper hover:text-ink"
+          >
+            <Chat />
+          </Link>
           <NotificationBellMenu settingsHref="/partner/mypage?panel=notifications" />
           <Link href="/partner/mypage" className="flex items-center gap-2">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-lg text-gold">
