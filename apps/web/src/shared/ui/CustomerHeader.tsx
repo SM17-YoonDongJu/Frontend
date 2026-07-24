@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Chat } from "@/shared/ui/icons/Chat";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { User } from "@/shared/ui/icons/User";
 import { NotificationBellMenu } from "@/shared/ui/NotificationBellMenu";
@@ -38,6 +39,13 @@ export function CustomerHeader() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Link
+            href="/customer/chat"
+            aria-label="채팅"
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-ink-2 transition hover:bg-paper hover:text-ink"
+          >
+            <Chat />
+          </Link>
           <NotificationBellMenu settingsHref="/customer/mypage?panel=notifications" />
           <Link
             href="/customer/mypage"
