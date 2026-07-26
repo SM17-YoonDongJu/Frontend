@@ -8,8 +8,10 @@ import {
 } from "@insurance/bridge/web";
 import { useAuthStatus } from "@/shared/api/use-auth-status";
 import { useRegisterDeviceToken } from "@/shared/api/use-register-device-token";
-
-const REGISTERED_TOKEN_STORAGE_KEY = "bb.registeredDeviceToken";
+import {
+  loadRegisteredDeviceToken,
+  saveRegisteredDeviceToken,
+} from "./device-token-storage";
 
 export function useDeviceTokenRegistration() {
   const auth = useAuthStatus();
@@ -23,22 +25,21 @@ export function useDeviceTokenRegistration() {
       return;
     }
 
-    // 계정 전환 시에도 새 계정으로 등록되도록 요청 상태·저장 키를 사용자 단위로 분리.
-    const storageKey = `${REGISTERED_TOKEN_STORAGE_KEY}.${userId}`;
-
     const unsubscribe = subscribeToNative((message) => {
       if (message.type !== "PUSH_TOKEN") {
         return;
       }
       const { token, platform } = message.payload;
-      if (localStorage.getItem(storageKey) === token) {
+      // 계정 전환 시에도 새 계정으로 등록되도록 사용자+토큰 쌍으로 중복 판정.
+      const registered = loadRegisteredDeviceToken();
+      if (registered?.userId === userId && registered.token === token) {
         return;
       }
       registerDeviceToken(
         { token, platform: platform === "ios" ? "IOS" : "ANDROID" },
         {
           onSuccess: () => {
-            localStorage.setItem(storageKey, token);
+            saveRegisteredDeviceToken({ userId, token });
           },
         },
       );
