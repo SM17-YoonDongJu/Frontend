@@ -32,14 +32,15 @@ export async function getPushToken(): Promise<PushTokenResult | null> {
   if (Platform.OS !== 'ios' && Platform.OS !== 'android') {
     return null;
   }
-  if (!(await ensurePermission())) {
-    return null;
-  }
+  // Android 13+는 알림 채널이 있어야 권한 프롬프트가 표시된다 — 권한 요청보다 먼저 생성
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
       name: '기본 알림',
       importance: Notifications.AndroidImportance.DEFAULT,
     });
+  }
+  if (!(await ensurePermission())) {
+    return null;
   }
   // EAS projectId는 앱 아이덴티티 이슈에서 설정 — 없으면 토큰 발급이 실패하므로 null 반환
   const projectId: string | undefined = Constants.expoConfig?.extra?.eas?.projectId;
