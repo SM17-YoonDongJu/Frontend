@@ -1,11 +1,16 @@
+import * as Linking from 'expo-linking';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
+import { getAllowedHosts } from './config/allowed-hosts';
 import { APP_USER_AGENT_SUFFIX } from './config/user-agent';
 import { getWebUrl } from './config/web-url';
+import { createLoadDecider } from './lib/create-should-start-load';
+
+const decideLoad = createLoadDecider(getAllowedHosts());
 
 export function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
@@ -31,6 +36,13 @@ export function WebViewScreen() {
         sharedCookiesEnabled
         thirdPartyCookiesEnabled
         allowsBackForwardNavigationGestures
+        onShouldStartLoadWithRequest={(request) => {
+          if (decideLoad(request) === 'open-external') {
+            Linking.openURL(request.url).catch(() => {});
+            return false;
+          }
+          return true;
+        }}
         style={styles.webview}
         onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
         startInLoadingState
