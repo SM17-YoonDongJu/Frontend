@@ -1,6 +1,6 @@
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { REPORT_TITLE } from "../_model/report-meta";
-import type { IssueStatus, ReportDetail } from "../_model/types";
+import type { ReportDetail } from "../_model/types";
 
 Font.register({
   family: "Gowun",
@@ -16,7 +16,7 @@ const LINE = "#e6e0d4";
 const NAVY = "#182740";
 const GOLD = "#8a6420";
 
-const ISSUE_LABEL: Record<IssueStatus, string> = {
+const ISSUE_LABEL: Record<string, string> = {
   CONFIRMED: "확정",
   TRUSTED: "신뢰",
   INFO: "안내",
@@ -72,7 +72,11 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
 
         <View style={s.navyCard}>
           <Text style={s.navyLabel}>검토 보장</Text>
-          <Text style={s.navyAmount}>{range(report.claimedMinAmount, report.claimedMaxAmount)}</Text>
+          <Text style={s.navyAmount}>
+            {report.claimedMinAmount != null && report.claimedMaxAmount != null
+              ? range(report.claimedMinAmount, report.claimedMaxAmount)
+              : "미산정"}
+          </Text>
           {report.offeredAmount != null && (
             <Text style={{ color: "#fff", fontSize: 10, marginTop: 8 }}>
               보험사 제안 금액: {won(report.offeredAmount)}
@@ -89,7 +93,7 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
                   <Text style={s.issueTitle}>
                     {i + 1}. {it.title}
                   </Text>
-                  <Text style={s.badge}>{ISSUE_LABEL[it.aiStatus]}</Text>
+                  <Text style={s.badge}>{ISSUE_LABEL[it.aiStatus] ?? "안내"}</Text>
                 </View>
                 <Text style={{ marginTop: 2 }}>{it.description}</Text>
                 {it.tags?.[0] && <Text style={s.tag}>{it.tags[0]}</Text>}
