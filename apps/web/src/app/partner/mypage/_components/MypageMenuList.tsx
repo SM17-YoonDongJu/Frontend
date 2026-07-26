@@ -42,6 +42,7 @@ export function MypageMenuList({
         description="검증 완료"
         onClick={onCredentialClick}
       />
+      <MenuRow icon={<User />} title="회원 탈퇴" href="/withdraw" />
     </nav>
   );
 }
