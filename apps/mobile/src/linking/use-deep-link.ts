@@ -9,12 +9,14 @@ export function useDeepLink(onNavigate: (webUrl: string) => void) {
   useEffect(() => {
     if (!handledInitialUrl.current) {
       handledInitialUrl.current = true;
-      Linking.getInitialURL().then((url) => {
-        const webUrl = url ? mapDeepLinkToWebUrl(url) : null;
-        if (webUrl) {
-          onNavigate(webUrl);
-        }
-      });
+      Linking.getInitialURL()
+        .then((url) => {
+          const webUrl = url ? mapDeepLinkToWebUrl(url) : null;
+          if (webUrl) {
+            onNavigate(webUrl);
+          }
+        })
+        .catch(() => {});
     }
 
     const subscription = Linking.addEventListener('url', ({ url }) => {
