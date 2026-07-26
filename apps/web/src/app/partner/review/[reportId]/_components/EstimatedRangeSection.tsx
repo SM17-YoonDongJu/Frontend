@@ -37,8 +37,8 @@ function ConfirmedAmountInput({ label, value, onValueChange }: ConfirmedAmountIn
 }
 
 export interface EstimatedRangeSectionProps {
-  aiMin: number;
-  aiMax: number;
+  aiMin: number | null;
+  aiMax: number | null;
   confirmedMin: number | null;
   confirmedMax: number | null;
   onChangeRange: (min: number | null, max: number | null) => void;
@@ -59,7 +59,11 @@ export function EstimatedRangeSection({
         <div className="rounded-card border border-line-2 bg-paper-2 p-4">
           <Label kicker>AI 추정</Label>
           <p className="mt-2">
-            <AmountRange min={aiMin} max={aiMax} size="lg" />
+            {aiMin != null && aiMax != null ? (
+              <AmountRange min={aiMin} max={aiMax} size="lg" />
+            ) : (
+              <span className="font-serif text-[1.25rem] font-bold text-ink">미산정</span>
+            )}
           </p>
         </div>
 
