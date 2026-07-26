@@ -51,7 +51,7 @@ export default function OauthCallbackPage() {
 
   // 앱 웹뷰에서 시작해 외부 브라우저로 우회된 로그인 복귀 — 여기서 code를 교환하면
   // 쿠키가 외부 브라우저에 남으므로, 교환 없이 앱 딥링크로 code를 넘긴다.
-  const [isExternalBrowserReturn] = useState(
+  const [isAppReturnInExternalBrowser] = useState(
     () =>
       typeof navigator !== "undefined" &&
       !!state?.startsWith("app.") &&
@@ -59,10 +59,12 @@ export default function OauthCallbackPage() {
   );
 
   const invalidEntry = !code || !!oauthError || !isSupportedProvider(provider);
+  // 거부·오류·미지원 provider 콜백은 외부 브라우저여도 /login으로 — 빈 화면 방지.
+  const isExternalBrowserReturn = isAppReturnInExternalBrowser && !invalidEntry;
 
   useEffect(() => {
-    if (invalidEntry && !isExternalBrowserReturn) router.replace("/login");
-  }, [invalidEntry, isExternalBrowserReturn, router]);
+    if (invalidEntry) router.replace("/login");
+  }, [invalidEntry, router]);
 
   useEffect(() => {
     if (!isExternalBrowserReturn || !code) return;
