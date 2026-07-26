@@ -7,6 +7,7 @@ import {
   isLoggedOut,
   setLoggedOut,
 } from "@/shared/mocks/auth-token-state";
+import { registerDeviceTokenBodySchema } from "@/shared/model/device-token.schema";
 
 // 로드 시점 기준 상대 마감일(로컬 달력 날짜) — 대시보드 "오늘 마감/N일 남음" 검증용
 function addDays(base: Date, days: number): string {
@@ -1880,9 +1881,10 @@ export const handlers = [
       );
     }
 
-    if (typeof body.token !== "string" || typeof body.platform !== "string") {
+    const parsedBody = registerDeviceTokenBodySchema.safeParse(body);
+    if (!parsedBody.success) {
       return HttpResponse.json(
-        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "token과 platform은 필수입니다." },
+        { status: "400", code: "VALIDATION_ERROR", message: "token·platform 값이 올바르지 않습니다." },
         { status: 400 },
       );
     }
@@ -1892,7 +1894,7 @@ export const handlers = [
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
         id: "3f9f3f70-6a4b-4e6b-9a56-6f1d6c2f7d01",
-        platform: body.platform,
+        platform: parsedBody.data.platform,
         createdAt: "2026-07-26T09:00:00Z",
       }),
     });
