@@ -4,6 +4,7 @@
     "slug": "mobile",
     "version": "1.0.0",
     "scheme": "bareun",
+    "plugins": ["expo-notifications"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
