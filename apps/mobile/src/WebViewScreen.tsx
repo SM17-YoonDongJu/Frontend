@@ -12,6 +12,7 @@ import { getWebUrl } from './config/web-url';
 import { createLoadDecider } from './lib/create-should-start-load';
 import { useDeepLink } from './linking/use-deep-link';
 import { getPushToken } from './push/push-token';
+import { useNotificationResponse } from './push/use-notification-response';
 
 const decideLoad = createLoadDecider(getAllowedHosts());
 
@@ -22,6 +23,7 @@ export function WebViewScreen() {
   const webReadyRef = useRef(false);
 
   useDeepLink(setSourceUri);
+  useNotificationResponse(setSourceUri);
 
   const handleWebMessage = (data: string) => {
     const message = parseWebMessage(data);
