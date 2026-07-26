@@ -28,6 +28,8 @@ export function WebViewScreen() {
         ref={webViewRef}
         source={{ uri: getWebUrl() }}
         applicationNameForUserAgent={APP_USER_AGENT_SUFFIX}
+        sharedCookiesEnabled
+        thirdPartyCookiesEnabled
         style={styles.webview}
         onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
         startInLoadingState
