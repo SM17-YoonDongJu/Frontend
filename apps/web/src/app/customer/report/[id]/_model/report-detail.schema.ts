@@ -10,12 +10,11 @@ export const reportStatusSchema = z.enum([
   "NOT_SELECTED",
 ]);
 
-export const issueStatusSchema = z.enum(["CONFIRMED", "TRUSTED", "INFO"]);
-
 export const issueItemSchema = z.object({
   title: z.string(),
   description: z.string(),
-  aiStatus: issueStatusSchema,
+  // 실제 스펙 type: string — 미확정 값 유입 시 파싱 실패 방지(표시는 소비처 fallback).
+  aiStatus: z.string(),
   tags: z.array(z.string()).nullish(),
   impactAmount: z.number().int().nullish(),
 });
@@ -25,8 +24,9 @@ export const reportDetailSchema = z.object({
   status: reportStatusSchema,
   accidentType: z.string(),
   treatment: z.string(),
-  claimedMinAmount: z.number().int(),
-  claimedMaxAmount: z.number().int(),
+  // 미산정 리포트는 null.
+  claimedMinAmount: z.number().int().nullable(),
+  claimedMaxAmount: z.number().int().nullable(),
   offeredAmount: z.number().int().nullable(),
   applicableGuarantees: z.array(z.string()),
   omittedSpecialContract: z.array(z.string()),

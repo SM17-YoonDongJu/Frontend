@@ -8,7 +8,6 @@ export { userRoleSchema };
 
 export const mypageProfileSchema = z.object({
   nickname: z.string(),
-  email: z.string(),
   avatarUrl: z.string().nullable(),
   headline: z.string(),
   specialties: z.array(z.string()),

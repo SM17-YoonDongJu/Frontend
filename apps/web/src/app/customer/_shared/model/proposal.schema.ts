@@ -5,14 +5,6 @@ import { z } from "zod";
  * 제안 식별자는 proposalId(report_reviews.id) — 매칭/거절 PATCH 대상.
  */
 
-// review status 원천(GET /reports/{id}/proposals): 발송(SENT) / 상담중(COUNSELING) / 거절(REJECTED) / 채택(ACCEPTED).
-export const proposalStatusSchema = z.enum([
-  "SENT",
-  "COUNSELING",
-  "REJECTED",
-  "ACCEPTED",
-]);
-
 // 명세 필수: proposalId·adjusterId·nickname·rating·proposalSummary·status·submittedAt.
 // 그 외(speciality·career·isNew·isVerified·estimate·feeBasis)는 디자인용 확장 → 백엔드 확정 전까지 optional.
 export const proposalSchema = z.object({
@@ -21,7 +13,8 @@ export const proposalSchema = z.object({
   nickname: z.string(),
   rating: z.number(),
   proposalSummary: z.string(),
-  status: proposalStatusSchema,
+  // 실제 스펙 type: string(SENT/COUNSELING/REJECTED/ACCEPTED) — 미확정 값 유입 대비 완화.
+  status: z.string(),
   submittedAt: z.string(),
   speciality: z.string().optional(),
   career: z.number().int().optional(),
@@ -53,7 +46,6 @@ export const proposalListSchema = z.object({
   pagination: paginationSchema,
 });
 
-export type ProposalStatus = z.infer<typeof proposalStatusSchema>;
 export type Proposal = z.infer<typeof proposalSchema>;
 export type ProposalTarget = z.infer<typeof proposalTargetSchema>;
 export type Pagination = z.infer<typeof paginationSchema>;

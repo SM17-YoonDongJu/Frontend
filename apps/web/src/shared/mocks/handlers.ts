@@ -653,7 +653,6 @@ const MOCK_INSURANCES: Array<Record<string, unknown>> = [
 const ADJUSTER_MYPAGE = {
   profile: {
     nickname: "김상정",
-    email: "kimsangjeong@example.com",
     avatarUrl: null,
     headline: "후유장해 전문 12년, 거절 사건을 다시 봅니다",
     specialties: ["후유장해", "교통사고"],
@@ -681,18 +680,20 @@ const ADJUSTER_MYPAGE = {
 
 // 손해사정사 자격 신청 상태(이슈 #44) — POST가 세우고 GET .../me가 읽는 모듈 스코프 상태.
 // 기본 null(미신청 → GET 404 POST_NOT_FOUND → NOT_APPLIED → 폼).
-type MockDocumentReview = {
-  type: "LICENSE" | "REGISTRATION" | "ID_CARD";
-  status: "PENDING" | "APPROVED" | "RESUBMIT_REQUIRED";
+type MockSubmittedDocument = {
+  s3Url: string;
+  name: string;
+  reportType: "LICENSE" | "REGISTRATION" | "ID_CARD";
+  fileType: string;
 };
 type MockAdjusterApplication = {
   applicationId: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   submittedAt: string;
   name: string;
-  speciality: string;
+  specialties: string[];
   licenseNo: string | null;
-  documents: MockDocumentReview[];
+  documents: MockSubmittedDocument[];
   rejectedAt: string | null;
   rejectReason: string | null;
 };
@@ -708,32 +709,20 @@ function buildAdjusterApplication(
     status,
     submittedAt: "2026-07-05T09:00:00Z",
     name: "김상정",
-    speciality: "종합",
+    specialties: ["후유장해", "교통사고"],
     licenseNo: "제2014-0087호",
     documents: [
-      { type: "LICENSE", status: "PENDING" },
-      { type: "REGISTRATION", status: "PENDING" },
-      { type: "ID_CARD", status: "PENDING" },
+      { s3Url: "https://mock.local/uploads/license.jpg", name: "손해사정사-자격증.jpg", reportType: "LICENSE", fileType: "image/jpeg" },
+      { s3Url: "https://mock.local/uploads/registration.jpg", name: "금감원-등록확인서.jpg", reportType: "REGISTRATION", fileType: "image/jpeg" },
+      { s3Url: "https://mock.local/uploads/id-card.jpg", name: "신분증.jpg", reportType: "ID_CARD", fileType: "image/jpeg" },
     ],
     rejectedAt: null,
     rejectReason: null,
   };
 
-  if (status === "APPROVED") {
-    return {
-      ...base,
-      documents: base.documents.map((d) => ({ ...d, status: "APPROVED" })),
-    };
-  }
-
   if (status === "REJECTED") {
     return {
       ...base,
-      documents: [
-        { type: "LICENSE", status: "APPROVED" },
-        { type: "REGISTRATION", status: "RESUBMIT_REQUIRED" },
-        { type: "ID_CARD", status: "APPROVED" },
-      ],
       rejectedAt: "2026-07-07T13:20:00Z",
       rejectReason:
         "등록확인서 이미지가 흐려 식별이 어렵습니다. 금감원 등록확인서를 다시 제출해 주세요.",
@@ -780,11 +769,12 @@ interface MockChatRoom {
   unreadCount: number;
 }
 
-// 메시지 첨부(GET/POST messages 응답 shape) — 조회용 url·원본명·MIME.
+// 메시지 첨부(BE Attachment shape) — 업로드 발급 key·원본명·MIME·크기.
 interface MockMessageAttachment {
-  url: string;
+  attachmentKey: string;
   name: string;
   contentType: string;
+  size: number;
 }
 
 interface MockChatMessage {
@@ -795,7 +785,7 @@ interface MockChatMessage {
   attachment?: MockMessageAttachment;
 }
 
-// 업로드된 첨부 임시 보관(key→메타) — 메시지 전송 시 attachment_key로 회수해 url 부여.
+// 업로드된 첨부 임시 보관(key→메타) — 메시지 전송 시 attachment_key로 메타 회수.
 const uploadedChatAttachments = new Map<string, MockMessageAttachment>();
 
 // 첨부 MIME으로 message_type 파생(서버 규칙: 이미지→IMAGE, 그 외 첨부→FILE, 없으면 TEXT).
@@ -1045,7 +1035,7 @@ export const handlers = [
 
     const body = (await request.json().catch(() => ({}))) as {
       name?: string;
-      specialities?: string[];
+      specialties?: string[];
       affiliation?: string;
       region?: string;
       registration_image_url?: string;
@@ -1055,8 +1045,8 @@ export const handlers = [
 
     if (
       !body.name ||
-      !body.specialities ||
-      body.specialities.length === 0 ||
+      !body.specialties ||
+      body.specialties.length === 0 ||
       !body.affiliation ||
       !body.region ||
       !body.registration_image_url
@@ -1087,13 +1077,14 @@ export const handlers = [
       status: "PENDING",
       submittedAt: new Date().toISOString(),
       name: body.name,
-      // GET .../me 응답은 speciality 단수(명세) — 요청 specialities 배열의 첫 값을 보관.
-      speciality: body.specialities[0] ?? "",
+      specialties: body.specialties,
       licenseNo: body.license_no ?? null,
+      // 실응답 documents는 업로드 파일 메타 — 요청의 업로드 url로 구성(자격증 사본은 선택).
       documents: [
-        { type: "LICENSE", status: "PENDING" },
-        { type: "REGISTRATION", status: "PENDING" },
-        { type: "ID_CARD", status: "PENDING" },
+        ...(body.license_image_url
+          ? [{ s3Url: body.license_image_url, name: "손해사정사-자격증.jpg", reportType: "LICENSE" as const, fileType: "image/jpeg" }]
+          : []),
+        { s3Url: body.registration_image_url, name: "금감원-등록확인서.jpg", reportType: "REGISTRATION" as const, fileType: "image/jpeg" },
       ],
       rejectedAt: null,
       rejectReason: null,
@@ -1267,37 +1258,38 @@ export const handlers = [
       );
     }
 
-    // fetch-json이 요청 body를 snake로 변환 → { content, attachment: { attachment_key, name, content_type } }
+    // fetch-json이 요청 body를 snake로 변환 → { content, attachments: [{ attachment_key, name, content_type, size }] }
     const body = (await request.json().catch(() => ({}))) as {
       content?: string;
-      attachment?: {
+      attachments?: {
         attachment_key?: string;
         name?: string;
         content_type?: string;
-      };
+        size?: number;
+      }[];
     };
     const content = typeof body.content === "string" ? body.content : "";
 
-    // 첨부는 업로드 응답 메타(key)를 전달받아 저장 url을 회수(없으면 key로 합성).
+    // 첨부는 업로드 응답 메타(key)를 배열로 전달받아 보관 메타를 회수(현 UI는 1건 전송).
     let attachment: MockMessageAttachment | undefined;
-    if (body.attachment?.attachment_key) {
-      const key = body.attachment.attachment_key;
+    const firstAttachment = body.attachments?.[0];
+    if (firstAttachment?.attachment_key) {
+      const key = firstAttachment.attachment_key;
       const stored = uploadedChatAttachments.get(key);
       attachment = {
-        url:
-          stored?.url ??
-          `https://mock.local/chat-uploads/${encodeURIComponent(key)}`,
-        name: body.attachment.name ?? stored?.name ?? "첨부 파일",
+        attachmentKey: key,
+        name: firstAttachment.name ?? stored?.name ?? "첨부 파일",
         contentType:
-          body.attachment.content_type ??
+          firstAttachment.content_type ??
           stored?.contentType ??
           "application/octet-stream",
+        size: firstAttachment.size ?? stored?.size ?? 0,
       };
     }
 
     if (!content && !attachment) {
       return HttpResponse.json(
-        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "content 또는 attachment 중 하나는 필수입니다." },
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "content 또는 attachments 중 하나는 필수입니다." },
         { status: 400 },
       );
     }
@@ -1369,13 +1361,14 @@ export const handlers = [
       request.headers.get("x-mock-file-type") ||
       "application/octet-stream";
 
-    // key 규칙: chat/{roomId}/{uuid}_{원본명}. 조회 url은 저장 후 GET/POST가 presigned로 내려준다.
+    // key 규칙: chat/{roomId}/{uuid}_{원본명}.
     const attachmentKey = `chat/${chatRoomId}/${crypto.randomUUID()}_${fileName}`;
     const size = file?.size ?? 1024;
     uploadedChatAttachments.set(attachmentKey, {
-      url: `https://mock.local/chat-uploads/${encodeURIComponent(attachmentKey)}`,
+      attachmentKey,
       name: fileName,
       contentType,
+      size,
     });
 
     return HttpResponse.json(

@@ -14,8 +14,8 @@ const CONFIDENCE_NOTE: Record<ConfidenceLevel, string> = {
 };
 
 export interface EstimatedPayoutProps {
-  claimedMinAmount: number;
-  claimedMaxAmount: number;
+  claimedMinAmount: number | null;
+  claimedMaxAmount: number | null;
   offeredAmount?: number | null;
   confidenceLevel?: ConfidenceLevel | null;
 }
@@ -27,7 +27,9 @@ export function EstimatedPayout({
   confidenceLevel,
 }: EstimatedPayoutProps) {
   const shortfallManwon =
-    offeredAmount != null ? Math.round((claimedMinAmount - offeredAmount) / WON_PER_MANWON) : 0;
+    offeredAmount != null && claimedMinAmount != null
+      ? Math.round((claimedMinAmount - offeredAmount) / WON_PER_MANWON)
+      : 0;
   const hasShortfall = shortfallManwon > 0;
 
   return (
@@ -53,21 +55,29 @@ export function EstimatedPayout({
       {/* 모바일: 대형 serif 금액 + 범위 바 + 축 라벨 + 차액 콜아웃 */}
       <div className="mt-4 lg:hidden">
         <p className="font-serif text-[2.0625rem] font-bold leading-tight">
-          {toManwon(claimedMinAmount)} – {toManwon(claimedMaxAmount)}
-          <span className="ml-1 text-[1.1875rem] font-semibold text-white/70">만원</span>
+          {claimedMinAmount != null && claimedMaxAmount != null ? (
+            <>
+              {toManwon(claimedMinAmount)} – {toManwon(claimedMaxAmount)}
+              <span className="ml-1 text-[1.1875rem] font-semibold text-white/70">만원</span>
+            </>
+          ) : (
+            "미산정"
+          )}
         </p>
 
-        <div className="mt-4">
-          <PayoutRangeBar
-            claimedMinAmount={claimedMinAmount}
-            claimedMaxAmount={claimedMaxAmount}
-            offeredAmount={offeredAmount}
-          />
-          <div className="mt-2 flex justify-between text-[0.7rem] text-white/45">
-            <span>{offeredAmount != null ? "제안받은 금액" : "최소 추정"}</span>
-            <span>최대 추정</span>
+        {claimedMinAmount != null && claimedMaxAmount != null && (
+          <div className="mt-4">
+            <PayoutRangeBar
+              claimedMinAmount={claimedMinAmount}
+              claimedMaxAmount={claimedMaxAmount}
+              offeredAmount={offeredAmount}
+            />
+            <div className="mt-2 flex justify-between text-[0.7rem] text-white/45">
+              <span>{offeredAmount != null ? "제안받은 금액" : "최소 추정"}</span>
+              <span>최대 추정</span>
+            </div>
           </div>
-        </div>
+        )}
 
         {hasShortfall && (
           <p className="mt-4 rounded-[0.6875rem] bg-white/[.07] px-[0.8125rem] py-[0.6875rem] text-[0.75rem] text-white/80">
@@ -80,7 +90,11 @@ export function EstimatedPayout({
 
       {/* 데스크톱: 기존 룩 유지 */}
       <div className="mt-6 hidden flex-wrap items-end justify-between gap-4 lg:flex">
-        <AmountRange min={claimedMinAmount} max={claimedMaxAmount} size="lg" className="text-white" />
+        {claimedMinAmount != null && claimedMaxAmount != null ? (
+          <AmountRange min={claimedMinAmount} max={claimedMaxAmount} size="lg" className="text-white" />
+        ) : (
+          <p className="font-serif text-[1.5rem] font-bold">미산정</p>
+        )}
         {confidenceLevel && (
           <p className="max-w-[15rem] rounded-card bg-white/10 px-4 py-3 text-[0.78rem] leading-relaxed text-white/80">
             {CONFIDENCE_NOTE[confidenceLevel]}

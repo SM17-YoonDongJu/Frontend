@@ -49,9 +49,10 @@ export const reviewAttachmentSchema = z.object({
   aiSummary: z.string().nullable(),
 });
 
+// 미산정 리포트는 min/max null.
 export const estimateRangeSchema = z.object({
-  min: z.number().int(),
-  max: z.number().int(),
+  min: z.number().int().nullable(),
+  max: z.number().int().nullable(),
 });
 
 export const reviewProgressSchema = z.object({
@@ -68,7 +69,8 @@ export const reviewDetailSchema = z.object({
   accidentType: z.string(),
   region: z.string(),
   status: reviewReportStatusSchema,
-  confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullable(),
+  // 실제 스펙 enum 아닌 순수 string.
+  confidenceLevel: z.string().nullable(),
   isMasked: z.boolean(),
   offeredAmount: z.number().int().nullable(),
   client: reviewClientSchema,

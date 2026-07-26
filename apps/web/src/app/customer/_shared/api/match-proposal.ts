@@ -23,6 +23,10 @@ export function matchProposal(
   return fetchJson(
     `${API_BASE_URL}/reports/${reportId}/proposals/${proposalId}`,
     matchProposalResultSchema,
-    { method: "PATCH", body: JSON.stringify({ status }) },
+    {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    },
   );
 }

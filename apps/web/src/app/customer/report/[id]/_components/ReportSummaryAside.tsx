@@ -4,8 +4,8 @@ import type { ReportStatus } from "../_model/types";
 
 export interface ReportSummaryAsideProps {
   status: ReportStatus;
-  claimedMinAmount: number;
-  claimedMaxAmount: number;
+  claimedMinAmount: number | null;
+  claimedMaxAmount: number | null;
   offeredAmount?: number | null;
 }
 
@@ -24,8 +24,12 @@ export function ReportSummaryAside({
       <dl className="mt-2 divide-y divide-line-2">
         <div className="flex items-center justify-between gap-2 py-3">
           <dt className="text-[0.8125rem] text-ink-3">이 사정서의 검토 범위</dt>
-          <dd>
-            <AmountRange min={claimedMinAmount} max={claimedMaxAmount} />
+          <dd className="text-[0.875rem] font-semibold text-ink">
+            {claimedMinAmount != null && claimedMaxAmount != null ? (
+              <AmountRange min={claimedMinAmount} max={claimedMaxAmount} />
+            ) : (
+              "미산정"
+            )}
           </dd>
         </div>
 

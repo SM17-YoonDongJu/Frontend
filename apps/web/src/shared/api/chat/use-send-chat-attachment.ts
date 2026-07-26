@@ -15,13 +15,7 @@ export function useSendChatAttachment(chatRoomId: string) {
   return useMutation({
     mutationFn: async (file: File) => {
       const uploaded = await uploadChatAttachment(chatRoomId, file);
-      return sendChatMessage(chatRoomId, {
-        attachment: {
-          attachmentKey: uploaded.attachmentKey,
-          name: uploaded.name,
-          contentType: uploaded.contentType,
-        },
-      });
+      return sendChatMessage(chatRoomId, { attachments: [uploaded] });
     },
     onSettled: () => {
       queryClient.invalidateQueries({

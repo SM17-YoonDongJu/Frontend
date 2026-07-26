@@ -4,15 +4,17 @@ import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
-import type { IssueItem, IssueStatus } from "../_model/types";
+import type { IssueItem } from "../_model/types";
 
 type Tone = NonNullable<StatusBadgeProps["tone"]>;
 
-const ISSUE_STATUS_META: Record<IssueStatus, { label: string; tone: Tone }> = {
+const ISSUE_STATUS_META: Record<string, { label: string; tone: Tone }> = {
   CONFIRMED: { label: "확정", tone: "green" },
   TRUSTED: { label: "신뢰", tone: "gold" },
   INFO: { label: "안내", tone: "neutral" },
 };
+
+const ISSUE_STATUS_FALLBACK = { label: "안내", tone: "neutral" as Tone };
 
 function issueTags(issue: IssueItem): string[] {
   return issue.tags ?? [];
@@ -36,7 +38,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
 
       <ol className="mt-4 space-y-4 lg:space-y-3">
         {issues.map((issue, i) => {
-          const meta = ISSUE_STATUS_META[issue.aiStatus];
+          const meta = ISSUE_STATUS_META[issue.aiStatus] ?? ISSUE_STATUS_FALLBACK;
           const tags = issueTags(issue);
           const isOpen = openIndex === i;
           const canToggle = tags.length > 0;
