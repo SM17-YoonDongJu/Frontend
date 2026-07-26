@@ -24,7 +24,7 @@ const INTRODUCTION_MAX = 200;
 
 interface ExpertiseFieldsProps {
   form: VerificationForm;
-  /** 전문분야 칩·한 줄 소개 노출 여부. 모바일 STEP2=true, 데스크톱 폼(131-10583 부재)=false. */
+  /** 한 줄 소개 노출 여부. 모바일 STEP2=true, 데스크톱 폼(131-10583 부재)=false. */
   showProfileExtras?: boolean;
 }
 
@@ -59,18 +59,20 @@ export function ExpertiseFields({ form, showProfileExtras = true }: ExpertiseFie
         )}
       </div>
 
-      {showProfileExtras && (
-        <div className="flex flex-col gap-2">
-          <Label>
-            전문 분야 <span className="font-normal text-ink-3">(중복 선택)</span>
-          </Label>
-          <SpecialtyChips
-            aria-label="전문 분야"
-            value={form.specialties}
-            onToggle={form.toggleSpecialty}
-          />
-        </div>
-      )}
+      {/* 전송 필드(BE specialties, 최소 1개)라 데스크톱 폼에도 항상 노출. */}
+      <div className="flex flex-col gap-2">
+        <Label>
+          전문 분야 <span className="font-normal text-ink-3">(중복 선택)</span>
+        </Label>
+        <SpecialtyChips
+          aria-label="전문 분야"
+          value={form.specialties}
+          onToggle={form.toggleSpecialty}
+        />
+        {form.errors.specialties && (
+          <span className="text-[0.75rem] font-medium text-terra">{form.errors.specialties}</span>
+        )}
+      </div>
 
       <div className="grid grid-cols-1 gap-[1.125rem] md:grid-cols-2">
         <div className="flex flex-col gap-2">

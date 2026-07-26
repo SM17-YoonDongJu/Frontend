@@ -26,6 +26,7 @@ export type VerificationFieldError =
   | "name"
   | "phone"
   | "speciality"
+  | "specialties"
   | "affiliation"
   | "region"
   | "license"
@@ -35,7 +36,7 @@ type ErrorMap = Partial<Record<VerificationFieldError, string>>;
 
 const STEP_FIELDS: Record<VerificationStep, VerificationFieldError[]> = {
   basic: ["name", "phone"],
-  expertise: ["speciality", "affiliation", "region"],
+  expertise: ["speciality", "specialties", "affiliation", "region"],
   documents: ["registration", "license"],
 };
 
@@ -162,11 +163,12 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
       Boolean(name.trim()) &&
       contactValid &&
       speciality !== null &&
+      specialties.length > 0 &&
       affiliation !== null &&
       Boolean(region.trim()) &&
       licenseSatisfied &&
       Boolean(registration.url),
-    [name, contactValid, speciality, affiliation, region, licenseSatisfied, registration.url],
+    [name, contactValid, speciality, specialties, affiliation, region, licenseSatisfied, registration.url],
   );
 
   const collectErrors = (step?: VerificationStep): ErrorMap => {
@@ -180,6 +182,7 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
     }
     if (wants("expertise")) {
       if (speciality === null) next.speciality = "자격 구분을 선택해 주세요.";
+      if (specialties.length === 0) next.specialties = "전문분야를 1개 이상 선택해 주세요.";
       if (affiliation === null) next.affiliation = "소속을 선택해 주세요.";
       if (!region.trim()) next.region = "활동 지역을 선택해 주세요.";
     }

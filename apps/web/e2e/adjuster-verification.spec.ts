@@ -47,6 +47,7 @@ async function fillBasic(page: Page) {
 
 async function fillExpertise(page: Page) {
   await page.getByRole("radio", { name: "종합손해사정사 (신체 포함)" }).click();
+  await page.getByRole("button", { name: "후유장해" }).click();
   await page.getByRole("radio", { name: "독립 (개업)" }).click();
   await selectRegions(page, [["서울특별시", "송파구"]]);
 }
@@ -82,6 +83,7 @@ test.describe("데스크톱 단일 폼", () => {
     // 데스크톱 폼은 이름·자격구분·소속·활동지역만 검증(연락처 미노출).
     await expect(page.getByText("이름을 입력해 주세요.")).toBeVisible();
     await expect(page.getByText("자격 구분을 선택해 주세요.")).toBeVisible();
+    await expect(page.getByText("전문분야를 1개 이상 선택해 주세요.")).toBeVisible();
     await expect(page.getByText("소속을 선택해 주세요.")).toBeVisible();
     await expect(page.getByText("활동 지역을 선택해 주세요.")).toBeVisible();
     // 제출은 차단(이동 없음).
