@@ -1,3 +1,4 @@
+import { parseWebMessage, serializeToWeb } from '@insurance/bridge/native';
 import * as Linking from 'expo-linking';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useRef, useState } from 'react';
@@ -10,6 +11,7 @@ import { APP_USER_AGENT_SUFFIX } from './config/user-agent';
 import { getWebUrl } from './config/web-url';
 import { createLoadDecider } from './lib/create-should-start-load';
 import { useDeepLink } from './linking/use-deep-link';
+import { getPushToken } from './push/push-token';
 
 const decideLoad = createLoadDecider(getAllowedHosts());
 
@@ -17,8 +19,30 @@ export function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
   const [canGoBack, setCanGoBack] = useState(false);
   const [sourceUri, setSourceUri] = useState(getWebUrl);
+  const webReadyRef = useRef(false);
 
   useDeepLink(setSourceUri);
+
+  const handleWebMessage = (data: string) => {
+    const message = parseWebMessage(data);
+    if (!message) {
+      return;
+    }
+    if (message.type === 'WEB_READY') {
+      webReadyRef.current = true;
+      return;
+    }
+    if (message.type === 'REQUEST_PUSH_TOKEN') {
+      getPushToken().then((result) => {
+        if (!result || !webReadyRef.current) {
+          return;
+        }
+        webViewRef.current?.injectJavaScript(
+          serializeToWeb({ v: 1, type: 'PUSH_TOKEN', payload: result }),
+        );
+      });
+    }
+  };
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -41,6 +65,7 @@ export function WebViewScreen() {
         thirdPartyCookiesEnabled
         allowsBackForwardNavigationGestures
         allowFileAccess
+        onMessage={(event) => handleWebMessage(event.nativeEvent.data)}
         onShouldStartLoadWithRequest={(request) => {
           if (decideLoad(request) === 'open-external') {
             Linking.openURL(request.url).catch(() => {});
