@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useReviewDetail } from "../_api/use-review-detail";
 import { useSubmitReview } from "../_api/use-submit-review";
 import { clearReviewDraft, useReviewDraft } from "../_hooks/use-review-draft";
-import { ConfirmDialog } from "./ConfirmDialog";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { AccidentNarrativeSection } from "./AccidentNarrativeSection";
 import { AttachmentSection } from "./AttachmentSection";
 import { ClaimInfoSection } from "./ClaimInfoSection";
