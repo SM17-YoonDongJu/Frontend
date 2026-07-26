@@ -10,6 +10,8 @@ import { hideQueryDevtools, selectRegion } from "./_region-helpers";
  * 응답은 기본 MSW 핸들러(POST /auth/register: 성공 201 + 토큰)가 제공.
  *   소셜 컨텍스트(socialToken/nickname/email)는 진입 쿼리로 주입(개발·E2E 경로) —
  *   컨텍스트 없이 직접 진입하면 /login으로 가드되므로 mock 폴백 없음.
+ * 로그인 가드(#185): 가입자는 비로그인이 정상 흐름 — 기본 MSW /users/me가 로그인 유저를
+ *   반환하므로 beforeEach에서 비로그인 시나리오 헤더를 주입한다(로그인 상태 진입 테스트만 예외).
  * DUPLICATE_RESOURCE는 nickname "중복닉네임" 진입 쿼리로 MSW 409 분기를 태워 검증(핸들러 override 대체).
  * 필드 형식·범위(닉네임 2~20자 등) 검증은 zod·MSW 계약에 위임(미테스트).
  */
@@ -50,6 +52,7 @@ async function fillIdentity(page: Page) {
 
 test.beforeEach(async ({ page }) => {
   await hideQueryDevtools(page);
+  await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
 });
 
 test("역할·약관 동의·본인 확인을 마치고 가입하면 완료 화면과 대시보드 이동 버튼이 보인다", async ({ page }) => {
@@ -65,6 +68,8 @@ test("역할·약관 동의·본인 확인을 마치고 가입하면 완료 화�
 
   const startButton = page.getByRole("button", { name: "보상 분석 시작" });
   await expect(startButton).toBeVisible();
+  // 가입 성공으로 로그인된 상태를 반영 — 이후 대시보드 진입이 가드에 막히지 않도록 헤더 해제.
+  await page.setExtraHTTPHeaders({});
   await expect(async () => {
     await startButton.click();
     await expect(page).toHaveURL(/\/customer\/dashboard/);
@@ -143,13 +148,18 @@ test("약관 동의 없이 본인 확인 단계로 직접 진입하면 첫 단�
 });
 
 test("소셜 인증 컨텍스트 없이 직접 진입하면 로그인으로 되돌아간다", async ({ page }) => {
-  // 로그인 화면은 비로그인 유저에게만 보인다(#108 접근 제한 가드). 기본 MSW의 /users/me는
-  // 로그인 유저를 반환하므로 비로그인 시나리오를 헤더로 주입한다.
-  await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
   await page.goto("/signup");
 
   await expect(page).toHaveURL(/\/login/, { timeout: 15000 });
   await expect(page.getByRole("heading", { name: "바른보상 시작하기" })).toBeVisible();
+});
+
+test("로그인 상태로 진입하면 역할별 홈으로 이동한다", async ({ page }) => {
+  // 기본 MSW /users/me = 로그인 유저(윤서, insured_person) — 비로그인 헤더 해제로 복원.
+  await page.setExtraHTTPHeaders({});
+  await page.goto("/signup");
+
+  await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 15000 });
 });
 
 test("손해사정사를 선택하고 시작하면 자격 인증 안내가 노출된다", async ({ page }) => {

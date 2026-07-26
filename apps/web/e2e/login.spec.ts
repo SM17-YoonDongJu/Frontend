@@ -81,6 +81,8 @@ test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저�
 });
 
 test("신규 회원 콜백이면 회원가입으로 이동한다", async ({ page }) => {
+  // 신규 회원은 아직 비로그인 — /signup 로그인 가드(#185)에 걸리지 않도록 시나리오 주입.
+  await page.setExtraHTTPHeaders(UNAUTH_HEADER);
   await page.goto("/login/oauth2/code/kakao?code=new&state=s1");
 
   await expect(page).toHaveURL(/\/signup/, { timeout: 15000 });
