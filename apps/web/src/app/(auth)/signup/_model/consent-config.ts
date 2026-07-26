@@ -1,4 +1,4 @@
-import type { TermsType } from "../_shared/model/terms";
+import type { TermsType } from "@/shared/model/terms-content";
 
 /** 약관 동의 항목 1개 정의. slug=상세 페이지 라우팅(terms/[type]) 겸용. */
 export interface ConsentItem {

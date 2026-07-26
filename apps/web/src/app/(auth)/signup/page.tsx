@@ -24,7 +24,7 @@ import {
   saveSignupDraft,
   type IdentityDraft,
 } from "./_model/signup-draft";
-import type { TermsType } from "./_shared/model/terms";
+import type { TermsType } from "@/shared/model/terms-content";
 
 const CUSTOMER_DASHBOARD_PATH = "/customer/dashboard";
 const ADJUSTER_CERTIFY_PATH = "/signup/verification";

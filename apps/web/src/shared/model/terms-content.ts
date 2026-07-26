@@ -131,3 +131,10 @@ export const TERMS_CONTENT: Record<TermsType, TermsDocument> = {
     ],
   },
 };
+
+/** 약관 상세 종류 슬러그(라우트 [type] 값·동의 항목 식별자 겸용). TERMS_CONTENT 키에서 파생. */
+export const TERMS_TYPES = Object.keys(TERMS_CONTENT) as TermsType[];
+
+export function isTermsType(value: string): value is TermsType {
+  return (TERMS_TYPES as readonly string[]).includes(value);
+}
