@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { isAppWebViewUserAgent } from "@/shared/lib/app-webview-token";
 import type { SocialProvider } from "../../_shared/hooks/use-recent-login";
 
 const AUTHORIZE_ENDPOINT: Record<SocialProvider, string> = {
@@ -27,7 +28,10 @@ export function useSocialLogin() {
   const startLogin = useCallback((provider: SocialProvider) => {
     if (typeof window === "undefined") return;
 
-    const state = createState();
+    // 앱 웹뷰 출발 표시 — 외부 브라우저로 우회된 콜백이 앱 복귀 딥링크로 바운스할 때 판별 근거.
+    const state = isAppWebViewUserAgent(navigator.userAgent)
+      ? `app.${createState()}`
+      : createState();
     window.sessionStorage.setItem(`${OAUTH_STATE_KEY}.${provider}`, state);
 
     const params = new URLSearchParams({

@@ -1,8 +1,12 @@
 "use client";
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getMe } from "@/shared/api/get-me";
+import {
+  APP_DEEP_LINK_SCHEME,
+  isAppWebViewUserAgent,
+} from "@/shared/lib/app-webview-token";
 import { Button } from "@/shared/ui/Button";
 import { maskEmail } from "../../../../_shared/lib/mask-email";
 import { saveSignupTicket } from "../../../../_shared/lib/signup-ticket";
@@ -45,15 +49,33 @@ export default function OauthCallbackPage() {
   const oauthError = searchParams.get("error");
   const state = searchParams.get("state");
 
+  // 앱 웹뷰에서 시작해 외부 브라우저로 우회된 로그인 복귀 — 여기서 code를 교환하면
+  // 쿠키가 외부 브라우저에 남으므로, 교환 없이 앱 딥링크로 code를 넘긴다.
+  const [isExternalBrowserReturn] = useState(
+    () =>
+      typeof navigator !== "undefined" &&
+      !!state?.startsWith("app.") &&
+      !isAppWebViewUserAgent(navigator.userAgent),
+  );
+
   const invalidEntry = !code || !!oauthError || !isSupportedProvider(provider);
 
   useEffect(() => {
-    if (invalidEntry) router.replace("/login");
-  }, [invalidEntry, router]);
+    if (invalidEntry && !isExternalBrowserReturn) router.replace("/login");
+  }, [invalidEntry, isExternalBrowserReturn, router]);
+
+  useEffect(() => {
+    if (!isExternalBrowserReturn || !code) return;
+    const query = new URLSearchParams({ code });
+    if (state) query.set("state", state);
+    window.location.replace(
+      `${APP_DEEP_LINK_SCHEME}://login/oauth2/code/${provider}?${query.toString()}`,
+    );
+  }, [isExternalBrowserReturn, code, state, provider]);
 
   const { data, isError, error, refetch, isFetching } = useOauthCallback({
     provider,
-    code,
+    code: isExternalBrowserReturn ? null : code,
     state,
   });
 
