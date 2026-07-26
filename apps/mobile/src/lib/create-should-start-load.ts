@@ -1,11 +1,14 @@
-export type LoadDecision = 'allow' | 'open-external';
+export type LoadDecision = 'allow' | 'open-external' | 'open-auth-session';
 
 interface LoadRequest {
   url: string;
   isTopFrame: boolean;
 }
 
-export function createLoadDecider(allowedHosts: readonly string[]) {
+export function createLoadDecider(
+  allowedHosts: readonly string[],
+  externalAuthHosts: readonly string[] = [],
+) {
   return function decideLoad({ url, isTopFrame }: LoadRequest): LoadDecision {
     if (!isTopFrame) {
       return 'allow';
@@ -17,6 +20,9 @@ export function createLoadDecider(allowedHosts: readonly string[]) {
       return 'open-external';
     }
     const { host } = new URL(url);
+    if (externalAuthHosts.includes(host)) {
+      return 'open-auth-session';
+    }
     return allowedHosts.includes(host) ? 'allow' : 'open-external';
   };
 }

@@ -1,20 +1,23 @@
 import { parseWebMessage, serializeToWeb } from '@insurance/bridge/native';
 import * as Linking from 'expo-linking';
 import { StatusBar } from 'expo-status-bar';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
-import { getAllowedHosts } from './config/allowed-hosts';
+import { EXTERNAL_AUTH_HOSTS, getAllowedHosts } from './config/allowed-hosts';
 import { APP_USER_AGENT_SUFFIX } from './config/user-agent';
 import { getWebUrl } from './config/web-url';
 import { createLoadDecider } from './lib/create-should-start-load';
+import { APP_SCHEME, mapDeepLinkToWebUrl } from './linking/deep-link';
 import { useDeepLink } from './linking/use-deep-link';
 import { getPushToken } from './push/push-token';
 import { useNotificationResponse } from './push/use-notification-response';
 
-const decideLoad = createLoadDecider(getAllowedHosts());
+const decideLoad = createLoadDecider(getAllowedHosts(), EXTERNAL_AUTH_HOSTS);
+const AUTH_SESSION_RETURN_URL = `${APP_SCHEME}://login/oauth2/code`;
 
 export function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
@@ -69,8 +72,22 @@ export function WebViewScreen() {
         allowFileAccess
         onMessage={(event) => handleWebMessage(event.nativeEvent.data)}
         onShouldStartLoadWithRequest={(request) => {
-          if (decideLoad(request) === 'open-external') {
+          const decision = decideLoad(request);
+          if (decision === 'open-external') {
             Linking.openURL(request.url).catch(() => {});
+            return false;
+          }
+          if (decision === 'open-auth-session') {
+            WebBrowser.openAuthSessionAsync(request.url, AUTH_SESSION_RETURN_URL)
+              .then((result) => {
+                if (result.type === 'success') {
+                  const webUrl = mapDeepLinkToWebUrl(result.url);
+                  if (webUrl) {
+                    setSourceUri(webUrl);
+                  }
+                }
+              })
+              .catch(() => {});
             return false;
           }
           return true;
