@@ -18,8 +18,8 @@ const FOOTER_COLUMNS = [
   {
     heading: "정책",
     links: [
-      { label: "이용약관", href: "/signup/terms/service" },
-      { label: "개인정보처리방침", href: "/signup/terms/privacy" }
+      { label: "이용약관", href: "/terms" },
+      { label: "개인정보처리방침", href: "/privacy" }
     ]
   }
 ] as const;

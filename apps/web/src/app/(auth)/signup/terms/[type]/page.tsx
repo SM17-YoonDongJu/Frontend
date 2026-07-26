@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { TermsBackButton } from "./_components/TermsBackButton";
 import { isTermsType, TERMS_TYPES } from "../../_shared/model/terms";
-import { TERMS_CONTENT } from "./_model/terms-content";
+import { TERMS_CONTENT } from "@/shared/model/terms-content";
 
 /** 3종 약관 상세를 정적 프리렌더(SSG). */
 export function generateStaticParams() {
