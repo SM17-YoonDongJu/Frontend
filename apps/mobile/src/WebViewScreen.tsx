@@ -18,6 +18,7 @@ import { useNotificationResponse } from './push/use-notification-response';
 
 const decideLoad = createLoadDecider(getAllowedHosts(), EXTERNAL_AUTH_HOSTS);
 const AUTH_SESSION_RETURN_URL = `${APP_SCHEME}://login/oauth2/code`;
+const SERVICE_HOST = new URL(getWebUrl()).host;
 
 export function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
@@ -93,7 +94,18 @@ export function WebViewScreen() {
           return true;
         }}
         style={styles.webview}
-        onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
+        onNavigationStateChange={(navState) => {
+          setCanGoBack(navState.canGoBack);
+          // 서비스 밖 문서(OAuth 등)로 이동하면 웹 준비 상태를 해제해 대기 중인 토큰 주입을 차단.
+          // 서비스 복귀 시 웹이 WEB_READY를 다시 보낸다.
+          try {
+            if (new URL(navState.url).host !== SERVICE_HOST) {
+              webReadyRef.current = false;
+            }
+          } catch {
+            webReadyRef.current = false;
+          }
+        }}
         startInLoadingState
         renderLoading={() => (
           <View style={styles.overlay}>
