@@ -30,6 +30,7 @@ export function WebViewScreen() {
         applicationNameForUserAgent={APP_USER_AGENT_SUFFIX}
         sharedCookiesEnabled
         thirdPartyCookiesEnabled
+        allowsBackForwardNavigationGestures
         style={styles.webview}
         onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
         startInLoadingState
