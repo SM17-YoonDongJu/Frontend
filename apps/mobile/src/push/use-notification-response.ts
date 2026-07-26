@@ -27,14 +27,18 @@ export function useNotificationResponse(onNavigate: (webUrl: string) => void) {
   useEffect(() => {
     if (!handledInitial.current) {
       handledInitial.current = true;
-      Notifications.getLastNotificationResponseAsync().then((response) => {
-        const webUrl = response
-          ? resolveDeepLink(response.notification.request.content.data)
-          : null;
-        if (webUrl) {
-          onNavigate(webUrl);
-        }
-      });
+      Notifications.getLastNotificationResponseAsync()
+        .then((response) => {
+          const webUrl = response
+            ? resolveDeepLink(response.notification.request.content.data)
+            : null;
+          if (webUrl) {
+            onNavigate(webUrl);
+            // 재마운트·JS 리로드 시 같은 응답으로 중복 이동하지 않도록 소진 처리
+            void Notifications.clearLastNotificationResponseAsync().catch(() => {});
+          }
+        })
+        .catch(() => {});
     }
 
     const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
