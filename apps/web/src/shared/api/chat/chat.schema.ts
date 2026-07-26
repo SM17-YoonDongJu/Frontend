@@ -38,11 +38,12 @@ export const chatListSchema = z.object({
   rooms: z.array(chatRoomSchema),
 });
 
-// 메시지 첨부(GET/POST messages 응답) — 조회용 단기 presigned url·원본명·MIME.
-export const messageAttachmentSchema = z.object({
-  url: z.string(),
+// 첨부 메타(BE Attachment) — 업로드 응답·메시지 응답·전송 body 공통 shape.
+export const chatAttachmentSchema = z.object({
+  attachmentKey: z.string(),
   name: z.string(),
   contentType: z.string(),
+  size: z.number().int(),
 });
 
 export const messageTypeSchema = z.enum(["TEXT", "IMAGE", "FILE", "SYSTEM"]);
@@ -52,7 +53,7 @@ export const chatMessageSchema = z.object({
   senderId: z.string(), // 명세 uuid. 낙관적 임시 메시지도 채운다.
   messageType: messageTypeSchema,
   content: z.string().nullable(), // 첨부(IMAGE/FILE) 메시지는 null 가능
-  attachment: messageAttachmentSchema.nullable(),
+  attachment: chatAttachmentSchema.nullable(),
   isMine: z.boolean(),
   createdAt: z.string(),
 });
@@ -63,21 +64,16 @@ export const chatMessagesSchema = z.object({
   hasNext: z.boolean(),
 });
 
-// 전송 요청 — content·attachment 중 최소 1개. 첨부는 업로드 응답 메타(key)를 전달.
-export const sendChatMessageAttachmentSchema = z.object({
-  attachmentKey: z.string(),
-  name: z.string(),
-  contentType: z.string(),
-});
-
+// 전송 요청(BE SendMessageRequest) — content·attachments 중 최소 1개. 첨부는 업로드 응답 메타를 배열로 전달.
 export const sendChatMessageBodySchema = z
   .object({
     content: z.string().optional(),
-    attachment: sendChatMessageAttachmentSchema.optional(),
+    attachments: z.array(chatAttachmentSchema).optional(),
   })
-  .refine((body) => Boolean(body.content) || Boolean(body.attachment), {
-    message: "content 또는 attachment 중 하나는 필요합니다.",
-  });
+  .refine(
+    (body) => Boolean(body.content) || (body.attachments?.length ?? 0) > 0,
+    { message: "content 또는 attachments 중 하나는 필요합니다." },
+  );
 
 export const sendChatMessageResponseSchema = z.object({
   messageId: z.uuid(),
@@ -85,17 +81,12 @@ export const sendChatMessageResponseSchema = z.object({
   senderId: z.string(),
   messageType: messageTypeSchema,
   content: z.string().nullable(),
-  attachment: messageAttachmentSchema.nullable(),
+  attachment: chatAttachmentSchema.nullable(),
   createdAt: z.string(),
 });
 
-// 첨부 업로드 응답(POST /chats/{id}/attachments) — key 기반. 메시지 전송에 attachment로 연결.
-export const uploadChatAttachmentResponseSchema = z.object({
-  attachmentKey: z.string(),
-  name: z.string(),
-  contentType: z.string(),
-  size: z.number().int(),
-});
+// 첨부 업로드 응답(POST /chats/{id}/attachments) — 발급 key 포함 Attachment 그대로.
+export const uploadChatAttachmentResponseSchema = chatAttachmentSchema;
 
 // 상담 수락(PATCH accept) — 내 제안 ACCEPTED · 리포트 CLOSED · 방 CLOSED(형제 방도 CLOSED).
 export const acceptChatResponseSchema = z.object({
@@ -126,7 +117,7 @@ export type MatchStatus = z.infer<typeof matchStatusSchema>;
 export type ChatCounterpart = z.infer<typeof chatCounterpartSchema>;
 export type ChatRoom = z.infer<typeof chatRoomSchema>;
 export type ChatList = z.infer<typeof chatListSchema>;
-export type MessageAttachment = z.infer<typeof messageAttachmentSchema>;
+export type ChatAttachment = z.infer<typeof chatAttachmentSchema>;
 export type MessageType = z.infer<typeof messageTypeSchema>;
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 export type ChatMessages = z.infer<typeof chatMessagesSchema>;

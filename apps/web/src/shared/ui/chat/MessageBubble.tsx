@@ -1,4 +1,4 @@
-import type { MessageAttachment } from "@/shared/api/chat/chat.schema";
+import type { ChatAttachment } from "@/shared/api/chat/chat.schema";
 import { cn } from "@/shared/lib/utils";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { formatMessageTime } from "./format";
@@ -9,7 +9,7 @@ export interface MessageBubbleProps {
   /** 내 메시지 여부 — true면 네이비 우측, false면 카드 좌측. 판별은 부모 책임 */
   mine: boolean;
   /** 첨부 파일 — 파일명 칩으로 표시(없으면 null) */
-  attachment?: MessageAttachment | null;
+  attachment?: ChatAttachment | null;
 }
 
 export function MessageBubble({ content, createdAt, mine, attachment }: MessageBubbleProps) {

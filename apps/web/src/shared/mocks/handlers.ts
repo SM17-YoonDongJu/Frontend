@@ -780,11 +780,12 @@ interface MockChatRoom {
   unreadCount: number;
 }
 
-// 메시지 첨부(GET/POST messages 응답 shape) — 조회용 url·원본명·MIME.
+// 메시지 첨부(BE Attachment shape) — 업로드 발급 key·원본명·MIME·크기.
 interface MockMessageAttachment {
-  url: string;
+  attachmentKey: string;
   name: string;
   contentType: string;
+  size: number;
 }
 
 interface MockChatMessage {
@@ -795,7 +796,7 @@ interface MockChatMessage {
   attachment?: MockMessageAttachment;
 }
 
-// 업로드된 첨부 임시 보관(key→메타) — 메시지 전송 시 attachment_key로 회수해 url 부여.
+// 업로드된 첨부 임시 보관(key→메타) — 메시지 전송 시 attachment_key로 메타 회수.
 const uploadedChatAttachments = new Map<string, MockMessageAttachment>();
 
 // 첨부 MIME으로 message_type 파생(서버 규칙: 이미지→IMAGE, 그 외 첨부→FILE, 없으면 TEXT).
@@ -1267,37 +1268,38 @@ export const handlers = [
       );
     }
 
-    // fetch-json이 요청 body를 snake로 변환 → { content, attachment: { attachment_key, name, content_type } }
+    // fetch-json이 요청 body를 snake로 변환 → { content, attachments: [{ attachment_key, name, content_type, size }] }
     const body = (await request.json().catch(() => ({}))) as {
       content?: string;
-      attachment?: {
+      attachments?: {
         attachment_key?: string;
         name?: string;
         content_type?: string;
-      };
+        size?: number;
+      }[];
     };
     const content = typeof body.content === "string" ? body.content : "";
 
-    // 첨부는 업로드 응답 메타(key)를 전달받아 저장 url을 회수(없으면 key로 합성).
+    // 첨부는 업로드 응답 메타(key)를 배열로 전달받아 보관 메타를 회수(현 UI는 1건 전송).
     let attachment: MockMessageAttachment | undefined;
-    if (body.attachment?.attachment_key) {
-      const key = body.attachment.attachment_key;
+    const firstAttachment = body.attachments?.[0];
+    if (firstAttachment?.attachment_key) {
+      const key = firstAttachment.attachment_key;
       const stored = uploadedChatAttachments.get(key);
       attachment = {
-        url:
-          stored?.url ??
-          `https://mock.local/chat-uploads/${encodeURIComponent(key)}`,
-        name: body.attachment.name ?? stored?.name ?? "첨부 파일",
+        attachmentKey: key,
+        name: firstAttachment.name ?? stored?.name ?? "첨부 파일",
         contentType:
-          body.attachment.content_type ??
+          firstAttachment.content_type ??
           stored?.contentType ??
           "application/octet-stream",
+        size: firstAttachment.size ?? stored?.size ?? 0,
       };
     }
 
     if (!content && !attachment) {
       return HttpResponse.json(
-        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "content 또는 attachment 중 하나는 필수입니다." },
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "content 또는 attachments 중 하나는 필수입니다." },
         { status: 400 },
       );
     }
@@ -1369,13 +1371,14 @@ export const handlers = [
       request.headers.get("x-mock-file-type") ||
       "application/octet-stream";
 
-    // key 규칙: chat/{roomId}/{uuid}_{원본명}. 조회 url은 저장 후 GET/POST가 presigned로 내려준다.
+    // key 규칙: chat/{roomId}/{uuid}_{원본명}.
     const attachmentKey = `chat/${chatRoomId}/${crypto.randomUUID()}_${fileName}`;
     const size = file?.size ?? 1024;
     uploadedChatAttachments.set(attachmentKey, {
-      url: `https://mock.local/chat-uploads/${encodeURIComponent(attachmentKey)}`,
+      attachmentKey,
       name: fileName,
       contentType,
+      size,
     });
 
     return HttpResponse.json(

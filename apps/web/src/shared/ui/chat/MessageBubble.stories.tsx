@@ -47,9 +47,10 @@ export const WithAttachment: Story = {
     content: "요청하신 진단서 보내드려요.",
     mine: true,
     attachment: {
-      url: "https://mock.local/chat-uploads/진단서.pdf",
+      attachmentKey: "chat/room-1/진단서.pdf",
       name: "진단서.pdf",
       contentType: "application/pdf",
+      size: 128_000,
     },
   },
 };
