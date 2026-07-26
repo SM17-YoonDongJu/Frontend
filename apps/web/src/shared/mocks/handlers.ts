@@ -2066,6 +2066,27 @@ export const handlers = [
     });
   }),
 
+  // 회원 탈퇴 (#179) — DELETE /users/me. 요청 바디 없음, data는 null.
+  // 성공 시 로그아웃 상태를 기록해 이후 보호 엔드포인트가 401 LOGIN_REQUIRED를 돌려준다.
+  // E2E 실패 주입: x-mock-failure=withdraw → 500(정리·이동 없이 에러 안내·재시도 검증용, 세션 유지).
+  http.delete(`${API_BASE_URL}/users/me`, async ({ request }) => {
+    await delay(200);
+
+    if (request.headers.get("x-mock-failure") === "withdraw") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "회원 탈퇴를 처리하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    setLoggedOut();
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: null,
+    });
+  }),
+
   // 고객 홈 대시보드 BFF (이슈 #142) — GET /users/me/dashboard. 🏷 백엔드 확정 대기.
   //   x-mock-scenario=unauthenticated → 401 LOGIN_REQUIRED.
   //   x-mock-scenario=dashboard-onboarding → report_count 0(온보딩 분기), 나머지 null/0.
