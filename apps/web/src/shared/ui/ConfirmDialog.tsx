@@ -11,7 +11,7 @@ export interface ConfirmDialogProps {
   confirmLabel: string;
   cancelLabel: string;
   confirmTone?: "primary" | "danger";
-  /** 배경/Esc로 닫을 때 동작(생략 시 onCancel). 강제 선택이면 undefined로 두지 말고 막을 것. */
+  /** 배경/Esc로 닫을 때 동작(생략 시 onCancel). 강제 선택이면 false로 막을 것. */
   dismissible?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
