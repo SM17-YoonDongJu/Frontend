@@ -186,7 +186,7 @@ export function CustomerChatThreadContent({
       />
 
       {/* Figma 1012:9931 — 모바일 스레드엔 배너 없음(목록 배너·헤더 버튼이 대체). 데스크톱만 노출 */}
-      {group === "comparing" && (
+      {group === "comparing" && room.reportTypeLabel != null && (
         <div className="hidden md:block">
           <ChatComparisonBanner
             variant="comparing"
@@ -195,7 +195,7 @@ export function CustomerChatThreadContent({
           />
         </div>
       )}
-      {group === "matched" && (
+      {group === "matched" && room.reportTypeLabel != null && (
         <div className="hidden md:block">
           <ChatComparisonBanner
             variant="matched"

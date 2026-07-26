@@ -123,7 +123,7 @@ export function ChatRoomListPanel({
       ) : grouped ? (
         /* customer — 매칭 그룹 섹션(상담 중·비교 / 진행 중·매칭 완료 / 종료된 상담) */
         <div className="flex-1 overflow-y-auto pb-5 md:pb-0">
-          {comparingRooms[0] && (
+          {comparingRooms[0] && comparingRooms[0].reportTypeLabel != null && (
             // Figma 1011:9251 — 모바일 목록 상단 비교 배너(데스크톱 목록엔 없음)
             <ChatListComparisonBanner
               reportTypeLabel={accidentTypeLabel(comparingRooms[0].reportTypeLabel)}
@@ -187,7 +187,11 @@ export function ChatRoomListPanel({
                           avatarUrl={room.counterpart.avatarUrl}
                           roomStatus={room.roomStatus}
                           matchStatus={room.matchStatus ?? undefined}
-                          reportTypeLabel={accidentTypeLabel(room.reportTypeLabel)}
+                          reportTypeLabel={
+                            room.reportTypeLabel != null
+                              ? accidentTypeLabel(room.reportTypeLabel)
+                              : undefined
+                          }
                           href={buildHref(room.chatRoomId)}
                           active={room.chatRoomId === activeChatRoomId}
                         />

@@ -31,7 +31,7 @@ export const chatRoomSchema = z.object({
   lastMessageAt: z.string(),
   unreadCount: z.number().int(),
   caseNo: z.string().nullable(), // 사정사 검색 방은 리포트 없음
-  reportTypeLabel: accidentTypeSchema, // accidentType 슬러그 — 표시는 accidentTypeLabel()로 변환
+  reportTypeLabel: accidentTypeSchema.nullable(), // accidentType 슬러그(표시는 accidentTypeLabel()) — 사정사 검색 방은 null
 });
 
 export const chatListSchema = z.object({
