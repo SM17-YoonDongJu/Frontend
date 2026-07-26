@@ -36,6 +36,7 @@ export function WebViewScreen() {
         sharedCookiesEnabled
         thirdPartyCookiesEnabled
         allowsBackForwardNavigationGestures
+        allowFileAccess
         onShouldStartLoadWithRequest={(request) => {
           if (decideLoad(request) === 'open-external') {
             Linking.openURL(request.url).catch(() => {});
