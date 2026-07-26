@@ -653,7 +653,6 @@ const MOCK_INSURANCES: Array<Record<string, unknown>> = [
 const ADJUSTER_MYPAGE = {
   profile: {
     nickname: "김상정",
-    email: "kimsangjeong@example.com",
     avatarUrl: null,
     headline: "후유장해 전문 12년, 거절 사건을 다시 봅니다",
     specialties: ["후유장해", "교통사고"],

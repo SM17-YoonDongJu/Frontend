@@ -43,7 +43,7 @@ export function ProfileSummaryCard({ profile, licenseNo }: ProfileSummaryCardPro
           등록번호 {licenseNo}
         </p>
         <p className="mt-1 hidden truncate text-[0.8125rem] text-white/50 md:block">
-          {profile.email} · {profile.activityRegion}
+          {profile.activityRegion}
         </p>
       </div>
 
