@@ -4,40 +4,29 @@ import { z } from "zod";
 export const affiliationSchema = z.enum(["INDEPENDENT", "FIRM"]);
 export type AffiliationType = z.infer<typeof affiliationSchema>;
 
-// 자격 구분(자격증 유형) — UI 단일 선택값(한글 literal).
-// CONTRACT: POST body 필드는 `specialities`(배열)이며 명세 JSON 예시는 ["traffic","cancer"]를 쓰지만
-// 같은 표의 설명 칸은 "신체/종합"이라 값 체계가 스스로 상충한다(⚠️ 백엔드 확인 필요). 설명 칸(신체/종합)을
-// 단일 진실로 채택해 전송하고, traffic/cancer 계열 코드로 확정되면 이 enum과 전송 매핑을 교체한다.
+// 자격 구분(자격증 유형) — UI 단일 선택값(한글 literal). 전송 필드가 아닌 화면 전용 상태.
 export const specialitySchema = z.enum(["신체", "종합"]);
 export type Speciality = z.infer<typeof specialitySchema>;
 
-// 서류 검토 결과 — 명세 documents[].type: LICENSE(자격증 사본)·REGISTRATION(등록증)·ID_CARD(신분증)
-export const documentTypeSchema = z.enum(["LICENSE", "REGISTRATION", "ID_CARD"]);
-export type DocumentType = z.infer<typeof documentTypeSchema>;
-
-export const documentReviewStatusSchema = z.enum([
-  "PENDING",
-  "APPROVED",
-  "RESUBMIT_REQUIRED",
-]);
-export type DocumentReviewStatus = z.infer<typeof documentReviewStatusSchema>;
-
-export const documentReviewSchema = z.object({
-  type: documentTypeSchema,
-  status: documentReviewStatusSchema,
+// 제출 서류(GET .../me 실응답) — 업로드 파일 메타. 서류별 검토 상태는 실응답에 없음.
+export const submittedDocumentSchema = z.object({
+  s3Url: z.string(),
+  name: z.string(),
+  reportType: z.string(),
+  fileType: z.string(),
 });
-export type DocumentReview = z.infer<typeof documentReviewSchema>;
+export type SubmittedDocument = z.infer<typeof submittedDocumentSchema>;
 
 // 신청/심사 상태 — 서버 enum(admin accept/reject와 동일)
 export const applicationStatusSchema = z.enum(["PENDING", "APPROVED", "REJECTED"]);
 export type ApplicationStatus = z.infer<typeof applicationStatusSchema>;
 
 // ── 신청 body ──
-// adjusterApplicationBodySchema = Notion 명세 필드(단일 진실). 자격 구분은 `specialities`(배열).
-// UI 확장 필드(phone·specialties[전문분야])는 아래 .extend()로 분리해 명세/확장을 구분한다.
+// 실제 BE 필드명은 `specialties`(전문분야 배열, minItems 1).
+// UI 확장 필드(phone)는 아래 .extend()로 분리해 명세/확장을 구분한다.
 export const adjusterApplicationBodySchema = z.object({
   name: z.string(),
-  specialities: z.array(specialitySchema).min(1),
+  specialties: z.array(z.string()).min(1),
   licenseNo: z.string().nullish(),
   licenseImageUrl: z.string().url().nullish(),
   career: z.number().int().nonnegative().nullish(),
@@ -53,12 +42,11 @@ const licenseEitherRequired = (
   value: { licenseNo?: string | null; licenseImageUrl?: string | null },
 ) => Boolean(value.licenseNo) || Boolean(value.licenseImageUrl);
 
-// UI 확장 body — 명세 필드 + phone·specialties(백엔드 정의 요청 중).
+// UI 확장 body — 명세 필드 + phone(백엔드 정의 요청 중).
 // 확장 초안: .pr-assets/api-spec-draft-adjuster-verification.md
 export const adjusterApplicationExtendedBodySchema = adjusterApplicationBodySchema
   .extend({
     phone: z.string(),
-    specialties: z.array(z.string()),
   })
   .refine(licenseEitherRequired, {
     message: "자격증 번호 또는 사본 중 하나는 필수입니다.",
@@ -71,7 +59,8 @@ export type AdjusterApplicationExtendedBody = z.infer<
 // ── 신청 응답(201) ──
 export const adjusterApplicationResponseSchema = z.object({
   applicationId: z.string().uuid(),
-  status: z.literal("PENDING"),
+  // 실제 스펙 type: string.
+  status: z.string(),
 });
 export type AdjusterApplicationResponse = z.infer<
   typeof adjusterApplicationResponseSchema
@@ -83,9 +72,9 @@ export const adjusterApplicationStatusSchema = z.object({
   status: applicationStatusSchema,
   submittedAt: z.string(),
   name: z.string(),
-  speciality: z.string(),
+  specialties: z.array(z.string()),
   licenseNo: z.string().nullable(),
-  documents: z.array(documentReviewSchema),
+  documents: z.array(submittedDocumentSchema),
   rejectedAt: z.string().nullable(),
   rejectReason: z.string().nullable(),
 });

@@ -205,11 +205,10 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
     setErrors(allErrors);
     if (Object.keys(allErrors).length > 0 || isUploading || apply.isPending) return;
 
-    // 자격 구분은 명세 `specialities`(배열) — UI 단일 선택값을 배열 1개로 감싼다.
-    // phone·specialties(전문분야)는 명세 미정의 확장 필드(백엔드 정의 요청 중). 데스크톱에선 빈 값.
+    // 전송 필드는 BE `specialties`(전문분야 배열, 최소 1개). 자격 구분은 화면 전용, phone은 확장 필드.
     const body: AdjusterApplicationExtendedBody = {
       name: name.trim(),
-      specialities: [speciality as Speciality],
+      specialties,
       licenseNo: licenseNo.trim() || null,
       licenseImageUrl: license.url ?? null,
       career: career ? Number(career.replace(/\D/g, "")) || null : null,
@@ -218,7 +217,6 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
       region: region.trim(),
       registrationImageUrl: registration.url as string,
       phone: phone.trim(),
-      specialties,
     };
 
     // N6: 제출 성공해도 draft 유지(같은 세션 반려→재제출 프리필). clear는 APPROVED에서만.

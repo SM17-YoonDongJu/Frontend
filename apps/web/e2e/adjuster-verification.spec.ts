@@ -190,11 +190,11 @@ test.describe("심사 현황 상태 분기", () => {
     }
   });
 
-  test("반려(REJECTED)면 반려 사유와 서류별 결과가 보인다", async ({ page }) => {
+  test("반려(REJECTED)면 반려 사유와 제출 서류가 보인다", async ({ page }) => {
     await page.setExtraHTTPHeaders({ "x-mock-scenario": "application-rejected" });
     await page.goto(STATUS_PATH);
     await expect(page.getByRole("heading", { name: "서류를 다시 확인해주세요" })).toBeVisible();
-    await expect(page.getByText("재제출 필요")).toBeVisible();
+    await expect(page.getByText("금감원-등록확인서.jpg")).toBeVisible();
     await expect(page.getByRole("button", { name: "서류 다시 제출하기" })).toBeVisible();
   });
 

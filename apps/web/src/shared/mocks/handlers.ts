@@ -681,18 +681,20 @@ const ADJUSTER_MYPAGE = {
 
 // 손해사정사 자격 신청 상태(이슈 #44) — POST가 세우고 GET .../me가 읽는 모듈 스코프 상태.
 // 기본 null(미신청 → GET 404 POST_NOT_FOUND → NOT_APPLIED → 폼).
-type MockDocumentReview = {
-  type: "LICENSE" | "REGISTRATION" | "ID_CARD";
-  status: "PENDING" | "APPROVED" | "RESUBMIT_REQUIRED";
+type MockSubmittedDocument = {
+  s3Url: string;
+  name: string;
+  reportType: "LICENSE" | "REGISTRATION" | "ID_CARD";
+  fileType: string;
 };
 type MockAdjusterApplication = {
   applicationId: string;
   status: "PENDING" | "APPROVED" | "REJECTED";
   submittedAt: string;
   name: string;
-  speciality: string;
+  specialties: string[];
   licenseNo: string | null;
-  documents: MockDocumentReview[];
+  documents: MockSubmittedDocument[];
   rejectedAt: string | null;
   rejectReason: string | null;
 };
@@ -708,32 +710,20 @@ function buildAdjusterApplication(
     status,
     submittedAt: "2026-07-05T09:00:00Z",
     name: "김상정",
-    speciality: "종합",
+    specialties: ["후유장해", "교통사고"],
     licenseNo: "제2014-0087호",
     documents: [
-      { type: "LICENSE", status: "PENDING" },
-      { type: "REGISTRATION", status: "PENDING" },
-      { type: "ID_CARD", status: "PENDING" },
+      { s3Url: "https://mock.local/uploads/license.jpg", name: "손해사정사-자격증.jpg", reportType: "LICENSE", fileType: "image/jpeg" },
+      { s3Url: "https://mock.local/uploads/registration.jpg", name: "금감원-등록확인서.jpg", reportType: "REGISTRATION", fileType: "image/jpeg" },
+      { s3Url: "https://mock.local/uploads/id-card.jpg", name: "신분증.jpg", reportType: "ID_CARD", fileType: "image/jpeg" },
     ],
     rejectedAt: null,
     rejectReason: null,
   };
 
-  if (status === "APPROVED") {
-    return {
-      ...base,
-      documents: base.documents.map((d) => ({ ...d, status: "APPROVED" })),
-    };
-  }
-
   if (status === "REJECTED") {
     return {
       ...base,
-      documents: [
-        { type: "LICENSE", status: "APPROVED" },
-        { type: "REGISTRATION", status: "RESUBMIT_REQUIRED" },
-        { type: "ID_CARD", status: "APPROVED" },
-      ],
       rejectedAt: "2026-07-07T13:20:00Z",
       rejectReason:
         "등록확인서 이미지가 흐려 식별이 어렵습니다. 금감원 등록확인서를 다시 제출해 주세요.",
@@ -1046,7 +1036,7 @@ export const handlers = [
 
     const body = (await request.json().catch(() => ({}))) as {
       name?: string;
-      specialities?: string[];
+      specialties?: string[];
       affiliation?: string;
       region?: string;
       registration_image_url?: string;
@@ -1056,8 +1046,8 @@ export const handlers = [
 
     if (
       !body.name ||
-      !body.specialities ||
-      body.specialities.length === 0 ||
+      !body.specialties ||
+      body.specialties.length === 0 ||
       !body.affiliation ||
       !body.region ||
       !body.registration_image_url
@@ -1088,13 +1078,14 @@ export const handlers = [
       status: "PENDING",
       submittedAt: new Date().toISOString(),
       name: body.name,
-      // GET .../me 응답은 speciality 단수(명세) — 요청 specialities 배열의 첫 값을 보관.
-      speciality: body.specialities[0] ?? "",
+      specialties: body.specialties,
       licenseNo: body.license_no ?? null,
+      // 실응답 documents는 업로드 파일 메타 — 요청의 업로드 url로 구성(자격증 사본은 선택).
       documents: [
-        { type: "LICENSE", status: "PENDING" },
-        { type: "REGISTRATION", status: "PENDING" },
-        { type: "ID_CARD", status: "PENDING" },
+        ...(body.license_image_url
+          ? [{ s3Url: body.license_image_url, name: "손해사정사-자격증.jpg", reportType: "LICENSE" as const, fileType: "image/jpeg" }]
+          : []),
+        { s3Url: body.registration_image_url, name: "금감원-등록확인서.jpg", reportType: "REGISTRATION" as const, fileType: "image/jpeg" },
       ],
       rejectedAt: null,
       rejectReason: null,
