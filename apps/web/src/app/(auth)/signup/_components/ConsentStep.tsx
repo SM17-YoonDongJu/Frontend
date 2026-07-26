@@ -7,7 +7,7 @@ import {
   isRequiredConsentMet,
   type ConsentState,
 } from "../_model/consent-config";
-import type { TermsType } from "../_shared/model/terms";
+import type { TermsType } from "@/shared/model/terms-content";
 import { ConsentCheckItem } from "./ConsentCheckItem";
 
 interface ConsentStepProps {
