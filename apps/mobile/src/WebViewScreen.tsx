@@ -9,12 +9,16 @@ import { getAllowedHosts } from './config/allowed-hosts';
 import { APP_USER_AGENT_SUFFIX } from './config/user-agent';
 import { getWebUrl } from './config/web-url';
 import { createLoadDecider } from './lib/create-should-start-load';
+import { useDeepLink } from './linking/use-deep-link';
 
 const decideLoad = createLoadDecider(getAllowedHosts());
 
 export function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
   const [canGoBack, setCanGoBack] = useState(false);
+  const [sourceUri, setSourceUri] = useState(getWebUrl);
+
+  useDeepLink(setSourceUri);
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -31,7 +35,7 @@ export function WebViewScreen() {
     <SafeAreaView style={styles.container}>
       <WebView
         ref={webViewRef}
-        source={{ uri: getWebUrl() }}
+        source={{ uri: sourceUri }}
         applicationNameForUserAgent={APP_USER_AGENT_SUFFIX}
         sharedCookiesEnabled
         thirdPartyCookiesEnabled
