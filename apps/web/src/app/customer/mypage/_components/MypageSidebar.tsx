@@ -59,8 +59,14 @@ export function MypageSidebar() {
         })}
       </ul>
 
-      <div className="mt-2 border-t border-line-2 pt-2">
+      <div className="mt-2 flex flex-col gap-0.5 border-t border-line-2 pt-2">
         <LogoutButton />
+        <Link
+          href="/withdraw"
+          className="rounded-button px-3 py-2.5 text-[0.8125rem] text-ink-3 transition hover:bg-paper hover:text-ink-2"
+        >
+          회원 탈퇴
+        </Link>
       </div>
     </nav>
   );

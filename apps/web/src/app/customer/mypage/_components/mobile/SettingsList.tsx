@@ -5,6 +5,7 @@ import { useInsuranceList } from "../../_api/use-insurance-list";
 import { Bell } from "@/shared/ui/icons/Bell";
 import { MessageCircle } from "@/shared/ui/icons/MessageCircle";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
+import { User } from "@/shared/ui/icons/User";
 import { MobileMenuRow } from "./MobileMenuRow";
 import { MobileSection } from "./MobileSection";
 
@@ -57,6 +58,11 @@ export function SettingsList() {
         label="고객센터 · 약관"
         onClick={() => showNotice("support")}
         right={notice === "support" ? noticeText : undefined}
+      />
+      <MobileMenuRow
+        icon={<User className={ICON_CLASS} />}
+        label="회원 탈퇴"
+        href="/withdraw"
       />
     </MobileSection>
   );
