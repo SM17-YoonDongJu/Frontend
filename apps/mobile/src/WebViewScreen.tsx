@@ -1,15 +1,54 @@
+import { parseWebMessage, serializeToWeb } from '@insurance/bridge/native';
+import * as Linking from 'expo-linking';
 import { StatusBar } from 'expo-status-bar';
+import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
+import { EXTERNAL_AUTH_HOSTS, getAllowedHosts } from './config/allowed-hosts';
 import { APP_USER_AGENT_SUFFIX } from './config/user-agent';
 import { getWebUrl } from './config/web-url';
+import { createLoadDecider } from './lib/create-should-start-load';
+import { APP_SCHEME, mapDeepLinkToWebUrl } from './linking/deep-link';
+import { useDeepLink } from './linking/use-deep-link';
+import { getPushToken } from './push/push-token';
+import { useNotificationResponse } from './push/use-notification-response';
+
+const decideLoad = createLoadDecider(getAllowedHosts(), EXTERNAL_AUTH_HOSTS);
+const AUTH_SESSION_RETURN_URL = `${APP_SCHEME}://login/oauth2/code`;
+const SERVICE_HOST = new URL(getWebUrl()).host;
 
 export function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
   const [canGoBack, setCanGoBack] = useState(false);
+  const [sourceUri, setSourceUri] = useState(getWebUrl);
+  const webReadyRef = useRef(false);
+
+  useDeepLink(setSourceUri);
+  useNotificationResponse(setSourceUri);
+
+  const handleWebMessage = (data: string) => {
+    const message = parseWebMessage(data);
+    if (!message) {
+      return;
+    }
+    if (message.type === 'WEB_READY') {
+      webReadyRef.current = true;
+      return;
+    }
+    if (message.type === 'REQUEST_PUSH_TOKEN') {
+      getPushToken().then((result) => {
+        if (!result || !webReadyRef.current) {
+          return;
+        }
+        webViewRef.current?.injectJavaScript(
+          serializeToWeb({ v: 1, type: 'PUSH_TOKEN', payload: result }),
+        );
+      });
+    }
+  };
 
   useEffect(() => {
     const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -26,10 +65,47 @@ export function WebViewScreen() {
     <SafeAreaView style={styles.container}>
       <WebView
         ref={webViewRef}
-        source={{ uri: getWebUrl() }}
+        source={{ uri: sourceUri }}
         applicationNameForUserAgent={APP_USER_AGENT_SUFFIX}
+        sharedCookiesEnabled
+        thirdPartyCookiesEnabled
+        allowsBackForwardNavigationGestures
+        allowFileAccess
+        onMessage={(event) => handleWebMessage(event.nativeEvent.data)}
+        onShouldStartLoadWithRequest={(request) => {
+          const decision = decideLoad(request);
+          if (decision === 'open-external') {
+            Linking.openURL(request.url).catch(() => {});
+            return false;
+          }
+          if (decision === 'open-auth-session') {
+            WebBrowser.openAuthSessionAsync(request.url, AUTH_SESSION_RETURN_URL)
+              .then((result) => {
+                if (result.type === 'success') {
+                  const webUrl = mapDeepLinkToWebUrl(result.url);
+                  if (webUrl) {
+                    setSourceUri(webUrl);
+                  }
+                }
+              })
+              .catch(() => {});
+            return false;
+          }
+          return true;
+        }}
         style={styles.webview}
-        onNavigationStateChange={(navState) => setCanGoBack(navState.canGoBack)}
+        onNavigationStateChange={(navState) => {
+          setCanGoBack(navState.canGoBack);
+          // 서비스 밖 문서(OAuth 등)로 이동하면 웹 준비 상태를 해제해 대기 중인 토큰 주입을 차단.
+          // 서비스 복귀 시 웹이 WEB_READY를 다시 보낸다.
+          try {
+            if (new URL(navState.url).host !== SERVICE_HOST) {
+              webReadyRef.current = false;
+            }
+          } catch {
+            webReadyRef.current = false;
+          }
+        }}
         startInLoadingState
         renderLoading={() => (
           <View style={styles.overlay}>

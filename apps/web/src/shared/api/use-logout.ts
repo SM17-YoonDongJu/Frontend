@@ -1,6 +1,12 @@
 "use client";
 
+import { isBridgeAvailable } from "@insurance/bridge/web";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  clearRegisteredDeviceToken,
+  loadRegisteredDeviceToken,
+} from "@/shared/lib/device-token-storage";
+import { deleteDeviceToken } from "./delete-device-token";
 import { logout } from "./logout";
 
 /**
@@ -11,7 +17,20 @@ export function useLogout() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: logout,
+    mutationFn: async () => {
+      // 로그아웃한 기기로 푸시가 가지 않도록 세션이 살아있을 때 기기 토큰을 먼저 해제.
+      // 해제 실패가 로그아웃을 막으면 안 되므로 best-effort.
+      if (isBridgeAvailable()) {
+        const registered = loadRegisteredDeviceToken();
+        if (registered) {
+          try {
+            await deleteDeviceToken(registered.token);
+            clearRegisteredDeviceToken();
+          } catch {}
+        }
+      }
+      return logout();
+    },
     onSettled: () => {
       queryClient.clear();
       window.location.replace("/login");

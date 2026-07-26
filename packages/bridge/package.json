@@ -5,13 +5,16 @@
   "type": "module",
   "description": "웹 ↔ RN WebView 브릿지 (메시지 프로토콜 · 핸들러)",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./web": "./src/web.ts",
+    "./native": "./src/native.ts"
   },
   "scripts": {
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@insurance/shared": "workspace:*"
+    "@insurance/shared": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "typescript": "^5.4.0"

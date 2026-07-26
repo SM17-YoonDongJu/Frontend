@@ -7,6 +7,7 @@ import {
   isLoggedOut,
   setLoggedOut,
 } from "@/shared/mocks/auth-token-state";
+import { registerDeviceTokenBodySchema } from "@/shared/model/device-token.schema";
 
 // 로드 시점 기준 상대 마감일(로컬 달력 날짜) — 대시보드 "오늘 마감/N일 남음" 검증용
 function addDays(base: Date, days: number): string {
@@ -1856,6 +1857,64 @@ export const handlers = [
       status: "200",
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({ ...NOTIFICATION_SETTINGS }),
+    });
+  }),
+
+  // 디바이스 토큰 등록 (이슈 #178)
+  http.post(`${API_BASE_URL}/users/me/device-tokens`, async ({ request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "device-token") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "디바이스 토큰을 등록하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    let body: Record<string, unknown>;
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    const parsedBody = registerDeviceTokenBodySchema.safeParse(body);
+    if (!parsedBody.success) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "token·platform 값이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: camelToSnakeDeep({
+        id: "3f9f3f70-6a4b-4e6b-9a56-6f1d6c2f7d01",
+        platform: parsedBody.data.platform,
+        createdAt: "2026-07-26T09:00:00Z",
+      }),
+    });
+  }),
+
+  // 디바이스 토큰 해제 (이슈 #178)
+  http.delete(`${API_BASE_URL}/users/me/device-tokens`, async ({ request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "device-token") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "디바이스 토큰을 해제하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: null,
     });
   }),
 
