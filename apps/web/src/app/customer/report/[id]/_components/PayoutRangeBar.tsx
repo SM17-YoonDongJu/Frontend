@@ -1,8 +1,7 @@
-const WON_PER_MANWON = 10_000;
+import { formatManwon } from "@/shared/lib/format-amount";
+
 const AXIS_MIN_PADDING = 0.9;
 const AXIS_MAX_PADDING = 1.05;
-
-const toManwon = (won: number) => Math.round(won / WON_PER_MANWON).toLocaleString("ko-KR");
 
 export interface PayoutRangeBarProps {
   claimedMinAmount: number;
@@ -38,7 +37,7 @@ export function PayoutRangeBar({
             className="absolute -translate-x-1/2 whitespace-nowrap text-[0.7rem] font-medium text-white/70"
             style={{ left: `${markerLeft}%` }}
           >
-            제안 {toManwon(offeredAmount)}만
+            제안 {formatManwon(offeredAmount)}만
           </span>
         </div>
       )}

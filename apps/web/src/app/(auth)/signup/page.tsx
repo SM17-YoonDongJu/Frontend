@@ -13,6 +13,7 @@ import { ConsentStep } from "./_components/ConsentStep";
 import { IdentityStep } from "./_components/IdentityStep";
 import { RoleSelectStep } from "./_components/RoleSelectStep";
 import { SignupProgress } from "./_components/SignupProgress";
+import { SignupRedirectGate } from "./_components/SignupRedirectGate";
 import { useSignupFunnel, type SignupStep } from "./_hooks/use-signup-funnel";
 import { useSignupSocial } from "./_hooks/use-signup-social";
 import { isRequiredConsentMet, type ConsentState } from "./_model/consent-config";
@@ -207,8 +208,10 @@ function SignupFunnel() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={null}>
-      <SignupFunnel />
-    </Suspense>
+    <SignupRedirectGate>
+      <Suspense fallback={null}>
+        <SignupFunnel />
+      </Suspense>
+    </SignupRedirectGate>
   );
 }

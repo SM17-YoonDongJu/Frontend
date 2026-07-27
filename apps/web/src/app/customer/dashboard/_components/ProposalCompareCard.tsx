@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Avatar } from "@/shared/ui/Avatar";
 import { useDashboard } from "../_api/use-dashboard";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
-import { OfferRangeBar, toManwon } from "./OfferRangeBar";
+import { formatManwon } from "@/shared/lib/format-amount";
+import { OfferRangeBar } from "./OfferRangeBar";
 
 export function ProposalCompareCard() {
   const { data } = useDashboard();
@@ -29,29 +30,29 @@ export function ProposalCompareCard() {
         <div>
           <p className="text-[0.75rem] font-medium text-ink-3">최저 제안가</p>
           <p className="mt-1 font-serif text-[1.375rem] font-bold text-ink">
-            {toManwon(summary.minAmount)}만원
+            {formatManwon(summary.minAmount ?? 0)}만원
           </p>
         </div>
         <div className="text-right">
           <p className="text-[0.75rem] font-medium text-ink-3">최고 제안가</p>
           <p className="mt-1 font-serif text-[1.375rem] font-bold text-gold-ink">
-            {toManwon(summary.maxAmount)}만원
+            {formatManwon(summary.maxAmount ?? 0)}만원
           </p>
         </div>
       </div>
 
-      <div className="mt-3">
-        <OfferRangeBar
-          min={summary.minAmount}
-          max={summary.maxAmount}
-          offeredAmount={summary.avgAmount}
-          markerLabel={null}
-        />
-      </div>
+          <div className="mt-3">
+            <OfferRangeBar
+              min={summary.minAmount ?? 0}
+              max={summary.maxAmount ?? 0}
+              offeredAmount={summary.avgAmount}
+              markerLabel={null}
+            />
+          </div>
 
       <div className="mt-2 flex items-center justify-between text-[0.75rem] text-ink-3">
         <span>제안 {summary.count}건</span>
-        <span>평균 {toManwon(summary.avgAmount)}만원</span>
+        <span>평균 {formatManwon(summary.avgAmount ?? 0)}만원</span>
       </div>
 
       <ul className="mt-[1.125rem] hidden border-t border-line-2 md:block">
@@ -72,7 +73,7 @@ export function ProposalCompareCard() {
                 경력 {item.career}년 · {item.speciality} 전문
               </p>
             </div>
-            {item.estimateMaxAmount === summary.maxAmount && (
+            {item.estimateMaxAmount != null && item.estimateMaxAmount === summary.maxAmount && (
               <span className="shrink-0 rounded-tag bg-gold-soft px-[0.4375rem] py-[0.1875rem] text-[0.6875rem] font-semibold text-gold-ink">
                 최고가
               </span>
@@ -80,7 +81,7 @@ export function ProposalCompareCard() {
             <span
               className={`ml-auto font-serif text-base font-bold ${item.estimateMaxAmount === summary.maxAmount ? "text-gold-ink" : "text-ink"}`}
             >
-              {toManwon(item.estimateMaxAmount)}만원
+              {formatManwon(item.estimateMaxAmount ?? 0)}만원
             </span>
           </li>
         ))}

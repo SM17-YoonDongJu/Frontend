@@ -1,11 +1,8 @@
 import { AmountRange } from "@/shared/ui/AmountRange";
 import { ConfidenceGauge, type ConfidenceLevel } from "@/shared/ui/ConfidenceGauge";
 import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
+import { formatManwon } from "@/shared/lib/format-amount";
 import { PayoutRangeBar } from "./PayoutRangeBar";
-
-const WON_PER_MANWON = 10_000;
-
-const toManwon = (won: number) => Math.round(won / WON_PER_MANWON).toLocaleString("ko-KR");
 
 const CONFIDENCE_NOTE: Record<ConfidenceLevel, string> = {
   HIGH: "신뢰도 높음 — 현재 자료 기준 단계적으로 검토하는 보수적 범위입니다.",
@@ -26,11 +23,9 @@ export function EstimatedPayout({
   offeredAmount,
   confidenceLevel,
 }: EstimatedPayoutProps) {
-  const shortfallManwon =
-    offeredAmount != null && claimedMinAmount != null
-      ? Math.round((claimedMinAmount - offeredAmount) / WON_PER_MANWON)
-      : 0;
-  const hasShortfall = shortfallManwon > 0;
+  const shortfallAmount =
+    offeredAmount != null && claimedMinAmount != null ? claimedMinAmount - offeredAmount : null;
+  const hasShortfall = shortfallAmount != null && shortfallAmount > 0;
 
   return (
     <section className="rounded-card-lg bg-navy p-[1.375rem] text-white lg:p-6">
@@ -57,7 +52,7 @@ export function EstimatedPayout({
         <p className="font-serif text-[2.0625rem] font-bold leading-tight">
           {claimedMinAmount != null && claimedMaxAmount != null ? (
             <>
-              {toManwon(claimedMinAmount)} – {toManwon(claimedMaxAmount)}
+              {formatManwon(claimedMinAmount)} – {formatManwon(claimedMaxAmount)}
               <span className="ml-1 text-[1.1875rem] font-semibold text-white/70">만원</span>
             </>
           ) : (
@@ -82,7 +77,7 @@ export function EstimatedPayout({
         {hasShortfall && (
           <p className="mt-4 rounded-[0.6875rem] bg-white/[.07] px-[0.8125rem] py-[0.6875rem] text-[0.75rem] text-white/80">
             제안 금액이 예상 범위보다{" "}
-            <strong className="font-bold text-gold-2">약 {shortfallManwon.toLocaleString("ko-KR")}만원</strong>{" "}
+            <strong className="font-bold text-gold-2">약 {formatManwon(shortfallAmount ?? 0)}만원</strong>{" "}
             낮을 수 있어요.
           </p>
         )}

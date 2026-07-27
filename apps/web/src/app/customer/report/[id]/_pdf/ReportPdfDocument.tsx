@@ -1,4 +1,5 @@
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { formatManwon, formatManwonRange } from "@/shared/lib/format-amount";
 import { REPORT_TITLE } from "../_model/report-meta";
 import type { ReportDetail } from "../_model/types";
 
@@ -22,9 +23,8 @@ const ISSUE_LABEL: Record<string, string> = {
   INFO: "안내",
 };
 
-const won = (n: number) => `${Math.round(n / 10_000).toLocaleString("ko-KR")}만원`;
-const range = (a: number, b: number) =>
-  `${Math.round(a / 10_000).toLocaleString("ko-KR")}~${Math.round(b / 10_000).toLocaleString("ko-KR")}만원`;
+const won = (n: number) => `${formatManwon(n)}만원`;
+const range = formatManwonRange;
 
 const s = StyleSheet.create({
   page: { fontFamily: "Gowun", fontSize: 10, color: INK, padding: 36, lineHeight: 1.5 },
