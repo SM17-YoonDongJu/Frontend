@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Avatar } from "@/shared/ui/Avatar";
 import { useDashboard } from "../_api/use-dashboard";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
-import { OfferRangeBar, toManwon } from "./OfferRangeBar";
+import { formatManwon } from "@/shared/lib/format-amount";
+import { OfferRangeBar } from "./OfferRangeBar";
 
 export function ProposalCompareCard() {
   const { data } = useDashboard();
@@ -25,23 +26,20 @@ export function ProposalCompareCard() {
         </Link>
       </header>
 
-      {/* 견적 미기입 제안만 있으면 집계 금액이 null — 금액 블록을 접고 건수만 표시 */}
-      {summary.minAmount != null && summary.maxAmount != null ? (
-        <>
-          <div className="mt-[1.125rem] flex items-end justify-between">
-            <div>
-              <p className="text-[0.75rem] font-medium text-ink-3">최저 제안가</p>
-              <p className="mt-1 font-serif text-[1.375rem] font-bold text-ink">
-                {toManwon(summary.minAmount)}만원
-              </p>
-            </div>
-            <div className="text-right">
-              <p className="text-[0.75rem] font-medium text-ink-3">최고 제안가</p>
-              <p className="mt-1 font-serif text-[1.375rem] font-bold text-gold-ink">
-                {toManwon(summary.maxAmount)}만원
-              </p>
-            </div>
-          </div>
+      <div className="mt-[1.125rem] flex items-end justify-between">
+        <div>
+          <p className="text-[0.75rem] font-medium text-ink-3">최저 제안가</p>
+          <p className="mt-1 font-serif text-[1.375rem] font-bold text-ink">
+            {formatManwon(summary.minAmount)}만원
+          </p>
+        </div>
+        <div className="text-right">
+          <p className="text-[0.75rem] font-medium text-ink-3">최고 제안가</p>
+          <p className="mt-1 font-serif text-[1.375rem] font-bold text-gold-ink">
+            {formatManwon(summary.maxAmount)}만원
+          </p>
+        </div>
+      </div>
 
           <div className="mt-3">
             <OfferRangeBar
@@ -52,16 +50,10 @@ export function ProposalCompareCard() {
             />
           </div>
 
-          <div className="mt-2 flex items-center justify-between text-[0.75rem] text-ink-3">
-            <span>제안 {summary.count}건</span>
-            <span>{summary.avgAmount != null ? `평균 ${toManwon(summary.avgAmount)}만원` : ""}</span>
-          </div>
-        </>
-      ) : (
-        <p className="mt-[1.125rem] text-[0.8125rem] text-ink-3">
-          제안 {summary.count}건 · 견적은 상담에서 안내돼요
-        </p>
-      )}
+      <div className="mt-2 flex items-center justify-between text-[0.75rem] text-ink-3">
+        <span>제안 {summary.count}건</span>
+        <span>평균 {formatManwon(summary.avgAmount)}만원</span>
+      </div>
 
       <ul className="mt-[1.125rem] hidden border-t border-line-2 md:block">
         {summary.items.map((item) => (
@@ -86,15 +78,11 @@ export function ProposalCompareCard() {
                 최고가
               </span>
             )}
-            {item.estimateMaxAmount != null ? (
-              <span
-                className={`ml-auto font-serif text-base font-bold ${item.estimateMaxAmount === summary.maxAmount ? "text-gold-ink" : "text-ink"}`}
-              >
-                {toManwon(item.estimateMaxAmount)}만원
-              </span>
-            ) : (
-              <span className="ml-auto text-[0.8125rem] text-ink-3">견적 미제시</span>
-            )}
+            <span
+              className={`ml-auto font-serif text-base font-bold ${item.estimateMaxAmount === summary.maxAmount ? "text-gold-ink" : "text-ink"}`}
+            >
+              {formatManwon(item.estimateMaxAmount)}만원
+            </span>
           </li>
         ))}
       </ul>

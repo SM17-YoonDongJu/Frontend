@@ -2,6 +2,7 @@
 
 import { useFormContext } from "react-hook-form";
 import { Checkbox } from "@/shared/ui/Checkbox";
+import { formatWon } from "@/shared/lib/format-amount";
 import type { AdjustRequestDraft } from "../_model/types";
 
 const TREATMENT_LABELS: Record<string, string> = {
@@ -39,7 +40,7 @@ export function Step7Confirm() {
   const offered = v.insuranceNotOffered
     ? "아직 제안받지 않음"
     : v.insuranceOffered != null
-      ? `${v.insuranceOffered.toLocaleString()}원`
+      ? formatWon(v.insuranceOffered)
       : "-";
   const docCount = v.documentUrls?.length ?? 0;
   const question = v.question?.trim();

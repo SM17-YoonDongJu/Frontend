@@ -12,6 +12,7 @@ import type {
   ReportListItem,
   ReportStatus,
 } from "@/app/customer/_shared/model/report-list.schema";
+import { formatManwon } from "@/shared/lib/format-amount";
 import { EmptyState } from "./EmptyState";
 
 const VISIBLE_REPORT_COUNT = 3;
@@ -63,10 +64,6 @@ const PILL_TONE_CLASS: Record<PillTone, string> = {
   neutral: "bg-line-2 text-ink-3",
 };
 
-function toManwon(won: number): string {
-  return Math.round(won / 10_000).toLocaleString("ko-KR");
-}
-
 function formatMonthDay(iso: string): string {
   const date = new Date(iso);
   return `${date.getMonth() + 1}. ${date.getDate()}`;
@@ -86,7 +83,7 @@ function reportFooter(report: ReportListItem): { label: string; value: string } 
     case "COUNSELING":
       return {
         label: "확정 보상액",
-        value: confirmedAmount !== null ? `${toManwon(confirmedAmount)}만원` : "협의 중",
+        value: confirmedAmount !== null ? `${formatManwon(confirmedAmount)}만원` : "협의 중",
       };
     case "AWAITING_INSPECTION":
       return { label: "진행 상태", value: "검수 진행 중" };

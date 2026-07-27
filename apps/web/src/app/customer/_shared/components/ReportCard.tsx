@@ -10,10 +10,7 @@ import {
 import { deriveReportTitle } from "@/app/customer/_shared/model/report-title";
 import { reportDetailHref } from "@/app/customer/_shared/model/report-routes";
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
-
-function toManwon(won: number): string {
-  return Math.round(won / 10_000).toLocaleString("ko-KR");
-}
+import { formatManwon } from "@/shared/lib/format-amount";
 
 function formatDate(iso: string): string {
   const [year, month, day] = iso.slice(0, 10).split("-");
@@ -68,7 +65,7 @@ export function ReportCard({
           <p className="text-[0.71875rem] font-medium text-ink-3">예상 보상 범위</p>
           <p className={`mt-1 ${meta.muted ? "text-ink-2" : "text-ink"}`}>
             <span className="font-serif text-[1.5rem] leading-none">
-              {toManwon(claimedMinAmount)} – {toManwon(claimedMaxAmount)}
+              {formatManwon(claimedMinAmount)} – {formatManwon(claimedMaxAmount)}
             </span>
             <span className="ml-1 text-[0.8125rem] font-bold">만원</span>
           </p>
