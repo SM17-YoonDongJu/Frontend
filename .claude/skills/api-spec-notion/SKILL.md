@@ -1,6 +1,6 @@
 ---
 name: api-spec-notion
-description: 프론트에 필요한데 Notion API 명세서 DB에 없는 엔드포인트를 팀 형식 명세 초안으로 작성하고, 백엔드 확정 후 Notion에 동기화하는 절차. 전역 응답 봉투·에러코드 enum·필드명 미러링 규칙 준수, 추측 경로 금지. "API 명세 초안", "명세 추가", "이 화면 API 정리", "백엔드에 API 요청", 명세에 없는 엔드포인트가 필요할 때 사용.
+description: 프론트에 필요한데 Notion API 명세서 DB에 없는 엔드포인트를 팀 형식 명세 초안으로 작성하고, 백엔드 확정 후 Notion에 동기화하는 절차. 전역 응답 봉투·에러코드 enum·필드명 미러링 규칙 준수, 추측 경로 금지. "API 명세 초안", "명세 추가", "이 화면 API 정리", 명세에 없는 엔드포인트가 필요할 때 사용. 확정 전 백엔드에 변경·확인을 요청하는 Notion 카드 작성은 `backend-request-notion` 스킬.
 ---
 
 # API 명세 초안 작성 · Notion 동기화
@@ -86,5 +86,7 @@ description: 프론트에 필요한데 Notion API 명세서 DB에 없는 엔드�
 
 확정 전에는 Notion 정식 행을 만들지 말고 코멘트/초안 단계에 머문다.
 
+확정 전 이 초안을 근거로 백엔드에 변경·확인을 요청하는 Notion 카드가 필요하면 `backend-request-notion` 스킬로 넘어간다.
+
 ## 관련
-[[fe-shared-endpoint-schema-drift]](공유 엔드포인트 enum 추가 시 전 소비처 zod 동반 갱신) · [[fe-naming-ask-on-missing]] · [[issue-craft]](이슈 API 연동 섹션) · `react-query-data`(확정 shape으로 훅·스키마 구현)
+`backend-request-notion`(백엔드 요청 DB 카드 작성) · [[fe-shared-endpoint-schema-drift]](공유 엔드포인트 enum 추가 시 전 소비처 zod 동반 갱신) · [[fe-naming-ask-on-missing]] · [[issue-craft]](이슈 API 연동 섹션) · `react-query-data`(확정 shape으로 훅·스키마 구현)
