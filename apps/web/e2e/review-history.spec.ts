@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 사정사 검수 내역 E2E (이슈 #59).
@@ -14,6 +15,7 @@ import { expect, test } from "@playwright/test";
 const PATH = "/partner/mypage/review-history";
 
 test("진입하면 검수한 사건 카드가 유형·사건번호·완료일·제목·상태와 함께 보인다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(PATH);
 
   await expect(page.getByRole("heading", { name: "검수 내역" })).toBeVisible();
@@ -30,6 +32,7 @@ test("진입하면 검수한 사건 카드가 유형·사건번호·완료일·�
 });
 
 test("채택 필터를 누르면 채택 사건만 남고 칩이 활성화되며 URL에 status가 반영된다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(PATH);
   await expect(page.getByRole("heading", { name: "검수 내역" })).toBeVisible();
 
@@ -48,6 +51,7 @@ test("채택 필터를 누르면 채택 사건만 남고 칩이 활성화되며 
 });
 
 test("더보기를 누르면 다음 페이지 사건이 이어 붙는다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(PATH);
   await expect(page.getByRole("heading", { name: "검수 내역" })).toBeVisible();
 
@@ -64,6 +68,7 @@ test("더보기를 누르면 다음 페이지 사건이 이어 붙는다", async
 });
 
 test("검수 이력이 없으면 빈 안내가 보인다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.setExtraHTTPHeaders({ "x-mock-reviewed": "empty" });
   await page.goto(PATH);
 
@@ -71,6 +76,8 @@ test("검수 이력이 없으면 빈 안내가 보인다", async ({ page }) => {
 });
 
 test("권한이 없으면 접근 권한 안내가 보인다", async ({ page }) => {
+  // 403은 유효 세션에서의 업무 규칙 실패 — 미들웨어 통과를 위해 쿠키가 필요하다.
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.setExtraHTTPHeaders({ "x-mock-failure": "reviewed-forbidden" });
   await page.goto(PATH);
 

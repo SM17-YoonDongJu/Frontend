@@ -5,6 +5,7 @@
  * 복귀 경로 저장 포맷·open redirect 차단은 정적 레이어(TS·유틸 단위 로직)에 위임(미테스트).
  */
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 const PROTECTED_PATH = "/customer/dashboard";
 const LOGIN_REQUIRED_PATH = "/login-required";
@@ -40,6 +41,8 @@ test("로그인이 완료되면 원래 보던 페이지로 돌아온다", async 
 
   // 로그인 성공 상태로 전환(기본 MSW = 로그인 유저) 후 로그인 화면 진입 → 저장된 복귀 경로로 이동
   await page.setExtraHTTPHeaders({});
+  // 복귀 목적지(보호 라우트)는 미들웨어가 실제 쿠키를 요구 — MSW는 쿠키를 못 심으므로 직접 주입.
+  await setAuthCookie(page, "USER");
   const loginLink = page.getByRole("link", { name: "로그인하러 가기" });
   await expect(async () => {
     await loginLink.click();

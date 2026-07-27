@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Locator, Page } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 검수 대기 리스트 E2E — 핵심 흐름 (이슈 #62 모바일 + #94 status 탭·PC 레이아웃).
@@ -12,6 +13,10 @@ import type { Locator, Page } from "@playwright/test";
  */
 
 const PATH = "/partner/review";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+});
 
 function visibleText(page: Page, text: string): Locator {
   return page.getByText(text).filter({ visible: true });

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 손해사정사 검수 흐름 E2E (happy-path CUJ).
@@ -14,6 +15,10 @@ import { expect, test } from "@playwright/test";
 const LIST_PATH = "/partner/review";
 // MSW 상세 핸들러는 어떤 reportId든 동일 리치 데이터를 반환 → 상세 직접 진입에 사용.
 const DETAIL_PATH = "/partner/review/11111111-1111-4111-8111-111111111111";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+});
 
 test("대기 목록에서 검수를 시작하면 상세로 진입한다", async ({ page, isMobile }) => {
   await page.goto(LIST_PATH);

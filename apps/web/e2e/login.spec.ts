@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 로그인 E2E (이슈 #40).
@@ -65,6 +66,8 @@ test("최근 로그인 흔적이 있으면 재로그인 화면과 최근 로그�
 });
 
 test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저장된다", async ({ page }) => {
+  // 콜백 성공 후 도착지(/customer/dashboard)는 미들웨어 보호 라우트 — MSW는 실제 쿠키를 못 심으므로 직접 주입.
+  await setAuthCookie(page, "USER");
   await page.goto("/login/oauth2/code/kakao?code=valid&state=s1");
 
   // 콜백은 "/"로 보내고, 랜딩 가드가 곧바로 역할별 홈으로 다시 보낸다(#108).
@@ -81,6 +84,8 @@ test("기존 회원 콜백이면 홈으로 이동하고 로그인 흔적이 저�
 });
 
 test("신규 회원 콜백이면 회원가입으로 이동한다", async ({ page }) => {
+  // 신규 회원은 아직 비로그인 — /signup 로그인 가드(#185)에 걸리지 않도록 시나리오 주입.
+  await page.setExtraHTTPHeaders(UNAUTH_HEADER);
   await page.goto("/login/oauth2/code/kakao?code=new&state=s1");
 
   await expect(page).toHaveURL(/\/signup/, { timeout: 15000 });
@@ -121,6 +126,7 @@ test("인가 코드가 없으면 로그인 화면으로 되돌아간다", async 
  */
 test.describe("로그인 사용자 접근 제한", () => {
   test("로그인 유저가 진입하면 고객 대시보드로 이동한다", async ({ page }) => {
+    await setAuthCookie(page, "USER");
     await page.goto(LOGIN_PATH);
 
     await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 10000 });
@@ -130,6 +136,7 @@ test.describe("로그인 사용자 접근 제한", () => {
     await page.addInitScript(() => {
       window.localStorage.setItem("mock:userType", "adjuster");
     });
+    await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
 
     await page.goto(LOGIN_PATH);
 

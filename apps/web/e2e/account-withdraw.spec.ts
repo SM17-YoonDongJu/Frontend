@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 회원 탈퇴 E2E (이슈 #179).
@@ -42,6 +43,9 @@ async function openWithdrawConfirm(page: import("@playwright/test").Page) {
 
 test.describe("PC", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
+  test.beforeEach(async ({ page }) => {
+    await setAuthCookie(page, "USER");
+  });
 
   test("마이페이지 사이드바의 회원 탈퇴를 누르면 탈퇴 안내가 보인다", async ({ page }) => {
     await page.goto(CUSTOMER_MYPAGE_PATH);
@@ -81,6 +85,9 @@ test.describe("PC", () => {
 
 test.describe("모바일", () => {
   test.use({ viewport: { width: 390, height: 844 } });
+  test.beforeEach(async ({ page }) => {
+    await setAuthCookie(page, "USER");
+  });
 
   test("설정 목록의 회원 탈퇴를 누르면 탈퇴 안내가 보인다", async ({ page }) => {
     await page.goto(CUSTOMER_MYPAGE_PATH);
@@ -118,6 +125,7 @@ test.describe("모바일", () => {
 });
 
 test("사정사 마이페이지 메뉴의 회원 탈퇴를 누르면 탈퇴 안내가 보인다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(PARTNER_MYPAGE_PATH);
   await expect(
     page.getByRole("heading", { level: 1, name: "내 정보" }).filter({ visible: true }),

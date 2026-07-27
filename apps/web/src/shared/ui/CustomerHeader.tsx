@@ -20,7 +20,10 @@ export function CustomerHeader() {
     <header className="sticky top-0 z-40 border-b border-line bg-card">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 font-serif text-xl font-bold text-navy">
+          <Link
+            href="/customer/dashboard"
+            className="flex items-center gap-2 font-serif text-xl font-bold text-navy"
+          >
             <Scale className="text-2xl text-gold" />
             바른보상
           </Link>

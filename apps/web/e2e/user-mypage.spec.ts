@@ -1,7 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 import { hideQueryDevtools, selectRegion } from "./_region-helpers";
 
 test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
   await hideQueryDevtools(page);
 });
 

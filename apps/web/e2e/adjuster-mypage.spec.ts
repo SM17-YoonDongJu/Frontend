@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 손해사정사 마이페이지 E2E (이슈 #46).
@@ -13,6 +14,10 @@ import { expect, test } from "@playwright/test";
  */
 
 const PATH = "/partner/mypage";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+});
 
 test.describe("PC", () => {
   test.use({ viewport: { width: 1280, height: 900 } });

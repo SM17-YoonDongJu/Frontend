@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 손해사정사(파트너) 마이페이지 로그아웃 E2E (이슈 #155, 데스크톱 노출 #194).
@@ -9,6 +10,10 @@ import { expect, test } from "@playwright/test";
  */
 
 const MYPAGE_PATH = "/partner/mypage";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+});
 
 async function expectLogoutFlow(page: import("@playwright/test").Page) {
   await page.goto(MYPAGE_PATH);

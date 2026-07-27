@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 받은 제안 목록 E2E (happy-path, 이슈 #18/#123).
@@ -14,6 +15,10 @@ import { expect, test } from "@playwright/test";
 // 채팅·제안 공용 시드 사건(reportId) — handlers.ts DASHBOARD_PROPOSABLE_REPORT_ID
 const REPORT_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const PATH = `/customer/proposals/${REPORT_ID}`;
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("진입하면 받은 제안 목록과 분석 대상 정보가 보인다", async ({ page }) => {
   await page.goto(PATH);

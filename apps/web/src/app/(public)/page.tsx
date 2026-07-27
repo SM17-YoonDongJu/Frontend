@@ -4,7 +4,6 @@ import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { CtaBandSection } from "./_components/CtaBandSection";
 import { HeroSection } from "./_components/HeroSection";
 import { HowItWorksSection } from "./_components/HowItWorksSection";
-import { LandingRedirectGate } from "./_components/LandingRedirectGate";
 import { MobileFeatureCards } from "./_components/MobileFeatureCards";
 import { MobileHero } from "./_components/MobileHero";
 import { ReportTypesSection } from "./_components/ReportTypesSection";
@@ -12,7 +11,7 @@ import { ReportTypesSection } from "./_components/ReportTypesSection";
 /** 온보딩(랜딩) 페이지. md↑ PC 시안 / md↓ 모바일 시안(문구가 다른 별도 변형). */
 export default function HomePage() {
   return (
-    <LandingRedirectGate>
+    <>
       <div className="hidden md:block">
         <HeroSection />
         <HowItWorksSection />
@@ -39,6 +38,6 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
-    </LandingRedirectGate>
+    </>
   );
 }

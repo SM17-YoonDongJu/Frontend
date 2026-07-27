@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 알림 페이지 E2E (이슈 #49).
@@ -10,6 +11,10 @@ import { expect, test } from "@playwright/test";
  */
 
 const PATH = "/notifications";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("진입하면 알림 목록과 날짜 그룹이 보인다", async ({ page }) => {
   await page.goto(PATH);

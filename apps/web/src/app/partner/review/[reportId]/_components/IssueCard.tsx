@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/shared/lib/utils";
+import { formatManwon } from "@/shared/lib/format-amount";
 import { Input } from "@/shared/ui/Input";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 import { Scale } from "@/shared/ui/icons/Scale";
@@ -12,7 +13,7 @@ import { IssueExcludeForm } from "./IssueExcludeForm";
 
 function formatImpact(won: number | null): string | null {
   if (won == null || won === 0) return null;
-  const manwon = Math.round(Math.abs(won) / 10_000).toLocaleString("ko-KR");
+  const manwon = formatManwon(Math.abs(won));
   return won > 0 ? `+약 ${manwon}만` : `-약 ${manwon}만`;
 }
 

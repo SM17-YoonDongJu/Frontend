@@ -1,11 +1,9 @@
+import { formatManwon } from "@/shared/lib/format-amount";
+
 function clamp01(value: number): number {
   if (value < 0) return 0;
   if (value > 1) return 1;
   return value;
-}
-
-export function toManwon(won: number): string {
-  return Math.round(won / 10_000).toLocaleString("ko-KR");
 }
 
 interface OfferRangeBarProps {
@@ -28,7 +26,7 @@ export function OfferRangeBar({ min, max, offeredAmount, markerLabel }: OfferRan
   const hasMarker = offeredAmount !== null && max > 0;
   const markerRatio = hasMarker ? clamp01(offeredAmount / max) : 0;
   const markerPercent = `${markerRatio * 100}%`;
-  const label = markerLabel === undefined ? `제안 ${toManwon(offeredAmount ?? 0)}만` : markerLabel;
+  const label = markerLabel === undefined ? `제안 ${formatManwon(offeredAmount ?? 0)}만` : markerLabel;
 
   return (
     <div className="relative h-2.5">

@@ -3,7 +3,7 @@ import { reportListStatusSchema } from "@/app/customer/_shared/model/report-list
 
 /**
  * 고객 홈 대시보드 BFF(GET /users/me/dashboard) 응답 거울 — 이슈 #142.
- * 🏷 백엔드 확정 대기. 단일 진실: .pr-assets/api-spec-draft-customer-dashboard-bff.md.
+ * BE 합의(PR #142·구현 PR #171): reportCount·activeReport·proposalSummary 3필드만. todos는 미제공(액션센터가 파생).
  * 봉투(status/message/code)는 fetchJson이 해제 — 여기선 data 페이로드만 모델링(snake→camel도 fetchJson 담당).
  */
 export const dashboardActiveReportSchema = z.object({
@@ -22,40 +22,27 @@ export const dashboardProposalItemSchema = z.object({
   nickname: z.string(),
   career: z.number().int().nonnegative(),
   speciality: z.string(),
-  estimateMinAmount: z.number().int().nonnegative(),
-  estimateMaxAmount: z.number().int().nonnegative(),
+  // 견적 미기입 제안은 null.
+  estimateMinAmount: z.number().int().nonnegative().nullable(),
+  estimateMaxAmount: z.number().int().nonnegative().nullable(),
 });
 
 export const dashboardProposalSummarySchema = z.object({
   count: z.number().int().nonnegative(),
-  minAmount: z.number().int().nonnegative(),
-  maxAmount: z.number().int().nonnegative(),
-  avgAmount: z.number().int().nonnegative(),
+  // 견적 미기입 제안만 있으면 집계 금액 null.
+  minAmount: z.number().int().nonnegative().nullable(),
+  maxAmount: z.number().int().nonnegative().nullable(),
+  avgAmount: z.number().int().nonnegative().nullable(),
   items: z.array(dashboardProposalItemSchema),
-});
-
-export const dashboardUnreadChatSchema = z.object({
-  chatRoomId: z.uuid(),
-  adjusterNickname: z.string(),
-  lastMessage: z.string(),
-});
-
-export const dashboardTodosSchema = z.object({
-  unreadProposalCount: z.number().int().nonnegative(),
-  unreadReviewCompleteCount: z.number().int().nonnegative(),
-  unreadChat: dashboardUnreadChatSchema.nullable(),
 });
 
 export const dashboardSchema = z.object({
   reportCount: z.number().int().nonnegative(),
   activeReport: dashboardActiveReportSchema.nullable(),
   proposalSummary: dashboardProposalSummarySchema.nullable(),
-  todos: dashboardTodosSchema,
 });
 
 export type Dashboard = z.infer<typeof dashboardSchema>;
 export type DashboardActiveReport = z.infer<typeof dashboardActiveReportSchema>;
 export type DashboardProposalSummary = z.infer<typeof dashboardProposalSummarySchema>;
 export type DashboardProposalItem = z.infer<typeof dashboardProposalItemSchema>;
-export type DashboardTodos = z.infer<typeof dashboardTodosSchema>;
-export type DashboardUnreadChat = z.infer<typeof dashboardUnreadChatSchema>;

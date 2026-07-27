@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 고객 마이페이지 로그아웃 E2E (이슈 #155).
@@ -14,6 +15,10 @@ import { expect, test } from "@playwright/test";
  */
 
 const MYPAGE_PATH = "/customer/mypage";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 async function clickLogout(page: import("@playwright/test").Page) {
   const logoutButton = page

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 앱(WebView) 셸 E2E (이슈 #103) — 웹 헤더·푸터 숨김 + 역할별 하단 탭바.
@@ -42,6 +43,7 @@ test.describe("고객 · 앱 UA", () => {
   test("로그인 상태로 대시보드에 들어가면 헤더·푸터 없이 4탭 탭바가 보이고 홈이 활성이다", async ({
     page,
   }) => {
+    await setAuthCookie(page, "USER");
     await page.goto("/customer/dashboard");
 
     const bar = tabBar(page);
@@ -60,11 +62,13 @@ test.describe("고객 · 앱 UA", () => {
   });
 
   test("리포트 상세에 들어가면 탭바가 숨겨진다", async ({ page }) => {
+    await setAuthCookie(page, "USER");
     await gotoAwaitingMe(page, "/customer/report/test-id-123");
     await expect(tabBar(page)).toHaveCount(0);
   });
 
   test("분석 신청 퍼널에 들어가면 탭바가 숨겨진다", async ({ page }) => {
+    await setAuthCookie(page, "USER");
     await gotoAwaitingMe(page, "/customer/adjust-request");
     await expect(tabBar(page)).toHaveCount(0);
   });
@@ -83,6 +87,7 @@ test.describe("사정사 · 앱 UA", () => {
     await page.addInitScript(() => {
       window.localStorage.setItem("mock:userType", "adjuster");
     });
+    await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   });
 
   test("사정사로 홈에 들어가면 검수 포함 4탭 탭바가 보이고 홈이 활성이다", async ({
@@ -119,6 +124,7 @@ test.describe("데스크톱 회귀 · 일반 UA", () => {
   test.use({ userAgent: DESKTOP_UA, viewport: DESKTOP_VIEWPORT });
 
   test("데스크톱에서는 헤더·푸터가 유지되고 탭바가 없다", async ({ page }) => {
+    await setAuthCookie(page, "USER");
     await gotoAwaitingMe(page, "/customer/dashboard");
 
     await expect(page.getByRole("banner")).toBeVisible();

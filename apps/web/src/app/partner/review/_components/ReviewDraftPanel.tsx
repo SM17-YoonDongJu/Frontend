@@ -4,14 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Suspense, useState } from "react";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
+import { formatManwon } from "@/shared/lib/format-amount";
 import { Button, buttonVariants } from "@/shared/ui/Button";
 import { toast } from "@/shared/ui/toast";
 import { useDraftPreview } from "../_api/use-draft-preview";
 import { useHoldReview } from "../_api/use-hold-review";
 import type { ReviewListItem } from "../../_shared/model/types";
 import { HoldReasonDialog } from "./HoldReasonDialog";
-
-const toManwon = (won: number) => Math.round(won / 10_000).toLocaleString("ko-KR");
 
 export function ReviewDraftPanel({ item }: { item: ReviewListItem | null }) {
   return (
@@ -59,7 +58,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
 
         <p className="mt-4 text-[0.8125rem] text-white/60">검토 가능한 예상 보상 범위</p>
         <p className="mt-1 text-[1.75rem] font-bold leading-tight">
-          {toManwon(data.claimedMinAmount)} – {toManwon(data.claimedMaxAmount)}
+          {formatManwon(data.claimedMinAmount)} – {formatManwon(data.claimedMaxAmount)}
           <span className="ml-1 text-base font-medium text-white/80">만원</span>
         </p>
 
@@ -70,9 +69,9 @@ function DraftContent({ item }: { item: ReviewListItem }) {
           />
         </div>
         <div className="mt-2 flex items-center justify-between text-xs">
-          <span className="text-white/60">보험사 제안 {toManwon(offered)}만</span>
+          <span className="text-white/60">보험사 제안 {formatManwon(offered)}만</span>
           {item.offerHeadroom != null && (
-            <span className="font-semibold text-gold-2">+ 약 {toManwon(item.offerHeadroom)}만</span>
+            <span className="font-semibold text-gold-2">+ 약 {formatManwon(item.offerHeadroom)}만</span>
           )}
         </div>
       </div>

@@ -259,6 +259,16 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 
 ⚠️ 카드용 사고유형·`confirmedMin/MaxAmount`·평점(`rating`)은 명세 list[]에 미존재 → zod optional + MSW 목킹, 백엔드 확장 요청. 상세 이동 키(reportId) 미존재 → placeholder 보류.
 
+## 9. 금액 포맷 유틸 (#190, 사용자 확정 2026-07-27)
+
+| 개념 | 식별자 | 위치 |
+|------|--------|------|
+| 만원 단일 요약 | `formatManwon(won)` | `shared/lib/format-amount.ts` |
+| 만원 범위 요약 | `formatManwonRange(min, max)` | 〃 |
+| 원 전액(입력/확인 전용) | `formatWon(won)` | 〃 |
+
+- 표시 기본=만원 요약, 입력/확인 단계만 `formatWon`. 로케일 `"ko-KR"` 고정(하이드레이션 불일치 방지).
+
 ## 출처
 
 - API 명세서 DB: `collection://7ce30798-f08f-82ee-81bb-875a29ed96bd` (필드·enum 단일 진실)
