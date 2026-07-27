@@ -9,7 +9,8 @@ export function getRoleFromAccessToken(token: string): UserRole | null {
   if (!payloadSegment) return null;
 
   try {
-    const base64 = payloadSegment.replace(/-/g, "+").replace(/_/g, "/");
+    const unpadded = payloadSegment.replace(/-/g, "+").replace(/_/g, "/");
+    const base64 = unpadded.padEnd(unpadded.length + ((4 - (unpadded.length % 4)) % 4), "=");
     const json = atob(base64);
     const payload: unknown = JSON.parse(json);
     if (typeof payload !== "object" || payload === null || !("role" in payload)) {
