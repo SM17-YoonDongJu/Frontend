@@ -5,7 +5,7 @@ import { expect, test } from "@playwright/test";
  *
  * 원칙: 핵심 사용자 흐름만 — 모바일·데스크톱 뷰포트 각각에서 로그아웃 버튼을 검증한다.
  * 로그아웃 성공 시 MSW가 localStorage["mock:loggedOut"]을 세팅해 GET /adjusters/me/mypage가
- * 401 LOGIN_REQUIRED를 돌려주므로, 뒤로 가기 시 로그인 안내(#148)로 이동한다.
+ * 401 LOGIN_REQUIRED를 돌려주므로, 로그아웃 후 마이페이지에 재진입하면 로그인 안내(#148)로 이동한다.
  */
 
 const MYPAGE_PATH = "/partner/mypage";
