@@ -3,14 +3,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
-import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
 import { MessageSquare } from "@/shared/ui/icons/MessageSquare";
 import { FileText } from "@/shared/ui/icons/FileText";
+import { useChatList } from "@/shared/api/chat/use-chat-list";
+import type { ChatRoom } from "@/shared/api/chat/chat.schema";
 import { useDashboard } from "../_api/use-dashboard";
 import type {
   DashboardActiveReport,
   DashboardProposalSummary,
-  DashboardTodos,
 } from "../_model/dashboard.schema";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
 import { formatManwon } from "@/shared/lib/format-amount";
@@ -28,15 +28,16 @@ interface ActionTodo {
   subDescription: string;
 }
 
+// BFF는 reportCount·activeReport·proposalSummary만 내려줌 — 할 일은 제안 집계·채팅 미읽음에서 파생.
 function buildTodos(
-  todos: DashboardTodos,
   activeReport: DashboardActiveReport | null,
   proposalSummary: DashboardProposalSummary | null,
+  unreadRoom: ChatRoom | null,
 ): ActionTodo[] {
   const list: ActionTodo[] = [];
 
-  if (todos.unreadProposalCount > 0) {
-    const count = todos.unreadProposalCount;
+  if (proposalSummary && proposalSummary.count > 0) {
+    const count = proposalSummary.count;
     list.push({
       key: "proposal",
       href: DASHBOARD_LINKS.proposalsList,
@@ -46,7 +47,7 @@ function buildTodos(
         </>
       ),
       description:
-        activeReport && proposalSummary ? (
+        activeReport && proposalSummary.maxAmount != null ? (
           <>
             {activeReport.title} · 최고 제안가{" "}
             <span className="font-bold text-gold-2">{formatManwon(proposalSummary.maxAmount)}만원</span>{" "}
@@ -62,39 +63,23 @@ function buildTodos(
     });
   }
 
-  if (todos.unreadReviewCompleteCount > 0) {
-    const count = todos.unreadReviewCompleteCount;
-    list.push({
-      key: "review",
-      href: DASHBOARD_LINKS.allReports,
-      heading: (
-        <>
-          검수 완료 리포트 <span className="text-gold-2">{count}건</span>
-        </>
-      ),
-      description: <>검수가 끝난 리포트에서 예상 보상 범위와 쟁점을 확인해 보세요.</>,
-      ctaLabel: "리포트 확인",
-      subIcon: <CheckCircle className="text-[1rem]" />,
-      subTitle: `검수 완료 리포트 ${count}건`,
-      subDescription: "검수 결과 확인",
-    });
-  }
-
-  const { unreadChat } = todos;
-  if (unreadChat) {
+  if (unreadRoom) {
+    const description = unreadRoom.lastMessage
+      ? `“${unreadRoom.lastMessage}”`
+      : "새 메시지를 확인해 보세요.";
     list.push({
       key: "chat",
-      href: DASHBOARD_LINKS.chatRoom(unreadChat.chatRoomId),
+      href: DASHBOARD_LINKS.chatRoom(unreadRoom.chatRoomId),
       heading: (
         <>
-          {unreadChat.adjusterNickname} 사정사 <span className="text-gold-2">새 메시지</span>
+          {unreadRoom.counterpart.name} <span className="text-gold-2">새 메시지</span>
         </>
       ),
-      description: <>“{unreadChat.lastMessage}”</>,
+      description: <>{description}</>,
       ctaLabel: "채팅 열기",
       subIcon: <MessageSquare className="text-[1rem]" />,
-      subTitle: `${unreadChat.adjusterNickname} 사정사 새 메시지`,
-      subDescription: `“${unreadChat.lastMessage}”`,
+      subTitle: `${unreadRoom.counterpart.name} 새 메시지`,
+      subDescription: description,
     });
   }
 
@@ -124,7 +109,9 @@ function buildInfoTodo(activeReport: DashboardActiveReport): ActionTodo {
 
 export function ActionCenterCard() {
   const { data } = useDashboard();
-  const todos = buildTodos(data.todos, data.activeReport, data.proposalSummary);
+  const { data: chatRooms } = useChatList();
+  const unreadRoom = chatRooms.find((room) => room.unreadCount > 0) ?? null;
+  const todos = buildTodos(data.activeReport, data.proposalSummary, unreadRoom);
 
   let main: ActionTodo | null = null;
   let subTodos: ActionTodo[] = [];

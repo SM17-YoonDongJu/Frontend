@@ -41,14 +41,14 @@ export function ProposalCompareCard() {
         </div>
       </div>
 
-      <div className="mt-3">
-        <OfferRangeBar
-          min={summary.minAmount}
-          max={summary.maxAmount}
-          offeredAmount={summary.avgAmount}
-          markerLabel={null}
-        />
-      </div>
+          <div className="mt-3">
+            <OfferRangeBar
+              min={summary.minAmount}
+              max={summary.maxAmount}
+              offeredAmount={summary.avgAmount}
+              markerLabel={null}
+            />
+          </div>
 
       <div className="mt-2 flex items-center justify-between text-[0.75rem] text-ink-3">
         <span>제안 {summary.count}건</span>
@@ -73,7 +73,7 @@ export function ProposalCompareCard() {
                 경력 {item.career}년 · {item.speciality} 전문
               </p>
             </div>
-            {item.estimateMaxAmount === summary.maxAmount && (
+            {item.estimateMaxAmount != null && item.estimateMaxAmount === summary.maxAmount && (
               <span className="shrink-0 rounded-tag bg-gold-soft px-[0.4375rem] py-[0.1875rem] text-[0.6875rem] font-semibold text-gold-ink">
                 최고가
               </span>
