@@ -5,9 +5,11 @@ export function formatManwon(won: number): string {
 }
 
 export function formatManwonRange(min: number, max: number): string {
-  return max !== min
-    ? `${formatManwon(min)}~${formatManwon(max)}만원`
-    : `${formatManwon(min)}만원`;
+  const formattedMin = formatManwon(min);
+  const formattedMax = formatManwon(max);
+  return formattedMax !== formattedMin
+    ? `${formattedMin}~${formattedMax}만원`
+    : `${formattedMin}만원`;
 }
 
 export function formatWon(won: number): string {

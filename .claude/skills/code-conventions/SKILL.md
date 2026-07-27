@@ -80,7 +80,7 @@ src/
 - **데이터 계약은 원(won) 단위 정수** — 목 데이터·zod 스키마 전부 원 단위(`12_000_000`). 화면 코드에서 임의 단위 가공 금지.
 - **표시 기본은 만원 요약**(목록·카드·대시보드·PDF 요약), **원 전액 표기는 금액 입력 필드·입력 확인 단계 한정**("원" 접미사 명시). 같은 값이 화면마다 다른 단위로 보이면 안 된다.
 - **금액 포맷은 `src/shared/lib` 공용 유틸로만.** 컴포넌트 안 인라인 `/10_000` 나눗셈·`toLocaleString()` 직접 호출 금지 — 로케일은 유틸에서 `"ko-KR"` 고정(서버/브라우저 하이드레이션 불일치 방지).
-- 기존 중복 4곳(`AmountRange`·`ActionCenterCard`·`ReportCard`·`ReportPdfDocument`)은 #190에서 유틸로 회수 예정 — **새 코드가 이 인라인 패턴을 따라 하지 말 것.** 유틸 함수명은 식별자 사전 등재 후 확정.
+- 기존 중복 13곳(`AmountRange`·`ActionCenterCard`·`ReportCard`·`ReportPdfDocument` 등)은 #190에서 `formatManwon`/`formatManwonRange`/`formatWon` 유틸로 회수 완료 — **새 코드가 인라인 `/10_000`·로컬 `toManwon` 패턴을 다시 만들지 말 것.**
 
 ## 코드 스타일 (oxlint/prettier 프리셋 준수)
 - `prefer-const`, `eqeqeq: smart`, `no-console`(warn/error만 허용)

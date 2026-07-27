@@ -4,8 +4,6 @@ import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 import { formatManwon } from "@/shared/lib/format-amount";
 import { PayoutRangeBar } from "./PayoutRangeBar";
 
-const WON_PER_MANWON = 10_000;
-
 const CONFIDENCE_NOTE: Record<ConfidenceLevel, string> = {
   HIGH: "신뢰도 높음 — 현재 자료 기준 단계적으로 검토하는 보수적 범위입니다.",
   MEDIUM: "신뢰도 보통 — 추가 자료 확보 시 범위가 조정될 수 있어요.",
@@ -25,11 +23,9 @@ export function EstimatedPayout({
   offeredAmount,
   confidenceLevel,
 }: EstimatedPayoutProps) {
-  const shortfallManwon =
-    offeredAmount != null && claimedMinAmount != null
-      ? Math.round((claimedMinAmount - offeredAmount) / WON_PER_MANWON)
-      : 0;
-  const hasShortfall = shortfallManwon > 0;
+  const shortfallAmount =
+    offeredAmount != null && claimedMinAmount != null ? claimedMinAmount - offeredAmount : null;
+  const hasShortfall = shortfallAmount != null && shortfallAmount > 0;
 
   return (
     <section className="rounded-card-lg bg-navy p-[1.375rem] text-white lg:p-6">
@@ -81,7 +77,7 @@ export function EstimatedPayout({
         {hasShortfall && (
           <p className="mt-4 rounded-[0.6875rem] bg-white/[.07] px-[0.8125rem] py-[0.6875rem] text-[0.75rem] text-white/80">
             제안 금액이 예상 범위보다{" "}
-            <strong className="font-bold text-gold-2">약 {shortfallManwon.toLocaleString("ko-KR")}만원</strong>{" "}
+            <strong className="font-bold text-gold-2">약 {formatManwon(shortfallAmount ?? 0)}만원</strong>{" "}
             낮을 수 있어요.
           </p>
         )}

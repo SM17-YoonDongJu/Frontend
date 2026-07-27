@@ -21,6 +21,12 @@ function issueTags(issue: IssueItem): string[] {
   return issue.tags ?? [];
 }
 
+function formatImpact(won: number | null | undefined): string | null {
+  if (won == null || won === 0) return null;
+  const manwon = formatManwon(Math.abs(won));
+  return won > 0 ? `+ 약 ${manwon}만` : `- 약 ${manwon}만`;
+}
+
 export interface IssueReviewProps {
   issues: IssueItem[];
 }
@@ -64,9 +70,9 @@ export function IssueReview({ issues }: IssueReviewProps) {
                 <span className="flex-1">
                   <span className="flex items-start justify-between gap-2">
                     <span className="text-[0.89rem] font-bold text-ink">{issue.title}</span>
-                    {issue.impactAmount != null && (
+                    {formatImpact(issue.impactAmount) && (
                       <span className="shrink-0 font-serif text-[0.9rem] font-bold text-gold-ink">
-                        + 약 {formatManwon(issue.impactAmount)}만
+                        {formatImpact(issue.impactAmount)}
                       </span>
                     )}
                   </span>
