@@ -13,6 +13,7 @@ import { toast } from "@/shared/ui/toast";
 import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
 import { useViewedProposals } from "../_hooks/use-viewed-proposals";
 import type { Proposal } from "../../../_shared/model/proposal.schema";
+import { formatManwon } from "@/shared/lib/format-amount";
 
 interface ProposalCardProps {
   reportId: string;
@@ -21,12 +22,9 @@ interface ProposalCardProps {
   otherProposalNames: string[];
 }
 
-const manWonFormatter = new Intl.NumberFormat("ko-KR");
-
 function formatEstimateRange(min?: number | null, max?: number | null) {
   if (min == null || max == null) return null;
-  const toMan = (value: number) => manWonFormatter.format(Math.round(value / 10_000));
-  return `${toMan(min)} – ${toMan(max)}만`;
+  return `${formatManwon(min)} – ${formatManwon(max)}만`;
 }
 
 function formatCredential(career?: number | null, speciality?: string | null) {

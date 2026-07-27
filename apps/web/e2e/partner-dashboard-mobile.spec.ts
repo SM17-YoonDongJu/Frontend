@@ -102,3 +102,14 @@ test("대시보드 요약 로드에 실패하면 섹션 에러가 표시된다",
     page.getByRole("button", { name: "다시 시도" }).filter({ visible: true }),
   ).toBeVisible();
 });
+
+test("헤더 로고를 누르면 랜딩을 거치지 않고 파트너 홈에 머문다", async ({ page }) => {
+  await page.goto(PATH);
+
+  const logo = page.locator("header").getByRole("link", { name: /바른보상/ });
+  await expect(logo).toHaveAttribute("href", "/partner");
+  await expect(async () => {
+    await logo.click();
+    await expect(page).toHaveURL(/\/partner$/);
+  }).toPass({ timeout: 10000 });
+});

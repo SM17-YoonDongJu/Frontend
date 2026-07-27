@@ -111,3 +111,14 @@ test("전부 종료: 진행 중 분석·제안이 없으면 타임라인·제안
     page.getByRole("heading", { name: "내 분석 리포트" }).filter({ visible: true }),
   ).toBeVisible();
 });
+
+test("헤더 로고를 누르면 랜딩을 거치지 않고 대시보드에 머문다", async ({ page }) => {
+  await page.goto(PATH);
+
+  const logo = page.locator("header").getByRole("link", { name: "바른보상" });
+  await expect(logo).toHaveAttribute("href", "/customer/dashboard");
+  await expect(async () => {
+    await logo.click();
+    await expect(page).toHaveURL(/\/customer\/dashboard/);
+  }).toPass({ timeout: 10000 });
+});

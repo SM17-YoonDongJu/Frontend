@@ -1,4 +1,5 @@
 import { accidentTypeLabel } from "@/shared/model/accident-type";
+import { formatManwon } from "@/shared/lib/format-amount";
 import { Chevron } from "@/shared/ui/icons/Chevron";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
 import type { ReviewListItem } from "../../_shared/model/types";
@@ -9,8 +10,6 @@ const TYPE_TONE: Record<string, Tone> = {
   disability: "gold",
   medical_indemnity: "green",
 };
-
-const toManwon = (won: number) => Math.round(won / 10_000).toLocaleString("ko-KR");
 
 function isNew(createdAt: string) {
   return Date.now() - new Date(createdAt).getTime() < 2 * 24 * 60 * 60 * 1000;
@@ -64,7 +63,7 @@ export function DesktopReviewCaseCard({ item, selected, onSelect }: Props) {
           <div>
             <p className="text-xs text-ink-3">예상 보상 범위</p>
             <p className="mt-0.5 font-semibold tabular-nums text-ink">
-              {toManwon(item.claimedMinAmount!)} – {toManwon(item.claimedMaxAmount!)}만
+              {formatManwon(item.claimedMinAmount!)} – {formatManwon(item.claimedMaxAmount!)}만
             </p>
           </div>
         )}
@@ -72,7 +71,7 @@ export function DesktopReviewCaseCard({ item, selected, onSelect }: Props) {
           <div className="border-l border-line pl-6">
             <p className="text-xs text-ink-3">제안 대비</p>
             <p className="mt-0.5 font-semibold tabular-nums text-gold">
-              + 약 {toManwon(item.offerHeadroom)}만
+              + 약 {formatManwon(item.offerHeadroom)}만
             </p>
           </div>
         )}

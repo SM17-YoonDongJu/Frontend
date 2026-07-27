@@ -1,7 +1,5 @@
 import { Avatar } from "@/shared/ui/Avatar";
-
-const WON_PER_MANWON = 10_000;
-const toManwon = (won: number) => Math.round(won / WON_PER_MANWON).toLocaleString("ko-KR");
+import { formatManwon } from "@/shared/lib/format-amount";
 
 export interface CaseSummaryCardProps {
   adjusterName: string;
@@ -25,7 +23,7 @@ export function CaseSummaryCard({ adjusterName, subtitle, confirmedAmount }: Cas
       {confirmedAmount != null && (
         <div className="hidden shrink-0 flex-col items-end lg:flex">
           <span className="text-[0.75rem] text-ink-3">확정 보상금</span>
-          <span className="font-serif text-[1.1875rem] font-bold text-gold-ink">{toManwon(confirmedAmount)}만 원</span>
+          <span className="font-serif text-[1.1875rem] font-bold text-gold-ink">{formatManwon(confirmedAmount)}만 원</span>
         </div>
       )}
     </div>

@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
+import { formatManwon } from "@/shared/lib/format-amount";
 
 const NOT_PROVIDED = "-";
 
 function toManwon(won: number | null): string {
   if (won == null) return NOT_PROVIDED;
-  return `${Math.round(won / 10_000).toLocaleString("ko-KR")}만원`;
+  return `${formatManwon(won)}만원`;
 }
 
 export interface ClaimInfoSectionProps {
