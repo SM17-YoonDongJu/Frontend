@@ -2,6 +2,7 @@ import { Bell } from "@/shared/ui/icons/Bell";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { User } from "@/shared/ui/icons/User";
+import { LogoutButton } from "./LogoutButton";
 import { MenuRow } from "./MenuRow";
 
 interface MypageMenuListProps {
@@ -43,6 +44,9 @@ export function MypageMenuList({
         onClick={onCredentialClick}
       />
       <MenuRow icon={<User />} title="회원 탈퇴" href="/withdraw" />
+      <div className="md:border-t md:border-line-2 md:px-2.5 md:pt-2 md:pb-1">
+        <LogoutButton />
+      </div>
     </nav>
   );
 }

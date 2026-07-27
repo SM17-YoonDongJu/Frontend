@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useMypage } from "../_api/use-mypage";
 import { usePanelParam } from "@/shared/lib/use-panel-param";
 import { CredentialProofModal } from "./CredentialProofModal";
-import { LogoutButton } from "./LogoutButton";
 import { MonthlyActivityCard } from "./MonthlyActivityCard";
 import { MypageMenuList } from "./MypageMenuList";
 import { NotificationSettingsModal } from "./NotificationSettingsModal";
@@ -42,9 +41,6 @@ export function MypageView() {
             onNotificationClick={() => setNotificationOpen(true)}
             onCredentialClick={() => setCredentialOpen(true)}
           />
-          <div className="mt-4 md:mt-2 md:border-t md:border-line-2 md:pt-2">
-            <LogoutButton />
-          </div>
         </div>
         <div className="order-1 md:order-2">
           <MonthlyActivityCard activity={data.monthlyActivity} />
