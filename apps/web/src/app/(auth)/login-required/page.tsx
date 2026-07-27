@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { cn } from "@/shared/lib/utils";
 import { buttonVariants } from "@/shared/ui/Button";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { HomeLink } from "./_components/HomeLink";
+import { ReturnPathBridge } from "./_components/ReturnPathBridge";
 
 export const metadata: Metadata = {
   title: "로그인 필요",
@@ -13,6 +15,9 @@ export const metadata: Metadata = {
 export default function LoginRequiredPage() {
   return (
     <main className="flex min-h-dvh items-center justify-center bg-paper px-5 py-10 tracking-[-0.01rem]">
+      <Suspense>
+        <ReturnPathBridge />
+      </Suspense>
       <section className="w-full max-w-md rounded-card-lg border border-line bg-card px-7 py-12 text-center shadow-popover sm:px-11">
         <div className="mx-auto flex size-14 items-center justify-center rounded-xl bg-gold text-white">
           <Scale className="size-8" />
