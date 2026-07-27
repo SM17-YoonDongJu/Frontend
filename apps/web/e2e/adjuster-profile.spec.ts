@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 손해사정사 공개 프로필 E2E (happy-path, 이슈 #32).
@@ -12,6 +13,10 @@ const ADJUSTER_ID = "11111111-1111-4111-8111-111111111111";
 const PATH = `/customer/adjusters/${ADJUSTER_ID}`;
 const EMPTY_REVIEWS_ID = "00000000-0000-4000-8000-000000000000";
 const NOT_FOUND_ID = "99999999-9999-4999-8999-999999999999";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("진입하면 프로필 모든 영역이 보인다", async ({ page, isMobile }) => {
   await page.goto(PATH);

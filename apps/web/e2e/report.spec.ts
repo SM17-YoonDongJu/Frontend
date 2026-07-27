@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 고객 리포트 상세 E2E (이슈 #65 모바일 반응형 + 데스크톱 회귀).
@@ -14,6 +15,10 @@ import { expect, test } from "@playwright/test";
  */
 
 const PATH = "/customer/report/test-id-123";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test.describe("모바일 뷰(454px)", () => {
   test.use({ viewport: { width: 454, height: 900 } });

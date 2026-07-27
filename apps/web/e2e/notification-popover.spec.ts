@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 헤더 알림 팝오버 E2E (이슈 #97).
@@ -17,6 +18,9 @@ const PATH = "/partner";
 
 test.describe("PC 알림 팝오버", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
+  test.beforeEach(async ({ page }) => {
+    await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+  });
 
   async function openPopover(page: import("@playwright/test").Page) {
     await page.goto(PATH);
@@ -80,6 +84,9 @@ test.describe("PC 알림 팝오버", () => {
 
 test.describe("PC 고객 헤더", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
+  test.beforeEach(async ({ page }) => {
+    await setAuthCookie(page, "USER");
+  });
 
   test("고객 헤더에서도 팝오버가 열리고 알림 설정은 마이페이지 카드로 이동한다", async ({ page }) => {
     await page.goto("/customer/dashboard");
@@ -104,6 +111,9 @@ test.describe("PC 고객 헤더", () => {
 
 test.describe("모바일", () => {
   test.use({ viewport: { width: 390, height: 844 } });
+  test.beforeEach(async ({ page }) => {
+    await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+  });
 
   test("벨을 누르면 알림 페이지로 이동한다", async ({ page }) => {
     await page.goto(PATH);

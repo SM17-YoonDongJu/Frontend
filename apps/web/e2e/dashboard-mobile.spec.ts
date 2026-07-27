@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 고객 홈 대시보드 개편 E2E — 모바일 (이슈 #142).
@@ -12,6 +13,10 @@ import { expect, test } from "@playwright/test";
 const PATH = "/customer/dashboard";
 
 test.use({ viewport: { width: 390, height: 900 } });
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("진입하면 인사·지금 할 일·제안 비교·빠른 실행이 보인다", async ({ page }) => {
   await page.goto(PATH);

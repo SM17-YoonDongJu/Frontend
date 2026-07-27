@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 고객 홈 대시보드 개편 E2E — 데스크톱 (이슈 #142).
@@ -14,6 +15,10 @@ import { expect, test } from "@playwright/test";
 const PATH = "/customer/dashboard";
 
 test.use({ viewport: { width: 1280, height: 900 } });
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("온보딩: 리포트 0건이면 온보딩 구성이 보이고 첫 분석 시작이 분석 신청으로 이동한다", async ({
   page,

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 손해사정사 찾기 E2E (happy-path + 필터, 이슈 #47).
@@ -21,6 +22,10 @@ const DISABILITY_COUNT = 7; // 후유장해 보유: 정우성·윤지후·한도
 // 모바일 프로젝트(Pixel 7 등)에서도 데스크톱 뷰포트로 고정해 돌리고,
 // 모바일 레이아웃은 아래 "모바일에서는 필터 칩…" 테스트가 뷰포트를 직접 좁혀 검증한다.
 test.use({ viewport: { width: 1280, height: 900 } });
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("진입하면 헤딩·통계 밴드·카드 한 페이지가 보인다", async ({ page }) => {
   await page.goto(PATH);

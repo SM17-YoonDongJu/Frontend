@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 손해사정사(파트너) 마이페이지 로그아웃 E2E (이슈 #155).
@@ -16,6 +17,7 @@ test.use({ viewport: { width: 390, height: 844 } });
 test("로그아웃을 누르면 로그인 화면으로 이동하고, 다시 들어가도 마이페이지가 보이지 않는다", async ({
   page,
 }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(MYPAGE_PATH);
   await expect(page.getByRole("heading", { name: /김상정 사정사/ })).toBeVisible();
 

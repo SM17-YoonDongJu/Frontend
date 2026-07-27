@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 받은 제안 목록(요청건별) E2E (happy-path, 이슈 #78/#154).
@@ -13,6 +14,10 @@ import { expect, test } from "@playwright/test";
 const PATH = "/customer/proposals";
 // 기본 MSW 시드 첫 카드(제안 도착)의 reportId — handlers.ts DASHBOARD_PROPOSABLE_REPORT_ID(#157 정합)
 const ARRIVED_REPORT_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("진입하면 요청건별 받은 제안 카드가 보인다", async ({ page }) => {
   await page.goto(PATH);

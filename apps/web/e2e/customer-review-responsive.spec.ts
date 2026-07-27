@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 고객 리뷰 작성 화면 반응형 E2E (이슈 #76).
@@ -11,6 +12,10 @@ import { expect, test } from "@playwright/test";
 
 const REVIEW_PATH = "/customer/report/test-id-123/review";
 const DONE_PATH = "/customer/report/test-id-123/review/done";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test.describe("모바일 뷰(454px)", () => {
   test.use({ viewport: { width: 454, height: 900 } });

@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 파트너 대시보드 모바일 E2E (happy-path CUJ, 이슈 #45).
@@ -18,6 +19,10 @@ const PATH = "/partner";
 
 // 모바일 트리(md:hidden, <768px)를 강제로 렌더 — 프로젝트 프리셋 뷰포트를 덮어쓴다.
 test.use({ viewport: { width: 402, height: 900 } });
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+});
 
 const visibleText = (page: Page, text: string | RegExp, exact?: boolean): Locator =>
   page.getByText(text, exact ? { exact } : undefined).filter({ visible: true });

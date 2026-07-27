@@ -1,4 +1,5 @@
 import { devices, expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 앱 웹뷰 OAuth 콜백 분기 E2E (이슈 #178).
@@ -48,6 +49,8 @@ test.describe("앱 웹뷰 내 콜백", () => {
   test("앱 웹뷰 안에서는 state 접두어와 무관하게 교환이 완료되고 홈으로 이동한다", async ({
     page,
   }) => {
+    // 콜백 성공 후 도착지(/customer/dashboard)는 미들웨어 보호 라우트 — MSW는 실제 쿠키를 못 심으므로 직접 주입.
+    await setAuthCookie(page, "USER");
     await page.goto("/login/oauth2/code/kakao?code=valid&state=app.s1");
 
     await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 15000 });
