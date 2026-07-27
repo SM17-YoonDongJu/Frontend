@@ -42,14 +42,13 @@ export function MypageView() {
             onNotificationClick={() => setNotificationOpen(true)}
             onCredentialClick={() => setCredentialOpen(true)}
           />
+          <div className="mt-4 md:mt-2 md:border-t md:border-line-2 md:pt-2">
+            <LogoutButton />
+          </div>
         </div>
         <div className="order-1 md:order-2">
           <MonthlyActivityCard activity={data.monthlyActivity} />
         </div>
-      </div>
-
-      <div className="mt-4">
-        <LogoutButton />
       </div>
 
       <NotificationSettingsModal
