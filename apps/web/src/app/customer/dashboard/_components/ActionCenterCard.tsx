@@ -13,10 +13,9 @@ import type {
   DashboardTodos,
 } from "../_model/dashboard.schema";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
+import { formatManwon } from "@/shared/lib/format-amount";
 
 const MAX_SUB_TODOS = 2;
-
-const toManwon = (won: number) => Math.round(won / 10_000).toLocaleString("ko-KR");
 
 interface ActionTodo {
   key: string;
@@ -50,7 +49,7 @@ function buildTodos(
         activeReport && proposalSummary ? (
           <>
             {activeReport.title} · 최고 제안가{" "}
-            <span className="font-bold text-gold-2">{toManwon(proposalSummary.maxAmount)}만원</span>{" "}
+            <span className="font-bold text-gold-2">{formatManwon(proposalSummary.maxAmount)}만원</span>{" "}
             — 제안을 비교하고 나에게 맞는 사정사를 선택해 보세요.
           </>
         ) : (

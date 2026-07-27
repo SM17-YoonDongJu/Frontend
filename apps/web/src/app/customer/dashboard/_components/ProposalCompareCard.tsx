@@ -4,7 +4,8 @@ import Link from "next/link";
 import { Avatar } from "@/shared/ui/Avatar";
 import { useDashboard } from "../_api/use-dashboard";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
-import { OfferRangeBar, toManwon } from "./OfferRangeBar";
+import { formatManwon } from "@/shared/lib/format-amount";
+import { OfferRangeBar } from "./OfferRangeBar";
 
 export function ProposalCompareCard() {
   const { data } = useDashboard();
@@ -29,13 +30,13 @@ export function ProposalCompareCard() {
         <div>
           <p className="text-[0.75rem] font-medium text-ink-3">최저 제안가</p>
           <p className="mt-1 font-serif text-[1.375rem] font-bold text-ink">
-            {toManwon(summary.minAmount)}만원
+            {formatManwon(summary.minAmount)}만원
           </p>
         </div>
         <div className="text-right">
           <p className="text-[0.75rem] font-medium text-ink-3">최고 제안가</p>
           <p className="mt-1 font-serif text-[1.375rem] font-bold text-gold-ink">
-            {toManwon(summary.maxAmount)}만원
+            {formatManwon(summary.maxAmount)}만원
           </p>
         </div>
       </div>
@@ -51,7 +52,7 @@ export function ProposalCompareCard() {
 
       <div className="mt-2 flex items-center justify-between text-[0.75rem] text-ink-3">
         <span>제안 {summary.count}건</span>
-        <span>평균 {toManwon(summary.avgAmount)}만원</span>
+        <span>평균 {formatManwon(summary.avgAmount)}만원</span>
       </div>
 
       <ul className="mt-[1.125rem] hidden border-t border-line-2 md:block">
@@ -80,7 +81,7 @@ export function ProposalCompareCard() {
             <span
               className={`ml-auto font-serif text-base font-bold ${item.estimateMaxAmount === summary.maxAmount ? "text-gold-ink" : "text-ink"}`}
             >
-              {toManwon(item.estimateMaxAmount)}만원
+              {formatManwon(item.estimateMaxAmount)}만원
             </span>
           </li>
         ))}

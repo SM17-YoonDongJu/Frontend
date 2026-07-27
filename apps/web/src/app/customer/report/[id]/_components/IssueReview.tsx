@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
+import { formatManwon } from "@/shared/lib/format-amount";
 import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
 import type { IssueItem } from "../_model/types";
@@ -65,7 +66,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
                     <span className="text-[0.89rem] font-bold text-ink">{issue.title}</span>
                     {issue.impactAmount != null && (
                       <span className="shrink-0 font-serif text-[0.9rem] font-bold text-gold-ink">
-                        + 약 {issue.impactAmount.toLocaleString("ko-KR")}만
+                        + 약 {formatManwon(issue.impactAmount)}만
                       </span>
                     )}
                   </span>

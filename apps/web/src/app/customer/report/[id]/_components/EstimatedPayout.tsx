@@ -1,11 +1,10 @@
 import { AmountRange } from "@/shared/ui/AmountRange";
 import { ConfidenceGauge, type ConfidenceLevel } from "@/shared/ui/ConfidenceGauge";
 import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
+import { formatManwon } from "@/shared/lib/format-amount";
 import { PayoutRangeBar } from "./PayoutRangeBar";
 
 const WON_PER_MANWON = 10_000;
-
-const toManwon = (won: number) => Math.round(won / WON_PER_MANWON).toLocaleString("ko-KR");
 
 const CONFIDENCE_NOTE: Record<ConfidenceLevel, string> = {
   HIGH: "신뢰도 높음 — 현재 자료 기준 단계적으로 검토하는 보수적 범위입니다.",
@@ -57,7 +56,7 @@ export function EstimatedPayout({
         <p className="font-serif text-[2.0625rem] font-bold leading-tight">
           {claimedMinAmount != null && claimedMaxAmount != null ? (
             <>
-              {toManwon(claimedMinAmount)} – {toManwon(claimedMaxAmount)}
+              {formatManwon(claimedMinAmount)} – {formatManwon(claimedMaxAmount)}
               <span className="ml-1 text-[1.1875rem] font-semibold text-white/70">만원</span>
             </>
           ) : (
