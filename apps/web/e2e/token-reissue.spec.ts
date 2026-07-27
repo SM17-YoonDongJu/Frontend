@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 액세스 토큰 자동 재발급·요청 재시도 E2E (이슈 #109).
@@ -39,6 +40,7 @@ function reissueCount(page: Page) {
 }
 
 test("액세스 토큰이 만료돼도 자동 재발급 후 대시보드가 정상으로 보인다", async ({ page }) => {
+  await setAuthCookie(page, "USER");
   await injectScenario(page, "once");
 
   await page.goto(DASHBOARD_PATH);
@@ -53,6 +55,7 @@ test("액세스 토큰이 만료돼도 자동 재발급 후 대시보드가 정�
 });
 
 test("여러 요청이 동시에 만료 응답을 받아도 재발급은 한 번만 호출된다", async ({ page }) => {
+  await setAuthCookie(page, "USER");
   await injectScenario(page, "once");
 
   // 실제로 두 개 이상의 요청이 401을 받았는지(=동시 만료 상황이 재현됐는지) 확인해 둔다.
@@ -111,6 +114,7 @@ test("리프레시 토큰까지 만료되면 로그인 안내 화면을 거쳐 �
 });
 
 test("만료가 아니면 재발급을 호출하지 않고 대시보드가 그대로 보인다", async ({ page }) => {
+  await setAuthCookie(page, "USER");
   await injectScenario(page, null);
 
   await page.goto(DASHBOARD_PATH);

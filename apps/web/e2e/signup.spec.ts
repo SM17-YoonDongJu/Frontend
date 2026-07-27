@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 import { hideQueryDevtools, selectRegion } from "./_region-helpers";
 
 /**
@@ -53,6 +54,8 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("역할·약관 동의·본인 확인을 마치고 가입하면 완료 화면과 대시보드 이동 버튼이 보인다", async ({ page }) => {
+  // 가입 완료 후 이동 목적지(/customer/dashboard)는 미들웨어 보호 라우트 — MSW는 실제 쿠키를 못 심으므로 직접 주입.
+  await setAuthCookie(page, "USER");
   await goThroughToIdentity(page);
 
   await fillIdentity(page);

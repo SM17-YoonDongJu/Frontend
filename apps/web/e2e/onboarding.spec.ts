@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 온보딩(랜딩) 페이지 E2E (happy-path, 이슈 #96).
@@ -60,6 +61,8 @@ test.describe("비로그인 랜딩 — 모바일", () => {
 
 test.describe("로그인 리다이렉트", () => {
   test("로그인 유저가 진입하면 고객 대시보드로 이동한다", async ({ page }) => {
+    // 도착지(/customer/dashboard)는 미들웨어 보호 라우트 — 실제 쿠키 없이는 소프트 내비게이션이 막힌다.
+    await setAuthCookie(page, "USER");
     await page.goto(PATH);
 
     await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 10000 });

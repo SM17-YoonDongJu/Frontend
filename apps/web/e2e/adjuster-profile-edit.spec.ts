@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 import { hideQueryDevtools, selectRegions } from "./_region-helpers";
 
 test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await hideQueryDevtools(page);
 });
 

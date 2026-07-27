@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 import { hideQueryDevtools, selectRegions } from "./_region-helpers";
 
 test.beforeEach(async ({ page }) => {
@@ -124,6 +125,8 @@ test.describe("데스크톱 단일 폼", () => {
   });
 
   test("나중에 하기를 누르면 고객 대시보드로 이동한다", async ({ page }) => {
+    // 이동 목적지(/customer/dashboard)는 미들웨어 보호 라우트 — 실제 쿠키 없이는 소프트 내비게이션이 막힌다.
+    await setAuthCookie(page, "USER");
     await page.goto(FORM_PATH);
     await expect(async () => {
       await page.getByRole("button", { name: "나중에 하기" }).click();

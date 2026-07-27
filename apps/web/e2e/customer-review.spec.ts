@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 고객 → 손해사정사 리뷰 등록 E2E (happy-path CUJ, 이슈 #76).
@@ -15,6 +16,10 @@ const CLOSED_REPORT_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 const DETAIL_PATH = `/customer/report/${CLOSED_REPORT_ID}`;
 
 test.use({ viewport: { width: 1280, height: 900 } });
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("종결(CLOSED) 리포트 상세에서 리뷰 남기기로 진입해 별점·후기를 등록하면 완료 화면이 뜬다", async ({
   page,

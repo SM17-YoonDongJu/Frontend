@@ -1,7 +1,11 @@
 import { expect, test } from "@playwright/test";
-
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 const PATH = "/customer/adjust-request";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 /** step1~7을 사용자 행동대로 채워 제출 직전까지 진행. */
 async function fillThroughConsent(page: import("@playwright/test").Page) {

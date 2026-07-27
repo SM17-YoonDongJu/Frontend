@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 채팅(상담) E2E — 비교→매칭 마켓플레이스 재설계(이슈 #48).
@@ -23,6 +24,11 @@ const ROOM_1 = "e1000000-0000-4000-8000-000000000001";
 const SHARED_REPORT_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
 const DESKTOP = { width: 1280, height: 900 };
+
+// 기본은 고객 흐름(USER) — 파트너 무회귀 테스트 2건은 각자 CERTIFICATED_ADJUSTER로 덮어쓴다.
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("목록에 진입하면 최근 대화가 위로 정렬되어 보인다", async ({ page }) => {
   await page.goto(CUSTOMER_LIST);
@@ -329,6 +335,7 @@ test("고객 방에서 공유 리포트를 열면 고객 리포트로 이동한�
 test("파트너 채팅은 그룹 없는 평면 목록·상담 종료 흐름을 유지한다(무회귀)", async ({
   page,
 }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.setViewportSize(DESKTOP);
   await page.goto(PARTNER_LIST);
 
@@ -352,6 +359,7 @@ test("파트너 채팅은 그룹 없는 평면 목록·상담 종료 흐름을 �
 });
 
 test("파트너 방에서 공유 리포트를 열면 파트너 검수로 이동한다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(`${PARTNER_LIST}/${ROOM_1}`);
 
   await expect(async () => {

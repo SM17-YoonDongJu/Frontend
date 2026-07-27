@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 고객 내 리포트 목록 E2E (이슈 #128).
@@ -13,6 +14,10 @@ import { expect, test } from "@playwright/test";
 
 const PATH = "/customer/reports";
 const DASHBOARD_PATH = "/customer/dashboard";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 // 데스크톱 뷰 검증(모바일 렌더는 마지막 describe에서 별도 뷰포트로).
 test.describe("내 리포트 목록", () => {

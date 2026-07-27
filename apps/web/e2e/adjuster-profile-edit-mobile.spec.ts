@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 손해사정사 프로필 수정 모바일 반응형 E2E (이슈 #75, 커밋 11).
@@ -14,6 +15,10 @@ const PATH = "/partner/profile/edit";
 const HEADLINE_PLACEHOLDER = "예) 후유장해 재산정 전문 · 근거 중심 검토";
 
 test.use({ viewport: { width: 402, height: 874 } });
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+});
 
 test("모바일로 진입하면 앱바가 보이고 데스크톱 미리보기·헤더는 숨는다", async ({ page }) => {
   await page.goto(PATH);
