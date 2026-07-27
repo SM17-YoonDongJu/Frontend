@@ -94,9 +94,33 @@ jobs:
           } > /tmp/audit/prompt.md
           wc -c /tmp/audit/prompt.md
 
+      - name: OpenAI 키 프리플라이트
+        if: steps.gate.outputs.run == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::OPENAI_API_KEY 시크릿 값이 비어 있습니다. 시크릿을 재등록하세요."
+            exit 1
+          fi
+          STATUS=$(curl -sS -o /tmp/audit/preflight.json -w '%{http_code}' \
+            -H "Authorization: Bearer $OPENAI_API_KEY" https://api.openai.com/v1/models)
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::OpenAI 키 검증 실패 (HTTP $STATUS) — 키가 무효하거나 만료됨, 재발급 필요"
+            cat /tmp/audit/preflight.json
+            exit 1
+          fi
+          echo "OpenAI 키 유효 (HTTP 200)"
+
       - name: Codex 설치
         if: steps.gate.outputs.run == 'true'
-        run: npm install -g @openai/codex@0.144.6
+        run: npm install -g @openai/codex@0.145.0
+
+      - name: Codex 인증 (API key)
+        if: steps.gate.outputs.run == 'true'
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: printf '%s' "$OPENAI_API_KEY" | codex login --with-api-key
 
       - name: AI 점검 실행 (codex exec)
         if: steps.gate.outputs.run == 'true'
@@ -104,6 +128,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           codex exec \
+            --model gpt-5.5 \
             --sandbox read-only \
             --skip-git-repo-check \
             --output-last-message /tmp/audit/result.md \
