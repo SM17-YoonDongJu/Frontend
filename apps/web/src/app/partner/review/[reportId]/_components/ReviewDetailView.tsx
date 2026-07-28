@@ -16,8 +16,23 @@ import { OverallOpinionSection } from "./OverallOpinionSection";
 import { ReviewHeader } from "./ReviewHeader";
 import { ReviewSidebar } from "./ReviewSidebar";
 
+// 리포트 소유자 정보(users)가 없으면 client·claim 둘 다 null — 표시용 빈 값으로 대체.
+const EMPTY_CLIENT = { nickname: "정보 없음", gender: "", birthDate: "", region: "", joinedAt: "" };
+const EMPTY_CLAIM = {
+  accidentType: "",
+  diagnosis: "",
+  accidentDate: "",
+  hospitalization: null,
+  description: null,
+  additionalInformation: null,
+  productName: null,
+  insurerName: null,
+};
+
 export function ReviewDetailView({ reportId }: { reportId: string }) {
   const { data } = useReviewDetail(reportId);
+  const client = data.client ?? EMPTY_CLIENT;
+  const claim = data.claim ?? EMPTY_CLAIM;
   const { state, derived, actions, toSubmitBody, draftPrompt } = useReviewDraft(data);
   const submitReview = useSubmitReview(reportId);
   const router = useRouter();
@@ -65,10 +80,10 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
         <div className="mx-auto w-full max-w-6xl px-6 py-5">
           <ReviewHeader
             caseNo={data.caseNo}
-            diagnosis={data.claim.diagnosis}
-            accidentType={data.accidentType}
+            diagnosis={claim.diagnosis}
+            accidentType={data.accidentType ?? ""}
             region={data.region}
-            clientName={data.client.nickname}
+            clientName={client.nickname}
             onSaveDraft={handleSaveDraft}
             isSaving={isSavingDraft}
           />
@@ -78,18 +93,18 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
       <div className="mx-auto w-full max-w-6xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
           <section className="space-y-5 rounded-card-lg border border-line bg-card p-6">
-            <ClientAccidentSection client={data.client} isMasked={data.isMasked} />
+            <ClientAccidentSection client={client} isMasked={data.isMasked} />
             <ClaimInfoSection
-              accidentType={data.claim.accidentType}
-              diagnosis={data.claim.diagnosis}
-              accidentDate={data.claim.accidentDate}
-              hospitalization={data.claim.hospitalization}
+              accidentType={claim.accidentType}
+              diagnosis={claim.diagnosis}
+              accidentDate={claim.accidentDate}
+              hospitalization={claim.hospitalization}
               offeredAmount={data.offeredAmount}
-              insurerName={data.claim.insurerName}
-              productName={data.claim.productName}
+              insurerName={claim.insurerName}
+              productName={claim.productName}
               applicableGuarantees={data.applicableGuarantees}
             />
-            <AccidentNarrativeSection description={data.claim.description} />
+            <AccidentNarrativeSection description={claim.description} />
             <AttachmentSection attachments={data.attachments} />
           </section>
           <EstimatedRangeSection
