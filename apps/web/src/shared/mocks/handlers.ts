@@ -677,11 +677,10 @@ const ADJUSTER_MYPAGE = {
 
 // 손해사정사 자격 신청 상태(이슈 #44) — POST가 세우고 GET .../me가 읽는 모듈 스코프 상태.
 // 기본 null(미신청 → GET 404 POST_NOT_FOUND → NOT_APPLIED → 폼).
+// 백엔드 AdjusterApplicationResponse.Document{type,status} — 파일명·URL 없음(심사 상태만).
 type MockSubmittedDocument = {
-  s3Url: string;
-  name: string;
-  reportType: "LICENSE" | "REGISTRATION" | "ID_CARD";
-  fileType: string;
+  type: "LICENSE" | "REGISTRATION" | "ID_CARD";
+  status: "PENDING" | "APPROVED" | "RESUBMIT_REQUIRED";
 };
 type MockAdjusterApplication = {
   applicationId: string;
@@ -709,9 +708,9 @@ function buildAdjusterApplication(
     specialties: ["후유장해", "교통사고"],
     licenseNo: "제2014-0087호",
     documents: [
-      { s3Url: "https://mock.local/uploads/license.jpg", name: "손해사정사-자격증.jpg", reportType: "LICENSE", fileType: "image/jpeg" },
-      { s3Url: "https://mock.local/uploads/registration.jpg", name: "금감원-등록확인서.jpg", reportType: "REGISTRATION", fileType: "image/jpeg" },
-      { s3Url: "https://mock.local/uploads/id-card.jpg", name: "신분증.jpg", reportType: "ID_CARD", fileType: "image/jpeg" },
+      { type: "LICENSE", status: "APPROVED" },
+      { type: "REGISTRATION", status: "APPROVED" },
+      { type: "ID_CARD", status: "APPROVED" },
     ],
     rejectedAt: null,
     rejectReason: null,
@@ -720,6 +719,9 @@ function buildAdjusterApplication(
   if (status === "REJECTED") {
     return {
       ...base,
+      documents: base.documents.map((doc) =>
+        doc.type === "REGISTRATION" ? { ...doc, status: "RESUBMIT_REQUIRED" as const } : doc,
+      ),
       rejectedAt: "2026-07-07T13:20:00Z",
       rejectReason:
         "등록확인서 이미지가 흐려 식별이 어렵습니다. 금감원 등록확인서를 다시 제출해 주세요.",
@@ -1078,12 +1080,12 @@ export const handlers = [
       name: body.name,
       specialties: body.specialties,
       licenseNo: body.license_no ?? null,
-      // 실응답 documents는 업로드 파일 메타 — 요청의 업로드 url로 구성(자격증 사본은 선택).
+      // 실응답 documents는 서류 종류별 심사 상태(PENDING) — 자격증 사본은 제출 시에만 생성.
       documents: [
         ...(body.license_image_url
-          ? [{ s3Url: body.license_image_url, name: "손해사정사-자격증.jpg", reportType: "LICENSE" as const, fileType: "image/jpeg" }]
+          ? [{ type: "LICENSE" as const, status: "PENDING" as const }]
           : []),
-        { s3Url: body.registration_image_url, name: "금감원-등록확인서.jpg", reportType: "REGISTRATION" as const, fileType: "image/jpeg" },
+        { type: "REGISTRATION" as const, status: "PENDING" as const },
       ],
       rejectedAt: null,
       rejectReason: null,
