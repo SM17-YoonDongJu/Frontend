@@ -1,14 +1,7 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
-import { uploadAvatarResponseSchema } from "../_model/adjuster-profile.schema";
+import { uploadFile } from "@/shared/api/upload-file";
 import type { UploadAvatarResponse } from "../_model/types";
 
+/** 프로필 아바타 업로드(presigned URL 발급 → S3 직접 PUT). */
 export function uploadAvatar(file: File): Promise<UploadAvatarResponse> {
-  const formData = new FormData();
-  formData.append("file", file);
-
-  return fetchJson(`${API_BASE_URL}/uploads`, uploadAvatarResponseSchema, {
-    method: "POST",
-    body: formData,
-  });
+  return uploadFile(file, "avatar");
 }

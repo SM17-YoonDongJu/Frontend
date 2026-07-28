@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { useUploadFile } from "@/shared/api/use-upload-file";
+import type { UploadPurpose } from "@/shared/model/upload.schema";
 import type { FileUploadStatus } from "@/shared/ui/FileUploadField";
 
 const MAX_SIZE_MB = 20;
@@ -33,8 +34,8 @@ export interface DocumentUpload {
 }
 
 /** 단일 서류 업로드 상태 관리 — 크기·형식 검증 후 POST /uploads(useUploadFile). */
-export function useDocumentUpload(): DocumentUpload {
-  const upload = useUploadFile();
+export function useDocumentUpload(purpose: UploadPurpose): DocumentUpload {
+  const upload = useUploadFile(purpose);
   const [status, setStatus] = useState<FileUploadStatus>("idle");
   const [url, setUrl] = useState<string>();
   const [fileName, setFileName] = useState<string>();

@@ -2343,9 +2343,10 @@ export const handlers = [
     });
   }),
 
-  // 증빙 업로드 — 기본 성공(결정적). x-mock-failure 헤더로 실패 주입(재시도 검증용)
+  // presigned 업로드 URL 발급 — 기본 성공(결정적). x-mock-failure 헤더로 실패 주입(재시도 검증용)
+  // 실제로는 { file_name, content_type, purpose } JSON → { upload_url, s3_url }.
   http.post(`${API_BASE_URL}/uploads`, async ({ request }) => {
-    await delay(800);
+    await delay(300);
 
     if (request.headers.get("x-mock-failure") === "upload") {
       return HttpResponse.json(
@@ -2354,8 +2355,25 @@ export const handlers = [
       );
     }
 
-    const url = `https://cdn.example.com/uploads/${crypto.randomUUID()}/document`;
-    return HttpResponse.json({ status: "200", message: "업로드 성공", data: { url } });
+    const key = crypto.randomUUID();
+    const uploadUrl = `${API_BASE_URL}/uploads/mock-put/${key}`;
+    const s3Url = `https://cdn.example.com/uploads/${key}`;
+    return HttpResponse.json({
+      status: "200",
+      message: "발급 성공",
+      data: camelToSnakeDeep({ uploadUrl, s3Url }),
+    });
+  }),
+
+  // presigned PUT 목적지(mock) — 실제 S3라면 여기서 바이너리를 그대로 저장한다.
+  http.put(`${API_BASE_URL}/uploads/mock-put/:key`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "upload-put") {
+      return new HttpResponse(null, { status: 500 });
+    }
+
+    return new HttpResponse(null, { status: 200 });
   }),
 
   // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION

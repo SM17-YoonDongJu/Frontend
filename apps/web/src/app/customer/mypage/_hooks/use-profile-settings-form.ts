@@ -25,7 +25,7 @@ export function useProfileSettingsForm({
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatarUrl);
 
   const { mutate: updateMe, isPending: isSaving } = useUpdateMe();
-  const { mutateAsync: uploadFile, isPending: isUploading } = useUploadFile();
+  const { mutateAsync: uploadFile, isPending: isUploading } = useUploadFile("avatar");
 
   const pickFile = async (file: File) => {
     const { url } = await uploadFile(file);
