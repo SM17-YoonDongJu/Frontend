@@ -50,7 +50,7 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
     <Document>
       <Page size="A4" style={s.page}>
         <Text style={s.crumb}>
-          {report.accidentType} · {report.treatment} · 검수 의견 {report.issues.length}건
+          {report.accidentType ?? ""} · {report.treatment} · 검수 의견 {report.issues.length}건
         </Text>
         <Text style={s.title}>{REPORT_TITLE}</Text>
 
@@ -63,7 +63,10 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
             </Text>
             {report.reviewComment && <Text>{`“${report.reviewComment}”`}</Text>}
             <Text style={[s.muted, { marginTop: 4 }]}>
-              {[report.adjuster?.career, report.reviewedAt && `${report.reviewedAt} 검수`]
+              {[
+                report.adjuster?.career != null ? `${report.adjuster.career}년차` : null,
+                report.reviewedAt && `${report.reviewedAt} 검수`,
+              ]
                 .filter(Boolean)
                 .join(" · ")}
             </Text>

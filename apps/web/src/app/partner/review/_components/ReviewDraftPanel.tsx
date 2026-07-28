@@ -33,10 +33,10 @@ function DraftContent({ item }: { item: ReviewListItem }) {
   const [holdOpen, setHoldOpen] = useState(false);
 
   const offered = data.offeredAmount ?? 0;
+  const claimedMax = data.claimedMaxAmount ?? 0;
   const fillStart =
-    data.claimedMaxAmount > 0
-      ? Math.min(95, Math.max(0, Math.round((offered / data.claimedMaxAmount) * 100)))
-      : 0;
+    claimedMax > 0 ? Math.min(95, Math.max(0, Math.round((offered / claimedMax) * 100))) : 0;
+  const hasEstimate = data.claimedMinAmount != null && data.claimedMaxAmount != null;
 
   const tags = [...new Set(data.issues.flatMap((issue) => issue.tags))];
 
@@ -58,8 +58,14 @@ function DraftContent({ item }: { item: ReviewListItem }) {
 
         <p className="mt-4 text-[0.8125rem] text-white/60">검토 가능한 예상 보상 범위</p>
         <p className="mt-1 text-[1.75rem] font-bold leading-tight">
-          {formatManwon(data.claimedMinAmount)} – {formatManwon(data.claimedMaxAmount)}
-          <span className="ml-1 text-base font-medium text-white/80">만원</span>
+          {hasEstimate ? (
+            <>
+              {formatManwon(data.claimedMinAmount!)} – {formatManwon(data.claimedMaxAmount!)}
+              <span className="ml-1 text-base font-medium text-white/80">만원</span>
+            </>
+          ) : (
+            <span className="text-base font-medium text-white/80">청구액 미산정</span>
+          )}
         </p>
 
         <div className="mt-3 h-2 w-full overflow-hidden rounded-pill bg-white/20">

@@ -31,7 +31,7 @@ function ReviewFormInner({ reportId }: { reportId: string }) {
   const { score, setScore, content, setContent, isSubmittable } = useReviewForm();
 
   const adjusterId = report.adjusterId;
-  const isEligible = report.status === "CLOSED" && adjusterId != null;
+  const isEligible = report.status === "MATCHED" && adjusterId != null;
   const adjusterName = report.adjuster?.nickname ? `${report.adjuster.nickname} 손해사정사` : "손해사정사";
 
   const mutation = useCreateReview(adjusterId ?? "");
@@ -82,7 +82,7 @@ function ReviewFormInner({ reportId }: { reportId: string }) {
 
       <CaseSummaryCard
         adjusterName={adjusterName}
-        subtitle={`${report.accidentType} 보상 분석`}
+        subtitle={`${report.accidentType ?? ""} 보상 분석`}
         confirmedAmount={report.offeredAmount}
       />
 

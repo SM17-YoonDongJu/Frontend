@@ -3173,7 +3173,7 @@ export const handlers = [
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
         reportId: responseReportId,
-        status: isCustomerSample ? "CLOSED" : "AWAITING_INSPECTION",
+        status: isCustomerSample ? "MATCHED" : "AWAITING_INSPECTION",
         accidentType: "교통사고(후유장해)",
         treatment: "우측 슬관절 후방십자인대 파열",
         claimedMinAmount: isCustomerSample ? 13_500_000 : 12_000_000,
@@ -3186,40 +3186,39 @@ export const handlers = [
           "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
           "대법원 2019다○○○○ (후유장해 인과관계 판단)",
         ],
-        issues: [
+        // 백엔드 CustomerReportDetailResponse.issue(단수) — title/opinion/status/tags/impactAmount.
+        issue: [
           {
-            issueId: "issue-1",
             title: "장해등급 과소 산정 가능",
-            description: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
-            aiStatus: "TRUSTED",
+            opinion: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
+            status: "TRUSTED",
             impactAmount: 350,
             tags: ["약관 제12조", "분쟁조정 2023-1456"],
           },
           {
-            issueId: "issue-2",
             title: "외모추상 특약 청구 누락",
-            description: "누락분 청구 검토가 가장 확실한 출발점이에요.",
-            aiStatus: "CONFIRMED",
+            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
+            status: "CONFIRMED",
             impactAmount: 200,
             tags: ["특약 약관 §4", "유사사례 1456"],
           },
           {
-            issueId: "issue-3",
             title: "진행 방향",
-            description: "추가 의료자료 확보 → 재산정 순서를 권해요.",
-            aiStatus: "INFO",
+            opinion: "추가 의료자료 확보 → 재산정 순서를 권해요.",
+            status: "INFO",
+            impactAmount: null,
             tags: ["분쟁조정 절차"],
           },
         ],
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
-        caseNo: "20260520-017",
+        reportNo: "20260520-017",
         adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
           : null,
-        reviewedAt: isCustomerSample ? "2026.05.22" : null,
-        adjuster: { nickname: "정우성", career: "12년 경력 손해사정사" },
+        reviewedAt: isCustomerSample ? "2026-05-22T09:00:00Z" : null,
+        adjuster: { nickname: "정우성", career: 12 },
       }),
     });
   }),
