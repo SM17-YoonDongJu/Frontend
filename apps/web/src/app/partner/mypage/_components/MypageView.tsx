@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { useMypage } from "../_api/use-mypage";
 import { usePanelParam } from "@/shared/lib/use-panel-param";
 import { CredentialProofModal } from "./CredentialProofModal";
-import { LogoutButton } from "./LogoutButton";
 import { MonthlyActivityCard } from "./MonthlyActivityCard";
 import { MypageMenuList } from "./MypageMenuList";
 import { NotificationSettingsModal } from "./NotificationSettingsModal";
@@ -46,10 +45,6 @@ export function MypageView() {
         <div className="order-1 md:order-2">
           <MonthlyActivityCard activity={data.monthlyActivity} />
         </div>
-      </div>
-
-      <div className="mt-4">
-        <LogoutButton />
       </div>
 
       <NotificationSettingsModal

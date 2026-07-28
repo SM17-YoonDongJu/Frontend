@@ -153,10 +153,4 @@ test.describe("모바일", () => {
     await page.getByRole("button", { name: "취소" }).click();
     await expect(page).toHaveURL(/\/partner\/mypage$/);
   });
-
-  test("모바일에는 로그아웃 버튼이 보인다", async ({ page }) => {
-    await page.goto(PATH);
-
-    await expect(page.getByRole("button", { name: "로그아웃" })).toBeVisible();
-  });
 });
