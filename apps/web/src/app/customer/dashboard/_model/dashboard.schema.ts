@@ -8,7 +8,7 @@ import { reportListStatusSchema } from "@/app/customer/_shared/model/report-list
  */
 export const dashboardActiveReportSchema = z.object({
   reportId: z.uuid(),
-  title: z.string(),
+  title: z.string().nullable(),
   accidentType: z.string(),
   status: reportListStatusSchema,
   createdAt: z.string(),
@@ -20,8 +20,9 @@ export const dashboardProposalItemSchema = z.object({
   proposalId: z.uuid(),
   adjusterId: z.uuid(),
   nickname: z.string(),
-  career: z.number().int().nonnegative(),
-  speciality: z.string(),
+  // 프로필 미기입 사정사는 career·speciality null.
+  career: z.number().int().nonnegative().nullable(),
+  speciality: z.string().nullable(),
   // 견적 미기입 제안은 null.
   estimateMinAmount: z.number().int().nonnegative().nullable(),
   estimateMaxAmount: z.number().int().nonnegative().nullable(),

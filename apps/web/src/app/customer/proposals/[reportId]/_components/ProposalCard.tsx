@@ -103,16 +103,20 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
             )}
           </div>
           {credential && <p className="text-[0.69375rem] text-ink-3">{credential}</p>}
-          <div className="flex items-center gap-1 pt-0.5">
-            <Star className="size-[0.8125rem] shrink-0 text-gold" />
-            <span className="text-[0.78125rem] font-bold text-ink">{rating.toFixed(1)}</span>
-          </div>
+          {rating != null && (
+            <div className="flex items-center gap-1 pt-0.5">
+              <Star className="size-[0.8125rem] shrink-0 text-gold" />
+              <span className="text-[0.78125rem] font-bold text-ink">{rating.toFixed(1)}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="rounded-button bg-paper-2 px-3.5 pb-[0.774rem] pt-[0.675rem]">
-        <p className="text-[0.79375rem] leading-[1.35rem] text-ink-2">“{proposalSummary}”</p>
-      </div>
+      {proposalSummary && (
+        <div className="rounded-button bg-paper-2 px-3.5 pb-[0.774rem] pt-[0.675rem]">
+          <p className="text-[0.79375rem] leading-[1.35rem] text-ink-2">“{proposalSummary}”</p>
+        </div>
+      )}
 
       <div className="flex items-stretch gap-2.5">
         <div className="flex min-w-0 flex-1 flex-col gap-[0.1875rem] rounded-[0.625rem] border border-line-2 px-[0.8125rem] py-[0.6875rem]">

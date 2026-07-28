@@ -11,8 +11,9 @@ export const proposalSchema = z.object({
   proposalId: z.uuid(), // report_reviews.id — 매칭/거절 PATCH 대상
   adjusterId: z.uuid(),
   nickname: z.string(),
-  rating: z.number(),
-  proposalSummary: z.string(),
+  // 후기 미작성 사정사는 rating null(평점 계산 대상 없음).
+  rating: z.number().nullable(),
+  proposalSummary: z.string().nullable(),
   // 실제 스펙 type: string(SENT/COUNSELING/REJECTED/ACCEPTED) — 미확정 값 유입 대비 완화.
   status: z.string(),
   submittedAt: z.string(),
