@@ -623,7 +623,7 @@ const ACTIVITY_SUMMARY = {
   closedCount: 4,
 };
 
-// 내 보험 (이슈 #105) — GET·POST /users/me/insurances (백엔드 확정 2026-07-13).
+// 내 보험 (이슈 #105) — GET /users/me/insurances(백엔드 UserInsuranceListResponse, 조회 전용 — POST 없음).
 // policyFileUrl 있음(증권 등록됨) 1건 + 없음(증권 미등록) 1건 — Figma 목업 2건 거울.
 const MOCK_INSURANCES: Array<Record<string, unknown>> = [
   {
@@ -633,9 +633,6 @@ const MOCK_INSURANCES: Array<Record<string, unknown>> = [
     policyNo: "100-2024-558***",
     enrolledAt: "2024-03-15",
     coverages: ["상해후유장해", "골절진단비", "입원일당"],
-    matchStatus: "MATCHED",
-    // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 확정 응답엔 policyFileUrl이 없다. 카드 배지("증권 등록됨/미등록")가
-    // 이 필드를 요구해 백엔드에 등재 요청 중 — 실서버에선 아직 안 온다(→ 전부 "미등록"으로 표시됨).
     policyFileUrl: "https://cdn.example.com/policies/e1000000-0001.pdf",
   },
   {
@@ -645,8 +642,6 @@ const MOCK_INSURANCES: Array<Record<string, unknown>> = [
     policyNo: "220-2023-114***",
     enrolledAt: "2023-08-02",
     coverages: ["실손의료비", "수술비"],
-    matchStatus: "UNMATCHED",
-    // CONTRACT(확장 등재 요청 중, 이슈 #105): 위와 동일 — 증권 미등록 케이스.
     policyFileUrl: null,
   },
 ];
@@ -1958,54 +1953,7 @@ export const handlers = [
     });
   }),
 
-  // 내 보험 추가 (이슈 #105) — POST /users/me/insurances (확정 스펙): 201 + data는 생성 id 단건.
-  http.post(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
-    await delay(500);
-
-    if (request.headers.get("x-mock-failure") === "add-insurance") {
-      return HttpResponse.json(
-        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "보험을 추가하지 못했습니다." },
-        { status: 500 },
-      );
-    }
-
-    let body: Record<string, unknown>;
-    try {
-      body = (await request.json()) as Record<string, unknown>;
-    } catch {
-      return HttpResponse.json(
-        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
-        { status: 400 },
-      );
-    }
-
-    if (typeof body.insurer_name !== "string" || typeof body.product_name !== "string") {
-      return HttpResponse.json(
-        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "보험사·상품명을 입력해 주세요." },
-        { status: 400 },
-      );
-    }
-
-    const id = crypto.randomUUID();
-    MOCK_INSURANCES.push({
-      id,
-      insurerName: body.insurer_name,
-      productName: body.product_name,
-      policyNo: typeof body.policy_no === "string" ? body.policy_no : null,
-      enrolledAt: typeof body.enrolled_at === "string" ? body.enrolled_at : null,
-      coverages: Array.isArray(body.coverages) ? body.coverages : [],
-      // CONTRACT(직접 입력 시 초기 matchStatus 백엔드 확인 필요): 서버가 즉시 fuzzy 매칭하는지 비동기 대기인지 미확정 → 대기(PENDING)로 둔다.
-      matchStatus: "PENDING",
-      // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 미등재 필드. 증권 업로드 없이 직접 입력 → 미등록.
-      policyFileUrl: typeof body.policy_file_url === "string" ? body.policy_file_url : null,
-    });
-
-    // 확정 응답: 201 + data는 생성 id 하나뿐(전체 객체 아님). 목록은 훅이 invalidate로 재조회한다.
-    return HttpResponse.json(
-      { status: "201", message: "등록되었습니다.", data: { id } },
-      { status: 201 },
-    );
-  }),
+  // POST /users/me/insurances — 백엔드 미구현(조회 컨트롤러만 존재). 추가 UI는 ComingSoonButton으로 대체.
 
   // 액세스 토큰 재발급 (#109) — refresh_token HttpOnly 쿠키만 사용(바디·Authorization 없음), data는 null.
   // E2E 주입: localStorage["mock:tokenExpired"]="once"(재발급 성공) | "refresh-expired"(재발급 실패).
