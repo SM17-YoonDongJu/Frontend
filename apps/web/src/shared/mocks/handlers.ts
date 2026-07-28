@@ -300,7 +300,7 @@ const DASHBOARD_AWAITING_REPORT_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const HEAD_REPORTS = [
   {
     reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
-    status: "CLOSED",
+    status: "MATCHED",
     accidentType: "교통사고",
     createdAt: "2026-05-20T09:00:00Z",
     reportNo: "20260520-017",
@@ -361,7 +361,7 @@ const REPORT_LIST_SOURCE = [
   },
   {
     reportId: "d4e1f2a3-5b6c-4d7e-8f9a-9b0c1d2e3f4a",
-    status: "CLOSED",
+    status: "MATCHED",
     accidentType: "실손",
     createdAt: "2026-04-22T09:00:00Z",
     reportNo: "20260422-077",
@@ -389,7 +389,7 @@ const REPORT_LIST_SOURCE = [
   },
   {
     reportId: "f6a3b4c5-7d8e-4f9a-8b1c-1d2e3f4a5b6c",
-    status: "CLOSED",
+    status: "MATCHED",
     accidentType: "교통사고",
     createdAt: "2026-04-03T09:00:00Z",
     reportNo: "20260403-208",
@@ -2234,7 +2234,7 @@ export const handlers = [
       },
       {
         reportId: "a1000000-0000-4000-8000-000000000002",
-        status: "CLOSED",
+        status: "MATCHED",
         accidentType: "실손",
         title: "실손 · 도수치료 한도",
         createdAt: "2026-04-28T09:00:00Z",
@@ -2247,7 +2247,7 @@ export const handlers = [
       },
       {
         reportId: "a1000000-0000-4000-8000-000000000003",
-        status: "CLOSED",
+        status: "MATCHED",
         accidentType: "질병",
         title: "질병 · 암진단비",
         createdAt: "2026-03-10T09:00:00Z",

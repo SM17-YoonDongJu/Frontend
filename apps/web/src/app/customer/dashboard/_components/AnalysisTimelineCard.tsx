@@ -15,12 +15,12 @@ const STATUS_PILL_LABEL: Record<ReportStatus, string> = {
   AWAITING_INSPECTION: "검수 중",
   AWAITING_ADOPTION: "제안 도착",
   COUNSELING: "매칭 완료",
-  CLOSED: "매칭 완료",
+  MATCHED: "매칭 완료",
   NOT_SELECTED: "제안 도착",
 };
 
 // 매칭(4단계)은 항상 미래 단계 — status가 아니라 고정. 현재 단계는 검수 대기(2)까지는
-// AWAITING_INSPECTION, 그 외에는 제안 도착(3)으로 본다(MATCHED enum 미확정).
+// AWAITING_INSPECTION, 그 외에는 제안 도착(3)으로 본다.
 function currentStepIndex(status: ReportStatus): number {
   return status === "AWAITING_INSPECTION" ? 2 : 3;
 }

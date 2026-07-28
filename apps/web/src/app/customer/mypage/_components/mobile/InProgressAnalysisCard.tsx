@@ -56,7 +56,7 @@ function CaseRow({ report }: { report: ReportListItem }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-[0.9375rem] font-bold text-ink">
-          {report.accidentType}
+          {report.accidentType ?? ""}
         </p>
         <p className="mt-0.5 truncate text-[0.75rem] text-ink-3">
           No.{report.reportNo} · {formatDate(report.createdAt)}
