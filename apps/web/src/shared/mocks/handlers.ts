@@ -771,12 +771,23 @@ interface MockChatRoom {
   unreadCount: number;
 }
 
-// 메시지 첨부(BE Attachment shape) — 업로드 발급 key·원본명·MIME·크기.
+// 메시지 첨부(BE Attachment shape) — 업로드 발급 key·원본명·MIME·크기(내부 저장은 key 기준).
 interface MockMessageAttachment {
   attachmentKey: string;
   name: string;
   contentType: string;
   size: number;
+}
+
+// 메시지 응답 직렬화 시 key → 단기 presigned GET URL로 변환(BE ChatMessageResponse.Attachment — url 기반, key 없음).
+function toMessageAttachmentDto(attachment?: MockMessageAttachment) {
+  if (!attachment) return null;
+  return {
+    url: `https://mock-s3.example.com/${attachment.attachmentKey}?X-Amz-Signature=mock`,
+    name: attachment.name,
+    contentType: attachment.contentType,
+    size: attachment.size,
+  };
 }
 
 interface MockChatMessage {
@@ -824,7 +835,7 @@ function toChatMessageDto(message: MockChatMessage) {
     senderId: message.senderId,
     messageType: deriveMessageType(message.attachment),
     content: message.content ? message.content : null,
-    attachment: message.attachment ?? null,
+    attachment: toMessageAttachmentDto(message.attachment),
     isMine: message.senderId === MOCK_ME_ID,
     createdAt: message.createdAt,
   };
@@ -1314,7 +1325,8 @@ export const handlers = [
           senderId: MOCK_ME_ID,
           messageType: deriveMessageType(attachment),
           content: content ? content : null,
-          attachment: attachment ?? null,
+          attachment: toMessageAttachmentDto(attachment),
+          isMine: true,
           createdAt,
         }),
       },
@@ -1395,7 +1407,7 @@ export const handlers = [
     }
 
     room.matchStatus = "ACCEPTED";
-    room.roomStatus = "CLOSED";
+    // 내 방은 CLOSED하지 않고 ACTIVE로 유지(수락 후에도 담당 사정사와 대화 지속) — 형제 방만 종료.
     // 형제 방(같은 리포트) 자동 종료 — 서버 캐스케이드 미러.
     chatRooms
       .filter((r) => r.reportId === room.reportId && r.chatRoomId !== room.chatRoomId)
@@ -1409,7 +1421,7 @@ export const handlers = [
       message: "상담을 수락했습니다.",
       data: camelToSnakeDeep({
         chatRoomId,
-        chatRoomStatus: "CLOSED",
+        chatRoomStatus: "ACTIVE",
         reviewStatus: "ACCEPTED",
         reportId: room.reportId,
         reportStatus: "CLOSED",

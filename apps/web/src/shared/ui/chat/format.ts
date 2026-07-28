@@ -22,8 +22,9 @@ export function isSameDay(a: string, b: string): boolean {
   return formatDateDividerLabel(a) === formatDateDividerLabel(b);
 }
 
-/** 목록 행 시각 — 오늘 "오후 2:14" · 어제 "어제" · 그 외 "05.19" */
-export function formatRoomListTime(iso: string, now: Date = new Date()): string {
+/** 목록 행 시각 — 오늘 "오후 2:14" · 어제 "어제" · 그 외 "05.19". 메시지 없는 방(생성 직후)은 "" */
+export function formatRoomListTime(iso: string | null, now: Date = new Date()): string {
+  if (!iso) return "";
   const date = new Date(iso);
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
