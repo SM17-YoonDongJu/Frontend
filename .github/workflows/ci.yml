@@ -73,7 +73,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - name: Playwright 버전 확인
         id: playwright-version
-        run: echo "version=$(node -p "require('./apps/web/package.json').devDependencies['@playwright/test']")" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(node -p "require('./apps/web/node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - name: Playwright 브라우저 캐시
         uses: actions/cache@v4
         with:
