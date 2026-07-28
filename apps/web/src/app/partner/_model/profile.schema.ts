@@ -7,5 +7,5 @@ export const adjusterProfileSchema = z.object({
   averageRating: z.number(),
   reviewCount: z.number().int(),
   // ⚠️ API 명세 미정(드리프트) — 헤더/인사말 검수 대기 빠른 카운트. 백엔드 확장 요청.
-  pendingReviewCount: z.number().int(),
+  pendingReviewCount: z.number().int().nullish(),
 });
