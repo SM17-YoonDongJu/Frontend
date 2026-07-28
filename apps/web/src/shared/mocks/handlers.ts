@@ -239,6 +239,8 @@ const PENDING_REVIEWS = [
   { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "COUNSELING", createdAt: "2026-06-14T13:50:00Z", caseId: "029", title: "통원 한도 적용 분쟁", region: "부산 해운대", claimedMinAmount: 2_800_000, claimedMaxAmount: 3_600_000, offerHeadroom: 900_000, issueCount: 1, held: false },
   { reportId: crypto.randomUUID(), accidentType: "traffic", status: "NOT_SELECTED", createdAt: "2026-06-13T08:40:00Z", caseId: "027", title: "다발성 늑골 골절 · 일실수입", region: "대구 수성", claimedMinAmount: 18_000_000, claimedMaxAmount: 24_000_000, offerHeadroom: 5_000_000, issueCount: 1, held: false },
   { reportId: crypto.randomUUID(), accidentType: "fire", status: "CLOSED", createdAt: "2026-06-12T15:20:00Z", caseId: "024", title: "가재도구 손해액 산정", region: "광주 서구", claimedMinAmount: 8_500_000, claimedMaxAmount: 12_000_000, offerHeadroom: 1_800_000, issueCount: 1, held: false },
+  // 명세 null 응답 케이스 회귀용 — title·claimedMin/Max·offerHeadroom null
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: "2026-06-11T09:00:00Z", caseId: "023", title: null, region: "서울 은평", claimedMinAmount: null, claimedMaxAmount: null, offerHeadroom: null, issueCount: 1, held: false },
 ];
 
 // 검수 내역 목 데이터 (이슈 #59/#130) — GET /adjusters/me/reviewed-reports.

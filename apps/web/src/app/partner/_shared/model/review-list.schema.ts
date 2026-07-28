@@ -19,12 +19,12 @@ export const reviewListItemSchema = z.object({
   createdAt: z.string(),
   // CONTRACT: 명세없음-임시 — Figma 카드 요구 필드. list 미확장으로 FE optional + MSW 목킹.
   caseId: z.string().optional(),
-  title: z.string().optional(),
+  title: z.string().nullish(),
   region: z.string().optional(),
-  claimedMinAmount: z.number().int().optional(),
-  claimedMaxAmount: z.number().int().optional(),
+  claimedMinAmount: z.number().int().nullish(),
+  claimedMaxAmount: z.number().int().nullish(),
   // CONTRACT: 명세없음-임시 — "제안 대비 +N만" 표시치. 백엔드 확장 시 정식 필드명 확인 대상.
-  offerHeadroom: z.number().int().optional(),
+  offerHeadroom: z.number().int().nullish(),
   // 명세 필드(issueCount·held) — PC 카드 쟁점 수·보류 표시용. list 미확장으로 FE optional.
   issueCount: z.number().int().optional(),
   held: z.boolean().optional(),
