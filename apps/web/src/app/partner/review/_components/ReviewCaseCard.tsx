@@ -34,15 +34,15 @@ export function ReviewCaseCard({ item }: Props) {
   return (
     <article className="flex flex-col gap-[0.5625rem] rounded-card border border-line bg-card p-[1.0625rem] shadow-[0_1px_1px_rgba(21,32,46,0.03)]">
       <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge tone={TYPE_TONE[item.accidentType] ?? "neutral"}>
-          {accidentTypeLabel(item.accidentType)}
+        <StatusBadge tone={TYPE_TONE[item.accidentType ?? ""] ?? "neutral"}>
+          {accidentTypeLabel(item.accidentType ?? "")}
         </StatusBadge>
         {isNew(item.createdAt) && <StatusBadge tone="terra">NEW</StatusBadge>}
         {item.caseId && <span className="text-[0.72rem] text-ink-3">#{item.caseId}</span>}
       </div>
 
       <p className="text-[0.86rem] font-bold tracking-[-0.01rem] text-ink">
-        {item.title ?? accidentTypeLabel(item.accidentType)}
+        {item.title ?? accidentTypeLabel(item.accidentType ?? "")}
       </p>
 
       {(hasRange || hasHeadroom) && (

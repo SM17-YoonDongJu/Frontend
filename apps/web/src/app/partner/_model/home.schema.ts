@@ -8,9 +8,10 @@ export const homeAdjusterSchema = z.object({
   avatarUrl: z.string().nullable(),
 });
 
+// 백엔드 AdjusterHomeResponse.Summary/Rating 기준 — 전부 long/double 항상 present(평점은 미구현 시 0/0 placeholder).
 export const homeRatingSchema = z.object({
-  average: z.number().nullable(),
-  reviewCount: z.number().int().nullable(),
+  average: z.number(),
+  reviewCount: z.number().int(),
 });
 
 export const homeSummarySchema = z.object({
@@ -18,8 +19,8 @@ export const homeSummarySchema = z.object({
   pendingNewCount: z.number().int(),
   inProgressCount: z.number().int(),
   monthlyCompletedCount: z.number().int(),
-  totalCompletedCount: z.number().int().nullable(),
-  consultationConvertedCount: z.number().int().nullable(),
+  totalCompletedCount: z.number().int(),
+  consultationConvertedCount: z.number().int(),
   rating: homeRatingSchema,
 });
 

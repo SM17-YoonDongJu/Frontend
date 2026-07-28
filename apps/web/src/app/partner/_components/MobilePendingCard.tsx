@@ -30,7 +30,7 @@ export function MobilePendingCard({ item, navigatingId, onNavigate }: MobilePend
   return (
     <div className="rounded-card border border-line bg-card p-4">
       <div className="flex items-center gap-2">
-        <StatusBadge tone="gold">{accidentTypeLabel(item.accidentType)}</StatusBadge>
+        <StatusBadge tone="gold">{accidentTypeLabel(item.accidentType ?? "")}</StatusBadge>
         {item.region && (
           <span className="flex items-center gap-1 text-[0.6875rem] text-ink-3">
             <span className="size-[0.3125rem] rounded-full bg-gold" />
@@ -40,7 +40,7 @@ export function MobilePendingCard({ item, navigatingId, onNavigate }: MobilePend
       </div>
 
       <p className="mt-2 truncate text-[0.8125rem] font-semibold text-ink">
-        {item.title ?? accidentTypeLabel(item.accidentType)}
+        {item.title ?? accidentTypeLabel(item.accidentType ?? "")}
       </p>
 
       <div className="mt-2 flex items-center justify-between">

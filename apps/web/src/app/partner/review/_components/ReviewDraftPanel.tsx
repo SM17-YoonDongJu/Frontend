@@ -46,7 +46,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-pill bg-gold px-2.5 py-1 text-[0.78rem] font-semibold">
-              {accidentTypeLabel(item.accidentType)}
+              {accidentTypeLabel(item.accidentType ?? "")}
             </span>
             {item.caseId && <span className="text-xs text-white/70">#{item.caseId}</span>}
             {item.region && <span className="text-xs text-white/70">· {item.region}</span>}

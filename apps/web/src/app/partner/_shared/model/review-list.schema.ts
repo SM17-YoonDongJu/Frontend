@@ -12,22 +12,20 @@ export const reviewStatusSchema = z.enum([
 ]);
 
 export const reviewListItemSchema = z.object({
-  // 명세 확정 4필드 (naming-dictionary §7-6)
   reportId: z.uuid(),
-  accidentType: z.string(),
-  status: reviewStatusSchema,
+  // 백엔드 PendingReviewListResponse.Item 기준(accidentType·status는 원본 null이면 null 그대로 노출).
+  accidentType: z.string().nullable(),
+  status: reviewStatusSchema.nullable(),
   createdAt: z.string(),
-  // CONTRACT: 명세없음-임시 — Figma 카드 요구 필드. list 미확장으로 FE optional + MSW 목킹.
-  caseId: z.string().optional(),
+  caseId: z.string().nullish(),
   title: z.string().nullish(),
-  region: z.string().optional(),
+  region: z.string(),
   claimedMinAmount: z.number().int().nullish(),
   claimedMaxAmount: z.number().int().nullish(),
-  // CONTRACT: 명세없음-임시 — "제안 대비 +N만" 표시치. 백엔드 확장 시 정식 필드명 확인 대상.
-  offerHeadroom: z.number().int().nullish(),
-  // 명세 필드(issueCount·held) — PC 카드 쟁점 수·보류 표시용. list 미확장으로 FE optional.
-  issueCount: z.number().int().optional(),
-  held: z.boolean().optional(),
+  // offerHeadroom(claimedMax - offered, 0 보정)은 항상 계산되어 내려오는 값 — null 아님.
+  offerHeadroom: z.number().int(),
+  issueCount: z.number().int(),
+  held: z.boolean(),
 });
 
 export const paginationSchema = z.object({
