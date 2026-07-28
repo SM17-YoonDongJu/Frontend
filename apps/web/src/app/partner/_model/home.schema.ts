@@ -9,8 +9,8 @@ export const homeAdjusterSchema = z.object({
 });
 
 export const homeRatingSchema = z.object({
-  average: z.number(),
-  reviewCount: z.number().int(),
+  average: z.number().nullable(),
+  reviewCount: z.number().int().nullable(),
 });
 
 export const homeSummarySchema = z.object({
@@ -18,8 +18,8 @@ export const homeSummarySchema = z.object({
   pendingNewCount: z.number().int(),
   inProgressCount: z.number().int(),
   monthlyCompletedCount: z.number().int(),
-  totalCompletedCount: z.number().int(),
-  consultationConvertedCount: z.number().int(),
+  totalCompletedCount: z.number().int().nullable(),
+  consultationConvertedCount: z.number().int().nullable(),
   rating: homeRatingSchema,
 });
 

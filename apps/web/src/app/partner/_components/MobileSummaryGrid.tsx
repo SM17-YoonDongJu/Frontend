@@ -41,7 +41,7 @@ export function MobileSummaryGrid() {
       icon: <Star />,
       chipClass: "bg-gold-soft text-gold-ink",
       label: "고객 평점",
-      value: summary.rating.average.toFixed(1),
+      value: (summary.rating.average ?? 0).toFixed(1),
     },
   ];
 

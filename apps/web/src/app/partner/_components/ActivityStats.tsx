@@ -10,8 +10,8 @@ export function ActivityStats() {
 
   const rows = [
     { label: "검수 완료", value: `${summary.monthlyCompletedCount}건` },
-    { label: "상담 전환", value: `${summary.consultationConvertedCount}건` },
-    { label: "고객 평점", value: summary.rating.average.toFixed(1) },
+    { label: "상담 전환", value: `${summary.consultationConvertedCount ?? 0}건` },
+    { label: "고객 평점", value: (summary.rating.average ?? 0).toFixed(1) },
   ];
 
   return (
