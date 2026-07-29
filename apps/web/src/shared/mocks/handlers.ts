@@ -1009,6 +1009,22 @@ const DASHBOARD_MOCK = {
 export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
+  // 문의 폼 제출 (#220) — 백엔드 확정 전 임시 목(요청: Notion "POST /contact-inquiries").
+  //   성공 200 + { received: true }. 이메일 형식 누락/빈 값 등 서버 측 재검증 실패는 400 VALIDATION_ERROR.
+  http.post(`${API_BASE_URL}/contact-inquiries`, async ({ request }) => {
+    await delay(500);
+
+    const body = (await request.json()) as { email?: string; message?: string };
+    if (!body.email || !body.message) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "이메일과 문의 내용을 모두 입력해주세요." },
+        { status: 400 },
+      );
+    }
+
+    return HttpResponse.json({ status: "200", data: { received: true } });
+  }),
+
   // 손해사정사 자격 신청 생성 (#44) — 전역 봉투 거울. 성공 201 + { applicationId, status: PENDING }.
   //   필수값 누락→400 MISSING_REQUIRED_FIELD, 자격증 번호·사본 둘 다 없음→400 MISSING_REQUIRED_FIELD,
   //   진행중/승인 상태에서 재-POST→409 DUPLICATE_RESOURCE, REJECTED에서 재-POST→201 재허용(재제출).
