@@ -1203,7 +1203,7 @@ export const handlers = [
   }),
 
   // 메시지 히스토리 (이슈 #48) — 커서 페이지네이션(?cursor&size, 기본 30).
-  // 최신 size건을 시간순으로 반환, cursor는 "이 메시지보다 오래된 것" 기준. CLOSED 방도 조회 가능.
+  // 페이지 내부는 최신순으로 반환, cursor는 "이 메시지보다 오래된 것" 기준. CLOSED 방도 조회 가능.
   http.get(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ request, params }) => {
     await delay(400);
 
@@ -1229,7 +1229,7 @@ export const handlers = [
       status: "200",
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
-        messages: page.map(toChatMessageDto),
+        messages: page.toReversed().map(toChatMessageDto),
         nextCursor,
         hasNext,
       }),
