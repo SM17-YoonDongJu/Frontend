@@ -40,9 +40,11 @@ export function DesktopReviewCaseCard({ item, selected, onSelect }: Props) {
       }`}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge tone={TYPE_TONE[item.accidentType ?? ""] ?? "neutral"}>
-          {accidentTypeLabel(item.accidentType ?? "")}
-        </StatusBadge>
+        {item.accidentType && (
+          <StatusBadge tone={TYPE_TONE[item.accidentType] ?? "neutral"}>
+            {accidentTypeLabel(item.accidentType)}
+          </StatusBadge>
+        )}
         {held && <StatusBadge tone="neutral">보류</StatusBadge>}
         {!held && isNew(item.createdAt) && <StatusBadge tone="gold">NEW</StatusBadge>}
         {item.caseId && <span className="text-xs text-ink-3">#{item.caseId}</span>}
@@ -55,7 +57,7 @@ export function DesktopReviewCaseCard({ item, selected, onSelect }: Props) {
       </div>
 
       <h3 className="mt-3 text-[0.9375rem] font-semibold text-ink">
-        {item.title ?? accidentTypeLabel(item.accidentType ?? "")}
+        {item.title ?? accidentTypeLabel(item.accidentType)}
       </h3>
 
       <div className="mt-3 flex items-center gap-6">

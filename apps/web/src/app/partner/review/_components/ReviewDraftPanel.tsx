@@ -46,7 +46,7 @@ function DraftContent({ item }: { item: ReviewListItem }) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-pill bg-gold px-2.5 py-1 text-[0.78rem] font-semibold">
-              {accidentTypeLabel(item.accidentType ?? "")}
+              {accidentTypeLabel(item.accidentType)}
             </span>
             {item.caseId && <span className="text-xs text-white/70">#{item.caseId}</span>}
             {item.region && <span className="text-xs text-white/70">· {item.region}</span>}
@@ -68,18 +68,24 @@ function DraftContent({ item }: { item: ReviewListItem }) {
           )}
         </p>
 
-        <div className="mt-3 h-2 w-full overflow-hidden rounded-pill bg-white/20">
-          <div
-            className="h-full rounded-pill bg-gold"
-            style={{ marginLeft: `${fillStart}%`, width: `${100 - fillStart}%` }}
-          />
-        </div>
-        <div className="mt-2 flex items-center justify-between text-xs">
-          <span className="text-white/60">보험사 제안 {formatManwon(offered)}만</span>
-          {item.offerHeadroom != null && (
-            <span className="font-semibold text-gold-2">+ 약 {formatManwon(item.offerHeadroom)}만</span>
-          )}
-        </div>
+        {hasEstimate && (
+          <>
+            <div className="mt-3 h-2 w-full overflow-hidden rounded-pill bg-white/20">
+              <div
+                className="h-full rounded-pill bg-gold"
+                style={{ marginLeft: `${fillStart}%`, width: `${100 - fillStart}%` }}
+              />
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs">
+              <span className="text-white/60">보험사 제안 {formatManwon(offered)}만</span>
+              {item.offerHeadroom != null && (
+                <span className="font-semibold text-gold-2">
+                  + 약 {formatManwon(item.offerHeadroom)}만
+                </span>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="rounded-card-lg border border-line bg-card p-5">

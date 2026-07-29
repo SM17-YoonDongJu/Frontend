@@ -8,7 +8,7 @@ import type { ReportListItem } from "./report-list.schema";
 export function deriveReportTitle(
   report: Pick<ReportListItem, "accidentType" | "treatment">,
 ): string {
-  const label = accidentTypeLabel(report.accidentType ?? "");
+  const label = accidentTypeLabel(report.accidentType);
   return report.treatment ? `${label} · ${report.treatment} 분석 요청` : `${label} 분석 요청`;
 }
 

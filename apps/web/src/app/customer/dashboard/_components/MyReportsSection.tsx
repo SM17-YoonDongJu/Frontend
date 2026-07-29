@@ -70,7 +70,7 @@ function formatMonthDay(iso: string): string {
 }
 
 function reportSubtitle(report: ReportListItem): string {
-  const type = accidentTypeLabel(report.accidentType ?? "");
+  const type = accidentTypeLabel(report.accidentType);
   return report.adjusterNickname ? `${type} · ${report.adjusterNickname} 사정사` : type;
 }
 

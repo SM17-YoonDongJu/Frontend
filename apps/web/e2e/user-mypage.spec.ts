@@ -135,8 +135,10 @@ test.describe("PC 내 보험 정보", () => {
       "2건",
     );
 
-    await page.getByRole("button", { name: "보험 추가" }).click();
-    await expect(page.getByRole("status")).toHaveText("추후 지원 예정");
+    await expect(async () => {
+      await page.getByRole("button", { name: "보험 추가" }).click();
+      await expect(page.getByRole("status")).toHaveText("추후 지원 예정");
+    }).toPass();
   });
 });
 
