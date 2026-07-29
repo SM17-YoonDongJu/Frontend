@@ -6,12 +6,10 @@ import { Scale } from "@/shared/ui/icons/Scale";
 import { NotificationBellMenu } from "@/shared/ui/NotificationBellMenu";
 import { useProfile } from "../_api/use-profile";
 
-// href: null → 준비 중(미구현) 탭. 링크 대신 비활성 표시로 렌더.
 const NAV_ITEMS = [
   { label: "홈", href: "/partner", showCount: false },
   { label: "검수 대기", href: "/partner/review", showCount: true },
-  { label: "진행 중", href: null, showCount: false },
-  { label: "완료", href: null, showCount: false },
+  { label: "진행 중", href: "/partner/review?status=진행중", showCount: false },
 ] as const;
 
 export function PartnerHeader() {
@@ -40,19 +38,6 @@ export function PartnerHeader() {
                   {pendingCount}
                 </span>
               );
-
-              if (item.href === null) {
-                return (
-                  <span
-                    key={item.label}
-                    aria-disabled
-                    title="준비 중"
-                    className="flex cursor-default items-center gap-1.5 text-sm text-ink-3"
-                  >
-                    {item.label}
-                  </span>
-                );
-              }
 
               return (
                 <Link

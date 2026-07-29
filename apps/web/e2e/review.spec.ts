@@ -146,6 +146,31 @@ test("결과 없는 status·유형 조합이면 빈 상태가 보인다", async 
 });
 
 /**
+ * 헤더 "진행 중" 프리셋 진입 (이슈 #215) — 데스크톱 내비게이션 전용.
+ */
+
+test("헤더 진행 중 탭으로 들어가면 전송 완료·상담 전환 상태만 남고 두 탭이 함께 활성화된다", async ({
+  page,
+  isMobile,
+}) => {
+  test.skip(isMobile, "헤더 내비게이션은 데스크톱(md 이상) 전용");
+  await page.goto("/partner");
+
+  await expect(async () => {
+    await page.getByRole("link", { name: "진행 중" }).click();
+    await expect(page).toHaveURL(/\/partner\/review\?status=%EC%A7%84%ED%96%89%EC%A4%91/);
+  }).toPass({ timeout: 10000 });
+
+  await expect(page.getByRole("tab", { name: /전송 완료/ })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: /상담 전환/ })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("tab", { name: /^전체/ })).toHaveAttribute("aria-selected", "false");
+
+  await expect(visibleText(page, "경추 염좌 · 향후 치료비 미반영")).toBeVisible();
+  await expect(visibleText(page, "유사암 분류 쟁점 · 진단비 과소")).toBeVisible();
+  await expect(page.getByText("우측 슬관절 인대 파열 · 등급 재산정")).toHaveCount(0);
+});
+
+/**
  * PC 레이아웃 (이슈 #94) — 요약 카드·프리뷰 패널·보류.
  */
 
