@@ -4,7 +4,7 @@ import { IN_PROGRESS_STAGE_LABELS } from "../_model/in-progress-status-meta";
 const STAGE_TONES = [
   { dot: "bg-gold", from: "from-gold", to: "to-gold", halo: "ring-gold-soft" },
   { dot: "bg-navy", from: "from-navy", to: "to-navy", halo: "ring-navy/15" },
-  { dot: "bg-terra-2", from: "from-terra-2", to: "to-terra-2", halo: "ring-terra-2/25" },
+  { dot: "bg-terra", from: "from-terra", to: "to-terra", halo: "ring-terra-soft" },
   { dot: "bg-green", from: "from-green", to: "to-green", halo: "ring-green-soft" },
 ] as const;
 
