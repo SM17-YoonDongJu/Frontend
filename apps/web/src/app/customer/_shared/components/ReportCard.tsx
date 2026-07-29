@@ -64,10 +64,16 @@ export function ReportCard({
         <div className="mt-3.5">
           <p className="text-[0.71875rem] font-medium text-ink-3">예상 보상 범위</p>
           <p className={`mt-1 ${meta.muted ? "text-ink-2" : "text-ink"}`}>
-            <span className="font-serif text-[1.5rem] leading-none">
-              {formatManwon(claimedMinAmount)} – {formatManwon(claimedMaxAmount)}
-            </span>
-            <span className="ml-1 text-[0.8125rem] font-bold">만원</span>
+            {claimedMinAmount != null && claimedMaxAmount != null ? (
+              <>
+                <span className="font-serif text-[1.5rem] leading-none">
+                  {formatManwon(claimedMinAmount)} – {formatManwon(claimedMaxAmount)}
+                </span>
+                <span className="ml-1 text-[0.8125rem] font-bold">만원</span>
+              </>
+            ) : (
+              <span className="text-[0.9375rem]">검수 중</span>
+            )}
           </p>
         </div>
 

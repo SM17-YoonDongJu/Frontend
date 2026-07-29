@@ -97,12 +97,12 @@ function buildInfoTodo(activeReport: DashboardActiveReport): ActionTodo {
     ),
     description: (
       <>
-        {activeReport.title} 검수를 진행하고 있어요. 결과가 준비되면 바로 알려드릴게요.
+        {activeReport.title ?? "리포트"} 검수를 진행하고 있어요. 결과가 준비되면 바로 알려드릴게요.
       </>
     ),
     ctaLabel: "리포트 상세",
     subIcon: <FileText className="text-[1rem]" />,
-    subTitle: activeReport.title,
+    subTitle: activeReport.title ?? "리포트 검수 진행 중",
     subDescription: "검수 진행 중",
   };
 }

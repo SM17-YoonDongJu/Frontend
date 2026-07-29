@@ -16,8 +16,8 @@ export function useChatList() {
     select: (data): ChatRoom[] =>
       data.rooms.toSorted(
         (a, b) =>
-          new Date(b.lastMessageAt).getTime() -
-          new Date(a.lastMessageAt).getTime(),
+          (b.lastMessageAt ? new Date(b.lastMessageAt).getTime() : 0) -
+          (a.lastMessageAt ? new Date(a.lastMessageAt).getTime() : 0),
       ),
   });
 }

@@ -15,14 +15,16 @@ const STATUS_PILL_LABEL: Record<ReportStatus, string> = {
   AWAITING_INSPECTION: "검수 중",
   AWAITING_ADOPTION: "제안 도착",
   COUNSELING: "매칭 완료",
-  CLOSED: "매칭 완료",
+  MATCHED: "매칭 완료",
   NOT_SELECTED: "제안 도착",
 };
 
-// 매칭(4단계)은 항상 미래 단계 — status가 아니라 고정. 현재 단계는 검수 대기(2)까지는
-// AWAITING_INSPECTION, 그 외에는 제안 도착(3)으로 본다(MATCHED enum 미확정).
+// 활성 리포트는 백엔드가 MATCHED(구 CLOSED)·NOT_SELECTED를 제외하고 내려주지만, 방어적으로 매칭(4단계)까지 다룬다.
+// 현재 단계는 검수 대기(2)까지는 AWAITING_INSPECTION, MATCHED면 매칭 완료(4), 그 외에는 제안 도착(3)으로 본다.
 function currentStepIndex(status: ReportStatus): number {
-  return status === "AWAITING_INSPECTION" ? 2 : 3;
+  if (status === "AWAITING_INSPECTION") return 2;
+  if (status === "MATCHED") return 4;
+  return 3;
 }
 
 function formatMonthDay(iso: string): string {
@@ -66,14 +68,14 @@ function buildSteps(report: DashboardActiveReport): Step[] {
       label: "제안 도착",
       mobileLabel: "제안 도착",
       subtext: proposalSubtext,
-      state: current >= 3 ? "current" : "future",
+      state: current >= 4 ? "completed" : current === 3 ? "current" : "future",
     },
     {
       index: 4,
       label: "사정사 매칭",
       mobileLabel: "매칭",
-      subtext: "제안 선택 후",
-      state: "future",
+      subtext: current >= 4 ? "매칭 완료" : "제안 선택 후",
+      state: current >= 4 ? "completed" : "future",
     },
   ];
 }
@@ -107,8 +109,10 @@ export function AnalysisTimelineCard() {
 
       <div className="mt-4 flex items-center gap-2.5">
         <span className="text-[0.9375rem] font-semibold text-ink">
-          {report.title}
-          <span className="hidden md:inline"> · {accidentTypeLabel(report.accidentType)}</span>
+          {report.title ?? accidentTypeLabel(report.accidentType)}
+          {report.title && (
+            <span className="hidden md:inline"> · {accidentTypeLabel(report.accidentType)}</span>
+          )}
         </span>
         <span className="shrink-0 rounded-pill bg-gold-soft px-2.5 py-1 text-[0.75rem] font-semibold text-gold-ink">
           {STATUS_PILL_LABEL[report.status]}

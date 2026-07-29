@@ -35,13 +35,13 @@ export function SummaryCards() {
       icon: <CheckCircle />,
       label: "이번 달 완료",
       value: `${summary.monthlyCompletedCount}건`,
-      hint: `누적 ${summary.totalCompletedCount.toLocaleString("ko-KR")}건`,
+      hint: `누적 ${(summary.totalCompletedCount ?? 0).toLocaleString("ko-KR")}건`,
     },
     {
       icon: <Star />,
       label: "고객 평점",
-      value: summary.rating.average.toFixed(1),
-      hint: `후기 ${summary.rating.reviewCount}건`,
+      value: (summary.rating.average ?? 0).toFixed(1),
+      hint: `후기 ${summary.rating.reviewCount ?? 0}건`,
     },
   ];
 

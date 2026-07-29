@@ -11,7 +11,7 @@ test.beforeEach(async ({ page }) => {
  *
  * 원칙: 핵심 사용자 흐름만 — 폼 제출→심사 현황 진입(CUJ), 미입력 제출 차단(리더 확정: 버튼 활성+클릭 시 인라인 에러),
  *   자격증 번호/사본 배타 검증, 상태 분기(PENDING/REJECTED/APPROVED/404), 반려→재제출 프리필, 반응형(퍼널/단일폼), 나중에 하기.
- * 응답은 앱 내장 MSW 기본 핸들러가 제공(POST /users/adjuster-applications 201, POST /uploads { url }).
+ * 응답은 앱 내장 MSW 기본 핸들러가 제공(POST /users/adjuster-applications 201, POST /uploads presigned URL 발급 + PUT).
  *   상태 분기는 GET /users/adjuster-applications/me 의 x-mock-scenario 헤더(setExtraHTTPHeaders)로 override.
  * 레이아웃 분기(useIsDesktop, md 48rem)는 project로 가름 — 데스크톱=chromium, 퍼널=mobile-chrome. beforeEach에서 skip.
  * 파일 형식·크기(20MB/pdf·image) 검증은 use-document-upload zod/TS에 위임(미테스트).
@@ -199,7 +199,8 @@ test.describe("심사 현황 상태 분기", () => {
     await page.setExtraHTTPHeaders({ "x-mock-scenario": "application-rejected" });
     await page.goto(STATUS_PATH);
     await expect(page.getByRole("heading", { name: "서류를 다시 확인해주세요" })).toBeVisible();
-    await expect(page.getByText("금감원-등록확인서.jpg")).toBeVisible();
+    await expect(page.getByText("등록확인서", { exact: true })).toBeVisible();
+    await expect(page.getByText("재제출 필요")).toBeVisible();
     await expect(page.getByRole("button", { name: "서류 다시 제출하기" })).toBeVisible();
   });
 

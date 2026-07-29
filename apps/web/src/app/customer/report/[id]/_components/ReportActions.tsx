@@ -80,7 +80,7 @@ export function ReportActions({
     );
   }
 
-  const canReview = report.status === "CLOSED" && report.adjusterId != null;
+  const canReview = report.status === "MATCHED" && report.adjusterId != null;
 
   return (
     <div className="flex shrink-0 flex-col items-end gap-1">

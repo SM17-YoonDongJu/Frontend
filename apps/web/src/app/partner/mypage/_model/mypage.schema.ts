@@ -6,31 +6,33 @@ import { z } from "zod";
 import { userRoleSchema } from "@/shared/model/user-role";
 export { userRoleSchema };
 
+// 백엔드 AdjusterMyPageResponse 기준 — headline·career·licenseNo는 미기입 시 null,
+// averageRating·consultationConversionRate는 미집계 시에도 0(never null, review_count로 유무 판별).
 export const mypageProfileSchema = z.object({
   nickname: z.string(),
   avatarUrl: z.string().nullable(),
-  headline: z.string(),
+  headline: z.string().nullable(),
   specialties: z.array(z.string()),
-  career: z.number().int(),
+  career: z.number().int().nullable(),
   activityRegion: z.string(),
   role: userRoleSchema,
 });
 
 export const mypageStatsSchema = z.object({
-  averageRating: z.number().nullable(),
+  averageRating: z.number(),
   reviewCount: z.number().int(),
   totalCompletedCount: z.number().int(),
-  consultationConversionRate: z.number().int().min(0).max(100).nullable(),
+  consultationConversionRate: z.number().int().min(0).max(100),
 });
 
 export const mypageMonthlyActivitySchema = z.object({
   completedCount: z.number().int(),
   consultationConvertedCount: z.number().int(),
-  averageRating: z.number().nullable(),
+  averageRating: z.number(),
 });
 
 export const mypageCertificationSchema = z.object({
-  licenseNo: z.string(),
+  licenseNo: z.string().nullable(),
   activityRegion: z.string(),
   createdAt: z.string(),
 });

@@ -232,7 +232,8 @@ const PENDING_REVIEWS = [
   { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), 0)}T09:00:00Z`, caseId: "042", title: "우측 슬관절 인대 파열 · 등급 재산정", region: "서울 강남", claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2, held: false },
   { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), -1)}T08:10:00Z`, caseId: "041", title: "다발성 늑골 골절 · 일실수입 과소", region: "경기 성남", claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3, held: false },
   { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "038", title: "요추 추간판탈출 · 특약 누락", region: "서울 송파", claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2, held: false },
-  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "036", title: "비급여 도수치료 · 한도 분쟁", region: "인천 연수", claimedMinAmount: 3_200_000, claimedMaxAmount: 4_800_000, offerHeadroom: 1_600_000, issueCount: 1, held: false },
+  // title·claimedMin/Max null 응답 케이스 회귀용(offerHeadroom은 항상 계산되는 값이라 non-null 유지).
+  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "036", title: null, region: "인천 연수", claimedMinAmount: null, claimedMaxAmount: null, offerHeadroom: 1_600_000, issueCount: 1, held: false },
   { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_ADOPTION", createdAt: "2026-06-17T14:05:00Z", caseId: "034", title: "경추 염좌 · 향후 치료비 미반영", region: "서울 마포", claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 2_100_000, issueCount: 1, held: false },
   { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_ADOPTION", createdAt: "2026-06-16T10:30:00Z", caseId: "033", title: "견관절 회전근개 파열 · 등급 재산정", region: "경기 수원", claimedMinAmount: 11_000_000, claimedMaxAmount: 15_500_000, offerHeadroom: 4_200_000, issueCount: 2, held: false },
   { reportId: crypto.randomUUID(), accidentType: "cancer_diagnosis", status: "COUNSELING", createdAt: "2026-06-15T09:15:00Z", caseId: "031", title: "유사암 분류 쟁점 · 진단비 과소", region: "서울 종로", claimedMinAmount: 20_000_000, claimedMaxAmount: 20_000_000, offerHeadroom: 3_000_000, issueCount: 2, held: false },
@@ -298,7 +299,7 @@ const DASHBOARD_AWAITING_REPORT_ID = "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb";
 const HEAD_REPORTS = [
   {
     reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
-    status: "CLOSED",
+    status: "MATCHED",
     accidentType: "교통사고",
     createdAt: "2026-05-20T09:00:00Z",
     reportNo: "20260520-017",
@@ -359,7 +360,7 @@ const REPORT_LIST_SOURCE = [
   },
   {
     reportId: "d4e1f2a3-5b6c-4d7e-8f9a-9b0c1d2e3f4a",
-    status: "CLOSED",
+    status: "MATCHED",
     accidentType: "실손",
     createdAt: "2026-04-22T09:00:00Z",
     reportNo: "20260422-077",
@@ -387,7 +388,7 @@ const REPORT_LIST_SOURCE = [
   },
   {
     reportId: "f6a3b4c5-7d8e-4f9a-8b1c-1d2e3f4a5b6c",
-    status: "CLOSED",
+    status: "MATCHED",
     accidentType: "교통사고",
     createdAt: "2026-04-03T09:00:00Z",
     reportNo: "20260403-208",
@@ -621,7 +622,7 @@ const ACTIVITY_SUMMARY = {
   closedCount: 4,
 };
 
-// 내 보험 (이슈 #105) — GET·POST /users/me/insurances (백엔드 확정 2026-07-13).
+// 내 보험 (이슈 #105) — GET /users/me/insurances(백엔드 UserInsuranceListResponse, 조회 전용 — POST 없음).
 // policyFileUrl 있음(증권 등록됨) 1건 + 없음(증권 미등록) 1건 — Figma 목업 2건 거울.
 const MOCK_INSURANCES: Array<Record<string, unknown>> = [
   {
@@ -631,9 +632,6 @@ const MOCK_INSURANCES: Array<Record<string, unknown>> = [
     policyNo: "100-2024-558***",
     enrolledAt: "2024-03-15",
     coverages: ["상해후유장해", "골절진단비", "입원일당"],
-    matchStatus: "MATCHED",
-    // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 확정 응답엔 policyFileUrl이 없다. 카드 배지("증권 등록됨/미등록")가
-    // 이 필드를 요구해 백엔드에 등재 요청 중 — 실서버에선 아직 안 온다(→ 전부 "미등록"으로 표시됨).
     policyFileUrl: "https://cdn.example.com/policies/e1000000-0001.pdf",
   },
   {
@@ -643,8 +641,6 @@ const MOCK_INSURANCES: Array<Record<string, unknown>> = [
     policyNo: "220-2023-114***",
     enrolledAt: "2023-08-02",
     coverages: ["실손의료비", "수술비"],
-    matchStatus: "UNMATCHED",
-    // CONTRACT(확장 등재 요청 중, 이슈 #105): 위와 동일 — 증권 미등록 케이스.
     policyFileUrl: null,
   },
 ];
@@ -680,11 +676,10 @@ const ADJUSTER_MYPAGE = {
 
 // 손해사정사 자격 신청 상태(이슈 #44) — POST가 세우고 GET .../me가 읽는 모듈 스코프 상태.
 // 기본 null(미신청 → GET 404 POST_NOT_FOUND → NOT_APPLIED → 폼).
+// 백엔드 AdjusterApplicationResponse.Document{type,status} — 파일명·URL 없음(심사 상태만).
 type MockSubmittedDocument = {
-  s3Url: string;
-  name: string;
-  reportType: "LICENSE" | "REGISTRATION" | "ID_CARD";
-  fileType: string;
+  type: "LICENSE" | "REGISTRATION" | "ID_CARD";
+  status: "PENDING" | "APPROVED" | "RESUBMIT_REQUIRED";
 };
 type MockAdjusterApplication = {
   applicationId: string;
@@ -712,9 +707,9 @@ function buildAdjusterApplication(
     specialties: ["후유장해", "교통사고"],
     licenseNo: "제2014-0087호",
     documents: [
-      { s3Url: "https://mock.local/uploads/license.jpg", name: "손해사정사-자격증.jpg", reportType: "LICENSE", fileType: "image/jpeg" },
-      { s3Url: "https://mock.local/uploads/registration.jpg", name: "금감원-등록확인서.jpg", reportType: "REGISTRATION", fileType: "image/jpeg" },
-      { s3Url: "https://mock.local/uploads/id-card.jpg", name: "신분증.jpg", reportType: "ID_CARD", fileType: "image/jpeg" },
+      { type: "LICENSE", status: "APPROVED" },
+      { type: "REGISTRATION", status: "APPROVED" },
+      { type: "ID_CARD", status: "APPROVED" },
     ],
     rejectedAt: null,
     rejectReason: null,
@@ -723,6 +718,9 @@ function buildAdjusterApplication(
   if (status === "REJECTED") {
     return {
       ...base,
+      documents: base.documents.map((doc) =>
+        doc.type === "REGISTRATION" ? { ...doc, status: "RESUBMIT_REQUIRED" as const } : doc,
+      ),
       rejectedAt: "2026-07-07T13:20:00Z",
       rejectReason:
         "등록확인서 이미지가 흐려 식별이 어렵습니다. 금감원 등록확인서를 다시 제출해 주세요.",
@@ -769,12 +767,23 @@ interface MockChatRoom {
   unreadCount: number;
 }
 
-// 메시지 첨부(BE Attachment shape) — 업로드 발급 key·원본명·MIME·크기.
+// 메시지 첨부(BE Attachment shape) — 업로드 발급 key·원본명·MIME·크기(내부 저장은 key 기준).
 interface MockMessageAttachment {
   attachmentKey: string;
   name: string;
   contentType: string;
   size: number;
+}
+
+// 메시지 응답 직렬화 시 key → 단기 presigned GET URL로 변환(BE ChatMessageResponse.Attachment — url 기반, key 없음).
+function toMessageAttachmentDto(attachment?: MockMessageAttachment) {
+  if (!attachment) return null;
+  return {
+    url: `https://mock-s3.example.com/${attachment.attachmentKey}?X-Amz-Signature=mock`,
+    name: attachment.name,
+    contentType: attachment.contentType,
+    size: attachment.size,
+  };
 }
 
 interface MockChatMessage {
@@ -822,7 +831,7 @@ function toChatMessageDto(message: MockChatMessage) {
     senderId: message.senderId,
     messageType: deriveMessageType(message.attachment),
     content: message.content ? message.content : null,
-    attachment: message.attachment ?? null,
+    attachment: toMessageAttachmentDto(message.attachment),
     isMine: message.senderId === MOCK_ME_ID,
     createdAt: message.createdAt,
   };
@@ -1070,12 +1079,12 @@ export const handlers = [
       name: body.name,
       specialties: body.specialties,
       licenseNo: body.license_no ?? null,
-      // 실응답 documents는 업로드 파일 메타 — 요청의 업로드 url로 구성(자격증 사본은 선택).
+      // 실응답 documents는 서류 종류별 심사 상태(PENDING) — 자격증 사본은 제출 시에만 생성.
       documents: [
         ...(body.license_image_url
-          ? [{ s3Url: body.license_image_url, name: "손해사정사-자격증.jpg", reportType: "LICENSE" as const, fileType: "image/jpeg" }]
+          ? [{ type: "LICENSE" as const, status: "PENDING" as const }]
           : []),
-        { s3Url: body.registration_image_url, name: "금감원-등록확인서.jpg", reportType: "REGISTRATION" as const, fileType: "image/jpeg" },
+        { type: "REGISTRATION" as const, status: "PENDING" as const },
       ],
       rejectedAt: null,
       rejectReason: null,
@@ -1312,7 +1321,8 @@ export const handlers = [
           senderId: MOCK_ME_ID,
           messageType: deriveMessageType(attachment),
           content: content ? content : null,
-          attachment: attachment ?? null,
+          attachment: toMessageAttachmentDto(attachment),
+          isMine: true,
           createdAt,
         }),
       },
@@ -1393,7 +1403,7 @@ export const handlers = [
     }
 
     room.matchStatus = "ACCEPTED";
-    room.roomStatus = "CLOSED";
+    // 내 방은 CLOSED하지 않고 ACTIVE로 유지(수락 후에도 담당 사정사와 대화 지속) — 형제 방만 종료.
     // 형제 방(같은 리포트) 자동 종료 — 서버 캐스케이드 미러.
     chatRooms
       .filter((r) => r.reportId === room.reportId && r.chatRoomId !== room.chatRoomId)
@@ -1407,7 +1417,7 @@ export const handlers = [
       message: "상담을 수락했습니다.",
       data: camelToSnakeDeep({
         chatRoomId,
-        chatRoomStatus: "CLOSED",
+        chatRoomStatus: "ACTIVE",
         reviewStatus: "ACCEPTED",
         reportId: room.reportId,
         reportStatus: "CLOSED",
@@ -1944,54 +1954,7 @@ export const handlers = [
     });
   }),
 
-  // 내 보험 추가 (이슈 #105) — POST /users/me/insurances (확정 스펙): 201 + data는 생성 id 단건.
-  http.post(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
-    await delay(500);
-
-    if (request.headers.get("x-mock-failure") === "add-insurance") {
-      return HttpResponse.json(
-        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "보험을 추가하지 못했습니다." },
-        { status: 500 },
-      );
-    }
-
-    let body: Record<string, unknown>;
-    try {
-      body = (await request.json()) as Record<string, unknown>;
-    } catch {
-      return HttpResponse.json(
-        { status: "400", code: "INVALID_REQUEST", message: "입력 형식이 올바르지 않습니다." },
-        { status: 400 },
-      );
-    }
-
-    if (typeof body.insurer_name !== "string" || typeof body.product_name !== "string") {
-      return HttpResponse.json(
-        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "보험사·상품명을 입력해 주세요." },
-        { status: 400 },
-      );
-    }
-
-    const id = crypto.randomUUID();
-    MOCK_INSURANCES.push({
-      id,
-      insurerName: body.insurer_name,
-      productName: body.product_name,
-      policyNo: typeof body.policy_no === "string" ? body.policy_no : null,
-      enrolledAt: typeof body.enrolled_at === "string" ? body.enrolled_at : null,
-      coverages: Array.isArray(body.coverages) ? body.coverages : [],
-      // CONTRACT(직접 입력 시 초기 matchStatus 백엔드 확인 필요): 서버가 즉시 fuzzy 매칭하는지 비동기 대기인지 미확정 → 대기(PENDING)로 둔다.
-      matchStatus: "PENDING",
-      // CONTRACT(확장 등재 요청 중, 이슈 #105): GET list 미등재 필드. 증권 업로드 없이 직접 입력 → 미등록.
-      policyFileUrl: typeof body.policy_file_url === "string" ? body.policy_file_url : null,
-    });
-
-    // 확정 응답: 201 + data는 생성 id 하나뿐(전체 객체 아님). 목록은 훅이 invalidate로 재조회한다.
-    return HttpResponse.json(
-      { status: "201", message: "등록되었습니다.", data: { id } },
-      { status: 201 },
-    );
-  }),
+  // POST /users/me/insurances — 백엔드 미구현(조회 컨트롤러만 존재). 추가 UI는 ComingSoonButton으로 대체.
 
   // 액세스 토큰 재발급 (#109) — refresh_token HttpOnly 쿠키만 사용(바디·Authorization 없음), data는 null.
   // E2E 주입: localStorage["mock:tokenExpired"]="once"(재발급 성공) | "refresh-expired"(재발급 실패).
@@ -2220,7 +2183,7 @@ export const handlers = [
       },
       {
         reportId: "a1000000-0000-4000-8000-000000000002",
-        status: "CLOSED",
+        status: "MATCHED",
         accidentType: "실손",
         title: "실손 · 도수치료 한도",
         createdAt: "2026-04-28T09:00:00Z",
@@ -2233,7 +2196,7 @@ export const handlers = [
       },
       {
         reportId: "a1000000-0000-4000-8000-000000000003",
-        status: "CLOSED",
+        status: "MATCHED",
         accidentType: "질병",
         title: "질병 · 암진단비",
         createdAt: "2026-03-10T09:00:00Z",
@@ -2379,9 +2342,10 @@ export const handlers = [
     });
   }),
 
-  // 증빙 업로드 — 기본 성공(결정적). x-mock-failure 헤더로 실패 주입(재시도 검증용)
+  // presigned 업로드 URL 발급 — 기본 성공(결정적). x-mock-failure 헤더로 실패 주입(재시도 검증용)
+  // 실제로는 { file_name, content_type, purpose } JSON → { upload_url, s3_url }.
   http.post(`${API_BASE_URL}/uploads`, async ({ request }) => {
-    await delay(800);
+    await delay(300);
 
     if (request.headers.get("x-mock-failure") === "upload") {
       return HttpResponse.json(
@@ -2390,8 +2354,25 @@ export const handlers = [
       );
     }
 
-    const url = `https://cdn.example.com/uploads/${crypto.randomUUID()}/document`;
-    return HttpResponse.json({ status: "200", message: "업로드 성공", data: { url } });
+    const key = crypto.randomUUID();
+    const uploadUrl = `${API_BASE_URL}/uploads/mock-put/${key}`;
+    const s3Url = `https://cdn.example.com/uploads/${key}`;
+    return HttpResponse.json({
+      status: "200",
+      message: "발급 성공",
+      data: camelToSnakeDeep({ uploadUrl, s3Url }),
+    });
+  }),
+
+  // presigned PUT 목적지(mock) — 실제 S3라면 여기서 바이너리를 그대로 저장한다.
+  http.put(`${API_BASE_URL}/uploads/mock-put/:key`, async ({ request }) => {
+    await delay(500);
+
+    if (request.headers.get("x-mock-failure") === "upload-put") {
+      return new HttpResponse(null, { status: 500 });
+    }
+
+    return new HttpResponse(null, { status: 200 });
   }),
 
   // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
@@ -3159,7 +3140,7 @@ export const handlers = [
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
         reportId: responseReportId,
-        status: isCustomerSample ? "CLOSED" : "AWAITING_INSPECTION",
+        status: isCustomerSample ? "MATCHED" : "AWAITING_INSPECTION",
         accidentType: "교통사고(후유장해)",
         treatment: "우측 슬관절 후방십자인대 파열",
         claimedMinAmount: isCustomerSample ? 13_500_000 : 12_000_000,
@@ -3172,40 +3153,39 @@ export const handlers = [
           "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
           "대법원 2019다○○○○ (후유장해 인과관계 판단)",
         ],
-        issues: [
+        // 백엔드 CustomerReportDetailResponse.issue(단수) — title/opinion/status/tags/impactAmount.
+        issue: [
           {
-            issueId: "issue-1",
             title: "장해등급 과소 산정 가능",
-            description: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
-            aiStatus: "TRUSTED",
+            opinion: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
+            status: "TRUSTED",
             impactAmount: 350,
             tags: ["약관 제12조", "분쟁조정 2023-1456"],
           },
           {
-            issueId: "issue-2",
             title: "외모추상 특약 청구 누락",
-            description: "누락분 청구 검토가 가장 확실한 출발점이에요.",
-            aiStatus: "CONFIRMED",
+            opinion: "누락분 청구 검토가 가장 확실한 출발점이에요.",
+            status: "CONFIRMED",
             impactAmount: 200,
             tags: ["특약 약관 §4", "유사사례 1456"],
           },
           {
-            issueId: "issue-3",
             title: "진행 방향",
-            description: "추가 의료자료 확보 → 재산정 순서를 권해요.",
-            aiStatus: "INFO",
+            opinion: "추가 의료자료 확보 → 재산정 순서를 권해요.",
+            status: "INFO",
+            impactAmount: null,
             tags: ["분쟁조정 절차"],
           },
         ],
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
-        caseNo: "20260520-017",
+        reportNo: "20260520-017",
         adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : crypto.randomUUID(),
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
           : null,
-        reviewedAt: isCustomerSample ? "2026.05.22" : null,
-        adjuster: { nickname: "정우성", career: "12년 경력 손해사정사" },
+        reviewedAt: isCustomerSample ? "2026-05-22T09:00:00Z" : null,
+        adjuster: { nickname: "정우성", career: 12 },
       }),
     });
   }),

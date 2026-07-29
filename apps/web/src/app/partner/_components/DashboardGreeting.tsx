@@ -20,7 +20,7 @@ export function DashboardGreeting() {
     <div>
       <h1 className="font-serif text-[1.75rem] font-bold text-ink">{greeting}</h1>
       {data ? (
-        data.pendingReviewCount > 0 ? (
+        (data.pendingReviewCount ?? 0) > 0 ? (
           <p className="mt-1.5 text-[0.875rem] text-ink-3">
             오늘 검수 대기 중인 사건이{" "}
             <span className="font-semibold text-ink">{data.pendingReviewCount}건</span> 있어요.

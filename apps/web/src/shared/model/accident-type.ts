@@ -30,8 +30,9 @@ const ACCIDENT_TYPE_LABEL_MAP: Record<AccidentType, string> = {
 /** 임의 문자열도 받도록 넓힌 라벨 맵(미지의 값은 그대로 노출). */
 export const ACCIDENT_TYPE_LABELS: Record<string, string> = ACCIDENT_TYPE_LABEL_MAP;
 
-/** 사고 유형 코드 → 한글 라벨(미지의 값은 원본 반환). */
-export function accidentTypeLabel(value: string): string {
+/** 사고 유형 코드 → 한글 라벨(미지의 값은 원본 반환, 없으면 "사고"). */
+export function accidentTypeLabel(value: string | null | undefined): string {
+  if (!value) return "사고";
   return ACCIDENT_TYPE_LABELS[value] ?? value;
 }
 

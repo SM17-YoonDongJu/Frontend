@@ -30,7 +30,7 @@ function bottomLeftText(item: ReportListItem): string {
     return `제안 ${item.proposalCount}건이 도착했어요`;
   }
   if (item.status === "AWAITING_INSPECTION") return "검수 완료 후 제안을 받을 수 있어요";
-  if (item.status === "CLOSED") {
+  if (item.status === "MATCHED") {
     if (item.adjusterNickname) return `상담 종결 · ${item.adjusterNickname} 사정사`;
     return `제안 ${item.proposalCount}건 · 미진행 종결`;
   }
@@ -59,7 +59,7 @@ function TopBadges({ item }: { item: ReportListItem }) {
       </StatusBadge>
     );
   }
-  if (item.status === "CLOSED") {
+  if (item.status === "MATCHED") {
     return (
       <StatusBadge
         tone="neutral"
@@ -74,10 +74,10 @@ function TopBadges({ item }: { item: ReportListItem }) {
 }
 
 export function ReceivedProposalCard({ item }: { item: ReportListItem }) {
-  const heading = item.title ?? item.accidentType;
+  const heading = item.title ?? item.accidentType ?? "";
   const isArrived = item.status === "AWAITING_ADOPTION";
   const isPending = item.status === "AWAITING_INSPECTION";
-  const isClosed = item.status === "CLOSED";
+  const isClosed = item.status === "MATCHED";
 
   return (
     <Link

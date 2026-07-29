@@ -5,28 +5,31 @@ import { z } from "zod";
  * 과거 dashboard/_model/report-list.schema.ts(12필드)와 이 파일(16필드)이 이중 정의였던 것을
  * 이 단일본으로 통합. 봉투(status/message/code)는 fetchJson이 해제 — 여기선 data 페이로드만 모델링.
  */
+// 백엔드 ReportResponseSupport.customerStatus — CLOSED는 고객 노출 시 MATCHED로 매핑되어 CLOSED는 내려오지 않는다.
 export const reportListStatusSchema = z.enum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
-  "CLOSED",
+  "MATCHED",
   "NOT_SELECTED",
 ]);
 
 export const reportListItemSchema = z.object({
   reportId: z.uuid(),
   status: reportListStatusSchema,
-  accidentType: z.string(),
+  // 백엔드 row.accidentType() null 가능(사고유형 미확정).
+  accidentType: z.string().nullable(),
   createdAt: z.string(),
   reportNo: z.string(),
-  claimedMinAmount: z.number().int().nonnegative(),
-  claimedMaxAmount: z.number().int().nonnegative(),
+  // 미검수(AWAITING_INSPECTION) 리포트는 청구액 미산정 — null 가능.
+  claimedMinAmount: z.number().int().nonnegative().nullable(),
+  claimedMaxAmount: z.number().int().nonnegative().nullable(),
   proposalCount: z.number().int(),
   reviewedAt: z.string().nullable(),
   adjusterNickname: z.string().nullable(),
 
   // 🏷확인필요(FE) list 확장 — optional, MSW로만 채움(노션 명세 반영됨).
-  title: z.string().optional(),
+  title: z.string().nullish(),
   confirmedMinAmount: z.number().int().nullable().optional(),
   confirmedMaxAmount: z.number().int().nullable().optional(),
   rating: z.number().nullable().optional(),

@@ -2,7 +2,7 @@ export type ReportListStatus =
   | "AWAITING_INSPECTION"
   | "AWAITING_ADOPTION"
   | "COUNSELING"
-  | "CLOSED"
+  | "MATCHED"
   | "NOT_SELECTED";
 
 export type ReportStatusTone = "gold" | "green" | "navy" | "neutral";
@@ -20,7 +20,7 @@ export const REPORT_STATUS_META: Record<
   AWAITING_INSPECTION: { label: "검수 대기", tone: "neutral", showCheck: false, muted: false },
   AWAITING_ADOPTION: { label: "채택 대기", tone: "gold", showCheck: false, muted: false },
   COUNSELING: { label: "상담 중", tone: "navy", showCheck: false, muted: false },
-  CLOSED: { label: "종결", tone: "neutral", showCheck: true, muted: true },
+  MATCHED: { label: "종결", tone: "neutral", showCheck: true, muted: true },
   NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral", showCheck: false, muted: true },
 };
 

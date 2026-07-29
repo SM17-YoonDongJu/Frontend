@@ -8,12 +8,11 @@ export type AffiliationType = z.infer<typeof affiliationSchema>;
 export const specialitySchema = z.enum(["신체", "종합"]);
 export type Speciality = z.infer<typeof specialitySchema>;
 
-// 제출 서류(GET .../me 실응답) — 업로드 파일 메타. 서류별 검토 상태는 실응답에 없음.
+// 제출 서류(GET .../me 실응답) — 백엔드 AdjusterApplicationResponse.Document{type,status}.
+// 서류별 심사 상태만 내려온다(파일명·URL 없음).
 export const submittedDocumentSchema = z.object({
-  s3Url: z.string(),
-  name: z.string(),
-  reportType: z.string(),
-  fileType: z.string(),
+  type: z.string(),
+  status: z.enum(["PENDING", "APPROVED", "RESUBMIT_REQUIRED"]),
 });
 export type SubmittedDocument = z.infer<typeof submittedDocumentSchema>;
 

@@ -2,13 +2,7 @@
 export type {
   ActivitySummary,
 } from "./activity.schema";
-export type {
-  MatchStatus,
-  InsuranceItem,
-  InsuranceList,
-  AddInsuranceBody,
-  AddInsuranceResult,
-} from "./insurance.schema";
+export type { InsuranceItem, InsuranceList } from "./insurance.schema";
 export type { AnalysisStep } from "./analysis-step";
 
 // 프로필은 신규 스키마 없음 — 확장된 shared meSchema 재사용.

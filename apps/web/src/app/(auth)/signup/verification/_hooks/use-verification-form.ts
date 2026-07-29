@@ -84,8 +84,8 @@ export function useVerificationForm(isDesktop: boolean): VerificationForm {
   const router = useRouter();
   const apply = useApplyAdjuster();
 
-  const license = useDocumentUpload();
-  const registration = useDocumentUpload();
+  const license = useDocumentUpload("license");
+  const registration = useDocumentUpload("registration");
 
   const [name, setName] = useState("");
   const [licenseNo, setLicenseNo] = useState("");

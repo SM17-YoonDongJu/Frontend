@@ -1,48 +1,65 @@
 import { z } from "zod";
 
-/** 리포트 상세. 출처: API 명세 GET /reports/{reportId}. 필드명 명세 그대로. */
+/**
+ * 리포트 상세. 출처: API 명세 GET /reports/{reportId}(백엔드 CustomerReportDetailResponse).
+ * 백엔드 필드 issue(단수)·reportNo는 기존 소비처(issues·caseNo) 무변경을 위해 파싱 시 별칭을 추가한다.
+ */
 
 export const reportStatusSchema = z.enum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
-  "CLOSED",
+  // 백엔드가 고객 노출 시 CLOSED를 MATCHED로 매핑 — CLOSED는 내려오지 않는다.
+  "MATCHED",
   "NOT_SELECTED",
 ]);
 
-export const issueItemSchema = z.object({
-  title: z.string(),
-  description: z.string(),
-  // 실제 스펙 type: string — 미확정 값 유입 시 파싱 실패 방지(표시는 소비처 fallback).
-  aiStatus: z.string(),
-  tags: z.array(z.string()).nullish(),
-  impactAmount: z.number().int().nullish(),
-});
+// 백엔드 IssueItem{title,opinion,status,tags,impactAmount} → 기존 소비처(description·aiStatus) 필드명 유지.
+export const issueItemSchema = z
+  .object({
+    title: z.string(),
+    opinion: z.string(),
+    status: z.string(),
+    tags: z.array(z.string()),
+    impactAmount: z.number().int().nullable(),
+  })
+  .transform((issue) => ({
+    title: issue.title,
+    description: issue.opinion,
+    aiStatus: issue.status,
+    tags: issue.tags,
+    impactAmount: issue.impactAmount,
+  }));
 
-export const reportDetailSchema = z.object({
+const rawReportDetailSchema = z.object({
   reportId: z.uuid(),
   status: reportStatusSchema,
-  accidentType: z.string(),
+  accidentType: z.string().nullable(),
   treatment: z.string(),
-  // 미산정 리포트는 null.
   claimedMinAmount: z.number().int().nullable(),
   claimedMaxAmount: z.number().int().nullable(),
   offeredAmount: z.number().int().nullable(),
   applicableGuarantees: z.array(z.string()),
   omittedSpecialContract: z.array(z.string()),
   basisTermsPrecedents: z.array(z.string()),
-  issues: z.array(issueItemSchema),
+  issue: z.array(issueItemSchema),
   question: z.string().nullable(),
   adjusterId: z.uuid().nullable(),
-  // 명세 GET 응답에 없는 디자인용 필드 — 부재 허용(nullish).
-  confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullish(),
-  caseNo: z.string().nullish(),
+  confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullable(),
+  reportNo: z.string().nullable(),
   reviewComment: z.string().nullable(),
   reviewedAt: z.string().nullable(),
   adjuster: z
     .object({
       nickname: z.string(),
-      career: z.string().nullable(),
+      // 연차(정수). 표시용 포맷("N년차")은 소비처 책임.
+      career: z.number().int().nullable(),
     })
     .nullable(),
 });
+
+export const reportDetailSchema = rawReportDetailSchema.transform((data) => ({
+  ...data,
+  issues: data.issue,
+  caseNo: data.reportNo,
+}));

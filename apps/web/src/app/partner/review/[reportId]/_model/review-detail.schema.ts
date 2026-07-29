@@ -66,15 +66,17 @@ export const reviewDetailSchema = z.object({
   reportId: z.uuid(),
   caseNo: z.string(),
   title: z.string(),
-  accidentType: z.string(),
+  // 백엔드 report.getAccidentType() null 가능(사고유형 미확정).
+  accidentType: z.string().nullable(),
   region: z.string(),
   status: reviewReportStatusSchema,
   // 실제 스펙 enum 아닌 순수 string.
   confidenceLevel: z.string().nullable(),
   isMasked: z.boolean(),
   offeredAmount: z.number().int().nullable(),
-  client: reviewClientSchema,
-  claim: reviewClaimSchema,
+  // 백엔드 ReviewContextRow(의뢰인·청구 맥락)가 없으면 client·claim 둘 다 null.
+  client: reviewClientSchema.nullable(),
+  claim: reviewClaimSchema.nullable(),
   attachments: z.array(reviewAttachmentSchema),
   aiEstimate: estimateRangeSchema,
   // started=false면 null(작업본 미생성).

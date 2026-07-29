@@ -128,33 +128,17 @@ test.describe("PC 내 보험 정보", () => {
     await expect(withoutPolicy.getByText("실손의료비")).toBeVisible();
   });
 
-  test("보험사·상품명을 입력해 추가하면 목록에 새 카드가 나타난다", async ({
-    page,
-  }) => {
+  test("보험 추가는 백엔드 미구현으로 준비 중 안내만 표시한다", async ({ page }) => {
     await page.goto(PATH);
 
     await expect(page.getByRole("heading", { name: /내 보험 정보/ })).toContainText(
       "2건",
     );
 
-    const input = page.getByPlaceholder("보험사 · 상품명 직접 입력");
-    const submit = page.getByRole("button", { name: "증권으로 자동 등록" });
-
-    // 하이드레이션 가드 — 입력이 상태에 반영돼야 제출 버튼이 활성화된다(fill은 멱등, 중복 추가 없음).
     await expect(async () => {
-      await input.fill("테스트생명 안심보험");
-      await expect(submit).toBeEnabled();
-    }).toPass({ timeout: 10000 });
-
-    await submit.click();
-
-    // 생성 응답은 id 하나뿐 → 목록 재조회로만 새 카드가 보인다(캐시 직접 주입 아님).
-    const added = cardOf(page, "테스트생명 안심보험");
-    await expect(added).toBeVisible();
-    await expect(added.getByText("증권 미등록")).toBeVisible();
-    await expect(page.getByRole("heading", { name: /내 보험 정보/ })).toContainText(
-      "3건",
-    );
+      await page.getByRole("button", { name: "보험 추가" }).click();
+      await expect(page.getByRole("status")).toHaveText("추후 지원 예정");
+    }).toPass();
   });
 });
 

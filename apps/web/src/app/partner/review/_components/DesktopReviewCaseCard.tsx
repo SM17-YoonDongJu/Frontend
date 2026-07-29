@@ -40,9 +40,11 @@ export function DesktopReviewCaseCard({ item, selected, onSelect }: Props) {
       }`}
     >
       <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge tone={TYPE_TONE[item.accidentType] ?? "neutral"}>
-          {accidentTypeLabel(item.accidentType)}
-        </StatusBadge>
+        {item.accidentType && (
+          <StatusBadge tone={TYPE_TONE[item.accidentType] ?? "neutral"}>
+            {accidentTypeLabel(item.accidentType)}
+          </StatusBadge>
+        )}
         {held && <StatusBadge tone="neutral">보류</StatusBadge>}
         {!held && isNew(item.createdAt) && <StatusBadge tone="gold">NEW</StatusBadge>}
         {item.caseId && <span className="text-xs text-ink-3">#{item.caseId}</span>}

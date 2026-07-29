@@ -12,7 +12,7 @@ export interface ChatRoomListItemProps {
   /** 사건번호 — 사정사 검색 방(리포트 없음)은 null */
   caseNo: string | null;
   lastMessage: string | null;
-  lastMessageAt: string;
+  lastMessageAt: string | null;
   avatarUrl: string | null;
   roomStatus: RoomStatus;
   href: string;

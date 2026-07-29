@@ -26,7 +26,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
   return (
     <div className="mx-auto w-full max-w-[67.5rem] px-5 pb-9 pt-[1.125rem] tracking-[-0.01rem] lg:px-4 lg:py-8">
       <ReportHeader
-        accidentType={data.accidentType}
+        accidentType={data.accidentType ?? ""}
         treatment={data.treatment}
         issueCount={data.issues.length}
         actions={<ReportActions report={data} />}
@@ -66,7 +66,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
             reviewComment={data.reviewComment}
             reviewedAt={data.reviewedAt}
             adjusterName={data.adjuster?.nickname}
-            adjusterCareer={data.adjuster?.career}
+            adjusterCareer={data.adjuster?.career != null ? `${data.adjuster.career}년차` : null}
             adjusterId={data.adjusterId}
           />
           <EstimatedPayout
