@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 공개 마케팅 페이지 E2E — 서비스 소개(/about)·이용 방법(/guide)·문의하기(/contact) (공개 페이지 슬라이스).
@@ -108,6 +109,7 @@ test.describe("문의하기 진입 흐름", () => {
   });
 
   test("로그인 유저 대시보드 푸터의 문의하기를 누르면 /contact로 이동한다", async ({ page }) => {
+    await setAuthCookie(page, "USER");
     await page.goto("/customer/dashboard");
 
     await expect(async () => {
