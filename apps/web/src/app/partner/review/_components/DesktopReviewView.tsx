@@ -7,13 +7,13 @@ import { ReviewStatusTabs } from "./ReviewStatusTabs";
 import { ReviewSummaryCards } from "./ReviewSummaryCards";
 
 export function DesktopReviewView() {
-  const { status, setStatus } = useReviewFilter();
+  const { status, setStatus, isPending } = useReviewFilter();
   const { data: statusCounts } = useReviewStatusCounts();
 
   return (
     <div className="space-y-6">
       <ReviewSummaryCards />
-      <ReviewStatusTabs value={status} counts={statusCounts} onSelect={setStatus} />
+      <ReviewStatusTabs value={status} counts={statusCounts} onSelect={setStatus} isPending={isPending} />
       <DesktopReviewFilterSection />
     </div>
   );
