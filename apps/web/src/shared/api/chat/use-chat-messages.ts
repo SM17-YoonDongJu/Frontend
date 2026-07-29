@@ -24,7 +24,7 @@ export function useChatMessages(chatRoomId: string) {
 
   // pages[0]=최신 → 뒤 페이지일수록 과거. 화면은 과거→최신 순이므로 역순으로 이어붙인다.
   const messages = useMemo<ChatMessage[]>(
-    () => query.data.pages.toReversed().flatMap((page) => page.messages),
+    () => query.data.pages.toReversed().flatMap((page) => page.messages.toReversed()),
     [query.data.pages],
   );
 
