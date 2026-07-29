@@ -14,7 +14,7 @@ permissions:
   issues: write
 
 env:
-  TRACKING_ISSUE: 119
+  TRACKING_ISSUE: 204
 
 jobs:
   audit:
