@@ -86,6 +86,17 @@ test.describe("문의하기 진입 흐름", () => {
     await expect(page.getByRole("link", { name: "teambrbosang@gmail.com" })).toBeVisible();
   });
 
+  test("이메일과 문의 내용을 입력해 제출하면 접수 완료 화면이 보인다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
+    await page.goto(CONTACT);
+
+    await page.getByPlaceholder("답변받으실 이메일 주소").fill("user@example.com");
+    await page.getByPlaceholder("문의하실 내용을 입력해주세요.").fill("문의 내용 테스트입니다.");
+    await page.getByRole("button", { name: "문의 보내기" }).click();
+
+    await expect(page.getByText("문의가 접수되었습니다")).toBeVisible();
+  });
+
   test("랜딩 푸터의 문의하기를 누르면 /contact로 이동한다", async ({ page }) => {
     await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
     await page.goto(LANDING);
