@@ -1721,7 +1721,7 @@ export const handlers = [
       {
         reportId: "c1000000-0000-4000-8000-000000000022",
         caseNo: "20260528-022",
-        accidentType: "후유장해",
+        accidentType: "disability",
         title: "장해등급 재산정 의견 작성 중",
         reportStatus: "AWAITING_INSPECTION",
         reviewStatus: null,
@@ -1731,7 +1731,7 @@ export const handlers = [
       {
         reportId: "c1000000-0000-4000-8000-000000000019",
         caseNo: "20260527-019",
-        accidentType: "교통사고",
+        accidentType: "traffic",
         title: "검수 완료 · 고객 상담 대기",
         reportStatus: "AWAITING_ADOPTION",
         reviewStatus: "SENT",

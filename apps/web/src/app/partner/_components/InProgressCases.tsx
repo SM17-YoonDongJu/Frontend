@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
-import { ProgressBar } from "@/shared/ui/ProgressBar";
 import { useAdjusterHome } from "../_api/use-home";
+import { inProgressStageIndex, inProgressStatusMeta } from "../_model/in-progress-status-meta";
 import type { HomeInProgressCase } from "../_model/types";
 import { SectionCard } from "./SectionCard";
 import { InProgressEmpty } from "./InProgressEmpty";
+import { InProgressStageTracker } from "./InProgressStageTracker";
 
 export function InProgressCases() {
   const { data } = useAdjusterHome();
@@ -30,8 +32,8 @@ export function InProgressCases() {
 }
 
 function InProgressRow({ item }: { item: HomeInProgressCase }) {
-  const tone = item.progressPercent >= 100 ? "green" : "gold";
-  const toneText = tone === "green" ? "text-green" : "text-gold-ink";
+  const status = inProgressStatusMeta(item);
+  const stageIndex = inProgressStageIndex(item);
 
   return (
     <Link
@@ -40,23 +42,17 @@ function InProgressRow({ item }: { item: HomeInProgressCase }) {
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <StatusBadge tone="gold">{item.accidentType}</StatusBadge>
           <span className="text-xs text-ink-3">#{item.caseNo}</span>
+          <span className="text-xs text-ink-3">{accidentTypeLabel(item.accidentType)}</span>
         </div>
-        <span className={`shrink-0 text-[0.8125rem] font-semibold ${toneText}`}>
-          {item.stageLabel}
-        </span>
+        <StatusBadge tone={status.tone} className="shrink-0">
+          {status.label}
+        </StatusBadge>
       </div>
 
       <p className="mt-2 text-[0.875rem] font-medium text-ink">{item.title}</p>
 
-      <ProgressBar
-        value={item.progressPercent}
-        max={100}
-        tone={tone}
-        label={`${item.stageLabel} 진행`}
-        className="mt-3"
-      />
+      <InProgressStageTracker currentIndex={stageIndex} />
     </Link>
   );
 }
