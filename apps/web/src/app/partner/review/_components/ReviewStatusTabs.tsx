@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReviewStatusCounts } from "../../_shared/model/types";
+import { REVIEW_STATUS_PRESETS } from "../_hooks/use-review-filter";
 
 /** status 필터 탭바(단일 선택). 상태는 props로 주입받는 프레젠테이션 컴포넌트. */
 
@@ -25,10 +26,13 @@ interface Props {
 }
 
 export function ReviewStatusTabs({ value, counts, onSelect }: Props) {
+  // 헤더 "진행 중" 프리셋 진입 시 대응 상태 탭들을 함께 활성 표시.
+  const presetValues = REVIEW_STATUS_PRESETS[value];
+
   return (
     <div role="tablist" aria-label="상태 필터" className="flex gap-5 overflow-x-auto border-b border-line px-5 pt-3 md:px-0">
       {REVIEW_STATUS_OPTIONS.map((option) => {
-        const active = option.value === value;
+        const active = presetValues ? presetValues.includes(option.value) : option.value === value;
         const count = option.value === "전체" ? counts?.total : counts?.[option.value];
         return (
           <button
