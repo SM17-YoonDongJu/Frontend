@@ -1,10 +1,10 @@
 import { expect, test } from "@playwright/test";
 
 /**
- * 공개 마케팅 페이지 E2E — 서비스 소개(/about)·이용 방법(/guide) (공개 페이지 슬라이스).
+ * 공개 마케팅 페이지 E2E — 서비스 소개(/about)·이용 방법(/guide)·문의하기(/contact) (공개 페이지 슬라이스).
  *
  * 원칙(fe-e2e-strategy): 핵심 사용자 흐름(CUJ) happy-path만 — 랜딩 헤더에서 두 페이지로
- *   진입 → 콘텐츠 노출 → FAQ 디스클로저 동작 → CTA로 로그인 진입.
+ *   진입 → 콘텐츠 노출 → FAQ 디스클로저 동작 → CTA로 로그인 진입 → 로그인 전후 푸터에서 문의하기 진입.
  * 데이터 없음(순수 Server Component, API·MSW 무관) — 렌더는 서버 정적 콘텐츠.
  * 저가치(개별 카드 문구 전수·반응형 그리드 열 수·아이콘 매핑)는 정적 레이어(TS·리뷰)에 위임(미테스트).
  */
@@ -12,6 +12,7 @@ import { expect, test } from "@playwright/test";
 const LANDING = "/";
 const ABOUT = "/about";
 const GUIDE = "/guide";
+const CONTACT = "/contact";
 
 test.describe("공개 페이지 진입 흐름", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
@@ -70,6 +71,37 @@ test.describe("이용 방법 FAQ 디스클로저", () => {
     await expect(async () => {
       await page.getByText("보험금을 더 받을 수 있나요?", { exact: true }).click();
       await expect(answer).toBeVisible();
+    }).toPass({ timeout: 10000 });
+  });
+});
+
+test.describe("문의하기 진입 흐름", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  test("비로그인 상태로 /contact에 바로 접근하면 안내와 이메일이 보인다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
+    await page.goto(CONTACT);
+
+    await expect(page.getByRole("heading", { name: "문의하기" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "teambrbosang@gmail.com" })).toBeVisible();
+  });
+
+  test("랜딩 푸터의 문의하기를 누르면 /contact로 이동한다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
+    await page.goto(LANDING);
+
+    await expect(async () => {
+      await page.getByRole("contentinfo").getByRole("link", { name: "문의하기" }).click();
+      await expect(page).toHaveURL(/\/contact$/);
+    }).toPass({ timeout: 10000 });
+  });
+
+  test("로그인 유저 대시보드 푸터의 문의하기를 누르면 /contact로 이동한다", async ({ page }) => {
+    await page.goto("/customer/dashboard");
+
+    await expect(async () => {
+      await page.getByRole("contentinfo").getByRole("link", { name: "문의하기" }).click();
+      await expect(page).toHaveURL(/\/contact$/);
     }).toPass({ timeout: 10000 });
   });
 });
