@@ -2,10 +2,10 @@ import { cn } from "@/shared/lib/utils";
 import { IN_PROGRESS_STAGE_LABELS } from "../_model/in-progress-status-meta";
 
 const STAGE_TONES = [
-  { dot: "bg-gold", ring: "ring-gold-soft" },
-  { dot: "bg-navy", ring: "ring-navy/20" },
-  { dot: "bg-terra-2", ring: "ring-terra-2/30" },
-  { dot: "bg-green", ring: "ring-green-soft" },
+  { dot: "bg-gold", from: "from-gold", to: "to-gold", halo: "ring-gold-soft" },
+  { dot: "bg-navy", from: "from-navy", to: "to-navy", halo: "ring-navy/15" },
+  { dot: "bg-terra-2", from: "from-terra-2", to: "to-terra-2", halo: "ring-terra-2/25" },
+  { dot: "bg-green", from: "from-green", to: "to-green", halo: "ring-green-soft" },
 ] as const;
 
 export function InProgressStageTracker({ currentIndex }: { currentIndex: number }) {
@@ -17,15 +17,16 @@ export function InProgressStageTracker({ currentIndex }: { currentIndex: number 
         const reached = index <= currentIndex;
         const isCurrent = index === currentIndex;
         const tone = STAGE_TONES[index] ?? STAGE_TONES[0];
+        const nextTone = STAGE_TONES[index + 1] ?? tone;
+        const lineDone = index < currentIndex;
 
         return (
           <li key={label} className="flex flex-1 items-center last:flex-none">
             <div className="flex flex-col items-center gap-1.5">
               <span
                 className={cn(
-                  "size-2.5 shrink-0 rounded-full",
-                  reached ? tone.dot : "bg-line",
-                  isCurrent && `ring-[3px] ${tone.ring}`,
+                  "size-3 shrink-0 rounded-full transition-colors",
+                  reached ? cn(tone.dot, isCurrent ? "ring-[5px]" : "ring-4", tone.halo) : "bg-line",
                 )}
               />
               <span
@@ -41,7 +42,7 @@ export function InProgressStageTracker({ currentIndex }: { currentIndex: number 
               <span
                 className={cn(
                   "-mt-4.5 mx-1.5 h-px flex-1",
-                  index < currentIndex ? tone.dot : "bg-line",
+                  lineDone ? cn("bg-gradient-to-r", tone.from, nextTone.to) : "bg-line",
                 )}
               />
             )}
