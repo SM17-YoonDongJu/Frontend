@@ -199,7 +199,7 @@ test.describe("심사 현황 상태 분기", () => {
     await page.setExtraHTTPHeaders({ "x-mock-scenario": "application-rejected" });
     await page.goto(STATUS_PATH);
     await expect(page.getByRole("heading", { name: "서류를 다시 확인해주세요" })).toBeVisible();
-    await expect(page.getByText("등록확인서")).toBeVisible();
+    await expect(page.getByText("등록확인서", { exact: true })).toBeVisible();
     await expect(page.getByText("재제출 필요")).toBeVisible();
     await expect(page.getByRole("button", { name: "서류 다시 제출하기" })).toBeVisible();
   });
