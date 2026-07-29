@@ -23,14 +23,22 @@ interface Props {
   value: string;
   counts?: ReviewStatusCounts;
   onSelect: (value: string) => void;
+  isPending?: boolean;
 }
 
-export function ReviewStatusTabs({ value, counts, onSelect }: Props) {
+export function ReviewStatusTabs({ value, counts, onSelect, isPending }: Props) {
   // 헤더 "진행 중" 프리셋 진입 시 대응 상태 탭들을 함께 활성 표시.
   const presetValues = REVIEW_STATUS_PRESETS[value];
 
   return (
-    <div role="tablist" aria-label="상태 필터" className="flex gap-5 overflow-x-auto border-b border-line px-5 pt-3 md:px-0">
+    <div
+      role="tablist"
+      aria-label="상태 필터"
+      aria-busy={isPending}
+      className={`flex gap-5 overflow-x-auto border-b border-line px-5 pt-3 transition-opacity md:px-0 ${
+        isPending ? "opacity-60" : ""
+      }`}
+    >
       {REVIEW_STATUS_OPTIONS.map((option) => {
         const active = presetValues ? presetValues.includes(option.value) : option.value === value;
         const count = option.value === "전체" ? counts?.total : counts?.[option.value];

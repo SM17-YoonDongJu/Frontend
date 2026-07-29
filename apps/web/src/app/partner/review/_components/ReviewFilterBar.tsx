@@ -5,10 +5,13 @@ import { useReviewFilter } from "../_hooks/use-review-filter";
 import { REVIEW_TYPE_OPTIONS } from "./ReviewTypeChips";
 
 export function ReviewFilterBar({ regions }: { regions: string[] }) {
-  const { type, setType, region, setRegion } = useReviewFilter();
+  const { type, setType, region, setRegion, isPending } = useReviewFilter();
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div
+      aria-busy={isPending}
+      className={`flex flex-wrap items-center gap-2 transition-opacity ${isPending ? "opacity-60" : ""}`}
+    >
       {REVIEW_TYPE_OPTIONS.map(({ value, label }) => (
         <button
           key={value}
