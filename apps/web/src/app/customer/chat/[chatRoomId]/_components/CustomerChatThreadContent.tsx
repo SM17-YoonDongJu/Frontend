@@ -178,6 +178,8 @@ export function CustomerChatThreadContent({
         caseNo={room.caseNo}
         roomStatus={room.roomStatus}
         reportHref={reportHref}
+        // customer 방의 상대는 항상 사정사 — counterpart.userId가 곧 adjusterId
+        profileHref={`/customer/adjusters/${room.counterpart.userId}`}
         subtitle={subtitle}
         badge={group === "matched" ? <MatchStatusBadge group={group} /> : undefined}
         actions={actions}

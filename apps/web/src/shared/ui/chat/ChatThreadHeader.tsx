@@ -27,6 +27,22 @@ export interface ChatThreadHeaderProps {
   /** 상담 종료(데스크톱 전용 버튼, partner 하위호환). ACTIVE 방에서만 노출 */
   onClose?: () => void;
   closePending?: boolean;
+  /** 상대 프로필 링크(customer→사정사 프로필). 없으면(partner) 링크 없이 렌더 */
+  profileHref?: string;
+}
+
+/** href가 있으면 아바타·이름 묶음을 프로필 링크로, 없으면(partner) 헤더 flex에 그대로 편다. */
+function ProfileLink({ href, children }: { href?: string; children: ReactNode }) {
+  if (!href) return <>{children}</>;
+
+  return (
+    <Link
+      href={href}
+      className="flex min-w-0 flex-1 items-center gap-2.5 transition hover:opacity-80"
+    >
+      {children}
+    </Link>
+  );
 }
 
 export function ChatThreadHeader({
@@ -41,6 +57,7 @@ export function ChatThreadHeader({
   mobileActions,
   onClose,
   closePending,
+  profileHref,
 }: ChatThreadHeaderProps) {
   const subtitle =
     subtitleOverride ??
@@ -60,19 +77,21 @@ export function ChatThreadHeader({
         </button>
       )}
 
-      <Avatar name={name} size="sm" />
+      <ProfileLink href={profileHref}>
+        <Avatar name={name} size="sm" />
 
-      <div className="min-w-0 flex-1">
-        <p className="flex items-center gap-1.5 truncate text-[0.85rem] font-bold text-ink">
-          {name}
-          {/* Figma 95:4611 — 이름 옆 인증 마크 */}
-          <ShieldCheck className="shrink-0 text-[0.8125rem] text-ink-3" />
-          {badge}
-        </p>
-        {/* Figma 모바일(663:3796) 헤더는 이름만 — 사건번호·상태는 데스크톱(95:4571) 전용 */}
-        <p className="hidden truncate text-[0.6875rem] text-ink-3 md:block">{subtitle}</p>
-        <span className="sr-only md:hidden">{subtitle}</span>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 truncate text-[0.85rem] font-bold text-ink">
+            {name}
+            {/* Figma 95:4611 — 이름 옆 인증 마크 */}
+            <ShieldCheck className="shrink-0 text-[0.8125rem] text-ink-3" />
+            {badge}
+          </p>
+          {/* Figma 모바일(663:3796) 헤더는 이름만 — 사건번호·상태는 데스크톱(95:4571) 전용 */}
+          <p className="hidden truncate text-[0.6875rem] text-ink-3 md:block">{subtitle}</p>
+          <span className="sr-only md:hidden">{subtitle}</span>
+        </div>
+      </ProfileLink>
 
       {/* 모바일 — 매칭 액션 주입 시(customer) 리포트 아이콘 대신 표시, 아니면(partner) 리포트 아이콘. Figma 1012:9931 */}
       {mobileActions ? (

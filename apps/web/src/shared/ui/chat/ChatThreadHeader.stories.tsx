@@ -29,6 +29,11 @@ export const Closed: Story = {
   args: { name: "윤지후 손해사정사", roomStatus: "CLOSED", caseNo: "#20260428-003" },
 };
 
+/** customer — 아바타·이름 묶음이 사정사 프로필 링크. partner는 profileHref 미전달로 링크 없음. */
+export const WithProfileLink: Story = {
+  args: { profileHref: "/customer/adjusters/aaaaaaaa-1111-1111-1111-111111111111" },
+};
+
 /** partner 하위호환 — onClose(상담 종료) 시그니처 그대로. */
 export const PartnerClose: Story = { args: { onClose: () => {} } };
 

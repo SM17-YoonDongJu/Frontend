@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/ui/Avatar";
@@ -83,7 +84,10 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
         viewed && "opacity-60",
       )}
     >
-      <div className="flex items-start gap-[0.8125rem]">
+      <Link
+        href={`/customer/adjusters/${adjusterId}`}
+        className="flex items-start gap-[0.8125rem] rounded-input transition hover:opacity-80"
+      >
         <Avatar name={nickname} className="text-[3rem]" />
         <div className="flex min-w-0 flex-1 flex-col gap-[0.1875rem] self-stretch">
           <div className="flex items-center gap-1.5">
@@ -110,7 +114,7 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
             </div>
           )}
         </div>
-      </div>
+      </Link>
 
       {proposalSummary && (
         <div className="rounded-button bg-paper-2 px-3.5 pb-[0.774rem] pt-[0.675rem]">

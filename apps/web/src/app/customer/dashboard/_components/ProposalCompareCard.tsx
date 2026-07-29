@@ -70,18 +70,23 @@ export function ProposalCompareCard() {
             key={item.proposalId}
             className="flex items-center gap-3 border-b border-line-2 py-3.5"
           >
-            <Avatar
-              name={item.nickname}
-              className="shrink-0 border border-line bg-paper text-[2.25rem] text-ink-2"
-            />
-            <div className="min-w-0">
-              <p className="truncate text-[0.875rem] font-semibold text-ink">
-                {item.nickname} 사정사
-              </p>
-              <p className="truncate text-[0.75rem] text-ink-3">
-                경력 {item.career}년 · {item.speciality} 전문
-              </p>
-            </div>
+            <Link
+              href={`/customer/adjusters/${item.adjusterId}`}
+              className="flex min-w-0 items-center gap-3 transition hover:opacity-80"
+            >
+              <Avatar
+                name={item.nickname}
+                className="shrink-0 border border-line bg-paper text-[2.25rem] text-ink-2"
+              />
+              <div className="min-w-0">
+                <p className="truncate text-[0.875rem] font-semibold text-ink">
+                  {item.nickname} 사정사
+                </p>
+                <p className="truncate text-[0.75rem] text-ink-3">
+                  경력 {item.career}년 · {item.speciality} 전문
+                </p>
+              </div>
+            </Link>
             {item.estimateMaxAmount != null && item.estimateMaxAmount === summary.maxAmount && (
               <span className="shrink-0 rounded-tag bg-gold-soft px-[0.4375rem] py-[0.1875rem] text-[0.6875rem] font-semibold text-gold-ink">
                 최고가

@@ -47,7 +47,7 @@ export function ReportSummary({
           {/* 데스크톱 제목 */}
           <div className="hidden items-center justify-between gap-2 lg:flex">
             <h2 className="text-[1rem] font-semibold text-ink">
-              {adjusterName ? `${adjusterName} 손해사정사의 검수 의견` : "검수 의견"}
+              {adjusterName ? <>{adjusterNameNode} 손해사정사의 검수 의견</> : "검수 의견"}
             </h2>
             <StatusBadge tone={meta.tone}>{meta.label}</StatusBadge>
           </div>
