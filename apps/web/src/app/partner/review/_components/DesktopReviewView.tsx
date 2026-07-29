@@ -12,17 +12,25 @@ import { ReviewStatusTabs } from "./ReviewStatusTabs";
 import { ReviewSummaryCards } from "./ReviewSummaryCards";
 
 export function DesktopReviewView() {
-  const { type, status, setStatus, region } = useReviewFilter();
+  const { type, status, setStatus, statusValues, region } = useReviewFilter();
   const accidentType = type === "전체" ? undefined : type;
-  const statusFilter = status === "전체" ? undefined : status;
+  // 백엔드가 status 다중값을 못 받아 프리셋(다중)은 전체를 받아 클라이언트 필터링.
+  const statusFilter = statusValues?.length === 1 ? statusValues[0] : undefined;
   const regionParam = region === "전체" ? undefined : region;
 
   // 지역 드롭다운 옵션은 지역 필터를 적용하지 않은 목록에서 파생(지역 선택 시 옵션 붕괴 방지).
   const { data: optionsData } = useReviewList({ status: statusFilter, accidentType });
-  const { data } = useReviewList({ status: statusFilter, accidentType, region: regionParam });
+  const { data: rawData } = useReviewList({ status: statusFilter, accidentType, region: regionParam });
   const { data: statusCounts } = useReviewStatusCounts();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const data = {
+    ...rawData,
+    list:
+      statusValues && statusValues.length > 1
+        ? rawData.list.filter((item) => !!item.status && statusValues.includes(item.status))
+        : rawData.list,
+  };
   const regions = [
     ...new Set(optionsData.list.map((item) => item.region).filter((r): r is string => !!r)),
   ];
