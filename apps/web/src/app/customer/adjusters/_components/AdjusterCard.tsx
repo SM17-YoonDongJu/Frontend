@@ -29,7 +29,10 @@ export function AdjusterCard({ adjuster }: { adjuster: AdjusterListItem }) {
 
   return (
     <article className="flex flex-col rounded-card border border-line bg-card p-5 md:p-6">
-      <div className="flex gap-4">
+      <Link
+        href={`/customer/adjusters/${adjusterId}`}
+        className="flex gap-4 transition hover:opacity-80"
+      >
         <Avatar
           src={avatarUrl}
           name={name}
@@ -58,7 +61,7 @@ export function AdjusterCard({ adjuster }: { adjuster: AdjusterListItem }) {
             <span className="hidden text-ink-3 md:inline">(후기 {numberFormatter.format(reviewCount)})</span>
           </div>
         </div>
-      </div>
+      </Link>
 
       {headline && <p className="mt-4 hidden text-sm text-ink-2 md:block">{headline}</p>}
 
