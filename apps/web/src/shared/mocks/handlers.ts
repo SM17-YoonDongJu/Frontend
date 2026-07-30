@@ -5,7 +5,9 @@ import {
   consumeReissue,
   isAccessTokenExpired,
   isLoggedOut,
+  recordExpiredResponse,
   setLoggedOut,
+  waitForExpiredResponses,
 } from "@/shared/mocks/auth-token-state";
 import { registerDeviceTokenBodySchema } from "@/shared/model/device-token.schema";
 
@@ -1960,6 +1962,10 @@ export const handlers = [
   // E2E 주입: localStorage["mock:tokenExpired"]="once"(재발급 성공) | "refresh-expired"(재발급 실패).
   // 실제 호출 횟수는 localStorage["mock:reissueCount"]에 누적 — 동시 401 다발 시 단일-flight 검증용.
   http.post(`${API_BASE_URL}/auth/reissue`, async () => {
+    // 대시보드 동시 만료 E2E(#224): useMe·useReportList 둘 다 401을 받은 뒤에 재발급을 끝내
+    // 늦게 나간 요청이 401 없이 200을 받는 타이밍 편차를 없앤다(상한 2초).
+    await waitForExpiredResponses(2, 2000);
+    // 두 번째 401을 받은 클라이언트가 진행 중 재발급 promise에 합류할 시간을 준다(단일-flight 검증 창).
     await delay(200);
 
     const outcome = consumeReissue();
@@ -2018,6 +2024,7 @@ export const handlers = [
     }
     // 액세스 토큰 만료 주입 (#109) — 재발급 성공 시 플래그가 해제돼 이후 호출은 200.
     if (isAccessTokenExpired()) {
+      recordExpiredResponse();
       return HttpResponse.json(
         { status: "401", code: "EXPIRED_TOKEN", message: "토큰이 만료되었습니다." },
         { status: 401 },
@@ -2261,6 +2268,7 @@ export const handlers = [
 
     // 액세스 토큰 만료 주입 (#109) — /users/me와 동시에 401을 받게 해 단일-flight 재발급을 검증한다.
     if (isAccessTokenExpired()) {
+      recordExpiredResponse();
       return HttpResponse.json(
         { status: "401", code: "EXPIRED_TOKEN", message: "토큰이 만료되었습니다." },
         { status: 401 },
