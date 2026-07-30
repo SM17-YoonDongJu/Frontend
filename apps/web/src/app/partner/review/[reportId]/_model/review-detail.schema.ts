@@ -65,7 +65,8 @@ export const reviewProgressSchema = z.object({
 export const reviewDetailSchema = z.object({
   reportId: z.uuid(),
   caseNo: z.string(),
-  title: z.string(),
+  // 제목 미배정 케이스는 null.
+  title: z.string().nullable(),
   // 백엔드 report.getAccidentType() null 가능(사고유형 미확정).
   accidentType: z.string().nullable(),
   region: z.string(),
