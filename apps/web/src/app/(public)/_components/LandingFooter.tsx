@@ -4,7 +4,9 @@ import { Scale } from "@/shared/ui/icons/Scale";
 const FOOTER_LINKS = [
   { label: "서비스 소개", href: "/about" },
   { label: "이용 방법", href: "/guide" },
-  { label: "문의하기", href: "/contact" }
+  { label: "문의하기", href: "/contact" },
+  { label: "이용약관", href: "/terms" },
+  { label: "개인정보처리방침", href: "/privacy" }
 ] as const;
 
 const LEGAL_NOTICE =
@@ -24,7 +26,7 @@ export function LandingFooter() {
             </span>
             <span className="font-serif text-[1.25rem] font-bold text-ink">바른보상</span>
           </div>
-          <nav aria-label="푸터 메뉴" className="flex items-center gap-5">
+          <nav aria-label="푸터 메뉴" className="flex flex-wrap items-center gap-x-5 gap-y-2">
             {FOOTER_LINKS.map((item) => (
               <Link
                 key={item.label}
