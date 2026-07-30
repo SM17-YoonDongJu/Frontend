@@ -26,7 +26,7 @@ export function LandingFooter() {
             </span>
             <span className="font-serif text-[1.25rem] font-bold text-ink">바른보상</span>
           </div>
-          <nav aria-label="푸터 메뉴" className="flex items-center gap-5">
+          <nav aria-label="푸터 메뉴" className="flex flex-wrap items-center gap-x-5 gap-y-2">
             {FOOTER_LINKS.map((item) => (
               <Link
                 key={item.label}
