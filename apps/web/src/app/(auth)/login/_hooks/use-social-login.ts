@@ -7,11 +7,13 @@ import type { SocialProvider } from "../../_shared/hooks/use-recent-login";
 const AUTHORIZE_ENDPOINT: Record<SocialProvider, string> = {
   kakao: "https://kauth.kakao.com/oauth/authorize",
   naver: "https://nid.naver.com/oauth2.0/authorize",
+  apple: "https://appleid.apple.com/auth/authorize",
 };
 
 const CLIENT_ID: Record<SocialProvider, string | undefined> = {
   kakao: process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID,
   naver: process.env.NEXT_PUBLIC_NAVER_CLIENT_ID,
+  apple: process.env.NEXT_PUBLIC_APPLE_CLIENT_ID,
 };
 
 const OAUTH_STATE_KEY = "bb.oauthState";

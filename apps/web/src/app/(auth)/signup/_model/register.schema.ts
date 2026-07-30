@@ -9,7 +9,7 @@ export const genderSchema = z.enum(["M", "F"]);
 // Figma의 이름·지역은 명세에 없어 미전송(백엔드 수용 확정 시 추가) — 드래프트에만 보관. 이메일 미수집.
 // 약관 동의(이용약관/개인정보/마케팅)는 프론트 게이트 전용이며 body 미제출(#43 확정).
 export const registerBodySchema = z.object({
-  provider: z.enum(["kakao", "naver"]),
+  provider: z.enum(["kakao", "naver", "apple"]),
   socialToken: z.string(),
   nickname: z.string().min(1).max(30),
   userType: userTypeSchema,

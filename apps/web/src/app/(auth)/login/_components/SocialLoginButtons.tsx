@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Apple } from "@/shared/ui/icons/Apple";
 import { Kakao } from "@/shared/ui/icons/Kakao";
 import { Naver } from "@/shared/ui/icons/Naver";
 import { Button } from "@/shared/ui/Button";
@@ -39,9 +40,16 @@ const PROVIDERS: ProviderSpec[] = [
     badge: "bg-white text-naver",
     icon: <Naver className="size-3" />,
   },
+  {
+    provider: "apple",
+    name: "애플",
+    button: "bg-apple text-white",
+    badge: "bg-white text-apple",
+    icon: <Apple className="size-3.5" />,
+  },
 ];
 
-/** 카카오·네이버 소셜 로그인 버튼 묶음. Button 재사용 + 브랜드 색은 className 조합. */
+/** 소셜 로그인 버튼 묶음. Button 재사용 + 브랜드 색은 className 조합. */
 export function SocialLoginButtons({
   mode,
   onSelect,

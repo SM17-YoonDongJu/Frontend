@@ -1497,7 +1497,7 @@ export const handlers = [
     const code = url.searchParams.get("code");
     const failure = request.headers.get("x-mock-failure");
 
-    if (provider !== "kakao" && provider !== "naver") {
+    if (provider !== "kakao" && provider !== "naver" && provider !== "apple") {
       return HttpResponse.json(
         { status: "400", code: "UNSUPPORTED_PROVIDER", message: "지원하지 않는 소셜 로그인입니다." },
         { status: 400 },

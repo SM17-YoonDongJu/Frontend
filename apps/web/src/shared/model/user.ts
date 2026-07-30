@@ -6,7 +6,7 @@ import { userRoleSchema } from "./user-role";
 export const userTypeSchema = z.enum(["insured_person", "adjuster"]);
 
 // 소셜 연결 — auth §4 provider 값 재사용.
-export const socialProviderSchema = z.enum(["kakao", "naver"]);
+export const socialProviderSchema = z.enum(["kakao", "naver", "apple"]);
 
 // 성별 — GET /users/me·POST /auth/register 공용(M/F/UNKNOWN).
 export const genderSchema = z.enum(["M", "F", "UNKNOWN"]);

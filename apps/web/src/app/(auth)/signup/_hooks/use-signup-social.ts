@@ -24,7 +24,9 @@ export interface SignupSocialContext {
 const DEFAULT_NICKNAME = "바른보상 회원";
 
 function toProvider(value: string | null): RegisterBody["provider"] {
-  return value === "naver" ? "naver" : "kakao";
+  if (value === "naver") return "naver";
+  if (value === "apple") return "apple";
+  return "kakao";
 }
 
 export function useSignupSocial(): SignupSocialContext | null {
