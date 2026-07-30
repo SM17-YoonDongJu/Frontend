@@ -12,7 +12,7 @@ const FOOTER_COLUMNS = [
     heading: "고객지원",
     links: [
       { label: "FAQ", href: "/guide#faq" },
-      { label: "문의하기", href: "#" }
+      { label: "문의하기", href: "/contact" }
     ]
   },
   {

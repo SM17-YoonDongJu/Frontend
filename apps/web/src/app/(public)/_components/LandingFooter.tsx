@@ -3,7 +3,8 @@ import { Scale } from "@/shared/ui/icons/Scale";
 
 const FOOTER_LINKS = [
   { label: "서비스 소개", href: "/about" },
-  { label: "이용 방법", href: "/guide" }
+  { label: "이용 방법", href: "/guide" },
+  { label: "문의하기", href: "/contact" }
 ] as const;
 
 const LEGAL_NOTICE =
