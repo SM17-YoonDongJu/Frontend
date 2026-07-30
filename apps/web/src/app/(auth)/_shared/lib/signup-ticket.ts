@@ -2,8 +2,10 @@ const SIGNUP_TICKET_KEY = "bb.signupTicket";
 
 export interface SignupTicket {
   ticket: string;
-  provider: "kakao" | "naver";
+  provider: "kakao" | "naver" | "apple";
 }
+
+const SIGNUP_PROVIDERS: SignupTicket["provider"][] = ["kakao", "naver", "apple"];
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";
@@ -31,7 +33,7 @@ export function getSignupTicket(): SignupTicket | null {
       typeof parsed !== "object" ||
       parsed === null ||
       typeof (parsed as SignupTicket).ticket !== "string" ||
-      ((parsed as SignupTicket).provider !== "kakao" && (parsed as SignupTicket).provider !== "naver")
+      !SIGNUP_PROVIDERS.includes((parsed as SignupTicket).provider)
     ) {
       return null;
     }

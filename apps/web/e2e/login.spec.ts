@@ -32,6 +32,7 @@ test("흔적이 없으면 첫 로그인 화면과 시작하기 버튼·약관 �
   await expect(page.getByRole("heading", { name: "바른보상 시작하기" })).toBeVisible();
   await expect(page.getByRole("button", { name: "카카오로 시작하기" })).toBeVisible();
   await expect(page.getByRole("button", { name: "네이버로 시작하기" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "애플로 시작하기" })).toBeVisible();
   await expect(page.getByText("이용약관")).toBeVisible();
   await expect(page.getByText("개인정보 처리방침")).toBeVisible();
 });

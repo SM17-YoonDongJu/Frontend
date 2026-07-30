@@ -1,4 +1,5 @@
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
+import { Apple } from "@/shared/ui/icons/Apple";
 import { Kakao } from "@/shared/ui/icons/Kakao";
 import { Naver } from "@/shared/ui/icons/Naver";
 import type { RecentLogin } from "../../_shared/hooks/use-recent-login";
@@ -12,6 +13,7 @@ interface RecentLoginCardProps {
 const PROVIDER_META: Record<SocialProvider, { label: string; badge: string; icon: React.ReactNode }> = {
   kakao: { label: "카카오", badge: "bg-kakao text-kakao-ink", icon: <Kakao className="size-4" /> },
   naver: { label: "네이버", badge: "bg-white text-naver", icon: <Naver className="size-3.5" /> },
+  apple: { label: "애플", badge: "bg-apple text-white", icon: <Apple className="size-3.5" /> },
 };
 
 function formatLoginDate(value: string): string {

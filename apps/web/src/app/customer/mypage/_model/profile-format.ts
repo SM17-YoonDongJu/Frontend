@@ -3,6 +3,7 @@ import type { SocialProvider } from "./types";
 const SOCIAL_LABEL: Record<SocialProvider, string> = {
   kakao: "카카오",
   naver: "네이버",
+  apple: "애플",
 };
 
 /** 소셜 계정 표시 라벨(예: "카카오 계정"). provider 없으면 "소셜 계정". */

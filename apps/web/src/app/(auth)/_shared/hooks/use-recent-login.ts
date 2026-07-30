@@ -4,7 +4,7 @@ import { useCallback, useSyncExternalStore } from "react";
 
 const RECENT_LOGIN_KEY = "bb.recentLogin";
 
-export type SocialProvider = "kakao" | "naver";
+export type SocialProvider = "kakao" | "naver" | "apple";
 
 export interface RecentLogin {
   provider: SocialProvider;
