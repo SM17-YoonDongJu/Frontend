@@ -1,4 +1,5 @@
 import { delay, http, HttpResponse } from "msw";
+import { z } from "zod";
 import { camelToSnakeDeep, toSnakeKey } from "@/shared/api/case-convert";
 import { API_BASE_URL } from "@/shared/api/config";
 import {
@@ -1010,14 +1011,22 @@ export const handlers = [
   http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
   // 문의 폼 제출 (#220) — 백엔드 확정 전 임시 목(요청: Notion "POST /contact-inquiries").
-  //   성공 200 + { received: true }. 이메일 형식 누락/빈 값 등 서버 측 재검증 실패는 400 VALIDATION_ERROR.
+  //   성공 200 + { received: true }. 이메일 형식 오류·문의 내용 길이 미달 등은 400 VALIDATION_ERROR.
+  //   프론트 zod 스키마(contact-inquiry.schema.ts)와 동일 계약을 여기서 거울 검증한다.
   http.post(`${API_BASE_URL}/contact-inquiries`, async ({ request }) => {
     await delay(500);
 
-    const body = (await request.json()) as { email?: string; message?: string };
-    if (!body.email || !body.message) {
+    const json: unknown = await request.json().catch(() => null);
+    const parsed = z
+      .object({
+        email: z.email(),
+        message: z.string().trim().min(10).max(1000),
+      })
+      .safeParse(json);
+
+    if (!parsed.success) {
       return HttpResponse.json(
-        { status: "400", code: "VALIDATION_ERROR", message: "이메일과 문의 내용을 모두 입력해주세요." },
+        { status: "400", code: "VALIDATION_ERROR", message: "이메일과 문의 내용을 모두 올바르게 입력해주세요." },
         { status: 400 },
       );
     }
