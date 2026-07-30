@@ -12,6 +12,8 @@ import { setAuthCookie } from "./_auth-cookie-helpers";
  * 실패는 x-mock-failure=withdraw 헤더로 500을 강제(고가치 — 실패했는데 계정이 사라진 것처럼
  * 보이면 신뢰 직타). 응답 봉투·에러코드 enum·다이얼로그 포커스 트랩은 zod·api-spec 훅·정적
  * 리뷰에 위임(의식적 미테스트).
+ * 앱 웹뷰 기기 토큰(이슈 #228): 브리지 스텁 + 저장 토큰 시드로 탈퇴 시 서버 해제(저장값 제거)와
+ * 해제 실패 시에도 탈퇴가 진행되는 best-effort를 검증 — 해제 실패는 x-mock-failure=device-token.
  * 고객 마이페이지는 PC/모바일 트리가 DOM에 공존(hidden md:* / md:hidden)하므로 보이는
  * 진입점만 filter로 지정한다.
  */
@@ -116,6 +118,51 @@ test.describe("모바일", () => {
     // 서버가 회복된 뒤 재시도하면 그대로 탈퇴가 끝난다.
     await page.setExtraHTTPHeaders({});
     await page.getByRole("button", { name: "다시 시도" }).click();
+
+    await expect(page).toHaveURL(/\/$/, { timeout: 20000 });
+    await expect(page.getByRole("heading", { name: /놓친 만큼 찾아드립니다/ })).toBeVisible({
+      timeout: 15000,
+    });
+  });
+});
+
+test.describe("앱 웹뷰 기기 토큰", () => {
+  // device-token-storage.ts의 저장 키를 거울로 사용 — 앱 웹뷰에서 등록된 토큰이 있는 상태를 재현한다.
+  const DEVICE_TOKEN_KEY = "bb.registeredDeviceToken";
+
+  test.use({ viewport: { width: 390, height: 844 } });
+  test.beforeEach(async ({ page }) => {
+    await setAuthCookie(page, "USER");
+    // 브리지 스텁 + 토큰 시드. init script는 내비게이션마다 재실행되므로
+    // 탈퇴 후 랜딩에서 재시드되지 않도록 1회만 심는다.
+    await page.addInitScript((key) => {
+      Object.assign(window, { ReactNativeWebView: { postMessage: () => {} } });
+      if (!window.localStorage.getItem("e2e.deviceTokenSeeded")) {
+        window.localStorage.setItem("e2e.deviceTokenSeeded", "1");
+        window.localStorage.setItem(
+          key,
+          JSON.stringify({ userId: "user-e2e", token: "device-token-e2e" }),
+        );
+      }
+    }, DEVICE_TOKEN_KEY);
+  });
+
+  test("탈퇴하면 등록된 기기 푸시 토큰이 해제된다", async ({ page }) => {
+    await page.goto(WITHDRAW_PATH);
+    await openWithdrawConfirm(page);
+    await page.getByRole("button", { name: "탈퇴하기" }).click();
+
+    await expect(page).toHaveURL(/\/$/, { timeout: 20000 });
+    const remaining = await page.evaluate((key) => localStorage.getItem(key), DEVICE_TOKEN_KEY);
+    expect(remaining).toBeNull();
+  });
+
+  test("기기 토큰 해제가 실패해도 탈퇴는 그대로 진행된다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-failure": "device-token" });
+
+    await page.goto(WITHDRAW_PATH);
+    await openWithdrawConfirm(page);
+    await page.getByRole("button", { name: "탈퇴하기" }).click();
 
     await expect(page).toHaveURL(/\/$/, { timeout: 20000 });
     await expect(page.getByRole("heading", { name: /놓친 만큼 찾아드립니다/ })).toBeVisible({

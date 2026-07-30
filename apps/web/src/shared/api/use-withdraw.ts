@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { releaseRegisteredDeviceToken } from "./release-registered-device-token";
 import { withdraw } from "./withdraw";
 
 /**
@@ -11,7 +12,11 @@ export function useWithdraw() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: withdraw,
+    mutationFn: async () => {
+      // 탈퇴한 계정의 기기로 푸시가 가지 않도록 세션이 살아있을 때 기기 토큰을 먼저 해제.
+      await releaseRegisteredDeviceToken();
+      return withdraw();
+    },
     onSuccess: () => {
       queryClient.clear();
       window.location.replace("/");
