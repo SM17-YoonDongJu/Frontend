@@ -7,8 +7,12 @@ import { Input } from "@/shared/ui/Input";
 import { useCreateContactInquiry } from "../_api/use-create-contact-inquiry";
 import { contactInquiryFormSchema, type ContactInquiryForm } from "../_model/contact-inquiry.schema";
 
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <span className="mb-2 block text-[0.8125rem] font-semibold text-ink-2">{children}</span>;
+function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
+  return (
+    <label htmlFor={htmlFor} className="mb-2 block text-[0.8125rem] font-semibold text-ink-2">
+      {children}
+    </label>
+  );
 }
 
 export function ContactForm() {
@@ -39,8 +43,9 @@ export function ContactForm() {
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4">
       <div>
-        <FieldLabel>이메일</FieldLabel>
+        <FieldLabel htmlFor="contact-email">이메일</FieldLabel>
         <Input
+          id="contact-email"
           type="email"
           placeholder="답변받으실 이메일 주소"
           error={errors.email?.message}
@@ -49,8 +54,9 @@ export function ContactForm() {
       </div>
 
       <div>
-        <FieldLabel>문의 내용</FieldLabel>
+        <FieldLabel htmlFor="contact-message">문의 내용</FieldLabel>
         <Input
+          id="contact-message"
           multiline
           rows={5}
           placeholder="문의하실 내용을 입력해주세요."
