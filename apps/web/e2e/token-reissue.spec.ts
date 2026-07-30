@@ -8,6 +8,8 @@ import { setAuthCookie } from "./_auth-cookie-helpers";
  * 만료는 MSW 시나리오 주입(localStorage "mock:tokenExpired": "once" | "refresh-expired").
  * 보호 엔드포인트 GET /users/me·GET /reports가 401 EXPIRED_TOKEN을 주고, POST /auth/reissue 실제 호출
  * 횟수는 localStorage "mock:reissueCount"에 누적된다(단일-flight 관측 채널).
+ * 401 응답 횟수도 MSW가 localStorage "mock:expiredResponseCount"에 누적한다(#224) —
+ * page.on("response")는 WebKit에서 서비스워커 경유 응답 이벤트를 흘리지 않아 관측 채널로 못 쓴다.
  * 동시 401은 대시보드가 프로덕션 경로 그대로 만든다 — 진입 시 useMe(/users/me)와 useReportList(/reports)가
  * 나란히 나가고 둘 다 401을 받으므로, fetchJson 두 곳이 같은 재발급 promise를 공유하는지 검증된다.
  * 재발급 응답 형식·에러코드 enum 검증은 zod·api-spec 훅에 위임(미테스트).
@@ -17,6 +19,7 @@ const DASHBOARD_PATH = "/customer/dashboard";
 const LOGIN_PATH = "/login";
 const SCENARIO_KEY = "mock:tokenExpired";
 const REISSUE_COUNT_KEY = "mock:reissueCount";
+const EXPIRED_COUNT_KEY = "mock:expiredResponseCount";
 const RECENT_LOGIN_KEY = "bb.recentLogin";
 
 // 대시보드 데스크톱 뷰(<md는 모바일 홈)를 기준으로 검증한다 — dashboard.spec.ts와 동일 패턴.
@@ -26,12 +29,13 @@ type Page = import("@playwright/test").Page;
 
 async function injectScenario(page: Page, scenario: string | null) {
   await page.addInitScript(
-    ([scenarioKey, countKey, value]) => {
+    ([scenarioKey, countKey, expiredKey, value]) => {
       window.localStorage.removeItem(countKey);
+      window.localStorage.removeItem(expiredKey);
       if (value === null) window.localStorage.removeItem(scenarioKey);
       else window.localStorage.setItem(scenarioKey, value);
     },
-    [SCENARIO_KEY, REISSUE_COUNT_KEY, scenario] as const,
+    [SCENARIO_KEY, REISSUE_COUNT_KEY, EXPIRED_COUNT_KEY, scenario] as const,
   );
 }
 
@@ -58,15 +62,6 @@ test("여러 요청이 동시에 만료 응답을 받아도 재발급은 한 번
   await setAuthCookie(page, "USER");
   await injectScenario(page, "once");
 
-  // 실제로 두 개 이상의 요청이 401을 받았는지(=동시 만료 상황이 재현됐는지) 확인해 둔다.
-  // 이게 없으면 요청 하나만 401을 받고도 테스트가 통과해 단일-flight를 검증하지 못한다.
-  let expiredResponses = 0;
-  page.on("response", (response) => {
-    if (response.status() === 401 && !response.url().includes("/auth/reissue")) {
-      expiredResponses += 1;
-    }
-  });
-
   await page.goto(DASHBOARD_PATH);
 
   // 인사말(/users/me)과 리포트 목록(/reports)이 모두 재시도로 살아났다 = 두 요청 다 401 → 재발급 → 재시도.
@@ -79,7 +74,12 @@ test("여러 요청이 동시에 만료 응답을 받아도 재발급은 한 번
     expect(await reissueCount(page)).toBe("1");
   }).toPass({ timeout: 10000 });
 
-  expect(expiredResponses).toBeGreaterThanOrEqual(2);
+  // 실제로 두 개 이상의 요청이 401을 받았는지(=동시 만료 상황이 재현됐는지) 확인해 둔다.
+  // 이게 없으면 요청 하나만 401을 받고도 테스트가 통과해 단일-flight를 검증하지 못한다.
+  await expect(async () => {
+    const count = await page.evaluate((key) => window.localStorage.getItem(key), EXPIRED_COUNT_KEY);
+    expect(Number(count ?? "0")).toBeGreaterThanOrEqual(2);
+  }).toPass({ timeout: 10000 });
 });
 
 test("리프레시 토큰까지 만료되면 로그인 안내 화면을 거쳐 로그인 화면에 최근 로그인 카드가 남는다", async ({
