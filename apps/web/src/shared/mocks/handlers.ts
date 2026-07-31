@@ -1509,6 +1509,121 @@ export const handlers = [
     });
   }),
 
+  // 공유 리포트 (GET /chats/{id}/shared-report, 이슈 #187) — 방에 공유된 사정사 검수 결과.
+  //  - x-mock-failure: shared-report-forbidden → 403 CHAT_NOT_A_MEMBER
+  //  - x-mock-failure: shared-report-missing   → 404 REPORT_NOT_FOUND(검수 리포트 미등록)
+  //  - x-mock-failure: shared-report-proposal  → 404 PROPOSAL_NOT_FOUND(제안 없는 사정사 검색 방)
+  //  - 없는 방                                  → 404 CHAT_ROOM_NOT_FOUND
+  http.get(`${API_BASE_URL}/chats/:chatRoomId/shared-report`, async ({ request, params }) => {
+    await delay(400);
+
+    const chatRoomId = String(params.chatRoomId);
+    const failure = request.headers.get("x-mock-failure");
+
+    if (failure === "shared-report-forbidden") {
+      return HttpResponse.json(
+        { status: "403", code: "CHAT_NOT_A_MEMBER", message: "참여 중인 상담방이 아닙니다." },
+        { status: 403 },
+      );
+    }
+    if (failure === "shared-report-missing") {
+      return HttpResponse.json(
+        { status: "404", code: "REPORT_NOT_FOUND", message: "검수 리포트를 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+    if (failure === "shared-report-proposal") {
+      return HttpResponse.json(
+        { status: "404", code: "PROPOSAL_NOT_FOUND", message: "제안을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
+    if (!room) {
+      return HttpResponse.json(
+        { status: "404", code: "CHAT_ROOM_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+    if (!room.reportId || !room.proposalId) {
+      return HttpResponse.json(
+        { status: "404", code: "PROPOSAL_NOT_FOUND", message: "제안을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: camelToSnakeDeep({
+        chatRoomId,
+        reportId: room.reportId,
+        proposalId: room.proposalId,
+        caseNo: room.caseNo ?? "#20260520-017",
+        accidentType: room.reportTypeLabel,
+        title: "교통사고 후유장해 검수 리포트",
+        reportStatus: "CLOSED",
+        reviewStatus: room.matchStatus ?? "COUNSELING",
+        reportUpdatedAt: "2026-06-28T09:12:00+09:00",
+        submittedAt: "2026-06-29T14:05:00+09:00",
+        summary:
+          "제출하신 진단서와 약관을 함께 검토했습니다. 장해등급 재산정 여지가 있고, 누락된 특약 청구도 함께 진행할 수 있어 보입니다. 최종 지급액은 보험사 심사 결과에 따라 달라질 수 있습니다.",
+        adjuster: {
+          adjusterId: room.adjusterId,
+          name: room.adjusterName,
+          career: 12,
+          specialties: ["후유장해", "교통사고"],
+        },
+        estimate: { min: 14_000_000, max: 17_500_000 },
+        offeredAmount: 9_800_000,
+        issues: [
+          {
+            issueId: "5f0c1a2b-3c4d-4e5f-8a9b-0c1d2e3f4a5b",
+            reviewIssueId: "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
+            title: "장해등급 산정 기준 재검토",
+            adjusterOpinion:
+              "제출된 진단서 기준으로 13급이 아닌 12급 적용 여지가 있습니다.",
+            description:
+              "AMA 기준 관절 운동범위 측정치가 12급 요건에 근접합니다. 재측정 소견서를 보완하면 다툼의 여지가 줄어듭니다.",
+            impactAmount: 3_200_000,
+            reviewStatus: "ACCEPTED",
+            tags: ["후유장해", "장해등급"],
+          },
+          {
+            issueId: "6a1d2b3c-4d5e-4f6a-9b0c-1d2e3f4a5b6c",
+            reviewIssueId: "b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e",
+            title: "외모추상 특약 청구 범위",
+            adjusterOpinion:
+              "청구 대상 부위를 흉터 길이 기준으로 조정하는 편이 유리합니다.",
+            description: null,
+            impactAmount: 1_500_000,
+            reviewStatus: "MODIFIED",
+            tags: ["특약"],
+          },
+          {
+            issueId: null,
+            reviewIssueId: "c3d4e5f6-a7b8-4c9d-8e0f-2a3b4c5d6e7f",
+            title: "휴업손해 미청구 확인",
+            adjusterOpinion:
+              "사고 이후 휴업 기간에 대한 손해가 청구 내역에 빠져 있습니다.",
+            description: "재직증명서와 급여명세서로 소득 자료를 보완하면 됩니다.",
+            impactAmount: null,
+            reviewStatus: "ADDED",
+            tags: ["휴업손해", "추가 검토"],
+          },
+        ],
+        issueCount: 3,
+        applicableGuarantees: ["상해후유장해", "외모추상 특약", "휴업손해"],
+        omittedSpecialContract: ["골절 진단비 특약"],
+        basisTermsPrecedents: [
+          "약관 제12조(후유장해 보험금) 지급 기준",
+          "대법원 2015다12345 판결",
+        ],
+      }),
+    });
+  }),
+
   // OAuth 소셜 로그인 콜백 (#40). 기본 성공(기존 회원).
   //  - code=new            → isNewUser:true (회원가입 플로우 분기)
   //  - code=fail-invalid   → 400 INVALID_REQUEST     (브라우저 URL 주입 — E2E)
