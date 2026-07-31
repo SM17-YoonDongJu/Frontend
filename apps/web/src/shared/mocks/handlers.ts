@@ -812,6 +812,8 @@ function toChatRoomDto(room: MockChatRoom) {
     chatRoomId: room.chatRoomId,
     reportId: room.reportId,
     proposalId: room.proposalId,
+    // 명세 필드명 미러링(report_review_id) — FE는 둘 중 하나를 proposalId로 정규화.
+    reportReviewId: room.proposalId,
     roomStatus: room.roomStatus,
     matchStatus: room.matchStatus,
     counterpart: {
@@ -2710,6 +2712,17 @@ export const handlers = [
             { status: 409 },
           );
         }
+        // ACCEPTED는 COUNSELING(상담 진행 중)에서만 유효 — 실서버 전이 규칙 거울.
+        if (status === "ACCEPTED" && extra.status !== "COUNSELING") {
+          return HttpResponse.json(
+            {
+              status: "409",
+              code: "UNSUPPORTED_OPERATION",
+              message: "상담 진행 중인 제안만 매칭할 수 있습니다.",
+            },
+            { status: 409 },
+          );
+        }
         if (status === "ACCEPTED") {
           extra.status = "ACCEPTED";
           EXTRA_PROPOSALS.filter(
@@ -2753,6 +2766,17 @@ export const handlers = [
             status: "409",
             code: "UNSUPPORTED_OPERATION",
             message: "이미 처리된 제안입니다.",
+          },
+          { status: 409 },
+        );
+      }
+      // ACCEPTED는 COUNSELING(채팅방 개설 후)에서만 유효 — 실서버 전이 규칙 거울.
+      if (status === "ACCEPTED" && target.matchStatus !== "COUNSELING") {
+        return HttpResponse.json(
+          {
+            status: "409",
+            code: "UNSUPPORTED_OPERATION",
+            message: "상담 진행 중인 제안만 매칭할 수 있습니다.",
           },
           { status: 409 },
         );
