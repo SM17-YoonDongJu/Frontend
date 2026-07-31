@@ -20,19 +20,26 @@ export const chatCounterpartSchema = z.object({
   avatarUrl: z.string().nullable().default(null), // 부재 시 null(이니셜 아바타 폴백)
 });
 
-export const chatRoomSchema = z.object({
-  chatRoomId: z.uuid(),
-  reportId: z.uuid().nullable(), // 사정사 검색 방은 null(공유 리포트 버튼 숨김)
-  proposalId: z.uuid().nullable(), // 제안 id — accept/reject 대상(검색 방은 null)
-  roomStatus: roomStatusSchema,
-  matchStatus: matchStatusSchema.nullable(),
-  counterpart: chatCounterpartSchema,
-  lastMessage: z.string().nullable(),
-  lastMessageAt: z.string().nullable(), // 메시지 없는 방(생성 직후)은 null
-  unreadCount: z.number().int(),
-  caseNo: z.string().nullable(), // 사정사 검색 방은 리포트 없음
-  reportTypeLabel: accidentTypeSchema.nullable(), // accidentType 슬러그(표시는 accidentTypeLabel()) — 사정사 검색 방은 null
-});
+export const chatRoomSchema = z
+  .object({
+    chatRoomId: z.uuid(),
+    reportId: z.uuid().nullable(), // 사정사 검색 방은 null(공유 리포트 버튼 숨김)
+    // 명세 필드명은 report_review_id(→ reportReviewId). 구 응답 proposal_id도 허용하고 proposalId로 정규화.
+    proposalId: z.uuid().nullish(), // 제안 id — accept/reject 대상(검색 방은 null)
+    reportReviewId: z.uuid().nullish(),
+    roomStatus: roomStatusSchema,
+    matchStatus: matchStatusSchema.nullable(),
+    counterpart: chatCounterpartSchema,
+    lastMessage: z.string().nullable(),
+    lastMessageAt: z.string().nullable(), // 메시지 없는 방(생성 직후)은 null
+    unreadCount: z.number().int(),
+    caseNo: z.string().nullable(), // 사정사 검색 방은 리포트 없음
+    reportTypeLabel: accidentTypeSchema.nullable(), // accidentType 슬러그(표시는 accidentTypeLabel()) — 사정사 검색 방은 null
+  })
+  .transform(({ reportReviewId, ...room }) => ({
+    ...room,
+    proposalId: room.proposalId ?? reportReviewId ?? null,
+  }));
 
 export const chatListSchema = z.object({
   rooms: z.array(chatRoomSchema),
@@ -102,7 +109,8 @@ export const uploadChatAttachmentResponseSchema = chatAttachmentSchema;
 // 상담 수락(PATCH accept) — 내 제안 ACCEPTED · 리포트 CLOSED. 내 방은 CLOSED하지 않고 ACTIVE로 유지(형제 방만 CLOSED).
 export const acceptChatResponseSchema = z.object({
   chatRoomId: z.uuid(),
-  chatRoomStatus: z.literal("ACTIVE"),
+  // CONTRACT: 명세는 CLOSED, 기존 FE는 ACTIVE literal로 고정돼 있었다 → 드리프트 회피로 enum 수용.
+  chatRoomStatus: roomStatusSchema,
   reviewStatus: z.literal("ACCEPTED"),
   reportId: z.uuid(),
   reportStatus: z.string(),

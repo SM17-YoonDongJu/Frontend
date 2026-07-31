@@ -812,6 +812,8 @@ function toChatRoomDto(room: MockChatRoom) {
     chatRoomId: room.chatRoomId,
     reportId: room.reportId,
     proposalId: room.proposalId,
+    // 명세 필드명 미러링(report_review_id) — FE는 둘 중 하나를 proposalId로 정규화.
+    reportReviewId: room.proposalId,
     roomStatus: room.roomStatus,
     matchStatus: room.matchStatus,
     counterpart: {
@@ -840,7 +842,8 @@ function toChatMessageDto(message: MockChatMessage) {
   };
 }
 
-// 비교 그룹 검증: 3방 모두 동일 reportId·caseNo, COUNSELING(비교중)으로 시작. adjusterName만 상이.
+// 비교 그룹 검증: 3방 모두 동일 reportId·caseNo. 김도현·정우성 COUNSELING(상담 중),
+// 윤지후 SENT(제안 도착 — 방은 제안 발송 시 선생성, #231 상담 수락 즉시 이동 흐름 시드).
 const chatRooms: MockChatRoom[] = [
   {
     chatRoomId: CHAT_ROOM_1_ID,
@@ -886,7 +889,7 @@ const chatRooms: MockChatRoom[] = [
     roomStatus: "ACTIVE",
     lastMessageAt: "2026-06-20T09:00:00Z",
     proposalId: CHAT_PROPOSAL_3_ID,
-    matchStatus: "COUNSELING",
+    matchStatus: "SENT",
     reportTypeLabel: "disability",
     unreadCount: 0,
   },
@@ -2710,6 +2713,17 @@ export const handlers = [
             { status: 409 },
           );
         }
+        // ACCEPTED는 COUNSELING(상담 진행 중)에서만 유효 — 실서버 전이 규칙 거울.
+        if (status === "ACCEPTED" && extra.status !== "COUNSELING") {
+          return HttpResponse.json(
+            {
+              status: "409",
+              code: "UNSUPPORTED_OPERATION",
+              message: "상담 진행 중인 제안만 매칭할 수 있습니다.",
+            },
+            { status: 409 },
+          );
+        }
         if (status === "ACCEPTED") {
           extra.status = "ACCEPTED";
           EXTRA_PROPOSALS.filter(
@@ -2753,6 +2767,17 @@ export const handlers = [
             status: "409",
             code: "UNSUPPORTED_OPERATION",
             message: "이미 처리된 제안입니다.",
+          },
+          { status: 409 },
+        );
+      }
+      // ACCEPTED는 COUNSELING(채팅방 개설 후)에서만 유효 — 실서버 전이 규칙 거울.
+      if (status === "ACCEPTED" && target.matchStatus !== "COUNSELING") {
+        return HttpResponse.json(
+          {
+            status: "409",
+            code: "UNSUPPORTED_OPERATION",
+            message: "상담 진행 중인 제안만 매칭할 수 있습니다.",
           },
           { status: 409 },
         );

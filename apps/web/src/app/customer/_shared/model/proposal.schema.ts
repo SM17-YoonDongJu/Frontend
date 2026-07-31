@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { matchStatusSchema } from "@/shared/api/chat/chat.schema";
 
 /**
  * 받은 제안 목록. 출처: 식별자 사전 §5b GET /reports/{reportId}/proposals.
@@ -14,8 +15,11 @@ export const proposalSchema = z.object({
   // 후기 미작성 사정사는 rating null(평점 계산 대상 없음).
   rating: z.number().nullable(),
   proposalSummary: z.string().nullable(),
-  // 실제 스펙 type: string(SENT/COUNSELING/REJECTED/ACCEPTED) — 미확정 값 유입 대비 완화.
-  status: z.string(),
+  // report_reviews.status. 미확정 값 유입 시에도 파싱이 죽지 않도록 catch로 SENT 폴백.
+  status: matchStatusSchema.catch("SENT"),
+  // CONTRACT: 명세없음 — GET /reports/{reportId}/proposals 응답에 chat_room_id 없음(백엔드 요청 중).
+  // 오면 그대로 쓰고, 없으면 GET /chats에서 reportReviewId(=proposalId)로 폴백 조회.
+  chatRoomId: z.uuid().nullish(),
   submittedAt: z.string(),
   speciality: z.string().optional(),
   career: z.number().int().optional(),

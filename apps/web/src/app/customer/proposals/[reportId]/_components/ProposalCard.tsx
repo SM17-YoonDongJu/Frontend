@@ -6,13 +6,19 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
+import { StatusBadge } from "@/shared/ui/StatusBadge";
 import { MatchConfirmModal } from "@/shared/ui/chat/MatchConfirmModal";
-import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { Star } from "@/shared/ui/icons/Star";
 import { toast } from "@/shared/ui/toast";
 import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
+import { getProposalAction } from "../../../_shared/model/proposal-actions";
 import { useViewedProposals } from "../_hooks/use-viewed-proposals";
+import {
+  ConsultChatActions,
+  MatchedProposalActions,
+  SentProposalActions,
+} from "./ConsultChatActions";
 import type { Proposal } from "../../../_shared/model/proposal.schema";
 import { formatManwon } from "@/shared/lib/format-amount";
 
@@ -51,7 +57,9 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
     estimateMinAmount,
     estimateMaxAmount,
     feeBasis,
+    status,
   } = proposal;
+  const cardAction = getProposalAction(status);
   const viewed = isViewed(adjusterId);
   const estimateRange = formatEstimateRange(estimateMinAmount, estimateMaxAmount);
   const credential = formatCredential(career, speciality);
@@ -61,18 +69,18 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
     router.push(`/customer/report/${reportId}`);
   };
 
-  // 채택 시 같은 리포트의 다른 제안이 자동 종료·되돌릴 수 없어 확인 모달을 거친다(채팅 화면과 동일 정책)
-  const acceptConsult = () => {
+  // 매칭 완료 시 같은 리포트의 다른 제안이 자동 종료·되돌릴 수 없어 확인 모달을 거친다(채팅 화면과 동일 정책)
+  const openMatchConfirm = () => {
     setConfirmOpen(true);
   };
 
-  const confirmAccept = () => {
+  const confirmMatch = () => {
     matchProposal.mutate(
       { proposalId, status: "ACCEPTED" },
       {
         onSuccess: () => setConfirmOpen(false),
         onError: () =>
-          toast.error("제안 채택에 실패했어요. 잠시 후 다시 시도해 주세요."),
+          toast.error("매칭 완료 처리에 실패했어요. 잠시 후 다시 시도해 주세요."),
       },
     );
   };
@@ -135,32 +143,41 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
         </div>
       </div>
 
-      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
-        <Button
-          variant="outline"
-          size="sm"
-          className="h-[2.125rem] px-[0.9375rem] py-[0.5625rem] text-[0.83125rem]"
-          onClick={openReviewReport}
-        >
-          상세 보기
-        </Button>
-        <Button
-          size="sm"
-          loading={matchProposal.isPending}
-          icon={<ArrowRight className="text-[0.9375rem]" />}
-          className="h-[2.125rem] px-[0.9375rem] py-[0.5625rem] text-[0.8125rem]"
-          onClick={acceptConsult}
-        >
-          상담 수락
-        </Button>
-      </div>
+      {cardAction === "REQUEST_CONSULT" && (
+        <SentProposalActions proposalId={proposalId} onOpenDetail={openReviewReport} />
+      )}
+
+      {cardAction === "IN_CONSULT" && (
+        <ConsultChatActions
+          proposalId={proposalId}
+          matchPending={matchProposal.isPending}
+          onMatchComplete={openMatchConfirm}
+          onOpenDetail={openReviewReport}
+        />
+      )}
+
+      {cardAction === "DONE" && <MatchedProposalActions proposalId={proposalId} />}
+
+      {cardAction === "ENDED" && (
+        <div className="flex items-center justify-between gap-2.5">
+          <StatusBadge tone="neutral">종료된 제안</StatusBadge>
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-[2.125rem] px-[0.9375rem] py-[0.5625rem] text-[0.83125rem]"
+            onClick={openReviewReport}
+          >
+            상세 보기
+          </Button>
+        </div>
+      )}
 
       <MatchConfirmModal
         open={confirmOpen}
         adjusterName={nickname}
         endingConsultations={otherProposalNames.map((name) => ({ name }))}
         pending={matchProposal.isPending}
-        onConfirm={confirmAccept}
+        onConfirm={confirmMatch}
         onCancel={() => setConfirmOpen(false)}
       />
     </article>
