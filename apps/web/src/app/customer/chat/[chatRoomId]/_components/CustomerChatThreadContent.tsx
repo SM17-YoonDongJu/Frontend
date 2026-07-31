@@ -30,8 +30,6 @@ export interface CustomerChatThreadContentProps {
   chatRoomId: string;
   /** 방 목록·뒤로가기 베이스(예 "/customer/chat") */
   chatBasePath: string;
-  /** 공유 리포트 베이스(예 "/customer/report") */
-  reportBasePath: string;
 }
 
 /**
@@ -41,7 +39,6 @@ export interface CustomerChatThreadContentProps {
 export function CustomerChatThreadContent({
   chatRoomId,
   chatBasePath,
-  reportBasePath,
 }: CustomerChatThreadContentProps) {
   const router = useRouter();
   const { data: room } = useChatRoom(chatRoomId);
@@ -61,7 +58,10 @@ export function CustomerChatThreadContent({
   }, [markRead, chatRoomId]);
 
   const group = toMatchGroup(room.matchStatus, room.roomStatus);
-  const reportHref = room.reportId ? `${reportBasePath}/${room.reportId}` : "#";
+  // 원본 리포트가 아니라 사정사 검수 결과(공유 리포트)로 이동. 사정사 검색 방은 공유 리포트가 없어 비활성.
+  const sharedReportHref = room.reportId
+    ? `${chatBasePath}/${chatRoomId}/shared-report`
+    : "#";
   const matchPending = accept.isPending || reject.isPending;
 
   // 목록 응답에 현재 방이 아직 없어도(딥링크 직진입) 비교 수에 자신은 포함
@@ -131,7 +131,7 @@ export function CustomerChatThreadContent({
       </>
     ) : group === "matched" ? (
       <Link
-        href={reportHref}
+        href={sharedReportHref}
         className="flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96]"
       >
         사건 진행 보기
@@ -163,7 +163,7 @@ export function CustomerChatThreadContent({
       </>
     ) : group === "matched" ? (
       <Link
-        href={reportHref}
+        href={sharedReportHref}
         className="flex items-center gap-1 rounded-button bg-navy px-2.5 py-2 text-[0.75rem] font-bold text-white transition hover:brightness-[.96]"
       >
         사건 진행
@@ -177,7 +177,7 @@ export function CustomerChatThreadContent({
         name={room.counterpart.name}
         caseNo={room.caseNo}
         roomStatus={room.roomStatus}
-        reportHref={reportHref}
+        reportHref={sharedReportHref}
         // customer 방의 상대는 항상 사정사 — counterpart.userId가 곧 adjusterId
         profileHref={`/customer/adjusters/${room.counterpart.userId}`}
         subtitle={subtitle}
@@ -202,7 +202,7 @@ export function CustomerChatThreadContent({
           <ChatComparisonBanner
             variant="matched"
             reportTypeLabel={accidentTypeLabel(room.reportTypeLabel)}
-            progressHref={reportHref}
+            progressHref={sharedReportHref}
           />
         </div>
       )}
