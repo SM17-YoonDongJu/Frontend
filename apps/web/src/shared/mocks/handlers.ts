@@ -842,7 +842,8 @@ function toChatMessageDto(message: MockChatMessage) {
   };
 }
 
-// 비교 그룹 검증: 3방 모두 동일 reportId·caseNo, COUNSELING(비교중)으로 시작. adjusterName만 상이.
+// 비교 그룹 검증: 3방 모두 동일 reportId·caseNo. 김도현·정우성 COUNSELING(상담 중),
+// 윤지후 SENT(제안 도착 — 방은 제안 발송 시 선생성, #231 상담 수락 즉시 이동 흐름 시드).
 const chatRooms: MockChatRoom[] = [
   {
     chatRoomId: CHAT_ROOM_1_ID,
@@ -888,7 +889,7 @@ const chatRooms: MockChatRoom[] = [
     roomStatus: "ACTIVE",
     lastMessageAt: "2026-06-20T09:00:00Z",
     proposalId: CHAT_PROPOSAL_3_ID,
-    matchStatus: "COUNSELING",
+    matchStatus: "SENT",
     reportTypeLabel: "disability",
     unreadCount: 0,
   },

@@ -6,7 +6,7 @@ import type { MatchStatus } from "@/shared/api/chat/chat.schema";
  * 매칭 완료(ACCEPTED PATCH)는 COUNSELING에서만 유효하다.
  */
 export type ProposalAction =
-  | "REQUEST_CONSULT" // SENT — 상담 신청(채팅방 생성 API 명세없음 → 이번 스코프 비구현)
+  | "REQUEST_CONSULT" // SENT — 상담 수락(제안 발송 시 선생성된 채팅방으로 즉시 이동, #231)
   | "IN_CONSULT" // COUNSELING — 상담채팅 진행 + 매칭 완료
   | "DONE" // ACCEPTED — 매칭 완료 표시 + 채팅 보기(읽기 전용)
   | "ENDED"; // REJECTED — 종료

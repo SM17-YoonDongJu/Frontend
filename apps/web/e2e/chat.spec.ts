@@ -9,7 +9,8 @@ import { setAuthCookie } from "./_auth-cookie-helpers";
  *   → 매칭 후 사건 진행 보기 → 공유 리포트 열기.
  * partner 무회귀: 평면 목록(그룹 없음)·헤더 상담 종료 버튼·상담 종료 흐름 그대로.
  *
- * 시드(기본 MSW): 같은 reportId·caseNo 3방(김도현·정우성·윤지후) 전부 ACTIVE·COUNSELING(=비교 중).
+ * 시드(기본 MSW): 같은 reportId·caseNo 3방(김도현·정우성·윤지후) 전부 ACTIVE.
+ * 김도현·정우성 COUNSELING, 윤지후 SENT(#231 선생성 방) — 셋 다 그룹은 "비교 중"으로 동일.
  * 전송 실패는 x-mock-failure 헤더로 강제. 매칭 액션 버튼은 데스크톱 헤더(md+) 전용 → 뷰포트 확대.
  */
 

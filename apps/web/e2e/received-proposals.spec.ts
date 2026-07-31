@@ -4,9 +4,9 @@ import { setAuthCookie } from "./_auth-cookie-helpers";
 /**
  * 받은 제안 목록 E2E (happy-path, 이슈 #18/#123).
  *
- * 원칙: 핵심 사용자 흐름만 — 목록 열람 / 상담채팅 진행 / 매칭 완료(형제 제안 자동 종료) / 상세 보기 이동.
- * 시드 제안 3건은 모두 COUNSELING(상담 진행 중) → 카드 액션은 "상담채팅 진행" + "매칭 완료"다.
- * SENT의 "상담 신청"은 채팅방 생성 API 명세 확정 전까지 비활성이라 테스트하지 않는다.
+ * 원칙: 핵심 사용자 흐름만 — 목록 열람 / 상담 수락 / 상담채팅 진행 / 매칭 완료(형제 제안 자동 종료) / 상세 보기 이동.
+ * 시드 제안 3건: 김도현·정우성 COUNSELING("상담채팅 진행"+"매칭 완료"), 윤지후 SENT("상담 수락").
+ * 채팅방은 제안 발송 시 선생성(#231) — SENT의 "상담 수락"은 생성 API 없이 기존 방으로 즉시 이동한다.
  * 응답은 기본 MSW 핸들러가 제공 — 제안은 채팅 시드와 동일 원천(같은 사건 3건: 김도현·정우성·윤지후).
  * 거절 진입은 채팅 화면으로 일원화(#123) — 거절 흐름은 chat.spec.ts가 검증한다.
  * 빈 상태는 핸들러 오버라이드가 필요해 의식적으로 테스트하지 않는다(정적 레이어가 하위 대체).
@@ -49,6 +49,21 @@ test("상담채팅 진행을 누르면 해당 제안의 채팅방으로 이동�
   await expect(async () => {
     await chatButton.click();
     await expect(page).toHaveURL(/\/customer\/chat\/[0-9a-f-]+/);
+  }).toPass({ timeout: 10000 });
+});
+
+test("상담 수락을 누르면 확인 화면 없이 해당 제안의 채팅방으로 바로 이동한다", async ({
+  page,
+}) => {
+  await page.goto(PATH);
+
+  const sentCard = page.getByRole("listitem").filter({ hasText: "윤지후" });
+  await expect(sentCard).toBeVisible();
+
+  await expect(async () => {
+    await sentCard.getByRole("button", { name: "상담 수락" }).click();
+    // 윤지후 방(CHAT_ROOM_3) — 중간 확인 화면 없이 채팅방 URL로 직행
+    await expect(page).toHaveURL(/\/customer\/chat\/e1000000-0000-4000-8000-000000000003/);
   }).toPass({ timeout: 10000 });
 });
 

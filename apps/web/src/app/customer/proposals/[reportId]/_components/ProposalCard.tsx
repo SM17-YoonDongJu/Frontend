@@ -14,7 +14,11 @@ import { toast } from "@/shared/ui/toast";
 import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
 import { getProposalAction } from "../../../_shared/model/proposal-actions";
 import { useViewedProposals } from "../_hooks/use-viewed-proposals";
-import { ConsultChatActions, MatchedProposalActions } from "./ConsultChatActions";
+import {
+  ConsultChatActions,
+  MatchedProposalActions,
+  SentProposalActions,
+} from "./ConsultChatActions";
 import type { Proposal } from "../../../_shared/model/proposal.schema";
 import { formatManwon } from "@/shared/lib/format-amount";
 
@@ -140,24 +144,7 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
       </div>
 
       {cardAction === "REQUEST_CONSULT" && (
-        <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)] gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-[2.125rem] px-[0.9375rem] py-[0.5625rem] text-[0.83125rem]"
-              onClick={openReviewReport}
-            >
-              상세 보기
-            </Button>
-            <Button size="sm" disabled className="h-[2.125rem] px-[0.9375rem] py-[0.5625rem] text-[0.8125rem]">
-              상담 신청
-            </Button>
-          </div>
-          <p className="text-[0.71875rem] leading-normal text-ink-3">
-            상담 신청 기능은 준비 중이에요. 사정사가 상담을 열면 이 카드에서 채팅으로 이어집니다.
-          </p>
-        </div>
+        <SentProposalActions proposalId={proposalId} onOpenDetail={openReviewReport} />
       )}
 
       {cardAction === "IN_CONSULT" && (

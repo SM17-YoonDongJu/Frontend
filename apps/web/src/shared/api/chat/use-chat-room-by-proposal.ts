@@ -9,7 +9,7 @@ import type { ChatRoom } from "./chat.schema";
 /**
  * 제안 ↔ 채팅방 연결 조회. GET /chats의 reportReviewId(=proposalId)가 연결 키다.
  * 카드 단위로 쓰이므로 비-suspense useQuery(캐시는 useChatList와 chatKeys.list로 공유).
- * 방이 없으면 chatRoom=null — 채팅방 생성 API가 명세없음이라 생성은 이 훅 범위 밖이다.
+ * 방은 제안 발송 시 서버가 선생성(#231) — 없으면 chatRoom=null(조회 실패·전파 지연), refetch로 재시도.
  */
 export function useChatRoomByProposal(proposalId: string | null | undefined) {
   const query = useQuery({
@@ -30,5 +30,6 @@ export function useChatRoomByProposal(proposalId: string | null | undefined) {
     isClosed: chatRoom?.roomStatus === "CLOSED",
     isPending: query.isPending,
     isError: query.isError,
+    refetch: query.refetch,
   };
 }
