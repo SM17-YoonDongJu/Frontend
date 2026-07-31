@@ -231,10 +231,10 @@ test("매칭 완료를 확정하면 형제 상담이 종료되고 매칭 완료�
   await expect(page.getByText("진행 중 · 매칭 완료", { exact: true })).toBeVisible();
   await expect(page.getByText("종료된 상담", { exact: true })).toBeVisible();
 
-  // 매칭 후 사건 진행 보기 → 고객 리포트 이동
+  // 매칭 후 사건 진행 보기 → 방 공유 리포트(사정사 검수 결과) 이동
   await expect(async () => {
     await page.getByRole("link", { name: "사건 진행 보기" }).click();
-    await expect(page).toHaveURL(new RegExp(`/customer/report/${SHARED_REPORT_ID}`));
+    await expect(page).toHaveURL(new RegExp(`/customer/chat/${ROOM_1}/shared-report`));
   }).toPass({ timeout: 10000 });
 });
 
@@ -321,14 +321,14 @@ test("데스크톱에서는 목록과 스레드가 분할 뷰로 함께 보이�
   await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeVisible();
 });
 
-test("고객 방에서 공유 리포트를 열면 고객 리포트로 이동한다", async ({ page }) => {
+test("고객 방에서 공유 리포트를 열면 방 검수 결과로 이동한다", async ({ page }) => {
   // 비교 중 모바일 헤더는 매칭 버튼이 리포트 아이콘을 대체(Figma 1012:9931) — 리포트 보기는 데스크톱 헤더에서
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
   await expect(async () => {
     await page.getByRole("link", { name: "리포트 보기" }).click();
-    await expect(page).toHaveURL(new RegExp(`/customer/report/${SHARED_REPORT_ID}`));
+    await expect(page).toHaveURL(new RegExp(`/customer/chat/${ROOM_1}/shared-report`));
   }).toPass({ timeout: 10000 });
 });
 
