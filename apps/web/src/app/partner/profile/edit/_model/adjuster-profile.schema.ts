@@ -52,5 +52,3 @@ export const profileFormSchema = z.object({
 });
 
 export const updateProfileBodySchema = profileFormSchema.partial();
-
-export const uploadAvatarResponseSchema = z.object({ url: z.string().url() });
