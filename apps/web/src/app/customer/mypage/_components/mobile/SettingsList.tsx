@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useInsuranceList } from "../../_api/use-insurance-list";
 import { Bell } from "@/shared/ui/icons/Bell";
-import { MessageCircle } from "@/shared/ui/icons/MessageCircle";
+import { FileText } from "@/shared/ui/icons/FileText";
+import { Lock } from "@/shared/ui/icons/Lock";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { User } from "@/shared/ui/icons/User";
 import { MobileMenuRow } from "./MobileMenuRow";
@@ -11,7 +12,7 @@ import { MobileSection } from "./MobileSection";
 
 const ICON_CLASS = "size-[1.125rem]";
 
-/** 모바일 내 정보·설정 리스트 — 내 보험 정보 / 알림 설정 / 고객센터·약관(목적지 미확정 → 추후 지원 예정). */
+/** 모바일 내 정보·설정 리스트 — 내 보험 정보 / 알림 설정(목적지 미확정 → 추후 지원 예정) / 약관 · 개인정보 처리방침. */
 export function SettingsList() {
   const { data } = useInsuranceList();
   const [notice, setNotice] = useState<string | null>(null);
@@ -54,10 +55,14 @@ export function SettingsList() {
         right={notice === "notification" ? noticeText : undefined}
       />
       <MobileMenuRow
-        icon={<MessageCircle className={ICON_CLASS} />}
-        label="고객센터 · 약관"
-        onClick={() => showNotice("support")}
-        right={notice === "support" ? noticeText : undefined}
+        icon={<FileText className={ICON_CLASS} />}
+        label="이용약관"
+        href="/terms"
+      />
+      <MobileMenuRow
+        icon={<Lock className={ICON_CLASS} />}
+        label="개인정보 처리방침"
+        href="/privacy"
       />
       <MobileMenuRow
         icon={<User className={ICON_CLASS} />}
