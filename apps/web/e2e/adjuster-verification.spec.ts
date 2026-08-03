@@ -11,10 +11,10 @@ test.beforeEach(async ({ page }) => {
  *
  * 원칙: 핵심 사용자 흐름만 — 폼 제출→심사 현황 진입(CUJ), 미입력 제출 차단(리더 확정: 버튼 활성+클릭 시 인라인 에러),
  *   자격증 번호/사본 배타 검증, 상태 분기(PENDING/REJECTED/APPROVED/404), 반려→재제출 프리필, 반응형(퍼널/단일폼), 나중에 하기.
- * 응답은 앱 내장 MSW 기본 핸들러가 제공(POST /users/adjuster-applications 201, POST /uploads presigned URL 발급 + PUT).
+ * 응답은 앱 내장 MSW 기본 핸들러가 제공(POST /users/adjuster-applications 201, POST /uploads multipart 업로드).
  *   상태 분기는 GET /users/adjuster-applications/me 의 x-mock-scenario 헤더(setExtraHTTPHeaders)로 override.
  * 레이아웃 분기(useIsDesktop, md 48rem)는 project로 가름 — 데스크톱=chromium, 퍼널=mobile-chrome. beforeEach에서 skip.
- * 파일 형식·크기(20MB/pdf·image) 검증은 use-document-upload zod/TS에 위임(미테스트).
+ * 형식 위반(webp)은 업로드 전 안내 문구가 사용자에게 보이는 유일한 경로라 테스트하고, 20MB 초과는 비용 대비 저가치로 미테스트.
  * 정적 위임(미테스트): 서버 status enum 파싱은 zod·TS 계약.
  * 409(DUPLICATE_RESOURCE)는 POST 핸들러의 x-mock-scenario=application-duplicate 강제 override로 재현(재검 반영).
  */
@@ -122,6 +122,19 @@ test.describe("데스크톱 단일 폼", () => {
       await page.getByRole("button", { name: "인증 신청하기" }).click();
       await expect(page).toHaveURL(new RegExp(`${STATUS_PATH}$`));
     }).toPass({ timeout: 15000 });
+  });
+
+  test("허용되지 않는 형식(webp)을 올리면 업로드하지 않고 형식 안내가 뜬다", async ({ page }) => {
+    await page.goto(FORM_PATH);
+
+    await page.locator('input[type="file"]').nth(0).setInputFiles({
+      name: "license.webp",
+      mimeType: "image/webp",
+      buffer: PNG_1PX,
+    });
+
+    await expect(page.getByText("PDF·JPG·PNG 형식만 올릴 수 있어요.")).toBeVisible();
+    await expect(page.getByText("업로드됨")).toHaveCount(0);
   });
 
   test("나중에 하기를 누르면 고객 대시보드로 이동한다", async ({ page }) => {
