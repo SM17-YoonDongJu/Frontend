@@ -71,6 +71,8 @@ export const chatKeys = createQueryKeys("chat", {
   list: null,
   detail: (chatRoomId: string) => [chatRoomId],
   messages: (chatRoomId: string) => [chatRoomId],
+  // 채팅방 공유 리포트(사정사 검수 결과) — 등록 후 불변. 방마다 검수본이 달라 chatRoomId가 키.
+  sharedReport: (chatRoomId: string) => [chatRoomId],
 });
 
 export const notificationKeys = createQueryKeys("notification", {

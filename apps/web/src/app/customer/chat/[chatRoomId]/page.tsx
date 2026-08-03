@@ -6,7 +6,6 @@ import { ChatThreadSkeleton } from "@/shared/ui/chat/ChatThreadSkeleton";
 import { CustomerChatThreadContent } from "./_components/CustomerChatThreadContent";
 
 const CHAT_BASE_PATH = "/customer/chat";
-const REPORT_BASE_PATH = "/customer/report";
 const EMPTY_ACTION = { href: "/customer/adjusters", label: "손해사정사 찾아보기" };
 
 export default async function CustomerChatThreadPage({
@@ -40,7 +39,6 @@ export default async function CustomerChatThreadPage({
           <CustomerChatThreadContent
             chatRoomId={chatRoomId}
             chatBasePath={CHAT_BASE_PATH}
-            reportBasePath={REPORT_BASE_PATH}
           />
         </ChatSectionBoundary>
       }

@@ -68,9 +68,12 @@ auth · user · settings · report · review · matching · chat · payment · a
 | 401 | `LOGIN_REQUIRED` | 비로그인 상태로 보호 리소스 접근 |
 | 401 | `REFRESH_TOKEN_NOT_FOUND` | 서버(Redis)에 저장된 refresh 토큰 없음 — `/auth/reissue` |
 | 403 | `FORBIDDEN` | 인증됐으나 권한 없음(미활성 사정사 채택, 타인 리포트) |
+| 403 | `CHAT_NOT_A_MEMBER` | 채팅방 멤버 아님 — `/chats/{chatRoomId}/shared-report` 등 방 참여자 전용 리소스 |
 | 404 | `USER_NOT_FOUND` | 사용자 없음 |
 | 404 | `POST_NOT_FOUND` | 게시물 없음 |
-| 404 | `REPORT_NOT_FOUND` | 리포트 없음 — `/reports/{id}/review`·`/hold` 404가 사용 |
+| 404 | `REPORT_NOT_FOUND` | 리포트 없음 — `/reports/{id}/review`·`/hold`·`/chats/{chatRoomId}/shared-report` 404가 사용 |
+| 404 | `CHAT_ROOM_NOT_FOUND` | 채팅방 없음 — `/chats/{chatRoomId}/shared-report` |
+| 404 | `PROPOSAL_NOT_FOUND` | 제안(공유리포트=report_review) 없음 — `/chats/{chatRoomId}/shared-report` |
 | 404 | `SUBSCRIPTION_NOT_FOUND` | 구독 정보 없음 |
 | 409 | `DUPLICATE_RESOURCE` | 중복 생성 시도 |
 | 409 | `CLOSED` | ⚠️ Notion 명세 409 근거·enum 반영 요청 — 종료(CLOSED)된 상담방에 메시지 전송 시도(이슈 #48 채팅) |
