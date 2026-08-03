@@ -2982,6 +2982,8 @@ export const handlers = [
   ),
 
   // 손해사정사 목록 조회 (이슈 #47) — 반드시 :adjusterId 핸들러보다 앞에 등록
+  //   x-mock-adjusters=empty → 0건 빈 상태 검증(이슈 #239). 대시보드 상태(x-mock-scenario)와
+  //   조합해야 하므로 x-mock-failure처럼 별도 축 헤더로 둔다.
   http.get(`${API_BASE_URL}/adjusters`, async ({ request }) => {
     await delay(400);
 
@@ -2998,6 +3000,23 @@ export const handlers = [
         },
         { status: 500 },
       );
+    }
+
+    if (request.headers.get("x-mock-adjusters") === "empty") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: {
+          list: [],
+          pagination: { page: 1, size: 20, totalElements: 0, totalPages: 0, hasNext: false },
+          meta: {
+            totalAdjusterCount: 0,
+            averageRating: 0,
+            totalConsultCount: 0,
+            averageCareer: 0,
+          },
+        },
+      });
     }
 
     const specialty = (url.searchParams.get("specialty") ?? "").trim();

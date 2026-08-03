@@ -45,6 +45,33 @@ test("온보딩: 리포트 0건이면 온보딩 구성이 보이고 첫 분석 �
   }).toPass({ timeout: 10000 });
 });
 
+test("온보딩: 추천 사정사가 0건이면 빈 상태 안내와 전체 둘러보기가 보인다", async ({ page }) => {
+  await page.setExtraHTTPHeaders({
+    "x-mock-scenario": "dashboard-onboarding",
+    "x-mock-adjusters": "empty",
+  });
+  await page.goto(PATH);
+
+  await expect(
+    page.getByText("아직 등록된 사정사님이 없어요").filter({ visible: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: /전체 둘러보기/ }).filter({ visible: true }),
+  ).toBeVisible();
+});
+
+test("추천 사정사가 0건이면 추천 카드에도 빈 상태 안내가 보인다", async ({ page }) => {
+  await page.setExtraHTTPHeaders({ "x-mock-adjusters": "empty" });
+  await page.goto(PATH);
+
+  await expect(
+    page.getByRole("heading", { name: "이런 사정사는 어때요?" }).filter({ visible: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("아직 등록된 사정사님이 없어요").filter({ visible: true }),
+  ).toBeVisible();
+});
+
 test("제안 도착: 액션센터 새 제안 3건과 제안 비교 카드가 보이고 비교하기가 받은 제안 목록으로 이동한다", async ({
   page,
 }) => {
