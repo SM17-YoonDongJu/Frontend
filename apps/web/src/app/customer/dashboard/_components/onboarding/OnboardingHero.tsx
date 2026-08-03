@@ -52,21 +52,7 @@ export function OnboardingHero() {
             진행 과정 알아보기
           </a>
         </div>
-
-        <div className="mt-4 flex flex-wrap justify-center gap-2.5">
-          <TrustChip label="매칭 전 비용" highlight="0원" />
-          <TrustChip label="여러 제안" highlight="한눈에 비교" />
-        </div>
       </div>
     </section>
-  );
-}
-
-function TrustChip({ label, highlight }: { label: string; highlight: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-pill border border-white/12 bg-white/6 px-3.5 py-2">
-      <span className="text-[0.78125rem] font-medium text-white/78">{label}</span>
-      <span className="text-[0.78125rem] font-semibold text-gold-2">{highlight}</span>
-    </span>
   );
 }
