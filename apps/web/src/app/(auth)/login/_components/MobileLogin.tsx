@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import type { SocialProvider } from "../../_shared/hooks/use-recent-login";
@@ -58,8 +59,15 @@ export function MobileLogin({ mode, onSelect, pendingProvider }: MobileLoginProp
       </div>
 
       <p className="mt-6 text-center text-[0.71rem] leading-5 tracking-[-0.01rem] text-ink-3">
-        계속 진행하면 <span className="font-semibold text-ink-2">서비스 이용약관</span>과{" "}
-        <span className="font-semibold text-ink-2">개인정보 처리방침</span>에 동의하는 것으로 간주됩니다.
+        계속 진행하면{" "}
+        <Link href="/terms" className="font-semibold text-ink-2 underline underline-offset-2">
+          서비스 이용약관
+        </Link>
+        과{" "}
+        <Link href="/privacy" className="font-semibold text-ink-2 underline underline-offset-2">
+          개인정보 처리방침
+        </Link>
+        에 동의하는 것으로 간주됩니다.
       </p>
     </div>
   );
