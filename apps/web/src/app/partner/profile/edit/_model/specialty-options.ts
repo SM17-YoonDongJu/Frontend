@@ -10,5 +10,3 @@ export const SPECIALTY_OPTIONS = [
 export const MAX_SPECIALTIES = 3;
 export const HEADLINE_MAX = 40;
 export const INTRODUCTION_MAX = 300;
-export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
-export const AVATAR_ACCEPT = ["image/jpeg", "image/png"] as const;

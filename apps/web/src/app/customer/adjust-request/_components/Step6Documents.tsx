@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { uploadErrorMessage } from "@/shared/api/upload-file";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
+import { validateUploadFile } from "@/shared/model/upload.schema";
 import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { useUploadDocument } from "../_api/use-upload-document";
@@ -17,9 +19,6 @@ import { DocumentSlot, type SlotStatus } from "./DocumentSlot";
 import { UploadFileItem, type UploadStatus } from "./UploadFileItem";
 
 const ACCEPT = ".pdf,.jpg,.jpeg,.png";
-const ACCEPT_MIME = ["application/pdf", "image/jpeg", "image/png"];
-const MAX_SIZE = 20 * 1024 * 1024;
-const SIZE_ERROR = "PDF·이미지, 최대 20MB만 올릴 수 있어요.";
 
 interface SlotEntry {
   status: SlotStatus;
@@ -109,13 +108,14 @@ export function Step6Documents() {
       onSuccess: (data) =>
         setSlots((prev) => ({ ...prev, [key]: { status: "done", url: data.url, fileName: file.name } })),
       onError: (e) =>
-        setSlots((prev) => ({ ...prev, [key]: { status: "error", error: e.message, fileName: file.name, file } })),
+        setSlots((prev) => ({ ...prev, [key]: { status: "error", error: uploadErrorMessage(e), fileName: file.name, file } })),
     });
   };
 
   const pickSlotFile = (key: DocumentSlotKey, file: File) => {
-    if (!ACCEPT_MIME.includes(file.type) || file.size > MAX_SIZE) {
-      setSlots((prev) => ({ ...prev, [key]: { status: "error", error: SIZE_ERROR, fileName: file.name } }));
+    const invalid = validateUploadFile(file, "report_document");
+    if (invalid) {
+      setSlots((prev) => ({ ...prev, [key]: { status: "error", error: invalid, fileName: file.name } }));
       return;
     }
     startSlotUpload(key, file);
@@ -136,7 +136,7 @@ export function Step6Documents() {
       onSuccess: (data) =>
         setExtras((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "done", url: data.url } : i))),
       onError: (e) =>
-        setExtras((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "error", error: e.message } : i))),
+        setExtras((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "error", error: uploadErrorMessage(e) } : i))),
     });
   };
 

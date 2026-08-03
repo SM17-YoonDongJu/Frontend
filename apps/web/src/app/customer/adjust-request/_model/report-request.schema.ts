@@ -91,11 +91,6 @@ export const step6DocumentSchema = z.object({
     .nullish(), // 업로드된 증빙 url, 선택
 });
 
-/** POST /uploads 응답 data. */
-export const uploadDocumentResponseSchema = z.object({
-  url: z.url(),
-});
-
 export const step7ConsentSchema = z.object({
   agreedToPrivacy: z.literal(true, { message: "민감정보 처리에 동의해 주세요." }),
   agreedToTerms: z.literal(true, { message: "필수 고지사항을 확인해 주세요." }),

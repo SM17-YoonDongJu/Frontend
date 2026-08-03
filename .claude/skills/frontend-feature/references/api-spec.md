@@ -63,6 +63,9 @@ auth · user · settings · report · review · matching · chat · payment · a
 | 400 | `MISSING_REQUIRED_FIELD` | 필수 입력값 누락 |
 | 400 | `UNSUPPORTED_OPERATION` | 미지원 동작(MVP 미지원 보험사, 미적재 약관 리포트 등) |
 | 400 | `UNSUPPORTED_PROVIDER` | 미지원 소셜 로그인 provider(kakao·naver 외) — `/auth/oauth2/{provider}/callback` |
+| 400 | `UPLOAD_CONTENT_TYPE_NOT_ALLOWED` | 허용되지 않는 파일 형식·매직바이트 위장 — `POST /uploads` |
+| 400 | `UPLOAD_FILE_EMPTY` | 빈 파일 업로드 — `POST /uploads` |
+| 413 | `UPLOAD_FILE_TOO_LARGE` | purpose별 용량 상한 초과 — `POST /uploads` |
 | 401 | `INVALID_TOKEN` | 토큰 위조·변조·서명 오류 |
 | 401 | `EXPIRED_TOKEN` | 토큰 만료 → Refresh 재발급 필요 |
 | 401 | `LOGIN_REQUIRED` | 비로그인 상태로 보호 리소스 접근 |

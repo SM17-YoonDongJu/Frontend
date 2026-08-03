@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { useUpdateMe } from "@/shared/api/use-update-me";
+import { uploadErrorMessage } from "@/shared/api/upload-file";
 import { useUploadFile } from "@/shared/api/use-upload-file";
+import { validateUploadFile } from "@/shared/model/upload.schema";
 import { toast } from "@/shared/ui/toast";
 import type { Me } from "../_model/types";
 
@@ -28,8 +30,17 @@ export function useProfileSettingsForm({
   const { mutateAsync: uploadFile, isPending: isUploading } = useUploadFile("avatar");
 
   const pickFile = async (file: File) => {
-    const { url } = await uploadFile(file);
-    setAvatarUrl(url);
+    const invalid = validateUploadFile(file, "avatar");
+    if (invalid) {
+      toast.error(invalid);
+      return;
+    }
+    try {
+      const { url } = await uploadFile(file);
+      setAvatarUrl(url);
+    } catch (error) {
+      toast.error(uploadErrorMessage(error));
+    }
   };
 
   const save = () => {

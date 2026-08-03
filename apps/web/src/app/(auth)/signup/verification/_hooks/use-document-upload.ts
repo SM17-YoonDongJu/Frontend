@@ -1,24 +1,14 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { uploadErrorMessage } from "@/shared/api/upload-file";
 import { useUploadFile } from "@/shared/api/use-upload-file";
-import type { UploadPurpose } from "@/shared/model/upload.schema";
+import { validateUploadFile, type UploadPurpose } from "@/shared/model/upload.schema";
 import type { FileUploadStatus } from "@/shared/ui/FileUploadField";
-
-const MAX_SIZE_MB = 20;
-const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-const ALLOWED_PREFIXES = ["application/pdf", "image/"];
 
 function formatSize(bytes: number): string {
   const mb = bytes / (1024 * 1024);
   return mb >= 1 ? `${mb.toFixed(1)}MB` : `${Math.max(1, Math.round(bytes / 1024))}KB`;
-}
-
-function validate(file: File): string | null {
-  const typeOk = ALLOWED_PREFIXES.some((prefix) => file.type.startsWith(prefix));
-  if (!typeOk) return "PDF 또는 이미지 파일만 올릴 수 있어요.";
-  if (file.size > MAX_SIZE_BYTES) return `파일당 최대 ${MAX_SIZE_MB}MB까지 올릴 수 있어요.`;
-  return null;
 }
 
 export interface DocumentUpload {
@@ -44,7 +34,7 @@ export function useDocumentUpload(purpose: UploadPurpose): DocumentUpload {
   const select = useCallback(
     (file: File) => {
       if (upload.isPending) return;
-      const invalid = validate(file);
+      const invalid = validateUploadFile(file, purpose);
       if (invalid) {
         setStatus("error");
         setErrorMessage(invalid);
@@ -61,13 +51,13 @@ export function useDocumentUpload(purpose: UploadPurpose): DocumentUpload {
           setFileName(displayName);
           setStatus("done");
         },
-        onError: () => {
+        onError: (error) => {
           setStatus("error");
-          setErrorMessage("업로드에 실패했어요. 다시 시도해 주세요.");
+          setErrorMessage(uploadErrorMessage(error));
         },
       });
     },
-    [upload],
+    [upload, purpose],
   );
 
   const restore = useCallback((restoredUrl: string, restoredName?: string) => {

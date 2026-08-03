@@ -2,6 +2,7 @@
 
 import { useId, useRef, useState, type DragEvent } from "react";
 import { cn } from "@/shared/lib/utils";
+import { uploadAcceptAttr } from "@/shared/model/upload.schema";
 import { Check } from "@/shared/ui/icons/Check";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { Spinner } from "@/shared/ui/icons/Spinner";
@@ -27,7 +28,7 @@ export interface FileUploadFieldProps {
   className?: string;
 }
 
-const ACCEPT_DEFAULT = "application/pdf,image/*";
+const ACCEPT_DEFAULT = uploadAcceptAttr("license");
 
 /**
  * 자격 서류 업로드 필드(프레젠테이셔널). Drag&Drop + 파일 선택.
