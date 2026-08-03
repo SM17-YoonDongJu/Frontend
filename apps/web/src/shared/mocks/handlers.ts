@@ -11,6 +11,15 @@ import {
   waitForExpiredResponses,
 } from "@/shared/mocks/auth-token-state";
 import { registerDeviceTokenBodySchema } from "@/shared/model/device-token.schema";
+import { UPLOAD_LIMITS, uploadPurposeSchema } from "@/shared/model/upload.schema";
+
+// 업로드 목 응답 url의 purpose별 key prefix — 명세(3a830798…a5ec)와 동일한 모양으로 돌려준다.
+const UPLOAD_KEY_PREFIX: Record<z.infer<typeof uploadPurposeSchema>, string> = {
+  avatar: "avatars/",
+  report_document: "report-documents/",
+  license: "licenses/",
+  registration: "registrations/",
+};
 
 // 로드 시점 기준 상대 마감일(로컬 달력 날짜) — 대시보드 "오늘 마감/N일 남음" 검증용
 function addDays(base: Date, days: number): string {
@@ -2378,8 +2387,8 @@ export const handlers = [
     });
   }),
 
-  // presigned 업로드 URL 발급 — 기본 성공(결정적). x-mock-failure 헤더로 실패 주입(재시도 검증용)
-  // 실제로는 { file_name, content_type, purpose } JSON → { upload_url, s3_url }.
+  // 서버 프록시 업로드 — multipart(file·purpose) 수신 → { s3_url } 응답.
+  // 기본 성공(결정적), x-mock-failure 헤더로 서버 오류 주입(재시도 검증용).
   http.post(`${API_BASE_URL}/uploads`, async ({ request }) => {
     await delay(300);
 
@@ -2390,25 +2399,56 @@ export const handlers = [
       );
     }
 
-    const key = crypto.randomUUID();
-    const uploadUrl = `${API_BASE_URL}/uploads/mock-put/${key}`;
-    const s3Url = `https://cdn.example.com/uploads/${key}`;
-    return HttpResponse.json({
-      status: "200",
-      message: "발급 성공",
-      data: camelToSnakeDeep({ uploadUrl, s3Url }),
-    });
-  }),
+    // webkit 서비스워커가 multipart 파싱을 누락하면 클라이언트가 보낸 폴백 메타로 대체한다.
+    const formData = await request.formData().catch(() => null);
+    const filePart = formData?.get("file");
+    const file = filePart instanceof File ? filePart : null;
+    const fileName = file?.name ?? decodeURIComponent(request.headers.get("x-mock-file-name") ?? "");
+    const contentType = file?.type || (request.headers.get("x-mock-file-type") ?? "");
+    const size = file?.size ?? Number(request.headers.get("x-mock-file-size") ?? NaN);
+    const purpose = (formData?.get("purpose") ?? request.headers.get("x-mock-upload-purpose")) as string | null;
 
-  // presigned PUT 목적지(mock) — 실제 S3라면 여기서 바이너리를 그대로 저장한다.
-  http.put(`${API_BASE_URL}/uploads/mock-put/:key`, async ({ request }) => {
-    await delay(500);
-
-    if (request.headers.get("x-mock-failure") === "upload-put") {
-      return new HttpResponse(null, { status: 500 });
+    if (!fileName || !purpose) {
+      return HttpResponse.json(
+        { status: "400", code: "MISSING_REQUIRED_FIELD", message: "필수 입력값이 누락되었습니다." },
+        { status: 400 },
+      );
     }
 
-    return new HttpResponse(null, { status: 200 });
+    const parsedPurpose = uploadPurposeSchema.safeParse(purpose);
+    if (!parsedPurpose.success) {
+      return HttpResponse.json(
+        { status: "400", code: "INVALID_REQUEST", message: "요청 형식이 올바르지 않습니다." },
+        { status: 400 },
+      );
+    }
+
+    const limit = UPLOAD_LIMITS[parsedPurpose.data];
+    if (!limit.mimeTypes.includes(contentType)) {
+      return HttpResponse.json(
+        { status: "400", code: "UPLOAD_CONTENT_TYPE_NOT_ALLOWED", message: "허용되지 않는 파일 형식입니다." },
+        { status: 400 },
+      );
+    }
+    if (size === 0) {
+      return HttpResponse.json(
+        { status: "400", code: "UPLOAD_FILE_EMPTY", message: "업로드 파일이 비어 있습니다." },
+        { status: 400 },
+      );
+    }
+    if (size > limit.maxBytes) {
+      return HttpResponse.json(
+        { status: "413", code: "UPLOAD_FILE_TOO_LARGE", message: "업로드 용량이 허용 범위를 초과했습니다." },
+        { status: 413 },
+      );
+    }
+
+    const extension = contentType === "application/pdf" ? "pdf" : contentType.replace("image/", "");
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: { s3_url: `https://cdn.example.com/${UPLOAD_KEY_PREFIX[parsedPurpose.data]}${crypto.randomUUID()}.${extension}` },
+    });
   }),
 
   // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
