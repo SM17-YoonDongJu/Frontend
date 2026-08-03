@@ -20,6 +20,11 @@ Closes #240
 ## ✅ 검증
 
 - `pnpm typecheck` · `pnpm lint` 통과
-- E2E: `adjuster-verification`(형식 위반 안내 케이스 추가) · `adjust-request` · `adjuster-mypage` · `customer-mypage` · `adjuster-profile-edit` 통과
-- 업로드가 `POST /uploads` 단일 요청으로 끝나고 S3 직접 PUT이 발생하지 않음을 확인
+- **업로드 계약 E2E 신규 추가**(`upload-multipart.spec.ts`) — 업로드 4경로 전부에서 네트워크 요청을 직접 확인
+  - `POST /uploads` 정확히 1회, `PUT` 0회 (S3 직접 PUT 사라진 것 확인)
+  - 요청 `Content-Type: multipart/form-data; boundary=…`
+  - 응답 `s3_url`의 key prefix로 purpose 도달 확인(`licenses/`·`avatars/`·`report-documents/`)
+  - webp 선택 시 요청이 아예 나가지 않고 안내 문구만 노출
+  - chromium·mobile-chrome·mobile-safari 15케이스 통과 — **webkit에서도 multipart가 실제로 파싱됨**
+- 기존 E2E 회귀: `adjuster-verification`(형식 위반 케이스 추가) · `adjust-request` · `adjuster-mypage` · `adjuster-profile-edit` 통과
 - 레포에 `upload_url`·presigned 업로드 잔재 없음(채팅 첨부의 조회용 presigned GET URL은 별개 엔드포인트라 유지)
