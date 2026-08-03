@@ -5,7 +5,7 @@ import { getInitial } from "@/shared/lib/initial";
 import { useRecommendedAdjusters } from "@/app/customer/_shared/api/use-recommended-adjusters";
 import type { AdjusterListItem } from "@/app/customer/_shared/model/adjuster-list.schema";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
-import { EmptyState } from "./EmptyState";
+import { AdjusterEmpty } from "./AdjusterEmpty";
 
 const RECOMMEND_COUNT = 3;
 
@@ -26,7 +26,7 @@ export function AdjusterRecommendCard() {
 
       {adjusters.length === 0 ? (
         <div className="mt-4">
-          <EmptyState message="아직 등록된 사정사님이 없어요" />
+          <AdjusterEmpty />
         </div>
       ) : (
         <ul className="mt-2 divide-y divide-line-2">
