@@ -37,6 +37,22 @@ export const WithProfileLink: Story = {
 /** partner 하위호환 — onClose(상담 종료) 시그니처 그대로. */
 export const PartnerClose: Story = { args: { onClose: () => {} } };
 
+/** 신고 — 데스크톱 아웃라인 pill. roomStatus 무관 항상 노출(CLOSED 방 포함). */
+export const WithReport: Story = {
+  args: { onReport: () => {}, onClose: () => {} },
+};
+
+/** 신고(종료된 방) — CLOSED에서도 신고 버튼은 남고 상담 종료만 사라진다. */
+export const WithReportClosed: Story = {
+  args: { onReport: () => {}, onClose: () => {}, roomStatus: "CLOSED" },
+};
+
+/** 신고(모바일) — mobileActions 유무와 무관하게 아이콘 버튼(aria-label="신고하기")이 항상 보인다. */
+export const WithReportMobile: Story = {
+  parameters: { viewport: { defaultViewport: "mobile1" } },
+  args: { onBack: () => {}, onReport: () => {} },
+};
+
 /** customer 비교중 — 리포트 보기 + 매칭 거절(terra) + 매칭 완료(ink). */
 export const CustomerComparing: Story = {
   args: {

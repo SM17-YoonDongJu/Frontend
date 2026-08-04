@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import type { RoomStatus } from "@/shared/api/chat/chat.schema";
 import { Avatar } from "@/shared/ui/Avatar";
+import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
@@ -29,6 +30,8 @@ export interface ChatThreadHeaderProps {
   closePending?: boolean;
   /** 상대 프로필 링크(customer→사정사 프로필). 없으면(partner) 링크 없이 렌더 */
   profileHref?: string;
+  /** 신고 다이얼로그 열기. 전달 시 데스크톱 pill·모바일 아이콘 버튼 노출(roomStatus 무관 항상) */
+  onReport?: () => void;
 }
 
 /** href가 있으면 아바타·이름 묶음을 프로필 링크로, 없으면(partner) 헤더 flex에 그대로 편다. */
@@ -58,6 +61,7 @@ export function ChatThreadHeader({
   onClose,
   closePending,
   profileHref,
+  onReport,
 }: ChatThreadHeaderProps) {
   const subtitle =
     subtitleOverride ??
@@ -93,6 +97,18 @@ export function ChatThreadHeader({
         </div>
       </ProfileLink>
 
+      {/* 모바일 — 신고는 mobileActions 유무·roomStatus와 무관하게 항상 노출 */}
+      {onReport && (
+        <button
+          type="button"
+          onClick={onReport}
+          aria-label="신고하기"
+          className="flex size-9 shrink-0 items-center justify-center rounded-button text-[1.0625rem] text-ink-3 transition hover:bg-paper-2 md:hidden"
+        >
+          <AlertTriangle />
+        </button>
+      )}
+
       {/* 모바일 — 매칭 액션 주입 시(customer) 리포트 아이콘 대신 표시, 아니면(partner) 리포트 아이콘. Figma 1012:9931 */}
       {mobileActions ? (
         <div className="flex shrink-0 items-center gap-1.5 md:hidden">{mobileActions}</div>
@@ -100,7 +116,7 @@ export function ChatThreadHeader({
         <Link
           href={reportHref}
           aria-label="리포트 보기"
-          className="flex size-9 items-center justify-center rounded-button text-[1.1875rem] text-ink transition hover:bg-paper-2 md:hidden"
+          className="flex size-9 shrink-0 items-center justify-center rounded-button text-[1.1875rem] text-ink transition hover:bg-paper-2 md:hidden"
         >
           <FileText />
         </Link>
@@ -116,6 +132,16 @@ export function ChatThreadHeader({
           <FileText className="text-[0.9375rem]" />
         </Link>
         {actions}
+        {onReport && (
+          <button
+            type="button"
+            onClick={onReport}
+            className="flex items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-1.5 text-[0.8125rem] font-semibold text-ink-2 transition hover:bg-paper-2 hover:text-terra"
+          >
+            신고
+            <AlertTriangle className="text-[0.9375rem]" />
+          </button>
+        )}
         {onClose && roomStatus === "ACTIVE" && (
           <button
             type="button"
