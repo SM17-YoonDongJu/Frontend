@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
@@ -13,11 +12,16 @@ import { useReadChat } from "@/shared/api/chat/use-read-chat";
 import { useRejectChat } from "@/shared/api/chat/use-reject-chat";
 import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
+import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
+import { FileText } from "@/shared/ui/icons/FileText";
 import { X } from "@/shared/ui/icons/X";
 import { ChatComparisonBanner } from "@/shared/ui/chat/ChatComparisonBanner";
-import { ChatThreadHeader } from "@/shared/ui/chat/ChatThreadHeader";
+import {
+  ChatThreadHeader,
+  type ChatThreadHeaderMenuAction,
+} from "@/shared/ui/chat/ChatThreadHeader";
 import { ChatThreadView } from "@/shared/ui/chat/ChatThreadView";
 import { MatchConfirmModal } from "@/shared/ui/chat/MatchConfirmModal";
 import { MatchRejectConfirmModal } from "@/shared/ui/chat/MatchRejectConfirmModal";
@@ -109,70 +113,41 @@ export function CustomerChatThreadContent({
         toast.error("매칭 완료에 실패했어요. 잠시 후 다시 시도해 주세요."),
     });
 
-  const actions =
-    group === "comparing" ? (
-      // Figma 1012:11044/11042 — 매칭 완료(primary·ink)가 앞, 매칭 거절(terra)이 뒤
-      <>
-        <button
-          type="button"
-          onClick={() => setConfirmOpen(true)}
-          disabled={matchPending}
-          className="flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
-        >
-          매칭 완료
-          <CheckCircle className="text-[0.9375rem]" />
-        </button>
-        <button
-          type="button"
-          onClick={rejectMatch}
-          disabled={matchPending}
-          className="flex items-center gap-1.5 rounded-full bg-terra px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
-        >
-          매칭 거절
-          <X className="text-[0.875rem]" />
-        </button>
-      </>
-    ) : group === "matched" ? (
-      <Link
-        href={sharedReportHref}
-        className="flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96]"
-      >
-        사건 진행 보기
-        <ArrowRight className="text-[0.9375rem]" />
-      </Link>
-    ) : null;
+  const matchActions: ChatThreadHeaderMenuAction[] =
+    group === "comparing"
+      ? [
+          {
+            key: "accept",
+            label: "매칭 완료",
+            icon: <CheckCircle />,
+            onClick: () => setConfirmOpen(true),
+            disabled: matchPending,
+          },
+          {
+            key: "reject",
+            label: "매칭 거절",
+            icon: <X />,
+            onClick: rejectMatch,
+            tone: "danger",
+            disabled: matchPending,
+          },
+        ]
+      : group === "matched"
+        ? [
+            {
+              key: "progress",
+              label: "사건 진행 보기",
+              icon: <ArrowRight />,
+              href: sharedReportHref,
+            },
+          ]
+        : [];
 
-  // Figma 1012:9931 — 모바일 헤더 매칭 버튼(거절=terra-soft·완료=navy, 컴팩트). 데스크톱 actions보다 작고 순서·톤 상이
-  const mobileActions =
-    group === "comparing" ? (
-      <>
-        <button
-          type="button"
-          onClick={rejectMatch}
-          disabled={matchPending}
-          className="rounded-button bg-terra-soft px-2.5 py-2 text-[0.75rem] font-bold text-terra transition hover:brightness-[.97] disabled:cursor-not-allowed disabled:opacity-[.42]"
-        >
-          매칭 거절
-        </button>
-        <button
-          type="button"
-          onClick={() => setConfirmOpen(true)}
-          disabled={matchPending}
-          className="flex items-center gap-1 rounded-button bg-navy px-2.5 py-2 text-[0.75rem] font-bold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
-        >
-          <CheckCircle className="text-[0.9375rem]" />
-          매칭 완료
-        </button>
-      </>
-    ) : group === "matched" ? (
-      <Link
-        href={sharedReportHref}
-        className="flex items-center gap-1 rounded-button bg-navy px-2.5 py-2 text-[0.75rem] font-bold text-white transition hover:brightness-[.96]"
-      >
-        사건 진행
-        <ArrowRight className="text-[0.9375rem]" />
-      </Link>
-    ) : null;
+  const menuActions: ChatThreadHeaderMenuAction[] = [
+    { key: "report", label: "리포트 보기", icon: <FileText />, href: sharedReportHref },
+    ...matchActions,
+    { key: "report-chat", label: "신고", icon: <AlertTriangle />, onClick: report.openDialog },
+  ];
 
   return (
     <div className="flex h-full flex-col">
@@ -180,15 +155,12 @@ export function CustomerChatThreadContent({
         name={room.counterpart.name}
         caseNo={room.caseNo}
         roomStatus={room.roomStatus}
-        reportHref={sharedReportHref}
         // customer 방의 상대는 항상 사정사 — counterpart.userId가 곧 adjusterId
         profileHref={`/customer/adjusters/${room.counterpart.userId}`}
         subtitle={subtitle}
         badge={group === "matched" ? <MatchStatusBadge group={group} /> : undefined}
-        actions={actions}
-        mobileActions={mobileActions}
+        menuActions={menuActions}
         onBack={() => router.push(chatBasePath)}
-        onReport={report.openDialog}
       />
 
       {/* Figma 1012:9931 — 모바일 스레드엔 배너 없음(목록 배너·헤더 버튼이 대체). 데스크톱만 노출 */}

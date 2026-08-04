@@ -8,8 +8,11 @@ import { useReadChat } from "@/shared/api/chat/use-read-chat";
 import { useRejectChat } from "@/shared/api/chat/use-reject-chat";
 import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
+import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
+import { FileText } from "@/shared/ui/icons/FileText";
+import { X } from "@/shared/ui/icons/X";
 import { toast } from "@/shared/ui/toast";
-import { ChatThreadHeader } from "./ChatThreadHeader";
+import { ChatThreadHeader, type ChatThreadHeaderMenuAction } from "./ChatThreadHeader";
 import { ChatThreadView } from "./ChatThreadView";
 import { MessageInputBar } from "./MessageInputBar";
 import { ReportChatDialog } from "./ReportChatDialog";
@@ -44,22 +47,46 @@ export function ChatThreadContent({
 
   const closed = room.roomStatus === "CLOSED";
 
+  const endChatConsultation = () =>
+    endChat.mutate(undefined, {
+      onError: () => toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요."),
+    });
+
+  const menuActions: ChatThreadHeaderMenuAction[] = [
+    {
+      key: "report",
+      label: "리포트 보기",
+      icon: <FileText />,
+      href: room.reportId ? `${reportBasePath}/${room.reportId}` : "#",
+    },
+    ...(room.roomStatus === "ACTIVE"
+      ? [
+          {
+            key: "close",
+            label: "상담 종료",
+            icon: <X />,
+            onClick: endChatConsultation,
+            tone: "danger" as const,
+            disabled: endChat.isPending,
+          },
+        ]
+      : []),
+    {
+      key: "report-chat",
+      label: "신고",
+      icon: <AlertTriangle />,
+      onClick: report.openDialog,
+    },
+  ];
+
   return (
     <div className="flex h-full flex-col">
       <ChatThreadHeader
         name={room.counterpart.name}
         caseNo={room.caseNo}
         roomStatus={room.roomStatus}
-        reportHref={room.reportId ? `${reportBasePath}/${room.reportId}` : "#"}
         onBack={() => router.push(chatBasePath)}
-        onClose={() =>
-          endChat.mutate(undefined, {
-            onError: () =>
-              toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요."),
-          })
-        }
-        closePending={endChat.isPending}
-        onReport={report.openDialog}
+        menuActions={menuActions}
       />
 
       <ChatThreadView
