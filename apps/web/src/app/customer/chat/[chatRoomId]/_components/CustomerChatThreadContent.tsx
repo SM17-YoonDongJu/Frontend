@@ -23,6 +23,8 @@ import { MatchConfirmModal } from "@/shared/ui/chat/MatchConfirmModal";
 import { MatchRejectConfirmModal } from "@/shared/ui/chat/MatchRejectConfirmModal";
 import { MatchStatusBadge } from "@/shared/ui/chat/MatchStatusBadge";
 import { MessageInputBar } from "@/shared/ui/chat/MessageInputBar";
+import { ReportChatDialog } from "@/shared/ui/chat/ReportChatDialog";
+import { useReportChatDialog } from "@/shared/ui/chat/use-report-chat-dialog";
 import { ROOM_STATUS_META } from "@/shared/ui/chat/room-status";
 import { toast } from "@/shared/ui/toast";
 
@@ -50,6 +52,7 @@ export function CustomerChatThreadContent({
   const accept = useAcceptChat(chatRoomId);
   const reject = useRejectChat(chatRoomId);
   const { mutate: markRead } = useReadChat(chatRoomId);
+  const report = useReportChatDialog(chatRoomId);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
 
@@ -185,6 +188,7 @@ export function CustomerChatThreadContent({
         actions={actions}
         mobileActions={mobileActions}
         onBack={() => router.push(chatBasePath)}
+        onReport={report.openDialog}
       />
 
       {/* Figma 1012:9931 — 모바일 스레드엔 배너 없음(목록 배너·헤더 버튼이 대체). 데스크톱만 노출 */}
@@ -243,6 +247,15 @@ export function CustomerChatThreadContent({
         pending={matchPending}
         onConfirm={confirmReject}
         onCancel={() => setRejectOpen(false)}
+      />
+
+      <ReportChatDialog
+        open={report.open}
+        counterpartName={room.counterpart.name}
+        pending={report.pending}
+        errorMessage={report.errorMessage}
+        onSubmit={report.submit}
+        onClose={report.closeDialog}
       />
     </div>
   );

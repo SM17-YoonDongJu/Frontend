@@ -12,6 +12,8 @@ import { toast } from "@/shared/ui/toast";
 import { ChatThreadHeader } from "./ChatThreadHeader";
 import { ChatThreadView } from "./ChatThreadView";
 import { MessageInputBar } from "./MessageInputBar";
+import { ReportChatDialog } from "./ReportChatDialog";
+import { useReportChatDialog } from "./use-report-chat-dialog";
 
 export interface ChatThreadContentProps {
   chatRoomId: string;
@@ -34,6 +36,7 @@ export function ChatThreadContent({
   // 상담 종료 UX는 명세상 reject(방 종료)로 매핑. 형제 방 유지·서버 미러.
   const endChat = useRejectChat(chatRoomId);
   const { mutate: markRead } = useReadChat(chatRoomId);
+  const report = useReportChatDialog(chatRoomId);
 
   useEffect(() => {
     markRead();
@@ -56,6 +59,7 @@ export function ChatThreadContent({
           })
         }
         closePending={endChat.isPending}
+        onReport={report.openDialog}
       />
 
       <ChatThreadView
@@ -77,6 +81,15 @@ export function ChatThreadContent({
           })
         }
         attachPending={sendAttachment.isPending}
+      />
+
+      <ReportChatDialog
+        open={report.open}
+        counterpartName={room.counterpart.name}
+        pending={report.pending}
+        errorMessage={report.errorMessage}
+        onSubmit={report.submit}
+        onClose={report.closeDialog}
       />
     </div>
   );
