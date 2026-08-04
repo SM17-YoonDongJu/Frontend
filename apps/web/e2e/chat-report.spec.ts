@@ -1,12 +1,13 @@
 import { expect, test, type Page } from "@playwright/test";
 import { setAuthCookie } from "./_auth-cookie-helpers";
+import { clickChatHeaderAction, openChatHeaderMenu } from "./_chat-header-helpers";
 
 /**
  * 채팅방 신고 E2E (이슈 #244).
  * 원칙: 핵심 사용자 흐름만 — 신고 접수(고객·파트너 공통), 노출 조건 회귀 가드, 실패 후 재제출.
  * 응답은 기본 MSW 핸들러가 제공(항상 201 접수, 중복 제한 없음). 실패는 x-mock-failure=chat-report로 500 강제
  * (MSW 워커가 fetch를 가로채 page.route 불가 — repo 표준 주입 방식).
- * 회귀 가드: 신고 버튼은 roomStatus(CLOSED 포함)·mobileActions와 무관하게 항상 노출돼야 한다.
+ * 회귀 가드: 신고 항목은 roomStatus(CLOSED 포함)·뷰포트와 무관하게 헤더 "더보기"에 항상 있어야 한다.
  * 정적 위임(미테스트): reason enum·reasonDetail 500자 제한 등 형식 검증은 zod·TS가 강제.
  */
 
@@ -26,14 +27,12 @@ test.beforeEach(async ({ page }) => {
   await setAuthCookie(page, "USER");
 });
 
-/** 데스크톱 헤더의 `신고` pill을 눌러 다이얼로그를 연다(하이드레이션 전 클릭 유실 가드). */
+/** 헤더 "더보기"를 열고 `신고` 항목을 눌러 다이얼로그를 연다. */
 async function openReportDialog(page: Page) {
   const dialog = page.getByRole("dialog", { name: DIALOG_TITLE });
 
-  await expect(async () => {
-    await page.getByRole("button", { name: "신고", exact: true }).click();
-    await expect(dialog).toBeVisible();
-  }).toPass({ timeout: 10000 });
+  await clickChatHeaderAction(page, "신고");
+  await expect(dialog).toBeVisible();
 
   return dialog;
 }
@@ -129,19 +128,18 @@ test("같은 방을 연달아 두 번 신고해도 매번 접수된다", async (
   await expect(page.getByText(SUCCESS_TOAST).first()).toBeVisible();
 });
 
-test("상담이 종료된 방에서도 신고 버튼은 그대로 남는다", async ({ page }) => {
+test("상담이 종료된 방에서도 신고 항목은 그대로 남는다", async ({ page }) => {
   await page.setViewportSize(DESKTOP);
   await page.goto(CUSTOMER_ROOM);
 
-  const reportButton = page.getByRole("button", { name: "신고", exact: true });
-  await expect(reportButton).toBeVisible();
+  const menu = await openChatHeaderMenu(page);
+  await expect(menu.getByRole("menuitem", { name: "신고" })).toBeVisible();
 
-  // 매칭 거절로 방을 종료(roomStatus CLOSED) — 상담 종료 액션은 사라져도 신고는 남아야 한다
-  await page.getByRole("button", { name: "매칭 거절" }).click();
+  // 매칭 거절로 방을 종료(roomStatus CLOSED) — 매칭 액션은 사라져도 신고는 남아야 한다
+  await menu.getByRole("menuitem", { name: "매칭 거절" }).click();
   await page.getByRole("dialog").getByRole("button", { name: "매칭 거절" }).click();
   await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeDisabled();
 
-  await expect(reportButton).toBeVisible();
   const dialog = await openReportDialog(page);
   await selectReason(dialog, "스팸·광고");
   await dialog.getByRole("button", { name: "신고하기" }).click();
@@ -161,20 +159,11 @@ test("파트너 방에서도 상대를 신고할 수 있다", async ({ page }) =
   await expect(page.getByText(SUCCESS_TOAST).first()).toBeVisible();
 });
 
-test("모바일에서는 신고하기 아이콘 버튼으로 다이얼로그를 연다", async ({ page }) => {
+test("모바일에서도 같은 더보기 항목으로 신고할 수 있다", async ({ page }) => {
   await page.setViewportSize(MOBILE);
   await page.goto(CUSTOMER_ROOM);
 
-  const dialog = page.getByRole("dialog", { name: DIALOG_TITLE });
-  // 헤더 아이콘 버튼(DOM 선두) — 다이얼로그 제출 버튼과 이름이 같아 첫 번째로 좁힌다
-  const mobileReport = page.getByRole("button", { name: "신고하기" }).first();
-
-  await expect(mobileReport).toBeVisible();
-  await expect(async () => {
-    await mobileReport.click();
-    await expect(dialog).toBeVisible();
-  }).toPass({ timeout: 10000 });
-
+  const dialog = await openReportDialog(page);
   await selectReason(dialog, "욕설·비방·괴롭힘");
   await dialog.getByRole("button", { name: "신고하기" }).click();
   await expect(dialog).toBeHidden();

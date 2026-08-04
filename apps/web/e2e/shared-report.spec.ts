@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { setAuthCookie } from "./_auth-cookie-helpers";
+import { clickChatHeaderAction } from "./_chat-header-helpers";
 
 /**
  * 채팅방 공유 리포트(사정사 검수 결과) E2E — 이슈 #187.
@@ -21,14 +22,12 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("상담방에서 리포트 보기를 누르면 공유 리포트로 이동한다", async ({ page }) => {
-  // 비교 중 모바일 헤더는 매칭 버튼이 리포트 아이콘을 대체 — 리포트 보기는 데스크톱 헤더에서
+  // 리포트 보기는 헤더 "더보기" 패널 안(데스크톱·모바일 동일)
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
-  await expect(async () => {
-    await page.getByRole("link", { name: "리포트 보기" }).click();
-    await expect(page).toHaveURL(new RegExp(`${ROOM_1}/shared-report`));
-  }).toPass({ timeout: 10000 });
+  await clickChatHeaderAction(page, "리포트 보기");
+  await expect(page).toHaveURL(new RegExp(`${ROOM_1}/shared-report`));
 
   await expect(page.getByText("김도현 손해사정사")).toBeVisible();
 });

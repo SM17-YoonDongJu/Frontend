@@ -1,6 +1,7 @@
 import { test } from "@playwright/test";
 import { setAuthCookie } from "./_auth-cookie-helpers";
 import { hideQueryDevtools } from "./_region-helpers";
+import { openChatHeaderMenu } from "./_chat-header-helpers";
 
 /** PR 스크린샷 캡처 헬퍼(#187 채팅 공유 리포트). 테스트 아님 — CI 제외(testIgnore). */
 
@@ -15,10 +16,11 @@ test.beforeEach(async ({ page }) => {
   await hideQueryDevtools(page);
 });
 
-test("01 채팅방 리포트 보기 버튼(데스크톱)", async ({ page }) => {
+test("01 채팅방 리포트 보기 항목(데스크톱)", async ({ page }) => {
   await page.setViewportSize(DESKTOP);
   await page.goto(`/customer/chat/${ROOM_1}`);
-  await page.getByRole("link", { name: "리포트 보기" }).waitFor({ timeout: 15000 });
+  const menu = await openChatHeaderMenu(page);
+  await menu.getByRole("menuitem", { name: "리포트 보기" }).waitFor({ timeout: 15000 });
   await page.screenshot({ path: `${DIR}/01-chat-report-button-desktop.png` });
 });
 

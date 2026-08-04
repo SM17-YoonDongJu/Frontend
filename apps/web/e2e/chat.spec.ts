@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { setAuthCookie } from "./_auth-cookie-helpers";
+import { clickChatHeaderAction, openChatHeaderMenu } from "./_chat-header-helpers";
 
 /**
  * 채팅(상담) E2E — 비교→매칭 마켓플레이스 재설계(이슈 #48).
@@ -7,11 +8,11 @@ import { setAuthCookie } from "./_auth-cookie-helpers";
  * customer 흐름: 목록 상태 그룹(상담 중·비교 N) → 스레드 진입(히스토리·날짜 구분선·mine/theirs)
  *   → 전송(낙관적 append·롤백) → 매칭 완료(모달·형제 자동종료 캐스케이드)·매칭 거절(단일 종료)
  *   → 매칭 후 사건 진행 보기 → 공유 리포트 열기.
- * partner 무회귀: 평면 목록(그룹 없음)·헤더 상담 종료 버튼·상담 종료 흐름 그대로.
+ * partner 무회귀: 평면 목록(그룹 없음)·헤더 더보기 상담 종료·상담 종료 흐름 그대로.
  *
  * 시드(기본 MSW): 같은 reportId·caseNo 3방(김도현·정우성·윤지후) 전부 ACTIVE.
  * 김도현·정우성 COUNSELING, 윤지후 SENT(#231 선생성 방) — 셋 다 그룹은 "비교 중"으로 동일.
- * 전송 실패는 x-mock-failure 헤더로 강제. 매칭 액션 버튼은 데스크톱 헤더(md+) 전용 → 뷰포트 확대.
+ * 전송 실패는 x-mock-failure 헤더로 강제. 헤더 보조 액션은 데스크톱·모바일 모두 "더보기" 패널 안에 있다.
  */
 
 const CUSTOMER_LIST = "/customer/chat";
@@ -180,35 +181,35 @@ test("이전 대화는 위로 스크롤하면 이어서 불러온다", async ({ 
   await expect(page.getByText("이전 답변 내용 1번입니다.")).toBeVisible();
 });
 
-test("비교 중 방 헤더에는 매칭 거절·매칭 완료 버튼이 보인다", async ({ page }) => {
-  // 매칭 액션은 데스크톱 헤더(md+) 전용
+test("비교 중 방 헤더 더보기에는 매칭 거절·매칭 완료 항목이 보인다", async ({ page }) => {
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
-  await expect(page.getByRole("button", { name: "매칭 거절" }).first()).toBeVisible();
-  await expect(page.getByRole("button", { name: "매칭 완료" }).first()).toBeVisible();
+  const menu = await openChatHeaderMenu(page);
+  await expect(menu.getByRole("menuitem", { name: "매칭 거절" })).toBeVisible();
+  await expect(menu.getByRole("menuitem", { name: "매칭 완료" })).toBeVisible();
   // 비교 배너(스레드 상단)
   await expect(page.getByText(/명과 상담 중 · 마음에 들면/)).toBeVisible();
 });
 
-test("모바일에서도 헤더 매칭 버튼으로 매칭을 완료할 수 있다", async ({ page }) => {
+test("모바일에서도 헤더 더보기로 매칭을 완료할 수 있다", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
 
   // 목록 상단 비교 배너(모바일 전용 문구)
   await page.goto(CUSTOMER_LIST);
   await expect(page.getByText(/3명과 상담 중이에요/)).toBeVisible();
 
-  // 스레드 헤더 컴팩트 매칭 버튼 → 모달 → 확정
+  // 스레드 헤더 더보기 → 매칭 완료 → 모달 → 확정
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
-  await expect(page.getByRole("button", { name: "매칭 거절" })).toBeVisible();
-  await page.getByRole("button", { name: "매칭 완료" }).click();
+  await clickChatHeaderAction(page, "매칭 완료");
 
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByText("함께 종료되는 상담 2건")).toBeVisible();
   await dialog.getByRole("button", { name: "매칭 완료" }).click();
 
-  // 매칭 후 — 모바일 헤더에 사건 진행 링크
-  await expect(page.getByRole("link", { name: /사건 진행/ })).toBeVisible();
+  // 매칭 후 — 더보기 항목이 사건 진행 보기로 바뀐다
+  const menu = await openChatHeaderMenu(page);
+  await expect(menu.getByRole("menuitem", { name: "사건 진행 보기" })).toBeVisible();
 });
 
 test("매칭 완료를 확정하면 형제 상담이 종료되고 매칭 완료로 바뀐다", async ({
@@ -217,7 +218,7 @@ test("매칭 완료를 확정하면 형제 상담이 종료되고 매칭 완료�
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
-  await page.getByRole("button", { name: "매칭 완료" }).click();
+  await clickChatHeaderAction(page, "매칭 완료");
 
   // 확인 모달 — 함께 종료되는 상담 2건(정우성·윤지후)
   const dialog = page.getByRole("dialog");
@@ -233,10 +234,8 @@ test("매칭 완료를 확정하면 형제 상담이 종료되고 매칭 완료�
   await expect(page.getByText("종료된 상담", { exact: true })).toBeVisible();
 
   // 매칭 후 사건 진행 보기 → 방 공유 리포트(사정사 검수 결과) 이동
-  await expect(async () => {
-    await page.getByRole("link", { name: "사건 진행 보기" }).click();
-    await expect(page).toHaveURL(new RegExp(`/customer/chat/${ROOM_1}/shared-report`));
-  }).toPass({ timeout: 10000 });
+  await clickChatHeaderAction(page, "사건 진행 보기");
+  await expect(page).toHaveURL(new RegExp(`/customer/chat/${ROOM_1}/shared-report`));
 });
 
 test("매칭 거절을 누르면 그 방만 종료되고 입력이 차단된다", async ({ page }) => {
@@ -245,7 +244,7 @@ test("매칭 거절을 누르면 그 방만 종료되고 입력이 차단된다"
 
   const input = page.getByRole("textbox", { name: "메시지 입력" });
   await expect(input).toBeEnabled();
-  await page.getByRole("button", { name: "매칭 거절" }).click();
+  await clickChatHeaderAction(page, "매칭 거절");
 
   // 거절도 확인 모달을 거친다(비가역 액션)
   const rejectDialog = page.getByRole("dialog");
@@ -267,7 +266,7 @@ test("종료된 상담 그룹은 기본으로 접혀 있고 헤더를 누르면 
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
   // 김도현 방을 거절(확인 모달 경유)해 종료 그룹 생성
-  await page.getByRole("button", { name: "매칭 거절" }).click();
+  await clickChatHeaderAction(page, "매칭 거절");
   await page.getByRole("dialog").getByRole("button", { name: "매칭 거절" }).click();
   const endedHeader = page.getByRole("button", { name: /종료된 상담/ });
   await expect(endedHeader).toBeVisible();
@@ -323,14 +322,11 @@ test("데스크톱에서는 목록과 스레드가 분할 뷰로 함께 보이�
 });
 
 test("고객 방에서 공유 리포트를 열면 방 검수 결과로 이동한다", async ({ page }) => {
-  // 비교 중 모바일 헤더는 매칭 버튼이 리포트 아이콘을 대체(Figma 1012:9931) — 리포트 보기는 데스크톱 헤더에서
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
-  await expect(async () => {
-    await page.getByRole("link", { name: "리포트 보기" }).click();
-    await expect(page).toHaveURL(new RegExp(`/customer/chat/${ROOM_1}/shared-report`));
-  }).toPass({ timeout: 10000 });
+  await clickChatHeaderAction(page, "리포트 보기");
+  await expect(page).toHaveURL(new RegExp(`/customer/chat/${ROOM_1}/shared-report`));
 });
 
 test("파트너 채팅은 그룹 없는 평면 목록·상담 종료 흐름을 유지한다(무회귀)", async ({
@@ -345,12 +341,13 @@ test("파트너 채팅은 그룹 없는 평면 목록·상담 종료 흐름을 �
   await expect(page.getByText("상담 중 · 비교", { exact: true })).toHaveCount(0);
   await expect(page.getByText("진행 중 · 매칭 완료", { exact: true })).toHaveCount(0);
 
-  // 스레드 — partner는 상담 종료 버튼(매칭 아님) 유지
+  // 스레드 — partner 더보기는 상담 종료(매칭 아님) 유지
   await page.goto(`${PARTNER_LIST}/${ROOM_1}`);
-  await expect(page.getByRole("button", { name: "매칭 완료" })).toHaveCount(0);
   await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeVisible();
 
-  await page.getByRole("button", { name: "상담 종료" }).click();
+  const menu = await openChatHeaderMenu(page);
+  await expect(menu.getByRole("menuitem", { name: "매칭 완료" })).toHaveCount(0);
+  await menu.getByRole("menuitem", { name: "상담 종료" }).click();
   const input = page.getByRole("textbox", { name: "메시지 입력" });
   await expect(input).toBeDisabled();
   await expect(input).toHaveAttribute(
@@ -363,8 +360,6 @@ test("파트너 방에서 공유 리포트를 열면 파트너 검수로 이동�
   await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(`${PARTNER_LIST}/${ROOM_1}`);
 
-  await expect(async () => {
-    await page.getByRole("link", { name: "리포트 보기" }).click();
-    await expect(page).toHaveURL(new RegExp(`/partner/review/${SHARED_REPORT_ID}`));
-  }).toPass({ timeout: 10000 });
+  await clickChatHeaderAction(page, "리포트 보기");
+  await expect(page).toHaveURL(new RegExp(`/partner/review/${SHARED_REPORT_ID}`));
 });
