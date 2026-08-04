@@ -91,6 +91,11 @@ body: `adjusterId` → resp: `reportId` · `adjusterId` · `status`(`AWAITING_AD
 ### chat — `GET /chats`
 items[]{ `chatRoomId` · `participants`(uuid[]) · `lastMessage` · `updatedAt` } — 메시지 송수신은 WebSocket(본 API는 목록만)
 
+### chat(신고) — `POST /chats/{chatRoomId}/report` (이슈 #244, 명세없음 → FE 초안, 사용자 확정 2026-08-04)
+- req `reason`(`ChatReportReason` enum: `SPAM`|`ABUSE`|`FRAUD`|`PRIVACY_VIOLATION`|`OTHER`) · `reasonDetail`(string, 최대 500자, `OTHER` 선택 시 필수)
+- resp 201 `chatReportId`(uuid) · `chatRoomId` · `reason` · `createdAt`
+- 중복 신고 제한 없음(횟수 무제한 재신고 허용, 409/`DUPLICATE_RESOURCE` 처리 없음) — 사용자 확정
+
 ### payment — `GET /payments/history`
 items[]{ `paymentId` · `amount`(int) · `type`(`SUBSCRIPTION`) · `status`(`PAID`) · `paidAt` } + `page` · `totalCount`
 - `POST /subscriptions`: `tier`(`BASIC`|`PRO`) · `paymentMethod`(PG 토큰) → resp `subscriptionId` · `tier` · `status`(`ACTIVE`) · `expiresAt`
