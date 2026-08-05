@@ -1,8 +1,9 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { getMyPage } from "@/shared/api/generated/sdk.gen";
 import { mypageSchema } from "../_model/mypage.schema";
 import type { Mypage } from "../_model/types";
 
-export function getMypage(): Promise<Mypage> {
-  return fetchJson(`${API_BASE_URL}/adjusters/me/mypage`, mypageSchema);
+export async function getMypage(): Promise<Mypage> {
+  const { data } = await getMyPage({ throwOnError: true });
+  return mypageSchema.parse(data);
 }
