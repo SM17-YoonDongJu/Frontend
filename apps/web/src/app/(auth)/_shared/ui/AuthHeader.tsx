@@ -1,17 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/shared/lib/utils";
-import { Scale } from "@/shared/ui/icons/Scale";
-
-export function AuthBrandMark() {
-  return (
-    <span className="flex items-center gap-2.5">
-      <span className="flex size-[1.875rem] items-center justify-center rounded-lg bg-gold text-white">
-        <Scale className="size-[1.1875rem]" />
-      </span>
-      <span className="font-serif text-[1.25rem] font-bold tracking-[-0.025rem] text-ink">바른보상</span>
-    </span>
-  );
-}
+import { AuthBrandMark } from "./AuthBrandMark";
 
 interface AuthHeaderProps {
   /** 우측 슬롯(로그인·회원가입 안내 등, 없으면 로고만) */

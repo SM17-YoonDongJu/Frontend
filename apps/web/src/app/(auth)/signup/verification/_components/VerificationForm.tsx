@@ -7,30 +7,13 @@ import type { VerificationForm as VerificationFormState } from "../_hooks/use-ve
 import { BasicInfoFields } from "./BasicInfoFields";
 import { DocumentFields } from "./DocumentFields";
 import { DocumentSecurityNote } from "./DocumentSecurityNote";
+import { FormCard } from "./FormCard";
 import { ExpertiseFields } from "./ExpertiseFields";
 import { SubmitErrorNotice } from "./SubmitErrorNotice";
 import { VerificationHeader } from "./VerificationHeader";
 
 interface VerificationFormProps {
   form: VerificationFormState;
-}
-
-interface FormCardProps {
-  title: string;
-  description?: string;
-  children: React.ReactNode;
-}
-
-function FormCard({ title, description, children }: FormCardProps) {
-  return (
-    <section className="flex flex-col gap-5 rounded-card border border-line bg-card p-7 md:p-8">
-      <div className="flex flex-col gap-1.5">
-        <h2 className="text-[1.0625rem] font-bold text-ink">{title}</h2>
-        {description && <p className="text-[0.78125rem] text-ink-3">{description}</p>}
-      </div>
-      {children}
-    </section>
-  );
 }
 
 /** 데스크톱(md↑) 단일 페이지 폼. Figma 131-10583: 자격 정보 + 증빙 서류 2카드. */
