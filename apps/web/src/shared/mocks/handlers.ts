@@ -1784,7 +1784,8 @@ export const handlers = [
     const body = (await request.json().catch(() => ({}))) as {
       provider?: string;
       social_token?: string;
-      nickname?: string;
+      // CONTRACT(드리프트, 2026-08-05 실측): 명세 요청 필드는 name — 응답은 여전히 nickname.
+      name?: string;
       user_type?: string;
       gender?: string;
       birth_date?: string;
@@ -1816,14 +1817,14 @@ export const handlers = [
       );
     }
 
-    if (!body.nickname || body.nickname.length < 1 || body.nickname.length > 30) {
+    if (!body.name || body.name.length < 1 || body.name.length > 30) {
       return HttpResponse.json(
         { status: "400", code: "VALIDATION_ERROR", message: "이름은 1~30자로 입력해 주세요." },
         { status: 400 },
       );
     }
 
-    if (body.nickname === "중복닉네임") {
+    if (body.name === "중복닉네임") {
       return HttpResponse.json(
         { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 사용 중인 닉네임이에요." },
         { status: 409 },
@@ -1837,7 +1838,7 @@ export const handlers = [
         // 응답 역할은 명세대로 role(요청 user_type 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
         data: camelToSnakeDeep({
           userId: crypto.randomUUID(),
-          nickname: body.nickname,
+          nickname: body.name,
           role: body.user_type === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
         }),
       },
