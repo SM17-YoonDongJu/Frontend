@@ -122,6 +122,8 @@ export function CustomerChatThreadContent({
             icon: <CheckCircle />,
             onClick: () => setConfirmOpen(true),
             disabled: matchPending,
+            // 데스크톱은 비교 배너에 전용 버튼이 있어 더보기에선 모바일에만 노출
+            mobileOnly: true,
           },
           {
             key: "reject",
@@ -130,6 +132,8 @@ export function CustomerChatThreadContent({
             onClick: rejectMatch,
             tone: "danger",
             disabled: matchPending,
+            // 데스크톱에선 접근 경로 없음(모바일 더보기 전용) — 팀 결정
+            mobileOnly: true,
           },
         ]
       : group === "matched"
@@ -170,6 +174,8 @@ export function CustomerChatThreadContent({
             variant="comparing"
             reportTypeLabel={accidentTypeLabel(room.reportTypeLabel)}
             comparingCount={comparingCount}
+            onMatchComplete={() => setConfirmOpen(true)}
+            matchCompletePending={matchPending}
           />
         </div>
       )}

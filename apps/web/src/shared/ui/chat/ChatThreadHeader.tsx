@@ -22,6 +22,8 @@ export interface ChatThreadHeaderMenuAction {
   disabled?: boolean;
   /** danger = 매칭 거절·상담 종료 */
   tone?: "default" | "danger";
+  /** 데스크톱에서 다른 곳에 전용 버튼으로 노출돼 더보기 목록에선 숨김(모바일만) */
+  mobileOnly?: boolean;
 }
 
 export interface ChatThreadHeaderProps {
@@ -66,7 +68,8 @@ function MenuActionItem({
   const className = cn(
     "flex w-full items-center gap-3 px-3.5 py-3 text-left text-[0.8125rem] font-semibold transition",
     danger ? "text-terra hover:bg-terra-soft/60" : "text-ink hover:bg-paper-2",
-    action.disabled && "pointer-events-none cursor-not-allowed opacity-[.42]"
+    action.disabled && "pointer-events-none cursor-not-allowed opacity-[.42]",
+    action.mobileOnly && "md:hidden",
   );
   const content = (
     <>
