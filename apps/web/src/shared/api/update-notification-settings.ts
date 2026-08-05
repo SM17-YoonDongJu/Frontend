@@ -1,21 +1,17 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { updateMySettings } from "@/shared/api/generated/sdk.gen";
 import { notificationSettingsSchema } from "@/shared/model/notification-settings.schema";
 import type {
   NotificationSettings,
   UpdateNotificationSettingsBody,
 } from "@/shared/model/notification-settings.schema";
 
-export function updateNotificationSettings(
+export async function updateNotificationSettings(
   body: UpdateNotificationSettingsBody,
 ): Promise<NotificationSettings> {
-  return fetchJson(
-    `${API_BASE_URL}/users/me/notification-settings`,
-    notificationSettingsSchema,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    },
-  );
+  const { data } = await updateMySettings({
+    throwOnError: true,
+    body,
+  });
+  return notificationSettingsSchema.parse(data);
 }

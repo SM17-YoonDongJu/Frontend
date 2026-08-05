@@ -1,11 +1,11 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { getMySettings } from "@/shared/api/generated/sdk.gen";
 import { notificationSettingsSchema } from "@/shared/model/notification-settings.schema";
 import type { NotificationSettings } from "@/shared/model/notification-settings.schema";
 
-export function getNotificationSettings(): Promise<NotificationSettings> {
-  return fetchJson(
-    `${API_BASE_URL}/users/me/notification-settings`,
-    notificationSettingsSchema,
-  );
+export async function getNotificationSettings(): Promise<NotificationSettings> {
+  const { data } = await getMySettings({
+    throwOnError: true,
+  });
+  return notificationSettingsSchema.parse(data);
 }
