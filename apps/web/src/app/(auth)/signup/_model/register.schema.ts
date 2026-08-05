@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { userTypeSchema } from "@/shared/model/user";
+import type { RegisterRequest, RegisterResponse as GenRegisterResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 // register 성별 값 — 명세(2026-07-09 개정) M/F.
 export const genderSchema = z.enum(["M", "F"]);
@@ -34,6 +36,14 @@ export type Gender = z.infer<typeof genderSchema>;
 export type RegisterBody = z.infer<typeof registerBodySchema>;
 export type RegisterRole = z.infer<typeof registerRoleSchema>;
 export type RegisterResponse = z.infer<typeof registerResponseSchema>;
+
+// nickname은 register.ts 호출부에서 명세 필드 name으로 매핑해 전송(드리프트 정정, 2026-08-05).
+type _RegisterBodyDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<RegisterBody, "nickname">, RegisterRequest>
+>;
+type _RegisterResponseDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<RegisterResponse, GenRegisterResponse>
+>;
 
 // UI 로컬 퍼널 상태(선택역할·닉네임·소셜값·본인 확인 입력) → 명세 body 매핑.
 // 약관 동의는 프론트 게이트 전용이므로 여기서 제외된다.

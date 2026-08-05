@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { HEADLINE_MAX, INTRODUCTION_MAX, MAX_SPECIALTIES } from "./specialty-options";
+import type { AdjusterProfileResponse, UpdateAdjusterProfileRequest } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 export const careerItemSchema = z.object({
   period: z.string().min(1),
@@ -52,3 +54,14 @@ export const profileFormSchema = z.object({
 });
 
 export const updateProfileBodySchema = profileFormSchema.partial();
+
+// registrationNo는 실 API 미정 필드(MSW 선제공) — 대조 대상에서 제외.
+type _AdjusterProfileDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<
+    Omit<z.infer<typeof adjusterProfileSchema>, "registrationNo">,
+    AdjusterProfileResponse
+  >
+>;
+type _UpdateProfileBodyDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof updateProfileBodySchema>, UpdateAdjusterProfileRequest>
+>;

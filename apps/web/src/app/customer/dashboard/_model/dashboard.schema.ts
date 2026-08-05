@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { reportListStatusSchema } from "@/app/customer/_shared/model/report-list.schema";
+import type { ActiveReport, ProposalSummary, UserDashboardResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /**
  * 고객 홈 대시보드 BFF(GET /users/me/dashboard) 응답 거울 — 이슈 #142.
@@ -47,3 +49,13 @@ export type Dashboard = z.infer<typeof dashboardSchema>;
 export type DashboardActiveReport = z.infer<typeof dashboardActiveReportSchema>;
 export type DashboardProposalSummary = z.infer<typeof dashboardProposalSummarySchema>;
 export type DashboardProposalItem = z.infer<typeof dashboardProposalItemSchema>;
+
+type _DashboardDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<Dashboard, "activeReport" | "proposalSummary">, UserDashboardResponse>
+>;
+type _DashboardActiveReportDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<DashboardActiveReport, ActiveReport>
+>;
+type _DashboardProposalSummaryDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<DashboardProposalSummary, "items">, ProposalSummary>
+>;

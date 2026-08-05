@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
+import type { NotificationSettingResponse } from "@/shared/api/generated/types.gen";
 
 /**
  * 알림 설정 — GET·PATCH /users/me/notification-settings (명세 V21, 10필드).
@@ -32,4 +34,9 @@ export const updateNotificationSettingsBodySchema =
 export type NotificationSettings = z.infer<typeof notificationSettingsSchema>;
 export type UpdateNotificationSettingsBody = z.infer<
   typeof updateNotificationSettingsBodySchema
+>;
+
+// kakaoPlusFriend는 명세에 없는 FE 전용 확장(이슈 #105, 등재 요청 중) — 대조 대상에서 제외.
+type _NotificationSettingsDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<NotificationSettings, "kakaoPlusFriend">, NotificationSettingResponse>
 >;

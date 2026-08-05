@@ -4,6 +4,8 @@ import {
   SUPPORTED_ACCIDENT_TYPE,
 } from "@/shared/model/accident-type";
 import { documentSlotsSchema, flattenDocuments } from "./document-slots";
+import type { CreateReportRequest, CreateReportResponse as GenCreateReportResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /** 손해사정 요청 퍼널 입력 스키마. 도메인 = report (슬러그만 adjust-request). */
 
@@ -135,6 +137,13 @@ export const createReportResponseSchema = z.object({
   reportId: z.uuid(),
   status: z.string(), // CONTRACT: 생성 직후 status 백엔드 확인(MSW는 AWAITING_INSPECTION)
 });
+
+type _CreateReportBodyDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof createReportBodySchema>, CreateReportRequest>
+>;
+type _CreateReportResponseDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof createReportResponseSchema>, GenCreateReportResponse>
+>;
 
 /** 자동저장용 — 부분 입력 허용. 슬라이스마다 필드 추가. */
 export const adjustRequestDraftSchema = z.object({

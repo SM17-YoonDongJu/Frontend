@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { issueReviewStatusSchema } from "./review-issue.schema";
+import type { IssueReview, ReviewReportRequest, ReviewReportResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /**
  * 검수 반영 제출 쟁점(부분 upsert). 출처: PATCH /reports/{reportId} body issues[].
@@ -35,3 +37,13 @@ export const reviewSubmitResultSchema = z.object({
   reportReviewId: z.string(),
   reviewStatus: z.string(),
 });
+
+type _ReviewSubmitIssueDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof reviewSubmitIssueSchema>, IssueReview>
+>;
+type _ReviewSubmitDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<z.infer<typeof reviewSubmitSchema>, "issues">, ReviewReportRequest>
+>;
+type _ReviewSubmitResultDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof reviewSubmitResultSchema>, ReviewReportResponse>
+>;

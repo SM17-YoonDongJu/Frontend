@@ -1,5 +1,13 @@
 import { z } from "zod";
 import { accidentTypeSchema } from "@/shared/model/accident-type";
+import type {
+  Attachment,
+  ChatMessageResponse as GenChatMessageResponse,
+  ChatRoomSummaryResponse,
+  ConsultationDecisionResponse,
+  ReadResponse,
+} from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 // 채팅 도메인 계약(봉투 내부 data만 — fetch-json이 봉투 해제·snake→camel 변환).
 // mine/theirs 판별은 서버 isMine(GET/POST messages)로 정합 — senderId 문자열 비교 제거.
@@ -151,3 +159,26 @@ export type UploadChatAttachmentResponse = z.infer<
 export type AcceptChatResponse = z.infer<typeof acceptChatResponseSchema>;
 export type RejectChatResponse = z.infer<typeof rejectChatResponseSchema>;
 export type ReadChatResponse = z.infer<typeof readChatResponseSchema>;
+
+// counterpart는 nested 커스텀 스키마라 얕은 키 대조 대상에서 제외.
+type _ChatRoomDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<ChatRoom, "counterpart">, ChatRoomSummaryResponse>
+>;
+type _ChatAttachmentDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<ChatAttachment, Attachment>
+>;
+type _ChatMessageDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<ChatMessage, "attachment">, GenChatMessageResponse>
+>;
+type _SendChatMessageResponseDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<SendChatMessageResponse, "attachment">, GenChatMessageResponse>
+>;
+type _AcceptChatResponseDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<AcceptChatResponse, ConsultationDecisionResponse>
+>;
+type _RejectChatResponseDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<RejectChatResponse, ConsultationDecisionResponse>
+>;
+type _ReadChatResponseDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<ReadChatResponse, ReadResponse>
+>;

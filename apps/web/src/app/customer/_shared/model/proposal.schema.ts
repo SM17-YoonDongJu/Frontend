@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { matchStatusSchema } from "@/shared/api/chat/chat.schema";
+import type { ProposalListResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /**
  * 받은 제안 목록. 출처: 식별자 사전 §5b GET /reports/{reportId}/proposals.
@@ -55,3 +57,9 @@ export type Proposal = z.infer<typeof proposalSchema>;
 export type ProposalTarget = z.infer<typeof proposalTargetSchema>;
 export type Pagination = z.infer<typeof paginationSchema>;
 export type ProposalList = z.infer<typeof proposalListSchema>;
+
+// target은 명세에 없는 디자인용 확장, list 원소(Proposal)의 확장 필드(speciality·career·isNew 등)도
+// 백엔드 확정 전 옵셔널 확장이라 대조 대상에서 제외.
+type _ProposalListDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<ProposalList, "target" | "list">, ProposalListResponse>
+>;

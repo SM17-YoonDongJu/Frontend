@@ -1,5 +1,14 @@
 import { z } from "zod";
 import { reviewIssueSchema } from "./review-issue.schema";
+import type {
+  AttachmentItem,
+  ClaimContext,
+  Client,
+  Estimate,
+  Progress,
+  ReviewWorkspaceResponse,
+} from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /** 리포트 생명주기 상태 (ERD REPORTS.status 5상태). */
 export const reviewReportStatusSchema = z.enum([
@@ -91,3 +100,24 @@ export const reviewDetailSchema = z.object({
   started: z.boolean(),
   progress: reviewProgressSchema,
 });
+
+// issues는 REPORT_ISSUES+REPORT_REVIEW_ISSUES를 FE에서 합쳐 aiTitle/modifiedTitle 등으로
+// 재명명한 오버레이라 명세 IssueItem과 필드명이 크게 달라 대조 대상에서 제외.
+type _ReviewDetailDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<z.infer<typeof reviewDetailSchema>, "issues">, ReviewWorkspaceResponse>
+>;
+type _ReviewClientDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof reviewClientSchema>, Client>
+>;
+type _ReviewClaimDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof reviewClaimSchema>, ClaimContext>
+>;
+type _ReviewAttachmentDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof reviewAttachmentSchema>, AttachmentItem>
+>;
+type _EstimateRangeDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof estimateRangeSchema>, Estimate>
+>;
+type _ReviewProgressDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof reviewProgressSchema>, Progress>
+>;

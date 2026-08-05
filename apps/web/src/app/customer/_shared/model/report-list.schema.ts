@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { ReportCardListResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /**
  * 고객 리포트 목록 정본 — 대시보드·받은 제안·검수 내역·내 리포트 목록 공유(이슈 #128 통합).
@@ -28,19 +30,16 @@ export const reportListItemSchema = z.object({
   reviewedAt: z.string().nullable(),
   adjusterNickname: z.string().nullable(),
 
-  // 🏷확인필요(FE) list 확장 — optional, MSW로만 채움(노션 명세 반영됨).
+  // title은 2026-08-05 실측 명세에 이미 포함됨(과거 "확인필요" 메모는 outdated).
   title: z.string().nullish(),
   confirmedMinAmount: z.number().int().nullable().optional(),
   confirmedMaxAmount: z.number().int().nullable().optional(),
   rating: z.number().nullable().optional(),
-  // 받은 제안 목록 "NEW N" 배지용 신규 도착 제안 수(이슈 #78).
+  // 받은 제안 목록 "NEW N" 배지용 신규 도착 제안 수(이슈 #78, 여전히 명세 미포함).
   newProposalCount: z.number().int().optional(),
 
-  // CONTRACT(naming-dictionary §확정 #24 / list 응답 미포함, FE 임시 추가 — 드리프트 항목 10): offeredAmount 보험사 제안금액.
-  // 구 dashboard 스키마에서 통합 보존 — optional로 완화(대시보드 외 화면은 미사용).
+  // offeredAmount·treatment도 2026-08-05 실측 명세에 이미 포함됨(구 "list 응답 미포함" 드리프트 메모는 정정됨).
   offeredAmount: z.number().int().nonnegative().nullable().optional(),
-  // CONTRACT(상세 GET /reports/{id}의 정식 필드 treatment / list 응답 미포함, FE 임시 추가 — 드리프트 항목 10): 진료 항목.
-  // 구 dashboard 스키마에서 통합 보존 — optional로 완화.
   treatment: z.string().nullable().optional(),
 });
 
@@ -66,3 +65,11 @@ export type ReportListResponse = z.infer<typeof reportListSchema>;
 export { reportListStatusSchema as reportStatusSchema };
 export type ReportStatus = z.infer<typeof reportListStatusSchema>;
 export type ReportList = z.infer<typeof reportListSchema>;
+
+// confirmedMinAmount·confirmedMaxAmount·rating·newProposalCount는 여전히 명세 미포함(FE 확장).
+type _ReportListItemDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<
+    Omit<ReportListItem, "confirmedMinAmount" | "confirmedMaxAmount" | "rating" | "newProposalCount">,
+    NonNullable<ReportCardListResponse["list"]>[number]
+  >
+>;

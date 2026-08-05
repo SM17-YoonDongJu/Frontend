@@ -1,8 +1,10 @@
 import { z } from "zod";
+import type { UserActivitySummaryResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
-// CONTRACT(명세없음-임시, 이슈 #105): 활동 카운트 집계 GET /users/me/activity-summary.
-// Notion API 명세서 DB 전수 조회(2026-07-13) 결과 이 엔드포인트 행 자체가 없다 — 등재 요청 중
-// (초안 .pr-assets/api-spec-draft-user-mypage.md). closedCount(종결) 정의·소스도 백엔드 확인 필요.
+// CONTRACT(2026-08-05 실측으로 정정): 2026-07-13 Notion 명세서 DB 전수 조회 시엔 이 엔드포인트가
+// 없었으나, 실제 OpenAPI 명세(https://api-dev.brbosang.com/v3/api-docs)엔 존재함 — Notion 미동기화였던 것으로 보임.
+// closedCount(종결) 정의·소스는 여전히 백엔드 확인 필요.
 export const activitySummarySchema = z.object({
   reportCount: z.number().int().nonnegative(),
   proposalCount: z.number().int().nonnegative(),
@@ -11,3 +13,7 @@ export const activitySummarySchema = z.object({
 });
 
 export type ActivitySummary = z.infer<typeof activitySummarySchema>;
+
+type _ActivitySummaryDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<ActivitySummary, UserActivitySummaryResponse>
+>;

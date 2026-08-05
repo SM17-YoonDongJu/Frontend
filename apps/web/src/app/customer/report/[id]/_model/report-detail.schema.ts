@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { CustomerReportDetailResponse, IssueItem } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /**
  * 리포트 상세. 출처: API 명세 GET /reports/{reportId}(백엔드 CustomerReportDetailResponse).
@@ -63,3 +65,16 @@ export const reportDetailSchema = rawReportDetailSchema.transform((data) => ({
   issues: data.issue,
   caseNo: data.reportNo,
 }));
+
+type _IssueItemDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.input<typeof issueItemSchema>, IssueItem>
+>;
+
+// 변환 전(rawReportDetailSchema) 필드명이 명세와 그대로 일치 — issue/reportNo→issues/caseNo 별칭은
+// 여기서만 일어나므로 원본 키 기준으로 대조한다.
+type _ReportDetailDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<
+    Omit<z.infer<typeof rawReportDetailSchema>, "adjuster">,
+    CustomerReportDetailResponse
+  >
+>;

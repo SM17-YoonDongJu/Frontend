@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { Estimate, Issue, SharedReportResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 // 채팅방 공유 리포트 계약(봉투 내부 data만 — fetch-json이 봉투 해제·snake→camel 변환).
 // 같은 리포트라도 방마다 사정사별 검수본이 달라 키·조회 단위는 chatRoomId.
@@ -74,3 +76,15 @@ export type SharedIssueReviewStatus = z.infer<
   typeof sharedIssueReviewStatusSchema
 >;
 export type SharedReviewStatus = z.infer<typeof sharedReviewStatusSchema>;
+
+// adjuster는 명세 Adjuster 타입이 {nickname,career}뿐인데 우리는 adjusterId·name·specialties도
+// 쓴다(실제 응답과 다른 범용 타입 재사용 추정) — 얕은 대조에서 제외, 별도 확인 필요로 남겨둔다.
+type _SharedReportDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<SharedReport, "adjuster" | "issues">, SharedReportResponse>
+>;
+type _SharedReportIssueDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<SharedReportIssue, Issue>
+>;
+type _SharedReportEstimateDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<SharedReportEstimate, Estimate>
+>;

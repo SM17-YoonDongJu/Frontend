@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { accidentTypeSchema } from "@/shared/model/accident-type";
+import type { ReviewedReportListResponse, Stats } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /**
  * 사정사 검수 내역. 출처: API 명세 GET /adjusters/me/reviewed-reports.
@@ -42,3 +44,11 @@ export const reviewedReportsSchema = z.object({
   totalElements: z.number().int(),
   totalPages: z.number().int(),
 });
+
+// items 배열 원소는 명세가 범용 Item 스키마로 나와 있어 항목별 대조는 생략.
+type _ReviewedReportsDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<z.infer<typeof reviewedReportsSchema>, "items">, ReviewedReportListResponse>
+>;
+type _ReviewStatsDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof reviewStatsSchema>, Stats>
+>;
