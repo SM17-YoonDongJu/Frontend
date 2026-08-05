@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 import type { RoomStatus } from "@/shared/api/chat/chat.schema";
 import { cn } from "@/shared/lib/utils";
@@ -9,6 +8,8 @@ import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { Popover } from "@/shared/ui/Popover";
+import { ChatProfileLink } from "./ChatProfileLink";
+import { MenuActionItem } from "./MenuActionItem";
 import { ROOM_STATUS_META } from "./room-status";
 
 export interface ChatThreadHeaderMenuAction {
@@ -42,78 +43,6 @@ export interface ChatThreadHeaderProps {
   menuActions: ChatThreadHeaderMenuAction[];
 }
 
-/** href가 있으면 아바타·이름 묶음을 프로필 링크로, 없으면(partner) 헤더 flex에 그대로 편다. */
-function ProfileLink({ href, children }: { href?: string; children: ReactNode }) {
-  if (!href) return <>{children}</>;
-
-  return (
-    <Link
-      href={href}
-      className="flex min-w-0 flex-1 items-center gap-2.5 transition hover:opacity-80"
-    >
-      {children}
-    </Link>
-  );
-}
-
-function MenuActionItem({
-  action,
-  onSelect
-}: {
-  action: ChatThreadHeaderMenuAction;
-  onSelect: () => void;
-}) {
-  const danger = action.tone === "danger";
-  const className = cn(
-    "flex w-full items-center gap-3 px-3.5 py-3 text-left text-[0.8125rem] font-semibold transition",
-    danger ? "text-terra hover:bg-terra-soft/60" : "text-ink hover:bg-paper-2",
-    action.disabled && "pointer-events-none cursor-not-allowed opacity-[.42]",
-    action.mobileOnly && "md:hidden"
-  );
-  const content = (
-    <>
-      <span
-        className={cn(
-          "flex size-8 shrink-0 items-center justify-center rounded-full text-[0.9375rem]",
-          danger ? "bg-terra-soft text-terra" : "bg-paper-2 text-ink-2"
-        )}
-      >
-        {action.icon}
-      </span>
-      {action.label}
-    </>
-  );
-
-  if (action.href) {
-    return (
-      <Link
-        href={action.href}
-        role="menuitem"
-        aria-disabled={action.disabled}
-        className={className}
-        onClick={onSelect}
-      >
-        {content}
-      </Link>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      role="menuitem"
-      disabled={action.disabled}
-      className={className}
-      onClick={() => {
-        onSelect();
-        action.onClick?.();
-      }}
-    >
-      {content}
-    </button>
-  );
-}
-
 export function ChatThreadHeader({
   name,
   caseNo,
@@ -143,7 +72,7 @@ export function ChatThreadHeader({
         </button>
       )}
 
-      <ProfileLink href={profileHref}>
+      <ChatProfileLink href={profileHref}>
         <Avatar name={name} size="sm" />
 
         <div className="min-w-0 flex-1">
@@ -157,7 +86,7 @@ export function ChatThreadHeader({
           <p className="hidden truncate text-[0.6875rem] text-ink-3 md:block">{subtitle}</p>
           <span className="sr-only md:hidden">{subtitle}</span>
         </div>
-      </ProfileLink>
+      </ChatProfileLink>
 
       {menuActions.length > 0 && (
         <div className="relative shrink-0">
