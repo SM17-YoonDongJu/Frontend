@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Estimate, Issue, SharedReportResponse } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
-// 채팅방 공유 리포트 계약(봉투 내부 data만 — fetch-json이 봉투 해제·snake→camel 변환).
+// 채팅방 공유 리포트 계약(응답 래퍼 내부 data만 — client가 래퍼 해제·snake→camel 변환).
 // 같은 리포트라도 방마다 사정사별 검수본이 달라 키·조회 단위는 chatRoomId.
 
 // 값 집합이 명세에 없어 잠그지 않는다(화면 분기에도 쓰지 않음).

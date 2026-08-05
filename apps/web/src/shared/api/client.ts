@@ -67,7 +67,7 @@ async function parseErrorCode(response: Response): Promise<string | null> {
 }
 
 /**
- * fetchJson의 401 재발급 1회 재시도 로직을 client-fetch용 커스텀 fetch로 이관.
+ * 401 재발급 1회 재시도 — client-fetch의 커스텀 fetch로 처리한다.
  * skipTokenReissue/skipAuthRedirect는 request 인터셉터가 심어둔 헤더로 전달받는다
  * (커스텀 fetch는 Request 객체만 받고 호출별 options.meta에 접근할 수 없음).
  */

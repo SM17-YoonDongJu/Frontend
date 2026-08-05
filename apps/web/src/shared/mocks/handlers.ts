@@ -1297,7 +1297,7 @@ export const handlers = [
       );
     }
 
-    // fetch-json이 요청 body를 snake로 변환 → { content, attachments: [{ attachment_key, name, content_type, size }] }
+    // client가 요청 body를 snake로 변환 → { content, attachments: [{ attachment_key, name, content_type, size }] }
     const body = (await request.json().catch(() => ({}))) as {
       content?: string;
       attachments?: {
@@ -2220,7 +2220,7 @@ export const handlers = [
       );
     }
 
-    // 요청 body는 이미 snake_case(fetch-json 변환). 명세 허용 필드만 머지.
+    // 요청 body는 이미 snake_case(client 변환). 명세 허용 필드만 머지.
     for (const key of ["phone_number", "region", "avatar_url"] as const) {
       if (key in body) MOCK_ME[key] = body[key];
     }
@@ -2522,7 +2522,10 @@ export const handlers = [
     const fileName = file?.name ?? decodeURIComponent(request.headers.get("x-mock-file-name") ?? "");
     const contentType = file?.type || (request.headers.get("x-mock-file-type") ?? "");
     const size = file?.size ?? Number(request.headers.get("x-mock-file-size") ?? NaN);
-    const purpose = (formData?.get("purpose") ?? request.headers.get("x-mock-upload-purpose")) as string | null;
+    // 명세상 purpose는 쿼리 파라미터. 구 form 파트·목 전용 헤더는 폴백으로만 남긴다.
+    const purpose = (new URL(request.url).searchParams.get("purpose") ??
+      formData?.get("purpose") ??
+      request.headers.get("x-mock-upload-purpose")) as string | null;
 
     if (!fileName || !purpose) {
       return HttpResponse.json(
@@ -2570,7 +2573,7 @@ export const handlers = [
   // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
   http.post(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(600);
-    // 요청 body는 fetchJson이 camel→snake 변환해 보냄 — 명세 필드명 그대로 읽는다.
+    // 요청 body는 client가 camel→snake 변환해 보냄 — 명세 필드명 그대로 읽는다.
     const body = (await request.json()) as {
       accident_type?: string;
       documents?: Array<{

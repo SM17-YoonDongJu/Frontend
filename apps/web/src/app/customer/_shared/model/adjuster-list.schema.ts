@@ -4,7 +4,7 @@ import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/dri
 
 /**
  * 손해사정사 목록 정본 — 목록 화면(adjusters) + 홈 추천(dashboard 온보딩·추천 카드, 이슈 #142) 공유.
- * 출처: API 명세 GET /adjusters. 필드명 명세 그대로. fetchJson이 봉투를 벗기므로 data 내부만 모델링.
+ * 출처: API 명세 GET /adjusters. 필드명 명세 그대로. client가 응답 래퍼를 벗기므로 data 내부만 모델링.
  */
 
 export const adjusterListItemSchema = z.object({

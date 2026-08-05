@@ -5,7 +5,7 @@ import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/dri
 
 /**
  * 사정사 검수 내역. 출처: API 명세 GET /adjusters/me/reviewed-reports.
- * 봉투(status/message/code)는 fetchJson이 해제 — 여기선 data 페이로드만 모델링.
+ * 응답 래퍼(status/message/code)는 client가 해제 — 여기선 data 페이로드만 모델링.
  */
 
 /** items[].status — 사정사 검수 상태(방향). 명세 Query status의 ALL(전체)은 제외. */

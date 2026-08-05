@@ -9,7 +9,7 @@ import type {
 } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
-// 채팅 도메인 계약(봉투 내부 data만 — fetch-json이 봉투 해제·snake→camel 변환).
+// 채팅 도메인 계약(응답 래퍼 내부 data만 — client가 래퍼 해제·snake→camel 변환).
 // mine/theirs 판별은 서버 isMine(GET/POST messages)로 정합 — senderId 문자열 비교 제거.
 
 export const roomStatusSchema = z.enum(["ACTIVE", "CLOSED"]);

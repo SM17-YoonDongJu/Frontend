@@ -6,7 +6,7 @@ import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/dri
 /**
  * 고객 홈 대시보드 BFF(GET /users/me/dashboard) 응답 거울 — 이슈 #142.
  * BE 합의(PR #142·구현 PR #171): reportCount·activeReport·proposalSummary 3필드만. todos는 미제공(액션센터가 파생).
- * 봉투(status/message/code)는 fetchJson이 해제 — 여기선 data 페이로드만 모델링(snake→camel도 fetchJson 담당).
+ * 응답 래퍼(status/message/code)는 client가 해제 — 여기선 data 페이로드만 모델링(snake→camel도 client 담당).
  */
 export const dashboardActiveReportSchema = z.object({
   reportId: z.uuid(),

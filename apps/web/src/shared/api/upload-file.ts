@@ -1,6 +1,6 @@
-import { API_BASE_URL } from "@/shared/api/config";
+import "@/shared/api/client";
+import { upload } from "@/shared/api/generated/sdk.gen";
 import { ERROR_CODES, getErrorCode } from "@/shared/api/error-codes";
-import { fetchJson } from "@/shared/api/fetch-json";
 import {
   uploadFileResponseSchema,
   type UploadPurpose,
@@ -17,27 +17,24 @@ const UPLOAD_ERROR_MESSAGES: Record<string, string> = {
 
 const UPLOAD_ERROR_FALLBACK = "업로드에 실패했어요. 다시 시도해 주세요.";
 
-/** 업로드 실패 원인을 사용자 안내 문구로 변환. LOGIN_REQUIRED 등 인증 에러는 fetchJson이 이동 처리. */
+/** 업로드 실패 원인을 사용자 안내 문구로 변환. LOGIN_REQUIRED 등 인증 에러는 client가 이동 처리. */
 export function uploadErrorMessage(error: unknown): string {
   const code = getErrorCode(error);
   return (code && UPLOAD_ERROR_MESSAGES[code]) ?? UPLOAD_ERROR_FALLBACK;
 }
 
 /**
- * POST /uploads — 서버 프록시 업로드. file·purpose 두 파트를 multipart 단일 요청으로 보내고
- * 서버가 S3에 저장한 최종 object URL을 받는다. Content-Type은 boundary 자동 생성에 맡긴다.
+ * POST /uploads — 서버 프록시 업로드. 파일을 multipart로 보내고 서버가 S3에 저장한
+ * 최종 object URL을 받는다. purpose는 명세상 쿼리 파라미터.
  */
 export async function uploadFile(
   file: File,
   purpose: UploadPurpose,
 ): Promise<UploadResponse> {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("purpose", purpose);
-
-  const { s3Url } = await fetchJson(`${API_BASE_URL}/uploads`, uploadFileResponseSchema, {
-    method: "POST",
-    body: formData,
+  const { data } = await upload({
+    throwOnError: true,
+    query: { purpose },
+    body: { file },
     // webkit 서비스워커가 multipart 파싱을 누락하는 경우 대비한 목 전용 폴백 메타
     headers: {
       "x-mock-file-name": encodeURIComponent(file.name),
@@ -47,5 +44,6 @@ export async function uploadFile(
     },
   });
 
+  const { s3Url } = uploadFileResponseSchema.parse(data);
   return { url: s3Url };
 }

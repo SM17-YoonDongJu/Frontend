@@ -45,7 +45,7 @@ export function isAuthRedirectError(error: unknown): boolean {
   return code !== null && AUTH_REDIRECT_CODES.has(code);
 }
 
-/** fetchJson 규약: 서버 실패 봉투의 code가 Error.name에 담긴다(없으면 `HTTP_<status>`). */
+/** client 규약: 서버 실패 응답 래퍼의 code가 Error.name에 담긴다. */
 export function getErrorCode(error: unknown): string | null {
   if (!(error instanceof Error)) return null;
   return error.name === "Error" ? null : error.name;
