@@ -11,7 +11,8 @@ import { NotificationSettingsCard } from "./NotificationSettingsCard";
 import { ProfileHero } from "./ProfileHero";
 import { ProfileSettingsModal } from "./ProfileSettingsModal";
 import { ProfileSettingsSheet } from "./mobile/ProfileSettingsSheet";
-import { SectionBoundary, SectionSkeleton } from "./SectionBoundary";
+import { SectionBoundary } from "./SectionBoundary";
+import { SectionSkeleton } from "./SectionSkeleton";
 
 /** PC 2컬럼 + 모바일 스택 오케스트레이터. 프로필(필수)은 상위 경계에서 suspend. */
 export function MypageView() {
