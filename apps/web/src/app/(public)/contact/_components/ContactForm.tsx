@@ -3,17 +3,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/shared/ui/Button";
+import { FieldLabel } from "@/shared/ui/FieldLabel";
 import { Input } from "@/shared/ui/Input";
 import { useCreateContactInquiry } from "../_api/use-create-contact-inquiry";
 import { contactInquiryFormSchema, type ContactInquiryForm } from "../_model/contact-inquiry.schema";
-
-function FieldLabel({ htmlFor, children }: { htmlFor: string; children: React.ReactNode }) {
-  return (
-    <label htmlFor={htmlFor} className="mb-2 block text-[0.8125rem] font-semibold text-ink-2">
-      {children}
-    </label>
-  );
-}
 
 export function ContactForm() {
   const {

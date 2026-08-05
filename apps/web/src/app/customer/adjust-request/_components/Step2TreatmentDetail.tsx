@@ -2,6 +2,7 @@
 
 import { Controller, useFormContext } from "react-hook-form";
 import { blockNonNumericKeys, toNonNegativeInt } from "@/shared/lib/number-input";
+import { FieldLabel } from "@/shared/ui/FieldLabel";
 import { Input } from "@/shared/ui/Input";
 import { MultiInputList } from "./MultiInputList";
 import { ToggleChip } from "./ToggleChip";
@@ -19,10 +20,6 @@ const NON_COVERED: { value: NonCoveredOption; label: string }[] = [
   { value: "EXCLUDED", label: "미포함" },
   { value: "UNKNOWN", label: "모름" },
 ];
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <span className="mb-2 block text-[0.8125rem] font-semibold text-ink-2">{children}</span>;
-}
 
 export function Step2TreatmentDetail() {
   const { control, watch, setValue, formState } = useFormContext<AdjustRequestDraft>();
