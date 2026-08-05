@@ -129,7 +129,8 @@ test("같은 방을 연달아 두 번 신고해도 매번 접수된다", async (
 });
 
 test("상담이 종료된 방에서도 신고 항목은 그대로 남는다", async ({ page }) => {
-  await page.setViewportSize(DESKTOP);
+  // 매칭 거절은 데스크톱 더보기에서 뺐다(팀 결정) — 모바일 뷰포트로 방을 종료시킨다.
+  await page.setViewportSize(MOBILE);
   await page.goto(CUSTOMER_ROOM);
 
   const menu = await openChatHeaderMenu(page);

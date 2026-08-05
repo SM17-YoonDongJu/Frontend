@@ -12,7 +12,8 @@ import { clickChatHeaderAction, openChatHeaderMenu } from "./_chat-header-helper
  *
  * 시드(기본 MSW): 같은 reportId·caseNo 3방(김도현·정우성·윤지후) 전부 ACTIVE.
  * 김도현·정우성 COUNSELING, 윤지후 SENT(#231 선생성 방) — 셋 다 그룹은 "비교 중"으로 동일.
- * 전송 실패는 x-mock-failure 헤더로 강제. 헤더 보조 액션은 데스크톱·모바일 모두 "더보기" 패널 안에 있다.
+ * 전송 실패는 x-mock-failure 헤더로 강제. 헤더 보조 액션은 "더보기" 패널 안에 있다 — 단, 매칭 완료는
+ * 데스크톱 비교 배너에 전용 버튼이 있어 더보기에서 빠지고, 매칭 거절은 데스크톱에 접근 경로가 없다(모바일 더보기 전용, 팀 결정).
  */
 
 const CUSTOMER_LIST = "/customer/chat";
@@ -26,6 +27,7 @@ const ROOM_1 = "e1000000-0000-4000-8000-000000000001";
 const SHARED_REPORT_ID = "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa";
 
 const DESKTOP = { width: 1280, height: 900 };
+const MOBILE = { width: 390, height: 844 };
 
 // 기본은 고객 흐름(USER) — 파트너 무회귀 테스트 2건은 각자 CERTIFICATED_ADJUSTER로 덮어쓴다.
 test.beforeEach(async ({ page }) => {
@@ -56,7 +58,7 @@ test("검색어를 입력하면 이름·마지막 메시지로 필터되고 없�
   page,
 }) => {
   // 대화 검색은 모바일 전용 UI(Figma 데스크톱 목록엔 검색창 없음)
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize(MOBILE);
   await page.goto(CUSTOMER_LIST);
 
   const search = page.getByRole("searchbox", { name: "대화 검색" });
@@ -181,19 +183,35 @@ test("이전 대화는 위로 스크롤하면 이어서 불러온다", async ({ 
   await expect(page.getByText("이전 답변 내용 1번입니다.")).toBeVisible();
 });
 
-test("비교 중 방 헤더 더보기에는 매칭 거절·매칭 완료 항목이 보인다", async ({ page }) => {
+test("데스크톱 비교 배너에는 매칭 완료 버튼이 있고 더보기엔 매칭 액션이 없다", async ({
+  page,
+}) => {
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
+  // 비교 배너(스레드 상단) 안의 전용 버튼 — 더보기를 거치지 않는다
+  await expect(
+    page.getByText(/명과 상담 중 · 마음에 들면 매칭 완료를 누르세요/),
+  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "매칭 완료" })).toBeVisible();
+
+  // 더보기엔 매칭 완료·매칭 거절 둘 다 없음(매칭 거절은 데스크톱 접근 경로 자체가 없다, 팀 결정)
   const menu = await openChatHeaderMenu(page);
-  await expect(menu.getByRole("menuitem", { name: "매칭 거절" })).toBeVisible();
+  await expect(menu.getByRole("menuitem", { name: "매칭 완료" })).toHaveCount(0);
+  await expect(menu.getByRole("menuitem", { name: "매칭 거절" })).toHaveCount(0);
+});
+
+test("모바일 헤더 더보기에는 매칭 완료·매칭 거절이 모두 있다", async ({ page }) => {
+  await page.setViewportSize(MOBILE);
+  await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
+
+  const menu = await openChatHeaderMenu(page);
   await expect(menu.getByRole("menuitem", { name: "매칭 완료" })).toBeVisible();
-  // 비교 배너(스레드 상단)
-  await expect(page.getByText(/명과 상담 중 · 마음에 들면/)).toBeVisible();
+  await expect(menu.getByRole("menuitem", { name: "매칭 거절" })).toBeVisible();
 });
 
 test("모바일에서도 헤더 더보기로 매칭을 완료할 수 있다", async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize(MOBILE);
 
   // 목록 상단 비교 배너(모바일 전용 문구)
   await page.goto(CUSTOMER_LIST);
@@ -218,7 +236,8 @@ test("매칭 완료를 확정하면 형제 상담이 종료되고 매칭 완료�
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
-  await clickChatHeaderAction(page, "매칭 완료");
+  // 데스크톱은 더보기가 아니라 비교 배너의 전용 버튼으로 매칭 완료를 연다
+  await page.getByRole("button", { name: "매칭 완료" }).click();
 
   // 확인 모달 — 함께 종료되는 상담 2건(정우성·윤지후)
   const dialog = page.getByRole("dialog");
@@ -244,12 +263,16 @@ test("매칭 거절을 누르면 그 방만 종료되고 입력이 차단된다"
 
   const input = page.getByRole("textbox", { name: "메시지 입력" });
   await expect(input).toBeEnabled();
+
+  // 매칭 거절은 데스크톱에 접근 경로가 없다(팀 결정) — 잠깐 모바일 뷰포트로 거절만 실행하고 되돌아온다.
+  await page.setViewportSize(MOBILE);
   await clickChatHeaderAction(page, "매칭 거절");
 
   // 거절도 확인 모달을 거친다(비가역 액션)
   const rejectDialog = page.getByRole("dialog");
   await expect(rejectDialog.getByText(/상담을 종료할까요\?/)).toBeVisible();
   await rejectDialog.getByRole("button", { name: "매칭 거절" }).click();
+  await page.setViewportSize(DESKTOP);
 
   // 거절한 방은 종료 — 입력·전송이 회색 비활성으로 잠김, 나머지 비교 유지
   await expect(input).toBeDisabled();
@@ -265,9 +288,13 @@ test("종료된 상담 그룹은 기본으로 접혀 있고 헤더를 누르면 
   await page.setViewportSize(DESKTOP);
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
 
-  // 김도현 방을 거절(확인 모달 경유)해 종료 그룹 생성
+  // 매칭 거절은 데스크톱에 접근 경로가 없다(팀 결정) — 잠깐 모바일 뷰포트로 거절만 실행하고 되돌아온다.
+  // 뒤이은 목록 접힘/펼침 검증은 데스크톱 분할 뷰가 필요하다.
+  await page.setViewportSize(MOBILE);
   await clickChatHeaderAction(page, "매칭 거절");
   await page.getByRole("dialog").getByRole("button", { name: "매칭 거절" }).click();
+  await page.setViewportSize(DESKTOP);
+
   const endedHeader = page.getByRole("button", { name: /종료된 상담/ });
   await expect(endedHeader).toBeVisible();
 
