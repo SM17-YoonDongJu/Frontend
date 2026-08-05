@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Chat } from "@/shared/ui/icons/Chat";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { NotificationBellMenu } from "@/shared/ui/NotificationBellMenu";
-import { useProfile } from "../_api/use-profile";
+import { useProfile } from "../_shared/api/use-profile";
 
 const NAV_ITEMS = [
   { label: "홈", href: "/partner", showCount: false },

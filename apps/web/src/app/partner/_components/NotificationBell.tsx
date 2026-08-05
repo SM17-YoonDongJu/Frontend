@@ -1,7 +1,7 @@
 "use client";
 
 import { Bell } from "@/shared/ui/icons/Bell";
-import { useProfile } from "../_api/use-profile";
+import { useProfile } from "../_shared/api/use-profile";
 
 export function NotificationBell() {
   const { data } = useProfile();
