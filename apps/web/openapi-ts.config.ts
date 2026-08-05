@@ -17,6 +17,8 @@ export default defineConfig({
       },
     },
     "@hey-api/sdk",
-    "@tanstack/react-query",
+    // @tanstack/react-query 플러그인은 끈다 — 생성 queryFn이 응답을 그대로 반환해
+    // 수동 zod 검증·변환이 빠지고, staleTime·캐시 갱신은 어차피 우리 훅이 갖는다.
+    // 응답 검증을 sdk validator로 옮긴 뒤 채택 여부를 다시 판단한다.
   ],
 });
