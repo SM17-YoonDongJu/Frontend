@@ -2,7 +2,8 @@ import { expect, test } from "@playwright/test";
 import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
- * 공개 마케팅 페이지 E2E — 서비스 소개(/about)·이용 방법(/guide)·문의하기(/contact) (공개 페이지 슬라이스).
+ * 공개 마케팅 페이지 E2E — 서비스 소개(/about)·이용 방법(/guide)·문의하기(/contact)·계정 삭제
+ *   안내(/account-deletion) (공개 페이지 슬라이스).
  *
  * 원칙(fe-e2e-strategy): 핵심 사용자 흐름(CUJ) happy-path만 — 랜딩 헤더에서 두 페이지로
  *   진입 → 콘텐츠 노출 → FAQ 디스클로저 동작 → CTA로 로그인 진입 → 로그인 전후 푸터에서 문의하기 진입.
@@ -14,6 +15,7 @@ const LANDING = "/";
 const ABOUT = "/about";
 const GUIDE = "/guide";
 const CONTACT = "/contact";
+const ACCOUNT_DELETION = "/account-deletion";
 
 test.describe("공개 페이지 진입 흐름", () => {
   test.use({ viewport: { width: 1280, height: 900 } });
@@ -115,6 +117,47 @@ test.describe("문의하기 진입 흐름", () => {
     await expect(async () => {
       await page.getByRole("contentinfo").getByRole("link", { name: "문의하기" }).click();
       await expect(page).toHaveURL(/\/contact$/);
+    }).toPass({ timeout: 10000 });
+  });
+});
+
+test.describe("계정 삭제 안내 페이지", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  // 스토어 심사자가 로그인 없이 여는 URL — 로그인 가드에 걸리면 제출 자체가 반려된다.
+  test("비로그인 상태로 /account-deletion에 접근하면 리다이렉트 없이 안내가 보인다", async ({
+    page
+  }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
+    await page.goto(ACCOUNT_DELETION);
+
+    await expect(page).toHaveURL(/\/account-deletion$/);
+    await expect(page.getByRole("heading", { name: "계정 삭제 안내" })).toBeVisible();
+    await expect(page.getByText("앱 이름: 바른보상")).toBeVisible();
+    await expect(page.getByText("개발자: 바른보상 팀")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "계정 삭제 요청 방법" })).toBeVisible();
+    await expect(page.getByText("주고받은 채팅 대화")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "보관되는 데이터와 보관 기간" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "teambrbosang@gmail.com" })).toBeVisible();
+  });
+
+  test("랜딩 푸터의 계정 삭제를 누르면 /account-deletion으로 이동한다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
+    await page.goto(LANDING);
+
+    await expect(async () => {
+      await page.getByRole("contentinfo").getByRole("link", { name: "계정 삭제" }).click();
+      await expect(page).toHaveURL(/\/account-deletion$/);
+    }).toPass({ timeout: 10000 });
+  });
+
+  test("문의하기의 계정 삭제 안내를 누르면 /account-deletion으로 이동한다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "unauthenticated" });
+    await page.goto(CONTACT);
+
+    await expect(async () => {
+      await page.getByRole("link", { name: "계정 삭제 안내" }).click();
+      await expect(page).toHaveURL(/\/account-deletion$/);
     }).toPass({ timeout: 10000 });
   });
 });
