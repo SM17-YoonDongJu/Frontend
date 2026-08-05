@@ -6,7 +6,7 @@ const LOGIN_REQUIRED_PATH = "/login-required";
 const CUSTOMER_HOME_PATH = "/customer/dashboard";
 const PARTNER_HOME_PATH = "/partner";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const accessToken = request.cookies.get(ACCESS_TOKEN_COOKIE)?.value;
   if (!accessToken) {
     const loginRequiredUrl = new URL(LOGIN_REQUIRED_PATH, request.url);
