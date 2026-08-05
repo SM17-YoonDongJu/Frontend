@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { RoomStatus } from "@/shared/api/chat/chat.schema";
 import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/ui/Avatar";
@@ -57,19 +57,25 @@ function ProfileLink({ href, children }: { href?: string; children: ReactNode })
 
 function MenuActionItem({
   action,
-  onSelect,
+  onSelect
 }: {
   action: ChatThreadHeaderMenuAction;
   onSelect: () => void;
 }) {
+  const danger = action.tone === "danger";
   const className = cn(
-    "flex w-full items-center gap-2.5 rounded-button px-3 py-2.5 text-left text-[0.8125rem] font-semibold transition hover:bg-paper-2",
-    action.tone === "danger" ? "text-terra" : "text-ink",
-    action.disabled && "pointer-events-none cursor-not-allowed opacity-[.42]",
+    "flex w-full items-center gap-3 px-3.5 py-3 text-left text-[0.8125rem] font-semibold transition",
+    danger ? "text-terra hover:bg-terra-soft/60" : "text-ink hover:bg-paper-2",
+    action.disabled && "pointer-events-none cursor-not-allowed opacity-[.42]"
   );
   const content = (
     <>
-      <span className="flex w-5 shrink-0 justify-center text-[0.9375rem]">
+      <span
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-full text-[0.9375rem]",
+          danger ? "bg-terra-soft text-terra" : "bg-paper-2 text-ink-2"
+        )}
+      >
         {action.icon}
       </span>
       {action.label}
@@ -114,92 +120,94 @@ export function ChatThreadHeader({
   badge,
   subtitle: subtitleOverride,
   profileHref,
-  menuActions,
+  menuActions
 }: ChatThreadHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const subtitle =
-    subtitleOverride ??
-    [caseNo, ROOM_STATUS_META[roomStatus].label].filter(Boolean).join(" · ");
+    subtitleOverride ?? [caseNo, ROOM_STATUS_META[roomStatus].label].filter(Boolean).join(" · ");
+
+  // 바깥 클릭·Esc로 닫기(진짜 오버레이 팝업이라 문서 흐름과 분리돼 있음).
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function handlePointerDown(event: PointerEvent) {
+      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuOpen]);
 
   return (
-    <>
-      <header className="flex items-center gap-2.5 border-b border-line-2 bg-paper px-4 py-3 md:bg-card md:px-5">
-        {onBack && (
-          <button
-            type="button"
-            onClick={onBack}
-            aria-label="목록으로"
-            className="-ml-1 flex size-8 items-center justify-center rounded-full text-[1.25rem] text-ink transition hover:bg-paper-2 md:hidden"
-          >
-            {/* Figma 663:3801 — 얇은 좌측 셰브런 */}
-            <ChevronRight className="rotate-180" />
-          </button>
-        )}
+    <header className="relative flex items-center gap-2.5 border-b border-line-2 bg-paper px-4 py-3 md:bg-card md:px-5">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="목록으로"
+          className="-ml-1 flex size-8 items-center justify-center rounded-full text-[1.25rem] text-ink transition hover:bg-paper-2 md:hidden"
+        >
+          {/* Figma 663:3801 — 얇은 좌측 셰브런 */}
+          <ChevronRight className="rotate-180" />
+        </button>
+      )}
 
-        <ProfileLink href={profileHref}>
-          <Avatar name={name} size="sm" />
+      <ProfileLink href={profileHref}>
+        <Avatar name={name} size="sm" />
 
-          <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-1.5 truncate text-[0.85rem] font-bold text-ink">
-              {name}
-              {/* Figma 95:4611 — 이름 옆 인증 마크 */}
-              <ShieldCheck className="shrink-0 text-[0.8125rem] text-ink-3" />
-              {badge}
-            </p>
-            {/* Figma 모바일(663:3796) 헤더는 이름만 — 사건번호·상태는 데스크톱(95:4571) 전용 */}
-            <p className="hidden truncate text-[0.6875rem] text-ink-3 md:block">
-              {subtitle}
-            </p>
-            <span className="sr-only md:hidden">{subtitle}</span>
-          </div>
-        </ProfileLink>
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 truncate text-[0.85rem] font-bold text-ink">
+            {name}
+            {/* Figma 95:4611 — 이름 옆 인증 마크 */}
+            <ShieldCheck className="shrink-0 text-[0.8125rem] text-ink-3" />
+            {badge}
+          </p>
+          {/* Figma 모바일(663:3796) 헤더는 이름만 — 사건번호·상태는 데스크톱(95:4571) 전용 */}
+          <p className="hidden truncate text-[0.6875rem] text-ink-3 md:block">{subtitle}</p>
+          <span className="sr-only md:hidden">{subtitle}</span>
+        </div>
+      </ProfileLink>
 
-        {menuActions.length > 0 && (
+      {menuActions.length > 0 && (
+        <div ref={menuRef} className="relative shrink-0">
           <button
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
             aria-expanded={menuOpen}
             aria-controls={MENU_ID}
-            className="flex shrink-0 items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-1.5 text-[0.8125rem] font-semibold text-ink-2 transition hover:bg-paper-2"
+            className="flex items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-1.5 text-[0.8125rem] font-semibold text-ink-2 transition hover:bg-paper-2"
           >
             더보기
             <ChevronDown
-              className={cn(
-                "text-[0.9375rem] transition-transform",
-                menuOpen && "rotate-180",
-              )}
+              className={cn("text-[0.9375rem] transition-transform", menuOpen && "rotate-180")}
             />
           </button>
-        )}
-      </header>
 
-      {/* 오버레이가 아니라 문서 흐름에 끼워 넣어 대화를 아래로 민다(grid-rows 0fr↔1fr 확장) */}
-      <div
-        inert={!menuOpen}
-        className={cn(
-          "grid shrink-0",
-          menuOpen
-            ? "grid-rows-[1fr] transition-[grid-template-rows] duration-200"
-            : // 접힐 땐 높이 애니메이션이 끝난 뒤 visibility를 끈다(클릭·포커스 차단)
-              "invisible grid-rows-[0fr] [transition:grid-template-rows_200ms_ease,visibility_0s_200ms]",
-        )}
-      >
-        <div className="overflow-hidden">
-          <div
-            id={MENU_ID}
-            role="menu"
-            className="flex flex-col border-b border-line-2 bg-card p-2 md:px-3"
-          >
-            {menuActions.map((action) => (
-              <MenuActionItem
-                key={action.key}
-                action={action}
-                onSelect={() => setMenuOpen(false)}
-              />
-            ))}
-          </div>
+          {menuOpen && (
+            <div
+              id={MENU_ID}
+              role="menu"
+              className="absolute top-[calc(100%+0.5rem)] right-0 z-20 w-56 overflow-hidden rounded-card bg-card shadow-popover divide-y divide-line-2"
+            >
+              {menuActions.map((action) => (
+                <MenuActionItem
+                  key={action.key}
+                  action={action}
+                  onSelect={() => setMenuOpen(false)}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      </div>
-    </>
+      )}
+    </header>
   );
 }
