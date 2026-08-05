@@ -124,6 +124,7 @@ items[]{ `paymentId` · `amount`(int) · `type`(`SUBSCRIPTION`) · `status`(`PAI
 
 - **조회 훅:** `use<Entity><List|Detail>` — `useReportList` · `useReportDetail` · `useMe` · `useChatList` · `usePaymentHistory` · `useProfile`(사정사 본인 프로필=`GET /adjusters/me/profile`)
 - **뮤테이션 훅:** `use<Verb><Entity>` — `useCreateReport`(신청) · `useReviewReport`(검수=PATCH) · `useCreateMatch`(상담신청) · `useCreateSubscription` · `useApplyAdjuster`(자격신청) · `useUpdateMe` · `useDeleteMe`(탈퇴) · `useRegister` · `useLogout` · `useUpdateProfile`(사정사 프로필 수정=PATCH) · `useUploadAvatar`(`POST /uploads`)
+- **화면 오케스트레이션 훅:** `use<Screen>` — 세그먼트 `_hooks/`에 두고 `{ state, derived, actions }` 반환(선례 `useReviewDraft`). 뷰는 파생값을 재계산하지 않는다 — `useDocumentUpload`(서류 제출 스텝 업로드) · `useCustomerChatThread`(고객 채팅 스레드) · `useSignupForm`(가입 동의·본인확인 폼)
 - **API 함수:** `<verb><Entity>` — `getReport` · `getReportList` · `createReport` · `reviewReport` · `createMatch` · `getMe` · `getProfile` · `updateProfile` · `uploadAvatar` …
 - **쿼리키 factory**(`@lukemorales/query-key-factory`): 도메인별 `createQueryKeys('<domain>', …)` → `report.list(params)` · `report.detail(reportId)` · `user.me` · `chat.list` · `payment.history` · `adjuster.meProfile()`(사정사 본인 프로필)
 
