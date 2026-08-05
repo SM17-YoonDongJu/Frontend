@@ -1,19 +1,16 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { send as sendChatMessageRequest } from "@/shared/api/generated/sdk.gen";
 import { sendChatMessageResponseSchema } from "./chat.schema";
 import type { SendChatMessageBody, SendChatMessageResponse } from "./chat.schema";
 
-export function sendChatMessage(
+export async function sendChatMessage(
   chatRoomId: string,
   body: SendChatMessageBody,
 ): Promise<SendChatMessageResponse> {
-  return fetchJson(
-    `${API_BASE_URL}/chats/${chatRoomId}/messages`,
-    sendChatMessageResponseSchema,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    },
-  );
+  const { data } = await sendChatMessageRequest({
+    throwOnError: true,
+    path: { chatRoomId },
+    body,
+  });
+  return sendChatMessageResponseSchema.parse(data);
 }
