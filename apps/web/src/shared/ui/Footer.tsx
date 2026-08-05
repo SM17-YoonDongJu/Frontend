@@ -19,7 +19,8 @@ const FOOTER_COLUMNS = [
     heading: "정책",
     links: [
       { label: "이용약관", href: "/terms" },
-      { label: "개인정보처리방침", href: "/privacy" }
+      { label: "개인정보처리방침", href: "/privacy" },
+      { label: "계정 삭제", href: "/account-deletion" }
     ]
   }
 ] as const;
