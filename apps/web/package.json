@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "generate:api": "openapi-ts -f openapi-ts.config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
@@ -34,6 +35,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@hey-api/client-fetch": "^0.13.1",
+    "@hey-api/openapi-ts": "^0.99.0",
     "@insurance/config": "workspace:*",
     "@playwright/test": "^1.61.0",
     "@storybook/addon-a11y": "10.4.4",

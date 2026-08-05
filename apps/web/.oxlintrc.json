@@ -28,6 +28,7 @@
     "dist",
     ".next",
     "storybook-static",
-    "public/mockServiceWorker.js"
+    "public/mockServiceWorker.js",
+    "src/shared/api/generated"
   ]
 }
