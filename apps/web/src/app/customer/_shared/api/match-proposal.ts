@@ -1,6 +1,6 @@
 import { z } from "zod";
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { decide } from "@/shared/api/generated/sdk.gen";
 import { matchStatusSchema } from "@/shared/api/chat/chat.schema";
 
 // PATCH /reports/{reportId}/proposals/{proposalId} {status} — 채택·거절 통합.
@@ -15,18 +15,15 @@ const matchProposalResultSchema = z.object({
 
 export type MatchProposalResult = z.infer<typeof matchProposalResultSchema>;
 
-export function matchProposal(
+export async function matchProposal(
   reportId: string,
   proposalId: string,
   status: "ACCEPTED" | "REJECTED",
 ) {
-  return fetchJson(
-    `${API_BASE_URL}/reports/${reportId}/proposals/${proposalId}`,
-    matchProposalResultSchema,
-    {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    },
-  );
+  const { data } = await decide({
+    throwOnError: true,
+    path: { reportId, proposalId },
+    body: { status },
+  });
+  return matchProposalResultSchema.parse(data);
 }
