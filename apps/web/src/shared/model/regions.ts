@@ -141,10 +141,6 @@ export const SIDO_LIST: readonly Sido[] = [
 
 const SIDO_BY_NAME = new Map(SIDO_LIST.map((sido) => [sido.name, sido]));
 
-export function findSido(name: string): Sido | undefined {
-  return SIDO_BY_NAME.get(name);
-}
-
 /** 트리거 버튼·칩 표기 라벨. "서울 강남구" / "서울 전체". */
 export function formatRegionLabel({ sido, district }: RegionValue): string {
   const shortName = SIDO_BY_NAME.get(sido)?.shortName ?? sido;

@@ -141,12 +141,10 @@ export const readChatResponseSchema = z.object({
 
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
 export type MatchStatus = z.infer<typeof matchStatusSchema>;
-export type ChatCounterpart = z.infer<typeof chatCounterpartSchema>;
 export type ChatRoom = z.infer<typeof chatRoomSchema>;
 export type ChatList = z.infer<typeof chatListSchema>;
 export type ChatAttachment = z.infer<typeof chatAttachmentSchema>;
 export type ChatMessageAttachment = z.infer<typeof chatMessageAttachmentSchema>;
-export type MessageType = z.infer<typeof messageTypeSchema>;
 export type ChatMessage = z.infer<typeof chatMessageSchema>;
 export type ChatMessages = z.infer<typeof chatMessagesSchema>;
 export type SendChatMessageBody = z.infer<typeof sendChatMessageBodySchema>;

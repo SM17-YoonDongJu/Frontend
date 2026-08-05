@@ -12,14 +12,6 @@ export const REPORT_STATUS_META: Record<ReviewReportStatus, { label: string; ton
   NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral" },
 };
 
-/** 쟁점 검수 방향 표시 라벨. 미검수는 null(라벨 없음). */
-export const ISSUE_STATUS_LABEL: Record<IssueReviewStatus, string> = {
-  ACCEPTED: "인정",
-  MODIFIED: "수정",
-  EXCLUDED: "제외",
-  ADDED: "추가",
-};
-
 /** 인정/수정/제외 토글 옵션 (ADDED는 신규추가 폼 전용, 미검수는 null). */
 export const ISSUE_STATUS_OPTIONS: { value: Exclude<IssueReviewStatus, "ADDED">; label: string }[] = [
   { value: "ACCEPTED", label: "인정" },

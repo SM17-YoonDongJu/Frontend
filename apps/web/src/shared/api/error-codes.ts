@@ -31,7 +31,6 @@ export const ERROR_CODES = {
   SERVICE_UNAVAILABLE: "SERVICE_UNAVAILABLE",
 } as const;
 
-export type ErrorCode = (typeof ERROR_CODES)[keyof typeof ERROR_CODES];
 
 /** 로그인 안내 화면(/login-required)으로 보내야 하는 인증 에러. EXPIRED_TOKEN은 재발급 루트가 따로 처리. */
 const AUTH_REDIRECT_CODES: ReadonlySet<string> = new Set([

@@ -48,7 +48,6 @@ export const dashboardSchema = z.object({
 export type Dashboard = z.infer<typeof dashboardSchema>;
 export type DashboardActiveReport = z.infer<typeof dashboardActiveReportSchema>;
 export type DashboardProposalSummary = z.infer<typeof dashboardProposalSummarySchema>;
-export type DashboardProposalItem = z.infer<typeof dashboardProposalItemSchema>;
 
 type _DashboardDriftCheck = ExpectDriftCheck<
   AssertFieldsExistInSpec<Omit<Dashboard, "activeReport" | "proposalSummary">, UserDashboardResponse>

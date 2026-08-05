@@ -34,7 +34,6 @@ export const registerResponseSchema = z.object({
 
 export type Gender = z.infer<typeof genderSchema>;
 export type RegisterBody = z.infer<typeof registerBodySchema>;
-export type RegisterRole = z.infer<typeof registerRoleSchema>;
 export type RegisterResponse = z.infer<typeof registerResponseSchema>;
 
 // nickname은 register.ts 호출부에서 명세 필드 name으로 매핑해 전송(드리프트 정정, 2026-08-05).

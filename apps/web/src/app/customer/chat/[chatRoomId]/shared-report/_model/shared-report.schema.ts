@@ -70,12 +70,10 @@ export const sharedReportSchema = z.object({
 
 export type SharedReport = z.infer<typeof sharedReportSchema>;
 export type SharedReportIssue = z.infer<typeof sharedReportIssueSchema>;
-export type SharedReportAdjuster = z.infer<typeof sharedReportAdjusterSchema>;
 export type SharedReportEstimate = z.infer<typeof sharedReportEstimateSchema>;
 export type SharedIssueReviewStatus = z.infer<
   typeof sharedIssueReviewStatusSchema
 >;
-export type SharedReviewStatus = z.infer<typeof sharedReviewStatusSchema>;
 
 // adjuster는 명세 Adjuster 타입이 {nickname,career}뿐인데 우리는 adjusterId·name·specialties도
 // 쓴다(실제 응답과 다른 범용 타입 재사용 추정) — 얕은 대조에서 제외, 별도 확인 필요로 남겨둔다.

@@ -27,7 +27,6 @@ export type SubmittedDocument = z.infer<typeof submittedDocumentSchema>;
 
 // 신청/심사 상태 — 서버 enum(admin accept/reject와 동일)
 export const applicationStatusSchema = z.enum(["PENDING", "APPROVED", "REJECTED"]);
-export type ApplicationStatus = z.infer<typeof applicationStatusSchema>;
 
 // ── 신청 body ──
 // 생성 스키마 베이스 + 우리 제약(licenseImageUrl/registrationImageUrl url() 형식, affiliation enum,
@@ -40,7 +39,6 @@ export const adjusterApplicationBodySchema = CreateAdjusterApplicationRequestSch
   affiliation: affiliationSchema,
   registrationImageUrl: z.string().url(),
 });
-export type AdjusterApplicationBody = z.infer<typeof adjusterApplicationBodySchema>;
 
 // 자격증 번호와 사본 중 최소 하나 필수(명세 명시) → MISSING_REQUIRED_FIELD 대응.
 const licenseEitherRequired = (
@@ -88,18 +86,3 @@ type _AdjusterApplicationStatusDriftCheck = ExpectDriftCheck<
 type _AdjusterApplicationResponseDriftCheck = ExpectDriftCheck<
   AssertFieldsExistInSpec<AdjusterApplicationResponse, GenCreateAdjusterApplicationResponse>
 >;
-
-// ── FE 파생 view 상태 ──
-// 서버 status(PENDING|APPROVED|REJECTED) + 404(신청 이력 없음 → NOT_APPLIED)를 합친 화면 분기용 값.
-export type VerificationView =
-  | "NOT_APPLIED"
-  | "PENDING"
-  | "REJECTED"
-  | "APPROVED";
-
-// 404는 조회 훅에서 null로 흡수 → null이면 NOT_APPLIED, 그 외 서버 status 그대로.
-export function deriveVerificationView(
-  data: AdjusterApplicationStatus | null,
-): VerificationView {
-  return data === null ? "NOT_APPLIED" : data.status;
-}

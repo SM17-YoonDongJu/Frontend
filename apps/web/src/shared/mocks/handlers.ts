@@ -1022,7 +1022,6 @@ const DASHBOARD_MOCK = {
 };
 
 export const handlers = [
-  http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
   // 문의 폼 제출 (#220) — 백엔드 확정 전 임시 목(요청: Notion "POST /contact-inquiries").
   //   성공 200 + { received: true }. 이메일 형식 오류·문의 내용 길이 미달 등은 400 VALIDATION_ERROR.

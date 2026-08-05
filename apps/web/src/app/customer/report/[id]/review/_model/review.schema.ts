@@ -13,4 +13,3 @@ export const reviewResultSchema = z.object({
   createdAt: z.string(),
 });
 
-export type ReviewResult = z.infer<typeof reviewResultSchema>;
