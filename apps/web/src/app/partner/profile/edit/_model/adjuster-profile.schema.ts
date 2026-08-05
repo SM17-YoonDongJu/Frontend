@@ -1,30 +1,12 @@
 import { z } from "zod";
 import { HEADLINE_MAX, INTRODUCTION_MAX, MAX_SPECIALTIES } from "./specialty-options";
+import type { UpdateAdjusterProfileRequest } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
+// 응답 스키마는 홈 헤더와 공유 — @/app/partner/_shared/model/adjuster-profile.schema
 export const careerItemSchema = z.object({
   period: z.string().min(1),
   company: z.string().min(1),
-});
-
-// 실응답은 미작성 프로필에서 기간·회사가 null로 올 수 있음(폼 검증은 careerItemSchema 유지).
-export const careerItemResponseSchema = z.object({
-  period: z.string().nullable(),
-  company: z.string().nullable(),
-});
-
-export const adjusterProfileSchema = z.object({
-  adjusterId: z.string().uuid(),
-  nickname: z.string(),
-  headline: z.string().nullable(),
-  introduction: z.string().nullable(),
-  career: z.number().int().nonnegative().nullable(),
-  activityRegion: z.string(),
-  avatarUrl: z.string().url().nullable(),
-  specialties: z.array(z.string()),
-  careers: z.array(careerItemResponseSchema),
-  // 실 API 미정 필드(MSW 선제공) — 명세 확정 시 필수로 승격
-  registrationNo: z.string().nullish(),
-  updatedAt: z.string().nullable(),
 });
 
 export const profileFormSchema = z.object({
@@ -52,3 +34,7 @@ export const profileFormSchema = z.object({
 });
 
 export const updateProfileBodySchema = profileFormSchema.partial();
+
+type _UpdateProfileBodyDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof updateProfileBodySchema>, UpdateAdjusterProfileRequest>
+>;

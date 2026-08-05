@@ -1,13 +1,13 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { getMyNotifications } from "@/shared/api/generated/sdk.gen";
 import {
   notificationListSchema,
   type NotificationList,
 } from "../model/notification.schema";
 
-export function getNotificationList(): Promise<NotificationList> {
-  return fetchJson(
-    `${API_BASE_URL}/users/me/notifications`,
-    notificationListSchema,
-  );
+export async function getNotificationList(): Promise<NotificationList> {
+  const { data } = await getMyNotifications({
+    throwOnError: true,
+  });
+  return notificationListSchema.parse(data);
 }

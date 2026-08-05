@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { HoldResponse, PendingReviewSummaryResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 // 백엔드 PendingReviewSummaryResponse 기준(4필드 전부 long, 항상 present).
 export const reviewSummarySchema = z.object({
@@ -26,3 +28,10 @@ export const holdReviewSchema = z.object({
 
 export type HoldReason = z.infer<typeof holdReasonSchema>;
 export type HoldReview = z.infer<typeof holdReviewSchema>;
+
+type _ReviewSummaryDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof reviewSummarySchema>, PendingReviewSummaryResponse>
+>;
+type _HoldReviewDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<HoldReview, HoldResponse>
+>;

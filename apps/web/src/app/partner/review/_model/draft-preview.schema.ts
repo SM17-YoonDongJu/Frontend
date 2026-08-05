@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { CustomerReportDetailResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /**
  * PC 프리뷰 패널용 AI 초안 요약. 출처: API 명세 GET /reports/{reportId}(백엔드 CustomerReportDetailResponse)의
@@ -24,3 +26,8 @@ export const draftPreviewSchema = rawDraftPreviewSchema.transform((data) => ({
 }));
 
 export type DraftPreview = z.infer<typeof draftPreviewSchema>;
+
+// issue→issues 별칭은 여기서만 일어나므로 원본 키(issue) 기준으로 대조한다.
+type _DraftPreviewDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.input<typeof rawDraftPreviewSchema>, CustomerReportDetailResponse>
+>;

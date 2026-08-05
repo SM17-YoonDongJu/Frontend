@@ -11,7 +11,7 @@ import { setAuthCookie } from "./_auth-cookie-helpers";
  * 401 응답 횟수도 MSW가 localStorage "mock:expiredResponseCount"에 누적한다(#224) —
  * page.on("response")는 WebKit에서 서비스워커 경유 응답 이벤트를 흘리지 않아 관측 채널로 못 쓴다.
  * 동시 401은 대시보드가 프로덕션 경로 그대로 만든다 — 진입 시 useMe(/users/me)와 useReportList(/reports)가
- * 나란히 나가고 둘 다 401을 받으므로, fetchJson 두 곳이 같은 재발급 promise를 공유하는지 검증된다.
+ * 나란히 나가고 둘 다 401을 받으므로, 두 요청이 같은 재발급 promise를 공유하는지 검증된다.
  * 재발급 응답 형식·에러코드 enum 검증은 zod·api-spec 훅에 위임(미테스트).
  */
 

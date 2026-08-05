@@ -1022,7 +1022,6 @@ const DASHBOARD_MOCK = {
 };
 
 export const handlers = [
-  http.get("/api/ping", () => HttpResponse.json({ message: "pong (mocked)" })),
 
   // 문의 폼 제출 (#220) — 백엔드 확정 전 임시 목(요청: Notion "POST /contact-inquiries").
   //   성공 200 + { received: true }. 이메일 형식 오류·문의 내용 길이 미달 등은 400 VALIDATION_ERROR.
@@ -1297,7 +1296,7 @@ export const handlers = [
       );
     }
 
-    // fetch-json이 요청 body를 snake로 변환 → { content, attachments: [{ attachment_key, name, content_type, size }] }
+    // client가 요청 body를 snake로 변환 → { content, attachments: [{ attachment_key, name, content_type, size }] }
     const body = (await request.json().catch(() => ({}))) as {
       content?: string;
       attachments?: {
@@ -1784,7 +1783,8 @@ export const handlers = [
     const body = (await request.json().catch(() => ({}))) as {
       provider?: string;
       social_token?: string;
-      nickname?: string;
+      // CONTRACT(드리프트, 2026-08-05 실측): 명세 요청 필드는 name — 응답은 여전히 nickname.
+      name?: string;
       user_type?: string;
       gender?: string;
       birth_date?: string;
@@ -1816,14 +1816,14 @@ export const handlers = [
       );
     }
 
-    if (!body.nickname || body.nickname.length < 1 || body.nickname.length > 30) {
+    if (!body.name || body.name.length < 1 || body.name.length > 30) {
       return HttpResponse.json(
         { status: "400", code: "VALIDATION_ERROR", message: "이름은 1~30자로 입력해 주세요." },
         { status: 400 },
       );
     }
 
-    if (body.nickname === "중복닉네임") {
+    if (body.name === "중복닉네임") {
       return HttpResponse.json(
         { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 사용 중인 닉네임이에요." },
         { status: 409 },
@@ -1837,7 +1837,7 @@ export const handlers = [
         // 응답 역할은 명세대로 role(요청 user_type 매핑: adjuster→UNCERTIFICATED_ADJUSTER, 그 외→USER)
         data: camelToSnakeDeep({
           userId: crypto.randomUUID(),
-          nickname: body.nickname,
+          nickname: body.name,
           role: body.user_type === "adjuster" ? "UNCERTIFICATED_ADJUSTER" : "USER",
         }),
       },
@@ -2219,7 +2219,7 @@ export const handlers = [
       );
     }
 
-    // 요청 body는 이미 snake_case(fetch-json 변환). 명세 허용 필드만 머지.
+    // 요청 body는 이미 snake_case(client 변환). 명세 허용 필드만 머지.
     for (const key of ["phone_number", "region", "avatar_url"] as const) {
       if (key in body) MOCK_ME[key] = body[key];
     }
@@ -2521,7 +2521,10 @@ export const handlers = [
     const fileName = file?.name ?? decodeURIComponent(request.headers.get("x-mock-file-name") ?? "");
     const contentType = file?.type || (request.headers.get("x-mock-file-type") ?? "");
     const size = file?.size ?? Number(request.headers.get("x-mock-file-size") ?? NaN);
-    const purpose = (formData?.get("purpose") ?? request.headers.get("x-mock-upload-purpose")) as string | null;
+    // 명세상 purpose는 쿼리 파라미터. 구 form 파트·목 전용 헤더는 폴백으로만 남긴다.
+    const purpose = (new URL(request.url).searchParams.get("purpose") ??
+      formData?.get("purpose") ??
+      request.headers.get("x-mock-upload-purpose")) as string | null;
 
     if (!fileName || !purpose) {
       return HttpResponse.json(
@@ -2569,7 +2572,7 @@ export const handlers = [
   // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
   http.post(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(600);
-    // 요청 body는 fetchJson이 camel→snake 변환해 보냄 — 명세 필드명 그대로 읽는다.
+    // 요청 body는 client가 camel→snake 변환해 보냄 — 명세 필드명 그대로 읽는다.
     const body = (await request.json()) as {
       accident_type?: string;
       documents?: Array<{
@@ -3437,6 +3440,13 @@ export const handlers = [
       typeof params.reportId === "string"
         ? params.reportId
         : crypto.randomUUID();
+
+    // E2E 관측 채널: SW 경유 요청은 Playwright request.postData() 캡처가 불안정해
+    // (client-fetch가 Request 객체 단일인자로 fetch하는 경로) localStorage로 우회(#reissueCount와 동일 패턴).
+    if (typeof localStorage !== "undefined") {
+      const receivedBody = await request.clone().json().catch(() => null);
+      localStorage.setItem("mock:lastReviewSubmitBody", JSON.stringify(receivedBody));
+    }
 
     // status는 서버가 파생(클라이언트 미전송). 작업본 최초 반영 시 review_status=SENT.
     return HttpResponse.json({

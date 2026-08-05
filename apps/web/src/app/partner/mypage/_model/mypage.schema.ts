@@ -4,6 +4,8 @@ import { z } from "zod";
 
 // userRoleSchema는 src/shared/model로 승격(이슈 #105) — 여기선 import 후 재노출.
 import { userRoleSchema } from "@/shared/model/user-role";
+import type { MonthlyActivity, Profile } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 export { userRoleSchema };
 
 // 백엔드 AdjusterMyPageResponse 기준 — headline·career·licenseNo는 미기입 시 null,
@@ -43,3 +45,12 @@ export const mypageSchema = z.object({
   monthlyActivity: mypageMonthlyActivitySchema,
   certification: mypageCertificationSchema,
 });
+
+// stats·certification은 명세상 Stats·Certification 컴포넌트가 다른 엔드포인트(검수 이력·프로필)와
+// 이름만 재사용되고 실제 필드가 달라(스펙 $ref 재사용 결함 추정) 대조 불가 — profile·monthlyActivity만 확인.
+type _MypageProfileDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof mypageProfileSchema>, Profile>
+>;
+type _MypageMonthlyActivityDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof mypageMonthlyActivitySchema>, MonthlyActivity>
+>;

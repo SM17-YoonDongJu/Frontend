@@ -1,6 +1,6 @@
 "use client";
 
-import { useProfile } from "../_api/use-profile";
+import { useProfile } from "../_shared/api/use-profile";
 
 export function DashboardGreeting() {
   const { data, isPending } = useProfile();

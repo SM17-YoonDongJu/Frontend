@@ -3,7 +3,7 @@
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { adjusterKeys, type AdjusterListFilter } from "@/shared/api/query-keys";
 import { GC_TIME_DEFAULT, STALE_TIME_LIST } from "@/shared/api/query-constants";
-import { getAdjusters } from "./get-adjusters";
+import { getAdjusters } from "@/app/customer/_shared/api/get-adjusters";
 
 export function useAdjusters(filter: AdjusterListFilter = {}) {
   return useSuspenseInfiniteQuery({

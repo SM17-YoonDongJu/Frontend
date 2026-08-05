@@ -22,3 +22,5 @@ export const insuranceListSchema = z.object({
 
 export type InsuranceItem = z.infer<typeof insuranceItemSchema>;
 export type InsuranceList = z.infer<typeof insuranceListSchema>;
+
+// list 배열 원소는 명세가 범용 Item 스키마로 나와 있어 항목별 대조는 생략(adjuster-list와 동일 사유).

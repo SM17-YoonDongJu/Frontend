@@ -1,9 +1,6 @@
-import { z } from "zod";
-import { API_BASE_URL } from "@/shared/api/config";
+import "@/shared/api/client";
+import { withdraw as withdrawRequest } from "@/shared/api/generated/sdk.gen";
 import { ERROR_CODES, getErrorCode } from "@/shared/api/error-codes";
-import { fetchJson } from "@/shared/api/fetch-json";
-
-const withdrawSchema = z.null().nullish();
 
 /**
  * 회원 탈퇴 — 인증은 HttpOnly 쿠키 기반이라 요청 바디 없음, 응답 data는 null.
@@ -12,9 +9,9 @@ const withdrawSchema = z.null().nullish();
  */
 export async function withdraw(): Promise<void> {
   try {
-    await fetchJson(`${API_BASE_URL}/users/me`, withdrawSchema, {
-      method: "DELETE",
-      skipAuthRedirect: true,
+    await withdrawRequest({
+      throwOnError: true,
+      meta: { skipAuthRedirect: true },
     });
   } catch (error) {
     if (getErrorCode(error) !== ERROR_CODES.USER_NOT_FOUND) throw error;

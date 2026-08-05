@@ -90,9 +90,8 @@ export interface AdjusterListFilter {
 }
 
 export const adjusterKeys = createQueryKeys("adjuster", {
+  // 편집 화면·홈 헤더가 같은 응답(GET /adjusters/me/profile)을 공유 — 캐시 한 벌
   meProfile: () => ["me", "profile"],
-  // 헤더/인사말용 축약 프로필 — meProfile(전체 프로필)과 응답 shape가 달라 키 분리
-  meProfileSummary: () => ["me", "profile", "summary"],
   home: (inProgressLimit?: number) => [{ inProgressLimit: inProgressLimit ?? 5 }],
   // 홈 추천 손해사정사(이슈 #142) — 평점순 첫 페이지. 목록 화면 list(무한 조회)와 캐시 분리.
   recommended: null,

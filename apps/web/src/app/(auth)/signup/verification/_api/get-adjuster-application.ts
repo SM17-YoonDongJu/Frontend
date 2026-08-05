@@ -1,5 +1,5 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { getMyApplication as getMyApplicationRequest } from "@/shared/api/generated/sdk.gen";
 import {
   adjusterApplicationStatusSchema,
   type AdjusterApplicationStatus,
@@ -10,10 +10,8 @@ import {
 // 401 LOGIN_REQUIRED·5xx는 그대로 throw(훅에서 isError).
 export async function getAdjusterApplication(): Promise<AdjusterApplicationStatus | null> {
   try {
-    return await fetchJson(
-      `${API_BASE_URL}/users/adjuster-applications/me`,
-      adjusterApplicationStatusSchema,
-    );
+    const { data } = await getMyApplicationRequest({ throwOnError: true });
+    return adjusterApplicationStatusSchema.parse(data);
   } catch (error) {
     if (error instanceof Error && error.name === "POST_NOT_FOUND") return null;
     throw error;

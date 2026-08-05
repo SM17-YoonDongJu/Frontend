@@ -1,8 +1,9 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { listMyRooms as getChatListRequest } from "@/shared/api/generated/sdk.gen";
 import { chatListSchema } from "./chat.schema";
 import type { ChatList } from "./chat.schema";
 
-export function getChatList(): Promise<ChatList> {
-  return fetchJson(`${API_BASE_URL}/chats`, chatListSchema);
+export async function getChatList(): Promise<ChatList> {
+  const { data } = await getChatListRequest({ throwOnError: true });
+  return chatListSchema.parse(data);
 }

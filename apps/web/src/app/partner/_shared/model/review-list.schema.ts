@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { PendingReviewListResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /** 검수 대기 목록. 출처: API 명세 GET /reports/pending-review. 필드명 명세 그대로. */
 
@@ -46,3 +48,8 @@ export const reviewListSchema = z.object({
   pagination: paginationSchema,
   statusCounts: reviewStatusCountsSchema.optional(),
 });
+
+// statusCounts는 여전히 명세 미포함(백엔드 협의 중), list 원소는 범용 Item 스키마라 항목별 대조 생략.
+type _ReviewListDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<z.infer<typeof reviewListSchema>, "list" | "statusCounts">, PendingReviewListResponse>
+>;

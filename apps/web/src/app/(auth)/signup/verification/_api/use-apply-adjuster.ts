@@ -5,7 +5,7 @@ import { userKeys } from "@/shared/api/query-keys";
 import { applyAdjuster } from "./apply-adjuster";
 
 // 자격 신청 흐름에서 발생 가능한 api-spec 에러코드.
-// fetchJson이 실패 봉투의 `code`를 Error.name에 담아 throw → 아래 헬퍼로 분기.
+// client가 실패 응답 래퍼의 `code`를 Error.name에 담아 throw → 아래 헬퍼로 분기.
 export type ApplyAdjusterErrorCode =
   | "MISSING_REQUIRED_FIELD"
   | "VALIDATION_ERROR"

@@ -1,4 +1,6 @@
 import { z } from "zod";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
+import type { Item, NotificationListResponse } from "@/shared/api/generated/types.gen";
 
 export const notificationTypeSchema = z.enum([
   // 고객계
@@ -37,3 +39,8 @@ export const notificationListSchema = z.object({
 export type NotificationType = z.infer<typeof notificationTypeSchema>;
 export type Notification = z.infer<typeof notificationSchema>;
 export type NotificationList = z.infer<typeof notificationListSchema>;
+
+type _NotificationDriftCheck = ExpectDriftCheck<AssertFieldsExistInSpec<Notification, Item>>;
+type _NotificationListDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<NotificationList, "items">, NotificationListResponse>
+>;

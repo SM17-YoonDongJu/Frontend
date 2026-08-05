@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { Button } from "@/shared/ui/Button";
 import { Check } from "@/shared/ui/icons/Check";
-import { useProfile } from "../_api/use-profile";
+import { useProfileSuspense } from "@/app/partner/_shared/api/use-profile";
+import type { AdjusterProfile } from "@/app/partner/_shared/model/adjuster-profile.schema";
 import { useUpdateProfile } from "../_api/use-update-profile";
 import { profileFormSchema, updateProfileBodySchema } from "../_model/adjuster-profile.schema";
-import type { AdjusterProfile, ProfileFormValues, UpdateProfileBody } from "../_model/types";
+import type { ProfileFormValues, UpdateProfileBody } from "../_model/types";
 import { BasicInfoSection } from "./BasicInfoSection";
 import { CareerSection } from "./CareerSection";
 import { PreviewCard } from "./PreviewCard";
@@ -43,7 +44,7 @@ function pickDirty(
 }
 
 export function ProfileEditView() {
-  const { data: profile } = useProfile();
+  const { data: profile } = useProfileSuspense();
   const updateProfile = useUpdateProfile();
   const [isUploading, setIsUploading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);

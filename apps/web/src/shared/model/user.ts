@@ -1,5 +1,8 @@
 import { z } from "zod";
 import { userRoleSchema } from "./user-role";
+import { UserUpdateRequestSchema } from "@/shared/api/generated/zod.gen";
+import type { UserMeResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 // CONTRACT(naming-dictionary §7-4): GET /users/me 예시에 userType 한글 혼합·검증여부 혼재.
 // FE는 영문 enum 기준. 검증여부 필드는 고객 대시보드 미사용.
@@ -49,16 +52,16 @@ function deriveUserType(role: z.infer<typeof userRoleSchema>): UserType {
 }
 
 // PATCH /users/me 확정 body(Notion 명세, 하나 이상 포함): phone_number·region[]·avatar_url.
-export const updateMeBodySchema = z
-  .object({
-    phoneNumber: z.string(),
-    region: z.array(z.string()),
-    avatarUrl: z.string(),
-  })
-  .partial();
+// 생성 스키마 그대로 사용 — 필드 3개 다 선택이고 우리가 따로 추가한 제약이 없어 그대로 상속.
+export const updateMeBodySchema = UserUpdateRequestSchema;
 
 export type UserType = z.infer<typeof userTypeSchema>;
 export type SocialProvider = z.infer<typeof socialProviderSchema>;
 export type Gender = z.infer<typeof genderSchema>;
 export type Me = z.infer<typeof meSchema>;
 export type UpdateMeBody = z.infer<typeof updateMeBodySchema>;
+
+// userType(FE 파생)·email(명세 GET 응답에 없는 FE 전용 확장)은 대조 대상에서 제외.
+type _MeDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<Omit<Me, "userType" | "email">, UserMeResponse>
+>;

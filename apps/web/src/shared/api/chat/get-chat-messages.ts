@@ -1,20 +1,18 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { getMessages as getChatMessagesRequest } from "@/shared/api/generated/sdk.gen";
 import { chatMessagesSchema } from "./chat.schema";
 import type { ChatMessages } from "./chat.schema";
 
 // 커서 페이지네이션(?cursor&size, 기본 30). MVP는 단일 페이지지만 확장 대비 시그니처 유지.
-export function getChatMessages(
+export async function getChatMessages(
   chatRoomId: string,
   cursor?: string,
   size = 30,
 ): Promise<ChatMessages> {
-  const query = new URLSearchParams();
-  if (cursor) query.set("cursor", cursor);
-  query.set("size", String(size));
-
-  return fetchJson(
-    `${API_BASE_URL}/chats/${chatRoomId}/messages?${query.toString()}`,
-    chatMessagesSchema,
-  );
+  const { data } = await getChatMessagesRequest({
+    throwOnError: true,
+    path: { chatRoomId },
+    query: { cursor, size },
+  });
+  return chatMessagesSchema.parse(data);
 }
