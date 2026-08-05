@@ -13,7 +13,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@insurance/shared": "workspace:*",
     "zod": "^4.4.3"
   },
   "devDependencies": {

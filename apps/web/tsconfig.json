@@ -6,8 +6,7 @@
     "noEmit": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@insurance/bridge": ["../../packages/bridge/src"],
-      "@insurance/shared": ["../../packages/shared/src"]
+      "@insurance/bridge": ["../../packages/bridge/src"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
