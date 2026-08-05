@@ -4,7 +4,7 @@ import type {
   adjusterListItemSchema,
   adjusterListPaginationSchema,
   adjusterListMetaSchema,
-} from "./adjuster-list.schema";
+} from "@/app/customer/_shared/model/adjuster-list.schema";
 
 export type AdjusterList = z.infer<typeof adjusterListSchema>;
 export type AdjusterListItem = z.infer<typeof adjusterListItemSchema>;
