@@ -1,15 +1,29 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { reviewReport } from "@/shared/api/generated/sdk.gen";
 import { reviewSubmitResultSchema } from "../_model/review-submit.schema";
 import type { ReviewSubmit, ReviewSubmitResult } from "../_model/types";
 
-export function submitReview(
+export async function submitReview(
   reportId: string,
   body: ReviewSubmit,
 ): Promise<ReviewSubmitResult> {
-  return fetchJson(`${API_BASE_URL}/reports/${reportId}`, reviewSubmitResultSchema, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+  const { data } = await reviewReport({
+    throwOnError: true,
+    path: { reportId },
+    body: {
+      ...body,
+      issues: body.issues?.map((issue) => ({
+        ...issue,
+        reviewIssueId: issue.reviewIssueId ?? undefined,
+        issueId: issue.issueId ?? undefined,
+        title: issue.title ?? undefined,
+        description: issue.description ?? undefined,
+        impactAmount: issue.impactAmount ?? undefined,
+        modifiedReason: issue.modifiedReason ?? undefined,
+        excludedReason: issue.excludedReason ?? undefined,
+        adjusterOpinion: issue.adjusterOpinion ?? undefined,
+      })),
+    },
   });
+  return reviewSubmitResultSchema.parse(data);
 }

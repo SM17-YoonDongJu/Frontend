@@ -3439,6 +3439,13 @@ export const handlers = [
         ? params.reportId
         : crypto.randomUUID();
 
+    // E2E 관측 채널: SW 경유 요청은 Playwright request.postData() 캡처가 불안정해
+    // (client-fetch가 Request 객체 단일인자로 fetch하는 경로) localStorage로 우회(#reissueCount와 동일 패턴).
+    if (typeof localStorage !== "undefined") {
+      const receivedBody = await request.clone().json().catch(() => null);
+      localStorage.setItem("mock:lastReviewSubmitBody", JSON.stringify(receivedBody));
+    }
+
     // status는 서버가 파생(클라이언트 미전송). 작업본 최초 반영 시 review_status=SENT.
     return HttpResponse.json({
       status: "200",

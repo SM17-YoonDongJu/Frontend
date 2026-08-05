@@ -78,15 +78,14 @@ test("쟁점을 인정·수정·제외하면 진행현황과 카운트가 즉시
   const completeButton = page.getByRole("button", { name: "검수 완료 · 고객 전송" });
   await expect(completeButton).toBeEnabled();
 
-  const patchRequest = page.waitForRequest(
-    (req) => req.method() === "PATCH" && /\/reports\/[^/]+$/.test(req.url()),
-  );
-
   await completeButton.click();
 
-  const req = await patchRequest;
-  // fetch 레이어가 camel→snake 변환해 전송 → 와이어 바디는 snake_case.
-  const body = req.postDataJSON() as {
+  // MSW SW 경유 요청은 request.postData() 캡처가 불안정(client-fetch가 Request 객체
+  // 단일인자로 fetch) — mock:reissueCount와 동일하게 핸들러가 localStorage에 남긴 걸로 검증.
+  const readSubmitBody = () =>
+    page.evaluate((key) => window.localStorage.getItem(key), "mock:lastReviewSubmitBody");
+  await expect.poll(readSubmitBody).not.toBeNull();
+  const body = JSON.parse((await readSubmitBody()) as string) as {
     status?: string;
     review?: string;
     issues?: { issue_id?: string | null; review_status?: string }[];
