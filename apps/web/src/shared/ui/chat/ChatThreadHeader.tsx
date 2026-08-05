@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import type { RoomStatus } from "@/shared/api/chat/chat.schema";
 import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/ui/Avatar";
 import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
+import { Popover } from "@/shared/ui/Popover";
 import { ROOM_STATUS_META } from "./room-status";
-
-const MENU_ID = "chat-header-menu";
 
 export interface ChatThreadHeaderMenuAction {
   key: string;
@@ -69,7 +68,7 @@ function MenuActionItem({
     "flex w-full items-center gap-3 px-3.5 py-3 text-left text-[0.8125rem] font-semibold transition",
     danger ? "text-terra hover:bg-terra-soft/60" : "text-ink hover:bg-paper-2",
     action.disabled && "pointer-events-none cursor-not-allowed opacity-[.42]",
-    action.mobileOnly && "md:hidden",
+    action.mobileOnly && "md:hidden"
   );
   const content = (
     <>
@@ -126,28 +125,9 @@ export function ChatThreadHeader({
   menuActions
 }: ChatThreadHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const subtitle =
     subtitleOverride ?? [caseNo, ROOM_STATUS_META[roomStatus].label].filter(Boolean).join(" · ");
-
-  // 바깥 클릭·Esc로 닫기(진짜 오버레이 팝업이라 문서 흐름과 분리돼 있음).
-  useEffect(() => {
-    if (!menuOpen) return;
-
-    function handlePointerDown(event: PointerEvent) {
-      if (!menuRef.current?.contains(event.target as Node)) setMenuOpen(false);
-    }
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") setMenuOpen(false);
-    }
-
-    document.addEventListener("pointerdown", handlePointerDown);
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("pointerdown", handlePointerDown);
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [menuOpen]);
 
   return (
     <header className="relative flex items-center gap-2.5 border-b border-line-2 bg-paper px-4 py-3 md:bg-card md:px-5">
@@ -180,12 +160,13 @@ export function ChatThreadHeader({
       </ProfileLink>
 
       {menuActions.length > 0 && (
-        <div ref={menuRef} className="relative shrink-0">
+        <div className="relative shrink-0">
           <button
+            ref={triggerRef}
             type="button"
             onClick={() => setMenuOpen((open) => !open)}
+            aria-haspopup="menu"
             aria-expanded={menuOpen}
-            aria-controls={MENU_ID}
             className="flex items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-1.5 text-[0.8125rem] font-semibold text-ink-2 transition hover:bg-paper-2"
           >
             더보기
@@ -194,12 +175,14 @@ export function ChatThreadHeader({
             />
           </button>
 
-          {menuOpen && (
-            <div
-              id={MENU_ID}
-              role="menu"
-              className="absolute top-[calc(100%+0.5rem)] right-0 z-20 w-56 overflow-hidden rounded-card bg-card shadow-popover divide-y divide-line-2"
-            >
+          <Popover
+            open={menuOpen}
+            onClose={() => setMenuOpen(false)}
+            triggerRef={triggerRef}
+            label="더보기"
+            className="w-56 overflow-hidden rounded-card"
+          >
+            <div role="menu" className="flex flex-col divide-y divide-line-2">
               {menuActions.map((action) => (
                 <MenuActionItem
                   key={action.key}
@@ -208,7 +191,7 @@ export function ChatThreadHeader({
                 />
               ))}
             </div>
-          )}
+          </Popover>
         </div>
       )}
     </header>
