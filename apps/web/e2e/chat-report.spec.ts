@@ -137,8 +137,13 @@ test("상담이 종료된 방에서도 신고 항목은 그대로 남는다", as
   await expect(menu.getByRole("menuitem", { name: "신고" })).toBeVisible();
 
   // 매칭 거절로 방을 종료(roomStatus CLOSED) — 매칭 액션은 사라져도 신고는 남아야 한다
-  await menu.getByRole("menuitem", { name: "매칭 거절" }).click();
-  await page.getByRole("dialog").getByRole("button", { name: "매칭 거절" }).click();
+  // 하이드레이션 전 클릭 유실 가드(openReportDialog와 동일 패턴)
+  const rejectDialog = page.getByRole("dialog");
+  await expect(async () => {
+    await menu.getByRole("menuitem", { name: "매칭 거절" }).click();
+    await expect(rejectDialog).toBeVisible();
+  }).toPass({ timeout: 10000 });
+  await rejectDialog.getByRole("button", { name: "매칭 거절" }).click();
   await expect(page.getByRole("textbox", { name: "메시지 입력" })).toBeDisabled();
 
   const dialog = await openReportDialog(page);

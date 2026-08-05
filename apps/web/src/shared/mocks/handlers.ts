@@ -1,6 +1,7 @@
 import { delay, http, HttpResponse } from "msw";
 import { z } from "zod";
 import { camelToSnakeDeep, toSnakeKey } from "@/shared/api/case-convert";
+import { chatReportReasonSchema } from "@/shared/api/chat/chat.schema";
 import { API_BASE_URL } from "@/shared/api/config";
 import {
   consumeReissue,
@@ -1541,9 +1542,13 @@ export const handlers = [
       );
     }
 
-    const body = (await request.json()) as { reason?: string };
-    const reasons = ["SPAM", "ABUSE", "FRAUD", "PRIVACY_VIOLATION", "OTHER"];
-    if (!body.reason || !reasons.includes(body.reason)) {
+    const body = (await request.json()) as {
+      reason?: string;
+      reason_detail?: string | null;
+    };
+    const reasons: string[] = chatReportReasonSchema.options;
+    const detailMissing = body.reason === "OTHER" && !body.reason_detail?.trim();
+    if (!body.reason || !reasons.includes(body.reason) || detailMissing) {
       return HttpResponse.json(
         { status: "400", code: "VALIDATION_ERROR", message: "신고 사유를 확인해 주세요." },
         { status: 400 },

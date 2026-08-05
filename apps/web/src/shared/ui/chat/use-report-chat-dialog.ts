@@ -23,7 +23,8 @@ export function useReportChatDialog(chatRoomId: string) {
 
   const closeDialog = () => setOpen(false);
 
-  const submit = (body: ReportChatBody) =>
+  const submit = (body: ReportChatBody) => {
+    setErrorMessage(null);
     mutate(body, {
       onSuccess: () => {
         setOpen(false);
@@ -32,6 +33,7 @@ export function useReportChatDialog(chatRoomId: string) {
       // 다이얼로그를 열어 둔 채 입력값을 보존해 재제출할 수 있게 한다.
       onError: () => setErrorMessage(REPORT_FAILED_MESSAGE),
     });
+  };
 
   return { open, openDialog, closeDialog, submit, pending: isPending, errorMessage };
 }
