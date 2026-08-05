@@ -29,7 +29,7 @@ export interface ChatThreadContentProps {
 export function ChatThreadContent({
   chatRoomId,
   chatBasePath,
-  reportBasePath,
+  reportBasePath
 }: ChatThreadContentProps) {
   const router = useRouter();
   const { data: room } = useChatRoom(chatRoomId);
@@ -39,7 +39,7 @@ export function ChatThreadContent({
   // 상담 종료 UX는 명세상 reject(방 종료)로 매핑. 형제 방 유지·서버 미러.
   const endChat = useRejectChat(chatRoomId);
   const { mutate: markRead } = useReadChat(chatRoomId);
-  const report = useReportChatDialog(chatRoomId);
+  const reportDialog = useReportChatDialog(chatRoomId);
 
   useEffect(() => {
     markRead();
@@ -49,7 +49,7 @@ export function ChatThreadContent({
 
   const endChatConsultation = () =>
     endChat.mutate(undefined, {
-      onError: () => toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      onError: () => toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요.")
     });
 
   const menuActions: ChatThreadHeaderMenuAction[] = [
@@ -57,7 +57,7 @@ export function ChatThreadContent({
       key: "report",
       label: "리포트 보기",
       icon: <FileText />,
-      href: room.reportId ? `${reportBasePath}/${room.reportId}` : "#",
+      href: room.reportId ? `${reportBasePath}/${room.reportId}` : "#"
     },
     ...(room.roomStatus === "ACTIVE"
       ? [
@@ -67,16 +67,16 @@ export function ChatThreadContent({
             icon: <X />,
             onClick: endChatConsultation,
             tone: "danger" as const,
-            disabled: endChat.isPending,
-          },
+            disabled: endChat.isPending
+          }
         ]
       : []),
     {
       key: "report-chat",
       label: "신고",
       icon: <AlertTriangle />,
-      onClick: report.openDialog,
-    },
+      onClick: reportDialog.openDialog
+    }
   ];
 
   return (
@@ -103,20 +103,19 @@ export function ChatThreadContent({
         sendFailed={sendMessage.isError}
         onPickFile={(file) =>
           sendAttachment.mutate(file, {
-            onError: () =>
-              toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요."),
+            onError: () => toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요.")
           })
         }
         attachPending={sendAttachment.isPending}
       />
 
       <ReportChatDialog
-        open={report.open}
+        open={reportDialog.open}
         counterpartName={room.counterpart.name}
-        pending={report.pending}
-        errorMessage={report.errorMessage}
-        onSubmit={report.submit}
-        onClose={report.closeDialog}
+        pending={reportDialog.pending}
+        errorMessage={reportDialog.errorMessage}
+        onSubmit={reportDialog.submit}
+        onClose={reportDialog.closeDialog}
       />
     </div>
   );

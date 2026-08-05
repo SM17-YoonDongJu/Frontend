@@ -20,7 +20,7 @@ import { X } from "@/shared/ui/icons/X";
 import { ChatComparisonBanner } from "@/shared/ui/chat/ChatComparisonBanner";
 import {
   ChatThreadHeader,
-  type ChatThreadHeaderMenuAction,
+  type ChatThreadHeaderMenuAction
 } from "@/shared/ui/chat/ChatThreadHeader";
 import { ChatThreadView } from "@/shared/ui/chat/ChatThreadView";
 import { MatchConfirmModal } from "@/shared/ui/chat/MatchConfirmModal";
@@ -44,7 +44,7 @@ export interface CustomerChatThreadContentProps {
  */
 export function CustomerChatThreadContent({
   chatRoomId,
-  chatBasePath,
+  chatBasePath
 }: CustomerChatThreadContentProps) {
   const router = useRouter();
   const { data: room } = useChatRoom(chatRoomId);
@@ -56,7 +56,7 @@ export function CustomerChatThreadContent({
   const accept = useAcceptChat(chatRoomId);
   const reject = useRejectChat(chatRoomId);
   const { mutate: markRead } = useReadChat(chatRoomId);
-  const report = useReportChatDialog(chatRoomId);
+  const reportDialog = useReportChatDialog(chatRoomId);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
 
@@ -66,35 +66,26 @@ export function CustomerChatThreadContent({
 
   const group = toMatchGroup(room.matchStatus, room.roomStatus);
   // 원본 리포트가 아니라 사정사 검수 결과(공유 리포트)로 이동. 사정사 검색 방은 공유 리포트가 없어 비활성.
-  const sharedReportHref = room.reportId
-    ? `${chatBasePath}/${chatRoomId}/shared-report`
-    : "#";
+  const sharedReportHref = room.reportId ? `${chatBasePath}/${chatRoomId}/shared-report` : "#";
   const matchPending = accept.isPending || reject.isPending;
 
   // 목록 응답에 현재 방이 아직 없어도(딥링크 직진입) 비교 수에 자신은 포함
-  const listSiblings = room.reportId
-    ? rooms.filter((item) => item.reportId === room.reportId)
-    : [];
-  const siblings = listSiblings.some(
-    (item) => item.chatRoomId === room.chatRoomId,
-  )
+  const listSiblings = room.reportId ? rooms.filter((item) => item.reportId === room.reportId) : [];
+  const siblings = listSiblings.some((item) => item.chatRoomId === room.chatRoomId)
     ? listSiblings
     : [room, ...listSiblings];
   const comparingCount = siblings.filter(
-    (item) => toMatchGroup(item.matchStatus, item.roomStatus) === "comparing",
+    (item) => toMatchGroup(item.matchStatus, item.roomStatus) === "comparing"
   ).length;
   const endingConsultations = siblings
     .filter(
       (item) =>
         item.chatRoomId !== room.chatRoomId &&
-        toMatchGroup(item.matchStatus, item.roomStatus) === "comparing",
+        toMatchGroup(item.matchStatus, item.roomStatus) === "comparing"
     )
     .map((item) => ({ name: item.counterpart.name }));
 
-  const subtitle = [
-    room.caseNo,
-    SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.roomStatus].label,
-  ]
+  const subtitle = [room.caseNo, SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.roomStatus].label]
     .filter(Boolean)
     .join(" · ");
 
@@ -103,14 +94,12 @@ export function CustomerChatThreadContent({
   const confirmReject = () =>
     reject.mutate(undefined, {
       onSuccess: () => setRejectOpen(false),
-      onError: () =>
-        toast.error("매칭 거절에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      onError: () => toast.error("매칭 거절에 실패했어요. 잠시 후 다시 시도해 주세요.")
     });
   const confirmMatch = () =>
     accept.mutate(undefined, {
       onSuccess: () => setConfirmOpen(false),
-      onError: () =>
-        toast.error("매칭 완료에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      onError: () => toast.error("매칭 완료에 실패했어요. 잠시 후 다시 시도해 주세요.")
     });
 
   const matchActions: ChatThreadHeaderMenuAction[] =
@@ -123,7 +112,7 @@ export function CustomerChatThreadContent({
             onClick: () => setConfirmOpen(true),
             disabled: matchPending,
             // 데스크톱은 비교 배너에 전용 버튼이 있어 더보기에선 모바일에만 노출
-            mobileOnly: true,
+            mobileOnly: true
           },
           {
             key: "reject",
@@ -133,8 +122,8 @@ export function CustomerChatThreadContent({
             tone: "danger",
             disabled: matchPending,
             // 데스크톱에선 접근 경로 없음(모바일 더보기 전용) — 팀 결정
-            mobileOnly: true,
-          },
+            mobileOnly: true
+          }
         ]
       : group === "matched"
         ? [
@@ -142,15 +131,15 @@ export function CustomerChatThreadContent({
               key: "progress",
               label: "사건 진행 보기",
               icon: <ArrowRight />,
-              href: sharedReportHref,
-            },
+              href: sharedReportHref
+            }
           ]
         : [];
 
   const menuActions: ChatThreadHeaderMenuAction[] = [
     { key: "report", label: "리포트 보기", icon: <FileText />, href: sharedReportHref },
     ...matchActions,
-    { key: "report-chat", label: "신고", icon: <AlertTriangle />, onClick: report.openDialog },
+    { key: "report-chat", label: "신고", icon: <AlertTriangle />, onClick: reportDialog.openDialog }
   ];
 
   return (
@@ -203,8 +192,7 @@ export function CustomerChatThreadContent({
         sendFailed={sendMessage.isError}
         onPickFile={(file) =>
           sendAttachment.mutate(file, {
-            onError: () =>
-              toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요."),
+            onError: () => toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요.")
           })
         }
         attachPending={sendAttachment.isPending}
@@ -228,12 +216,12 @@ export function CustomerChatThreadContent({
       />
 
       <ReportChatDialog
-        open={report.open}
+        open={reportDialog.open}
         counterpartName={room.counterpart.name}
-        pending={report.pending}
-        errorMessage={report.errorMessage}
-        onSubmit={report.submit}
-        onClose={report.closeDialog}
+        pending={reportDialog.pending}
+        errorMessage={reportDialog.errorMessage}
+        onSubmit={reportDialog.submit}
+        onClose={reportDialog.closeDialog}
       />
     </div>
   );
@@ -241,5 +229,5 @@ export function CustomerChatThreadContent({
 
 const SUBTITLE_SUFFIX: Partial<Record<ReturnType<typeof toMatchGroup>, string>> = {
   comparing: "상담 중 · 비교 중",
-  matched: "매칭 완료 · 진행 중",
+  matched: "매칭 완료 · 진행 중"
 };
