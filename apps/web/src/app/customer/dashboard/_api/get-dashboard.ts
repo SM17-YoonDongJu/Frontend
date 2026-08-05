@@ -1,7 +1,8 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { dashboard as dashboardRequest } from "@/shared/api/generated/sdk.gen";
 import { dashboardSchema, type Dashboard } from "../_model/dashboard.schema";
 
-export function getDashboard(): Promise<Dashboard> {
-  return fetchJson(`${API_BASE_URL}/users/me/dashboard`, dashboardSchema);
+export async function getDashboard(): Promise<Dashboard> {
+  const { data } = await dashboardRequest({ throwOnError: true });
+  return dashboardSchema.parse(data);
 }
