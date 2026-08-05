@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, dev]
+    branches: [main, dev, release]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -57,6 +57,25 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @insurance/web build
+
+  # 커밋된 스펙 스냅샷으로 재생성했을 때 생성물이 그대로인지 확인한다.
+  # 생성물 직접 수정·스냅샷만 갱신하고 재생성 누락한 커밋을 잡는다. 네트워크를 타지 않음.
+  api-codegen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @insurance/web generate:api
+      - name: 생성물이 스냅샷과 일치하는지 확인
+        run: git diff --exit-code -- apps/web/src/shared/api/generated
 
   e2e:
     runs-on: ubuntu-latest

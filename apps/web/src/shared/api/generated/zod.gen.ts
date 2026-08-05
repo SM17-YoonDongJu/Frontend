@@ -83,7 +83,7 @@ export const CreateReportRequestSchema = z.object({
     ]).optional(),
     accidentDate: z.iso.date().optional(),
     diagnosis: z.array(z.string()).optional(),
-    offeredAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    offeredAmount: z.number().int().optional(),
     hospitalizations: z.array(HospitalizationSchema).optional(),
     description: z.string().optional(),
     additionalInformation: z.string().optional(),
@@ -165,7 +165,7 @@ export const AttachmentSchema = z.object({
     attachmentKey: z.string().optional(),
     name: z.string().optional(),
     contentType: z.string().optional(),
-    size: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    size: z.number().int().optional()
 });
 
 export const SendMessageRequestSchema = z.object({
@@ -199,7 +199,7 @@ export const UploadAttachmentResponseSchema = z.object({
     attachmentKey: z.string().optional(),
     name: z.string().optional(),
     contentType: z.string().optional(),
-    size: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    size: z.number().int().optional()
 });
 
 export const ApiResponseUploadAttachmentResponseSchema = z.object({
@@ -317,15 +317,15 @@ export const IssueReviewSchema = z.object({
     reviewStatus: z.string().optional(),
     title: z.string().optional(),
     description: z.string().optional(),
-    impactAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    impactAmount: z.number().int().optional(),
     adjusterOpinion: z.string().optional(),
     modifiedReason: z.string().optional(),
     excludedReason: z.string().optional()
 });
 
 export const ReviewReportRequestSchema = z.object({
-    estimateMinAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    estimateMaxAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    estimateMinAmount: z.number().int().optional(),
+    estimateMaxAmount: z.number().int().optional(),
     applicableGuarantees: z.array(z.string()).optional(),
     omittedSpecialContract: z.array(z.string()).optional(),
     basisTermsPrecedents: z.array(z.string()).optional(),
@@ -438,7 +438,7 @@ export const AdjusterProfileResponseSchema = z.object({
     reviewCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     recentReviews: z.array(RecentReviewSchema).optional(),
     completedConsultCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    handledCaseCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    handledCaseCount: z.number().int().optional(),
     pendingReviewCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     updatedAt: z.iso.datetime().optional()
 });
@@ -460,10 +460,10 @@ export const ItemSchema = z.object({
 
 export const NotificationListResponseSchema = z.object({
     items: z.array(ItemSchema).optional(),
-    unreadCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    unreadCount: z.number().int().optional(),
     page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    totalElements: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    totalElements: z.number().int().optional(),
     totalPages: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
 });
 
@@ -490,19 +490,19 @@ export const ActiveReportSchema = z.object({
     status: z.string().optional(),
     createdAt: z.iso.datetime().optional(),
     firstReviewedAt: z.iso.datetime().optional(),
-    proposalCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    proposalCount: z.number().int().optional()
 });
 
 export const ProposalSummarySchema = z.object({
     count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    minAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    maxAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    avgAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    minAmount: z.number().int().optional(),
+    maxAmount: z.number().int().optional(),
+    avgAmount: z.number().int().optional(),
     items: z.array(ItemSchema).optional()
 });
 
 export const UserDashboardResponseSchema = z.object({
-    reportCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    reportCount: z.number().int().optional(),
     activeReport: ActiveReportSchema.optional(),
     proposalSummary: ProposalSummarySchema.optional()
 });
@@ -514,10 +514,10 @@ export const ApiResponseUserDashboardResponseSchema = z.object({
 });
 
 export const UserActivitySummaryResponseSchema = z.object({
-    reportCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    proposalCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    consultCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    closedCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    reportCount: z.number().int().optional(),
+    proposalCount: z.number().int().optional(),
+    consultCount: z.number().int().optional(),
+    closedCount: z.number().int().optional()
 });
 
 export const ApiResponseUserActivitySummaryResponseSchema = z.object({
@@ -553,19 +553,19 @@ export const CardSchema = z.object({
     title: z.string().optional(),
     createdAt: z.iso.datetime().optional(),
     reportNo: z.string().optional(),
-    claimedMinAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    claimedMaxAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    proposalCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    claimedMinAmount: z.number().int().optional(),
+    claimedMaxAmount: z.number().int().optional(),
+    proposalCount: z.number().int().optional(),
     reviewedAt: z.iso.datetime().optional(),
     adjusterNickname: z.string().optional(),
-    offeredAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    offeredAmount: z.number().int().optional(),
     treatment: z.string().optional()
 });
 
 export const PaginationSchema = z.object({
     page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    totalElements: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    totalElements: z.number().int().optional(),
     totalPages: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     hasNext: z.boolean().optional()
 });
@@ -591,7 +591,7 @@ export const IssueItemSchema = z.object({
     opinion: z.string().optional(),
     status: z.string().optional(),
     tags: z.array(z.string()).optional(),
-    impactAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    impactAmount: z.number().int().optional()
 });
 
 export const CustomerReportDetailResponseSchema = z.object({
@@ -599,9 +599,9 @@ export const CustomerReportDetailResponseSchema = z.object({
     status: z.string().optional(),
     accidentType: z.string().optional(),
     treatment: z.string().optional(),
-    claimedMinAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    claimedMaxAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    offeredAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    claimedMinAmount: z.number().int().optional(),
+    claimedMaxAmount: z.number().int().optional(),
+    offeredAmount: z.number().int().optional(),
     applicableGuarantees: z.array(z.string()).optional(),
     omittedSpecialContract: z.array(z.string()).optional(),
     basisTermsPrecedents: z.array(z.string()).optional(),
@@ -653,8 +653,8 @@ export const ClientSchema = z.object({
 });
 
 export const EstimateSchema = z.object({
-    min: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    max: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    min: z.number().int().optional(),
+    max: z.number().int().optional()
 });
 
 export const ProgressSchema = z.object({
@@ -673,7 +673,7 @@ export const ReviewWorkspaceResponseSchema = z.object({
     status: z.string().optional(),
     confidenceLevel: z.string().optional(),
     isMasked: z.boolean().optional(),
-    offeredAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    offeredAmount: z.number().int().optional(),
     client: ClientSchema.optional(),
     claim: ClaimContextSchema.optional(),
     attachments: z.array(AttachmentItemSchema).optional(),
@@ -728,10 +728,10 @@ export const ApiResponsePendingReviewListResponseSchema = z.object({
 });
 
 export const PendingReviewSummaryResponseSchema = z.object({
-    pendingCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    dueSoonCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    inProgressCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    specialtyMatchCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    pendingCount: z.number().int().optional(),
+    dueSoonCount: z.number().int().optional(),
+    inProgressCount: z.number().int().optional(),
+    specialtyMatchCount: z.number().int().optional()
 });
 
 export const ApiResponsePendingReviewSummaryResponseSchema = z.object({
@@ -770,7 +770,7 @@ export const ChatRoomSummaryResponseSchema = z.object({
     counterpart: CounterpartSchema.optional(),
     lastMessage: z.string().optional(),
     lastMessageAt: z.iso.datetime().optional(),
-    unreadCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    unreadCount: z.number().int().optional()
 });
 
 export const ChatRoomListResponseSchema = z.object({
@@ -807,7 +807,7 @@ export const ChatRoomDetailResponseSchema = z.object({
     counterpart: CounterpartSchema.optional(),
     lastMessage: z.string().optional(),
     lastMessageAt: z.iso.datetime().optional(),
-    unreadCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    unreadCount: z.number().int().optional(),
     createdAt: z.iso.datetime().optional()
 });
 
@@ -823,7 +823,7 @@ export const IssueSchema = z.object({
     title: z.string().optional(),
     adjusterOpinion: z.string().optional(),
     description: z.string().optional(),
-    impactAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    impactAmount: z.number().int().optional(),
     reviewStatus: z.string().optional(),
     tags: z.array(z.string()).optional()
 });
@@ -842,7 +842,7 @@ export const SharedReportResponseSchema = z.object({
     summary: z.string().optional(),
     adjuster: AdjusterSchema.optional(),
     estimate: EstimateSchema.optional(),
-    offeredAmount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    offeredAmount: z.number().int().optional(),
     issues: z.array(IssueSchema).optional(),
     issueCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     applicableGuarantees: z.array(z.string()).optional(),
@@ -881,9 +881,9 @@ export const ApiResponseOAuthCallbackResponseSchema = z.object({
 });
 
 export const MetaSchema = z.object({
-    totalAdjusterCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    totalAdjusterCount: z.number().int().optional(),
     averageRating: z.number().optional(),
-    totalConsultCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    totalConsultCount: z.number().int().optional(),
     averageCareer: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
 });
 
@@ -924,7 +924,7 @@ export const AdjusterDetailResponseSchema = z.object({
     reviewCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     recentReviews: z.array(RecentReviewSchema).optional(),
     completedConsultCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    handledCaseCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    handledCaseCount: z.number().int().optional(),
     verified: z.boolean().optional(),
     consultGuide: ConsultGuideSchema.optional(),
     certification: CertificationSchema.optional()
@@ -948,20 +948,20 @@ export const ApiResponseAdjusterReviewListResponseSchema = z.object({
 });
 
 export const StatsSchema = z.object({
-    monthlyReviewCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    previousMonthReviewCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    consultationConvertedCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    monthlyReviewCount: z.number().int().optional(),
+    previousMonthReviewCount: z.number().int().optional(),
+    consultationConvertedCount: z.number().int().optional(),
     consultationConversionRate: z.number().optional(),
-    totalCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    totalCount: z.number().int().optional()
 });
 
 export const ReviewedReportListResponseSchema = z.object({
     stats: StatsSchema.optional(),
-    statusCounts: z.record(z.string(), z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' })).optional(),
+    statusCounts: z.record(z.string(), z.number().int()).optional(),
     items: z.array(ItemSchema).optional(),
     page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    totalElements: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    totalElements: z.number().int().optional(),
     totalPages: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
 });
 
@@ -972,8 +972,8 @@ export const ApiResponseReviewedReportListResponseSchema = z.object({
 });
 
 export const MonthlyActivitySchema = z.object({
-    completedCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    consultationConvertedCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    completedCount: z.number().int().optional(),
+    consultationConvertedCount: z.number().int().optional(),
     averageRating: z.number().optional()
 });
 
@@ -1002,22 +1002,22 @@ export const ApiResponseAdjusterMyPageResponseSchema = z.object({
 });
 
 export const InProgressCasesSchema = z.object({
-    total: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    total: z.number().int().optional(),
     items: z.array(ItemSchema).optional()
 });
 
 export const RatingSchema = z.object({
     average: z.number().optional(),
-    reviewCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional()
+    reviewCount: z.number().int().optional()
 });
 
 export const SummarySchema = z.object({
-    pendingCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    pendingNewCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    inProgressCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    monthlyCompletedCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    totalCompletedCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
-    consultationConvertedCount: z.coerce.bigint().min(BigInt('-9223372036854775808'), { error: 'Invalid value: Expected int64 to be >= -9223372036854775808' }).max(BigInt('9223372036854775807'), { error: 'Invalid value: Expected int64 to be <= 9223372036854775807' }).optional(),
+    pendingCount: z.number().int().optional(),
+    pendingNewCount: z.number().int().optional(),
+    inProgressCount: z.number().int().optional(),
+    monthlyCompletedCount: z.number().int().optional(),
+    totalCompletedCount: z.number().int().optional(),
+    consultationConvertedCount: z.number().int().optional(),
     rating: RatingSchema.optional()
 });
 

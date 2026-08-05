@@ -13,7 +13,9 @@
     "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "generate:api": "openapi-ts -f openapi-ts.config.ts"
+    "generate:api": "openapi-ts -f openapi-ts.config.ts && node scripts/patch-generated-zod.mjs",
+    "spec:pull": "node scripts/spec-snapshot.mjs --write",
+    "spec:check": "node scripts/spec-snapshot.mjs --check"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
