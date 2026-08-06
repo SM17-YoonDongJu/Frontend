@@ -6,7 +6,8 @@ const FOOTER_LINKS = [
   { label: "이용 방법", href: "/guide" },
   { label: "문의하기", href: "/contact" },
   { label: "이용약관", href: "/terms" },
-  { label: "개인정보처리방침", href: "/privacy" }
+  { label: "개인정보처리방침", href: "/privacy" },
+  { label: "계정 삭제", href: "/account-deletion" }
 ] as const;
 
 const LEGAL_NOTICE =

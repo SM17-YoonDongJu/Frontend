@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ContactForm } from "./_components/ContactForm";
 
 const CONTACT_EMAIL = "teambrbosang@gmail.com";
@@ -35,6 +36,20 @@ export default function ContactPage() {
                 {CONTACT_EMAIL}
               </a>
               로 보내주세요.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-[0.9375rem] font-bold text-ink">계정 삭제 문의</h2>
+            <p className="mt-2 text-[0.8125rem] leading-relaxed text-ink-2">
+              계정과 관련 데이터 삭제를 원하시면{" "}
+              <Link
+                href="/account-deletion"
+                className="text-ink underline underline-offset-2"
+              >
+                계정 삭제 안내
+              </Link>
+              에서 삭제 절차와 삭제되는 데이터를 확인하실 수 있습니다.
             </p>
           </section>
         </div>
