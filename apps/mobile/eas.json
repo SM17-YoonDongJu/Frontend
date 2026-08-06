@@ -28,6 +28,13 @@
       "env": {
         "EXPO_PUBLIC_WEB_URL": "https://www.brbosang.com"
       }
+    },
+    "production-apk": {
+      "extends": "production",
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {
