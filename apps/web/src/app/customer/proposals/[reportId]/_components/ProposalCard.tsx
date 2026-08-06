@@ -14,11 +14,9 @@ import { toast } from "@/shared/ui/toast";
 import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
 import { getProposalAction } from "../../../_shared/model/proposal-actions";
 import { useViewedProposals } from "../_hooks/use-viewed-proposals";
-import {
-  ConsultChatActions,
-  MatchedProposalActions,
-  SentProposalActions,
-} from "./ConsultChatActions";
+import { ConsultChatActions } from "./ConsultChatActions";
+import { MatchedProposalActions } from "./MatchedProposalActions";
+import { SentProposalActions } from "./SentProposalActions";
 import type { Proposal } from "../../../_shared/model/proposal.schema";
 import { formatManwon } from "@/shared/lib/format-amount";
 

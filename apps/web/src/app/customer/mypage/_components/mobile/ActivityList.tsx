@@ -4,6 +4,7 @@ import { useActivitySummary } from "../../_api/use-activity-summary";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { MessageCircle } from "@/shared/ui/icons/MessageCircle";
 import { MessageSquare } from "@/shared/ui/icons/MessageSquare";
+import { CountText } from "./CountText";
 import { MobileMenuRow } from "./MobileMenuRow";
 import { MobileSection } from "./MobileSection";
 
@@ -45,8 +46,4 @@ export function ActivityList() {
       />
     </MobileSection>
   );
-}
-
-function CountText({ value }: { value: string }) {
-  return <span className="text-[0.8125rem] font-bold text-ink-3">{value}</span>;
 }

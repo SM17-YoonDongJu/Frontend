@@ -1,6 +1,7 @@
 import { Avatar } from "@/shared/ui/Avatar";
 import { StarRating } from "@/shared/ui/StarRating";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
+import { AdjusterStat } from "./AdjusterStat";
 
 interface AdjusterProfileHeaderProps {
   nickname: string;
@@ -79,7 +80,7 @@ export function AdjusterProfileHeader({
         </div>
 
         <dl className="mt-8 hidden grid-cols-3 divide-x divide-line lg:grid">
-          <Stat
+          <AdjusterStat
             label="평점"
             value={
               <span className="flex items-center gap-1.5">
@@ -89,13 +90,13 @@ export function AdjusterProfileHeader({
             }
             caption={`후기 ${numberFormatter.format(reviewCount)}건`}
           />
-          <Stat
+          <AdjusterStat
             label="상담 완료"
             value={`${numberFormatter.format(completedConsultCount)}+`}
             caption="누적 의뢰"
             inset
           />
-          <Stat
+          <AdjusterStat
             label="처리 사건"
             value={`${numberFormatter.format(handledCaseCount)}건`}
             caption="누적 처리"
@@ -104,25 +105,5 @@ export function AdjusterProfileHeader({
         </dl>
       </div>
     </header>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  caption,
-  inset,
-}: {
-  label: string;
-  value: React.ReactNode;
-  caption: string;
-  inset?: boolean;
-}) {
-  return (
-    <div className={inset ? "pl-3 sm:pl-6" : undefined}>
-      <dt className="text-xs text-ink-3">{label}</dt>
-      <dd className="mt-1 text-2xl font-semibold text-ink sm:text-3xl">{value}</dd>
-      <p className="mt-1 text-xs text-ink-3">{caption}</p>
-    </div>
   );
 }

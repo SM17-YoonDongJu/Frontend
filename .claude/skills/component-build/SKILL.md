@@ -7,6 +7,8 @@ description: 손해사정 플랫폼 Next.js App Router UI 구현 패턴. 페이�
 
 대상: React 19 + Next.js 16 App Router + Tailwind 4. 코드 컨벤션은 `code-conventions` 스킬과 함께 적용한다(이 스킬은 "어떻게 만드나", 컨벤션 스킬은 "어떻게 잘 쓰나"). 시각 디자인 완성도가 필요한 화면은 `frontend-design` 스킬을 품질 가이드로 참조하되, 아래 프로젝트 규칙(Tailwind 토큰·3상태·접근성)이 항상 우선한다. 색·radius·폰트 토큰은 `references/design-tokens.md`가 단일 진실 — **화면·컴포넌트 작업은 착수 전 이 문서를 먼저 확인**한다. Figma 디자인을 코드로 옮길 때는 `figma-design-convert` 스킬을 사용한다(raw 출력 그대로 쓰지 말고 토큰·프렉탈로 매핑).
 
+**1파일 1컴포넌트** — 한 파일에 컴포넌트 선언은 하나만. 로컬 프리미티브·아이콘·Skeleton/Empty/ErrorFallback도 형제 파일로 분리한다(`*.stories.tsx`만 예외). 로직은 `_api`/`_hooks`/`_model`, `.tsx`는 렌더만. 규칙 본문은 `code-conventions` 스킬이 단일 진실이며, `react/no-multi-comp` 룰과 PostToolUse 훅이 기계로 강제한다.
+
 ## 라우트그룹 = 역할 경계
 ```
 app/

@@ -4,44 +4,11 @@ import { Suspense } from "react";
 import { useRouter } from "next/navigation";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { ErrorBoundary } from "react-error-boundary";
-import { Button } from "@/shared/ui/Button";
 import { useReadAllNotifications } from "@/shared/api/use-read-all-notifications";
 import { useNotificationUnreadCount } from "@/shared/api/use-notification-unread-count";
+import { NotificationPopoverError } from "./NotificationPopoverError";
 import { NotificationPopoverList } from "./NotificationPopoverList";
-
-const SKELETON_ROW_COUNT = 3;
-
-function NotificationPopoverSkeleton() {
-  return (
-    <div aria-hidden className="flex flex-col gap-2 px-5 py-4">
-      {Array.from({ length: SKELETON_ROW_COUNT }).map((_, index) => (
-        <div
-          key={index}
-          className="h-14 animate-pulse rounded-input bg-paper-2"
-        />
-      ))}
-    </div>
-  );
-}
-
-interface NotificationPopoverErrorProps {
-  code?: string;
-  onRetry: () => void;
-}
-
-function NotificationPopoverError({ code, onRetry }: NotificationPopoverErrorProps) {
-  return (
-    <div role="alert" className="flex flex-col items-center px-6 py-8 text-center">
-      <p className="text-[0.8125rem] font-semibold text-ink">
-        알림을 불러오지 못했어요
-      </p>
-      {code && <p className="mt-1 text-[0.71875rem] text-ink-3">({code})</p>}
-      <Button variant="outline" size="sm" className="mt-3" onClick={onRetry}>
-        다시 시도
-      </Button>
-    </div>
-  );
-}
+import { NotificationPopoverSkeleton } from "./NotificationPopoverSkeleton";
 
 interface NotificationPopoverProps {
   settingsHref: string;

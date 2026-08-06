@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Me } from "../../_model/types";
-import { SectionBoundary, SectionSkeleton } from "../SectionBoundary";
+import { SectionBoundary } from "../SectionBoundary";
+import { SectionSkeleton } from "../SectionSkeleton";
 import { ActivityList } from "./ActivityList";
 import { InProgressAnalysisCard } from "./InProgressAnalysisCard";
 import { MobileLogout } from "./MobileLogout";

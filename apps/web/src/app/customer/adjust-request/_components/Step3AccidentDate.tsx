@@ -2,12 +2,9 @@
 
 import { Controller, useFieldArray, useFormContext } from "react-hook-form";
 import { DatePicker } from "@/shared/ui/DatePicker";
+import { FieldLabel } from "@/shared/ui/FieldLabel";
 import { Input } from "@/shared/ui/Input";
 import type { AdjustRequestDraft } from "../_model/types";
-
-function FieldLabel({ children }: { children: React.ReactNode }) {
-  return <span className="mb-2 block text-[0.8125rem] font-semibold text-ink-2">{children}</span>;
-}
 
 export function Step3AccidentDate() {
   const { control, formState } = useFormContext<AdjustRequestDraft>();

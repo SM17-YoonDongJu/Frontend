@@ -5,6 +5,7 @@ import { DayPicker } from "react-day-picker";
 import { ko } from "react-day-picker/locale";
 import "react-day-picker/style.css";
 import { cn } from "@/shared/lib/utils";
+import { Calendar } from "@/shared/ui/icons/Calendar";
 
 interface DatePickerProps {
   /** YYYY-MM-DD */
@@ -69,7 +70,7 @@ export function DatePicker({
         )}
       >
         {value ? formatLabel(value) : placeholder}
-        <CalendarGlyph />
+        <Calendar />
       </button>
 
       {open && (
@@ -98,14 +99,5 @@ export function DatePicker({
 
       {error && <span className="text-[0.75rem] font-medium text-terra">{error}</span>}
     </div>
-  );
-}
-
-function CalendarGlyph() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-ink-3">
-      <rect x="3" y="4.5" width="18" height="16" rx="2.5" stroke="currentColor" strokeWidth="1.6" />
-      <path d="M3 9h18M8 2.5v4M16 2.5v4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-    </svg>
   );
 }

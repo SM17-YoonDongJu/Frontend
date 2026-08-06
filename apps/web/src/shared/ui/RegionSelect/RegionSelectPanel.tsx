@@ -1,23 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/shared/lib/utils";
-import {
-  formatRegionLabel,
-  isSameRegion,
-  regionKey,
-  searchRegions,
-  SIDO_LIST,
-  type RegionValue,
-  type Sido,
-} from "@/shared/model/regions";
-import { Checkbox } from "@/shared/ui/Checkbox";
-import { Check } from "@/shared/ui/icons/Check";
-import { ChevronLeft } from "@/shared/ui/icons/ChevronLeft";
-import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
-import { Clock } from "@/shared/ui/icons/Clock";
+import { isSameRegion, type RegionValue, type Sido } from "@/shared/model/regions";
 import { Search } from "@/shared/ui/icons/Search";
-import { X } from "@/shared/ui/icons/X";
+import { DistrictStep } from "./DistrictStep";
+import { RecentRegions } from "./RecentRegions";
+import { SearchResults } from "./SearchResults";
+import { SidoStep } from "./SidoStep";
 
 interface RegionSelectPanelProps {
   multiple: boolean;
@@ -27,8 +16,6 @@ interface RegionSelectPanelProps {
   onSelect: (option: RegionValue) => void;
   onRemoveRecent: (option: RegionValue) => void;
 }
-
-const ROW = "flex h-[2.4375rem] w-full items-center gap-2 rounded-[0.625rem] px-3.5 text-sm transition";
 
 /** 드롭다운 본체. 검색어가 있으면 통합 검색 결과, 없으면 1단계 시·도 → 2단계 시·군·구. */
 export function RegionSelectPanel({
@@ -75,181 +62,5 @@ export function RegionSelectPanel({
         <SidoStep onEnter={setActiveSido} />
       )}
     </div>
-  );
-}
-
-/** 최근 선택 지역 칩. 칩 본체와 삭제 버튼을 형제로 둔다(인터랙티브 중첩 금지). */
-function RecentRegions({
-  recent,
-  onSelect,
-  onRemove,
-}: {
-  recent: RegionValue[];
-  onSelect: (option: RegionValue) => void;
-  onRemove: (option: RegionValue) => void;
-}) {
-  return (
-    <div className="px-3.5 pb-3">
-      <p className="flex items-center gap-1.5 text-xs font-bold text-ink-3">
-        <Clock className="text-[0.875rem]" />
-        최근 선택
-      </p>
-      <ul className="mt-2 flex flex-wrap gap-1.5">
-        {recent.map((option) => (
-          <li
-            key={regionKey(option)}
-            className="flex h-8 items-center rounded-full border border-line bg-paper-2 transition hover:bg-paper"
-          >
-            <button
-              type="button"
-              onClick={() => onSelect(option)}
-              className="h-full pl-3 pr-1.5 text-[0.8125rem] font-bold text-ink-2"
-            >
-              {formatRegionLabel(option)}
-            </button>
-            <button
-              type="button"
-              aria-label={`${formatRegionLabel(option)} 최근 선택에서 삭제`}
-              onClick={() => onRemove(option)}
-              className="mr-1.5 flex size-4 items-center justify-center rounded-full text-[0.75rem] text-ink-3 transition hover:text-ink"
-            >
-              <X />
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function SidoStep({ onEnter }: { onEnter: (sido: Sido) => void }) {
-  return (
-    <div className="flex min-h-0 flex-1 flex-col border-t border-line-2">
-      <p className="px-4 py-2.5 text-xs font-bold text-ink-3">시·도 선택</p>
-      <ul className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
-        {SIDO_LIST.map((sido) => (
-          <li key={sido.name}>
-            <button type="button" onClick={() => onEnter(sido)} className={cn(ROW, "hover:bg-paper")}>
-              <span className="flex-1 text-left font-medium text-ink-2">{sido.name}</span>
-              {sido.districts.length > 0 && (
-                <span className="text-xs text-ink-3">{sido.districts.length}</span>
-              )}
-              <ChevronRight className="shrink-0 text-base text-ink-3" />
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-interface OptionProps {
-  multiple: boolean;
-  isSelected: (option: RegionValue) => boolean;
-  onSelect: (option: RegionValue) => void;
-}
-
-function DistrictStep({
-  sido,
-  onBack,
-  ...optionProps
-}: OptionProps & { sido: Sido; onBack: () => void }) {
-  const options: RegionValue[] = [
-    { sido: sido.name, district: null },
-    ...sido.districts.map((district) => ({ sido: sido.name, district })),
-  ];
-
-  return (
-    <div className="flex min-h-0 flex-1 flex-col border-t border-line-2">
-      <div className="flex items-center border-b border-line-2">
-        <button
-          type="button"
-          onClick={onBack}
-          className="flex h-[2.875rem] flex-1 items-center gap-2.5 px-3.5 text-left transition hover:bg-paper"
-        >
-          <ChevronLeft className="shrink-0 text-[1.125rem] text-ink-3" />
-          <span className="font-serif text-[0.9375rem] font-bold text-ink">{sido.name}</span>
-        </button>
-        <span className="px-3.5 text-xs text-ink-3">시·군·구 선택</span>
-      </div>
-
-      <ul className="min-h-0 flex-1 overflow-y-auto px-2 py-1.5">
-        {options.map((option) => (
-          <li key={regionKey(option)}>
-            <OptionRow
-              option={option}
-              label={option.district ?? `${sido.shortName} 전체`}
-              {...optionProps}
-            />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function SearchResults({ keyword, ...optionProps }: OptionProps & { keyword: string }) {
-  const results = searchRegions(keyword);
-
-  if (results.length === 0) {
-    return (
-      <div className="flex min-h-0 flex-1 items-center justify-center border-t border-line-2 px-4">
-        <p className="text-sm text-ink-3">검색 결과가 없습니다</p>
-      </div>
-    );
-  }
-
-  return (
-    <ul className="min-h-0 flex-1 overflow-y-auto border-t border-line-2 px-2 py-1.5">
-      {results.map((option) => (
-        <li key={regionKey(option)}>
-          <OptionRow option={option} label={formatRegionLabel(option)} {...optionProps} />
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-/** 다중 모드는 체크박스 행, 단일 모드는 선택 시 체크 표시가 붙는 버튼 행. */
-function OptionRow({
-  option,
-  label,
-  multiple,
-  isSelected,
-  onSelect,
-}: OptionProps & { option: RegionValue; label: string }) {
-  const selected = isSelected(option);
-  const text = (
-    <span
-      className={cn(
-        "flex-1 text-left",
-        selected || option.district === null ? "font-bold text-ink" : "font-medium text-ink-2",
-      )}
-    >
-      {label}
-    </span>
-  );
-
-  if (multiple) {
-    return (
-      <Checkbox
-        checked={selected}
-        onChange={() => onSelect(option)}
-        label={text}
-        className={cn(ROW, "gap-2.5", selected ? "bg-paper-2" : "hover:bg-paper")}
-      />
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      aria-pressed={selected}
-      onClick={() => onSelect(option)}
-      className={cn(ROW, selected ? "bg-paper-2" : "hover:bg-paper")}
-    >
-      {text}
-      {selected && <Check className="shrink-0 text-[1.0625rem] text-gold" />}
-    </button>
   );
 }

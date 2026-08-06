@@ -7,6 +7,7 @@ import { StarRating } from "@/shared/ui/StarRating";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
+import { StatBox } from "./StatBox";
 
 const numberFormatter = new Intl.NumberFormat("ko-KR");
 
@@ -106,15 +107,5 @@ export function AdjusterCard({ adjuster }: { adjuster: AdjusterListItem }) {
         </div>
       </div>
     </article>
-  );
-}
-
-function StatBox({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="rounded-input border border-line bg-paper-2 py-3 text-center">
-      <dt className="sr-only">{label}</dt>
-      <dd className="font-serif text-xl font-semibold text-ink">{value}</dd>
-      <p className="mt-0.5 text-xs text-ink-3">{label}</p>
-    </div>
   );
 }

@@ -8,6 +8,7 @@
   "rules": {
     "react/react-in-jsx-scope": "off",
     "react/no-unstable-nested-components": ["warn", { "allowAsProps": true }],
+    "react/no-multi-comp": ["error", { "ignoreStateless": false }],
     "no-console": ["warn", { "allow": ["warn", "error"] }],
     "prefer-const": "error",
     "eqeqeq": ["error", "smart"],
@@ -22,6 +23,10 @@
     {
       "files": ["scripts/**"],
       "rules": { "no-console": "off" }
+    },
+    {
+      "files": ["**/*.stories.tsx"],
+      "rules": { "react/no-multi-comp": "off" }
     }
   ],
   "ignorePatterns": [

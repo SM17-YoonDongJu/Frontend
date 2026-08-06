@@ -1,7 +1,8 @@
+import { ChatEmptyPane } from "@/shared/ui/chat/ChatEmptyPane";
 import { ChatListContent } from "@/shared/ui/chat/ChatListContent";
 import { ChatListSkeleton } from "@/shared/ui/chat/ChatListSkeleton";
 import { ChatSectionBoundary } from "@/shared/ui/chat/ChatSectionBoundary";
-import { ChatEmptyPane, ChatSplitShell } from "@/shared/ui/chat/ChatSplitShell";
+import { ChatSplitShell } from "@/shared/ui/chat/ChatSplitShell";
 
 const CHAT_BASE_PATH = "/customer/chat";
 const EMPTY_ACTION = { href: "/customer/adjusters", label: "손해사정사 찾아보기" };

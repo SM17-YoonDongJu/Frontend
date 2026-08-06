@@ -17,6 +17,7 @@ import {
   type RecentLogin,
 } from "../../../../_shared/hooks/use-recent-login";
 import { useOauthCallback } from "./_api/use-oauth-callback";
+import { CenteredMessage } from "./_components/CenteredMessage";
 import { oauthProviderSchema, type OauthProvider } from "./_model/oauth-callback.schema";
 
 function isSupportedProvider(value: string): value is OauthProvider {
@@ -28,14 +29,6 @@ const ERROR_MESSAGE: Record<string, string> = {
   INVALID_REQUEST: "로그인 요청이 만료되었어요. 다시 시도해 주세요.",
   UNSUPPORTED_PROVIDER: "지원하지 않는 소셜 로그인 방식이에요. 다시 시도해 주세요.",
 };
-
-function CenteredMessage({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
-      {children}
-    </div>
-  );
-}
 
 export default function OauthCallbackPage() {
   const router = useRouter();

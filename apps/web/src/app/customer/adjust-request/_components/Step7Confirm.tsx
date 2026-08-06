@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { Checkbox } from "@/shared/ui/Checkbox";
 import { formatWon } from "@/shared/lib/format-amount";
 import type { AdjustRequestDraft } from "../_model/types";
+import { SummaryRow } from "./SummaryRow";
 
 const TREATMENT_LABELS: Record<string, string> = {
   ADMISSION: "입원",
@@ -11,15 +12,6 @@ const TREATMENT_LABELS: Record<string, string> = {
   MEDICATION: "약제",
   SURGERY: "수술",
 };
-
-function SummaryRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-line py-2.5 last:border-0">
-      <span className="text-[0.8125rem] text-ink-3">{label}</span>
-      <span className="text-right text-[0.875rem] font-medium text-ink">{value}</span>
-    </div>
-  );
-}
 
 export function Step7Confirm() {
   const { watch, setValue, formState } = useFormContext<AdjustRequestDraft>();

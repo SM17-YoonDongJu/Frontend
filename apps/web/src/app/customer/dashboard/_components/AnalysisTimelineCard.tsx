@@ -8,6 +8,7 @@ import { useDashboard } from "../_api/use-dashboard";
 import type { DashboardActiveReport } from "../_model/dashboard.schema";
 import type { ReportStatus } from "@/app/customer/_shared/model/report-list.schema";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
+import { TimelineConnector } from "./TimelineConnector";
 
 type StepState = "completed" | "current" | "future";
 
@@ -122,7 +123,7 @@ export function AnalysisTimelineCard() {
       <ol className="mt-5 flex items-start">
         {steps.map((step) => (
           <li key={step.index} className="relative flex flex-1 flex-col items-center">
-            {step.index > 1 && <StepConnector reached={step.state !== "future"} />}
+            {step.index > 1 && <TimelineConnector reached={step.state !== "future"} />}
             <span
               className={`relative z-10 flex size-6 items-center justify-center rounded-full text-[0.8125rem] font-bold md:size-[1.875rem] ${CIRCLE_STATE_CLASS[step.state]}`}
             >
@@ -152,14 +153,5 @@ export function AnalysisTimelineCard() {
         </p>
       </div>
     </section>
-  );
-}
-
-function StepConnector({ reached }: { reached: boolean }) {
-  return (
-    <span
-      aria-hidden
-      className={`absolute right-1/2 top-3 z-0 h-px w-full md:top-[0.9375rem] ${reached ? "bg-gold-2" : "bg-line"}`}
-    />
   );
 }
