@@ -12,6 +12,12 @@ export interface ReportSummaryProps {
   adjusterId?: string | null;
 }
 
+function formatReviewedDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return `${date.getFullYear()}. ${date.getMonth() + 1}. ${date.getDate()}`;
+}
+
 export function ReportSummary({
   status,
   reviewComment,
@@ -21,8 +27,10 @@ export function ReportSummary({
   adjusterId,
 }: ReportSummaryProps) {
   const meta = REPORT_STATUS_META[status];
-  const subtitle = [adjusterCareer, reviewedAt && `${reviewedAt} 검수`].filter(Boolean).join(" · ");
-  const avatarChar = adjusterName?.slice(0, 1) ?? "사";
+  const subtitle = [adjusterCareer, reviewedAt && `${formatReviewedDate(reviewedAt)} 검수`]
+    .filter(Boolean)
+    .join(" · ");
+  const avatarChar = adjusterName?.slice(0, 1);
 
   const adjusterNameNode =
     adjusterName && adjusterId ? (
@@ -30,19 +38,21 @@ export function ReportSummary({
         {adjusterName}
       </Link>
     ) : (
-      (adjusterName ?? "손해사정사")
+      adjusterName
     );
 
   return (
     <section className="rounded-card border border-green bg-card px-[1.0625rem] py-4 lg:rounded-card-lg lg:border-line lg:p-6">
       <div className="flex gap-3 lg:gap-4">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-[1.25rem] bg-navy font-serif text-[1.05rem] text-white lg:size-11 lg:rounded-full lg:bg-gold-soft lg:font-sans lg:text-[1rem] lg:font-semibold lg:text-gold-ink">
-          {avatarChar}
-        </div>
+        {avatarChar && (
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-[1.25rem] bg-navy font-serif text-[1.05rem] text-white lg:size-11 lg:rounded-full lg:bg-gold-soft lg:font-sans lg:text-[1rem] lg:font-semibold lg:text-gold-ink">
+            {avatarChar}
+          </div>
+        )}
         <div className="flex-1">
           {/* 모바일 제목 */}
           <h2 className="text-[0.875rem] font-bold leading-[1.27rem] text-ink lg:hidden">
-            {adjusterNameNode} 손해사정사님이 검수해주셨어요
+            {adjusterName ? <>{adjusterNameNode} 손해사정사님이 검수해주셨어요</> : "검수 의견"}
           </h2>
           {/* 데스크톱 제목 */}
           <div className="hidden items-center justify-between gap-2 lg:flex">
