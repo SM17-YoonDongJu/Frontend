@@ -157,11 +157,14 @@ test("상세 보기를 누르면 리포트 상세로 이동한다", async ({ pag
 // 목 데이터 정합(#153) — 리포트 목록의 제안 건수와 제안 목록 응답이 같은 원천을 봐야 한다.
 // 채팅 시드가 없는 리포트에서 빈 목록·고정 target이 돌아오던 회귀를 가드한다.
 
-test("리포트 목록의 제안 N건 보기로 들어가면 N건의 제안이 보인다", async ({ page }) => {
+test("리포트 목록 카드로 들어가면 카드에 적힌 건수만큼 제안이 보인다", async ({ page }) => {
   await page.goto("/customer/reports");
 
+  const card = page.getByRole("listitem").filter({ hasText: "No.20260430-118" });
+  await expect(card.getByText("제안 5 건")).toBeVisible();
+
   await expect(async () => {
-    await page.getByRole("link", { name: "제안 5건 보기" }).click();
+    await card.getByRole("link").click();
     await expect(page).toHaveURL(/\/customer\/proposals\/c3d0e1f2/);
   }).toPass({ timeout: 10000 });
 
@@ -176,20 +179,3 @@ test("리포트 목록의 제안 N건 보기로 들어가면 N건의 제안이 �
   await expect(page.getByText("백승호")).toBeVisible();
 });
 
-test("받은 제안 목록 카드의 건수와 상세 목록 건수가 일치한다", async ({ page }) => {
-  await page.goto("/customer/proposals");
-
-  const card = page.getByRole("link").filter({ hasText: "실손 · 도수치료 한도" });
-  await expect(card).toBeVisible();
-  await expect(card.getByText("제안 2 건")).toBeVisible();
-
-  await expect(async () => {
-    await card.click();
-    await expect(page).toHaveURL(/\/customer\/proposals\/a1000000/);
-  }).toPass({ timeout: 10000 });
-
-  // 카드가 약속한 2건이 그대로 보인다
-  await expect(page.getByText("No.20260415-031")).toBeVisible();
-  await expect(page.getByText("박준호")).toBeVisible();
-  await expect(page.getByText("오민석")).toBeVisible();
-});

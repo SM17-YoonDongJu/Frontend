@@ -38,7 +38,7 @@ test("진입하면 인사·지금 할 일·제안 비교·빠른 실행이 보�
   ).toBeVisible();
 });
 
-test("제안 비교하기를 누르면 받은 제안 목록으로 이동한다", async ({ page }) => {
+test("제안 비교하기를 누르면 내 리포트 목록으로 이동한다", async ({ page }) => {
   await page.goto(PATH);
 
   await expect(async () => {
@@ -46,7 +46,7 @@ test("제안 비교하기를 누르면 받은 제안 목록으로 이동한다",
       .getByRole("link", { name: "제안 3건 비교하기" })
       .filter({ visible: true })
       .click();
-    await expect(page).toHaveURL(/\/customer\/proposals$/);
+    await expect(page).toHaveURL(/\/customer\/reports$/);
   }).toPass({ timeout: 10000 });
 });
 

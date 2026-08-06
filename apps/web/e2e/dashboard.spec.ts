@@ -89,13 +89,13 @@ test("제안 도착: 액션센터 새 제안 3건과 제안 비교 카드가 보
     page.getByRole("heading", { name: "받은 제안 비교" }).filter({ visible: true }),
   ).toBeVisible();
 
-  // "제안 3건 비교하기" → 받은 제안 목록(/customer/proposals)
+  // "제안 3건 비교하기" → 내 리포트 목록(/customer/reports, #262 통합)
   await expect(async () => {
     await page
       .getByRole("link", { name: "제안 3건 비교하기" })
       .filter({ visible: true })
       .click();
-    await expect(page).toHaveURL(/\/customer\/proposals$/);
+    await expect(page).toHaveURL(/\/customer\/reports$/);
   }).toPass({ timeout: 10000 });
 });
 
