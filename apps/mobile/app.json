@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "바른보상",
     "slug": "mobile",
     "version": "1.0.0",
-    "scheme": "bareun",
+    "scheme": "brbosang",
     "plugins": [
       "expo-notifications",
       "expo-web-browser"
@@ -13,6 +13,7 @@
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.brbosang.app",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "사진 첨부를 위해 사진 보관함 접근 권한이 필요합니다.",
         "NSCameraUsageDescription": "사진 촬영 후 첨부를 위해 카메라 접근 권한이 필요합니다.",
@@ -20,6 +21,7 @@
       }
     },
     "android": {
+      "package": "com.brbosang.app",
       "adaptiveIcon": {
         "backgroundColor": "#2f3648",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -35,6 +37,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e452ee69-2a3a-439a-90f8-4239eeddd608"
+      }
+    },
+    "owner": "teambrbosang"
   }
 }

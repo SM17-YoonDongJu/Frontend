@@ -7,7 +7,7 @@ import { ActivityIndicator, BackHandler, Pressable, StyleSheet, Text, View } fro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
-import { EXTERNAL_AUTH_HOSTS, getAllowedHosts } from './config/allowed-hosts';
+import { EXTERNAL_AUTH_HOSTS, getAllowedHosts, getServiceHosts } from './config/allowed-hosts';
 import { APP_USER_AGENT_SUFFIX } from './config/user-agent';
 import { getWebUrl } from './config/web-url';
 import { createLoadDecider } from './lib/create-should-start-load';
@@ -18,7 +18,7 @@ import { useNotificationResponse } from './push/use-notification-response';
 
 const decideLoad = createLoadDecider(getAllowedHosts(), EXTERNAL_AUTH_HOSTS);
 const AUTH_SESSION_RETURN_URL = `${APP_SCHEME}://login/oauth2/code`;
-const SERVICE_HOST = new URL(getWebUrl()).host;
+const SERVICE_HOSTS = getServiceHosts();
 
 export function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
@@ -99,7 +99,7 @@ export function WebViewScreen() {
           // 서비스 밖 문서(OAuth 등)로 이동하면 웹 준비 상태를 해제해 대기 중인 토큰 주입을 차단.
           // 서비스 복귀 시 웹이 WEB_READY를 다시 보낸다.
           try {
-            if (new URL(navState.url).host !== SERVICE_HOST) {
+            if (!SERVICE_HOSTS.includes(new URL(navState.url).host)) {
               webReadyRef.current = false;
             }
           } catch {

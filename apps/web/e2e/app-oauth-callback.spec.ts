@@ -7,7 +7,7 @@ import { setAuthCookie } from "./_auth-cookie-helpers";
  * 원칙: 앱에서 시작한 로그인(state `app.` 접두어)이 외부 브라우저에서 콜백에 도달하면
  *       code를 교환하지 않고 앱 딥링크로 넘긴다(쿠키가 외부 브라우저에 남는 것 방지).
  *       앱 웹뷰 안(UA에 BareunApp)에서는 접두어와 무관하게 정상 교환한다.
- * 인가 리다이렉트·실제 딥링크 복귀(bareun://)는 브라우저 밖 영역이라 검증하지 않고,
+ * 인가 리다이렉트·실제 딥링크 복귀(brbosang://)는 브라우저 밖 영역이라 검증하지 않고,
  * "교환이 실행됐는가(홈 이동 여부)"와 실패 콜백의 로그인 복귀만 검증한다.
  */
 
@@ -18,7 +18,7 @@ test.describe("외부 브라우저 복귀", () => {
     page,
     browserName,
   }) => {
-    // webkit은 미지원 스킴(bareun://) 이동 시 동작이 달라 chromium 계열만 검증한다.
+    // webkit은 미지원 스킴(brbosang://) 이동 시 동작이 달라 chromium 계열만 검증한다.
     test.skip(browserName === "webkit", "커스텀 스킴 이동 동작이 달라 chromium만 검증");
 
     await page.goto("/login/oauth2/code/kakao?code=valid&state=app.s1");

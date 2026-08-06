@@ -1,6 +1,6 @@
 import { getWebUrl } from '../config/web-url';
 
-export const APP_SCHEME = 'bareun';
+export const APP_SCHEME = 'brbosang';
 
 export function mapDeepLinkToWebUrl(deepLinkUrl: string): string | null {
   const match = deepLinkUrl.match(new RegExp(`^${APP_SCHEME}://(.*)$`));

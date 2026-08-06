@@ -42,7 +42,6 @@ export async function getPushToken(): Promise<PushTokenResult | null> {
   if (!(await ensurePermission())) {
     return null;
   }
-  // EAS projectId는 앱 아이덴티티 이슈에서 설정 — 없으면 토큰 발급이 실패하므로 null 반환
   const projectId: string | undefined = Constants.expoConfig?.extra?.eas?.projectId;
   try {
     const { data } = await Notifications.getExpoPushTokenAsync(
