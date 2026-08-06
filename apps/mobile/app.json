@@ -3,7 +3,7 @@
     "name": "바른보상",
     "slug": "mobile",
     "version": "1.0.0",
-    "scheme": "bareun",
+    "scheme": "brbosang",
     "plugins": [
       "expo-notifications",
       "expo-web-browser"
