@@ -16,13 +16,19 @@ Closes #259
 
 ### 1. 하단 안전영역을 웹 탭바에 위임
 
-`SafeAreaView`에 `edges`가 없어 네이티브가 하단 인셋을 흰 여백으로 먹고, 웹 탭바가 `pb-[env(safe-area-inset-bottom)]`로 같은 영역을 한 번 더 넣고 있었습니다. iOS는 상단만 네이티브가 처리하도록 한정해 탭바 배경이 홈 인디케이터까지 이어집니다.
+`SafeAreaView`에 `edges`가 없어 네이티브가 하단 인셋을 흰 여백으로 먹고, 웹 탭바가 `pb-[env(safe-area-inset-bottom)]`로 같은 영역을 한 번 더 넣고 있었습니다. 네이티브는 상단만 처리하도록 한정해 탭바 배경이 홈 인디케이터까지 이어집니다.
 
-안드로이드 웹뷰는 `env(safe-area-inset-*)` 보고가 불안정해 제스처 바에 탭 라벨이 물릴 수 있습니다. 안드로이드는 기존대로 네이티브가 하단 인셋을 처리하도록 플랫폼을 분기했습니다.
+안드로이드 웹뷰는 `env(safe-area-inset-*)` 보고가 불안정해 그대로 두면 제스처 바에 탭 라벨이 물립니다. 네이티브가 읽은 하단 인셋을 CSS 변수로 웹뷰에 주입하고, 탭바가 `env()`와 주입값 중 큰 값을 쓰도록 했습니다.
 
 ```tsx
 // apps/mobile/src/WebViewScreen.tsx
-const SAFE_AREA_EDGES: Edge[] = Platform.OS === 'ios' ? ['top'] : ['top', 'bottom'];
+const insetBottomScript = (bottom: number) =>
+  `document.documentElement.style.setProperty('--app-inset-bottom', '${bottom}px'); true;`;
+```
+
+```tsx
+// apps/web/src/shared/ui/AppTabBar.tsx
+className="... pb-[max(env(safe-area-inset-bottom),var(--app-inset-bottom))] ..."
 ```
 
 <br/>
@@ -62,6 +68,6 @@ Playwright + MSW **E2E 12개**(`apps/web/e2e/app-shell.spec.ts`, `apps/web/e2e/r
 
 `CustomerBottomNav`는 받은 제안 화면에서만 쓰이던 고객 전용 탭바였습니다. 다른 고객 모바일 웹 화면에는 하단 탭바가 없어 이 화면만 예외였고, 통합 후에는 앱에서만 탭바가 보입니다. 웹 모바일에도 탭바를 노출하려면 `AppTabBar`의 앱 전용 조건을 푸는 별도 결정이 필요합니다.
 
-### 안드로이드 실기기 확인이 필요합니다
+### 안드로이드 실기기 확인 완료
 
-안드로이드는 네이티브가 하단 인셋을 처리하므로 탭바 배경이 제스처 바까지 이어지지 않습니다. 제스처 바 겹침 여부와 여백 크기는 실기기(EAS 빌드)에서 확인이 필요합니다. iOS도 시뮬레이터가 아닌 실기기에서 홈 인디케이터 영역을 확인해 주세요.
+EAS 내부 배포 APK를 실기기에 설치해 확인했습니다. 처음에는 네이티브가 하단 인셋을 먹어 탭바 아래 흰 띠가 남았고, 이를 인셋 주입 방식으로 바꿔 해소했습니다. iOS는 `env()` 경로라 동작이 같지만 실기기 확인이 남아 있습니다.
