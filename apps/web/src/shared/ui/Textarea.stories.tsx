@@ -50,3 +50,14 @@ export const InsideCounter: Story = {
   args: { value: "", onChange: () => {} },
   render: () => <InsideCounterDemo />,
 };
+
+/** 제출 중 등 입력 잠금. */
+export const Disabled: Story = {
+  args: {
+    value: "상담 중 반복적인 욕설이 있었습니다.",
+    onChange: () => {},
+    maxLength: 500,
+    rows: 4,
+    disabled: true,
+  },
+};

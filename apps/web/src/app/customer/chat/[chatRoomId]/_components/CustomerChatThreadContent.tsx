@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
@@ -13,16 +12,23 @@ import { useReadChat } from "@/shared/api/chat/use-read-chat";
 import { useRejectChat } from "@/shared/api/chat/use-reject-chat";
 import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
+import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
+import { FileText } from "@/shared/ui/icons/FileText";
 import { X } from "@/shared/ui/icons/X";
 import { ChatComparisonBanner } from "@/shared/ui/chat/ChatComparisonBanner";
-import { ChatThreadHeader } from "@/shared/ui/chat/ChatThreadHeader";
+import {
+  ChatThreadHeader,
+  type ChatThreadHeaderMenuAction
+} from "@/shared/ui/chat/ChatThreadHeader";
 import { ChatThreadView } from "@/shared/ui/chat/ChatThreadView";
 import { MatchConfirmModal } from "@/shared/ui/chat/MatchConfirmModal";
 import { MatchRejectConfirmModal } from "@/shared/ui/chat/MatchRejectConfirmModal";
 import { MatchStatusBadge } from "@/shared/ui/chat/MatchStatusBadge";
 import { MessageInputBar } from "@/shared/ui/chat/MessageInputBar";
+import { ReportChatDialog } from "@/shared/ui/chat/ReportChatDialog";
+import { useReportChatDialog } from "@/shared/ui/chat/use-report-chat-dialog";
 import { ROOM_STATUS_META } from "@/shared/ui/chat/room-status";
 import { toast } from "@/shared/ui/toast";
 
@@ -38,7 +44,7 @@ export interface CustomerChatThreadContentProps {
  */
 export function CustomerChatThreadContent({
   chatRoomId,
-  chatBasePath,
+  chatBasePath
 }: CustomerChatThreadContentProps) {
   const router = useRouter();
   const { data: room } = useChatRoom(chatRoomId);
@@ -50,6 +56,7 @@ export function CustomerChatThreadContent({
   const accept = useAcceptChat(chatRoomId);
   const reject = useRejectChat(chatRoomId);
   const { mutate: markRead } = useReadChat(chatRoomId);
+  const reportDialog = useReportChatDialog(chatRoomId);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
 
@@ -59,35 +66,26 @@ export function CustomerChatThreadContent({
 
   const group = toMatchGroup(room.matchStatus, room.roomStatus);
   // 원본 리포트가 아니라 사정사 검수 결과(공유 리포트)로 이동. 사정사 검색 방은 공유 리포트가 없어 비활성.
-  const sharedReportHref = room.reportId
-    ? `${chatBasePath}/${chatRoomId}/shared-report`
-    : "#";
+  const sharedReportHref = room.reportId ? `${chatBasePath}/${chatRoomId}/shared-report` : "#";
   const matchPending = accept.isPending || reject.isPending;
 
   // 목록 응답에 현재 방이 아직 없어도(딥링크 직진입) 비교 수에 자신은 포함
-  const listSiblings = room.reportId
-    ? rooms.filter((item) => item.reportId === room.reportId)
-    : [];
-  const siblings = listSiblings.some(
-    (item) => item.chatRoomId === room.chatRoomId,
-  )
+  const listSiblings = room.reportId ? rooms.filter((item) => item.reportId === room.reportId) : [];
+  const siblings = listSiblings.some((item) => item.chatRoomId === room.chatRoomId)
     ? listSiblings
     : [room, ...listSiblings];
   const comparingCount = siblings.filter(
-    (item) => toMatchGroup(item.matchStatus, item.roomStatus) === "comparing",
+    (item) => toMatchGroup(item.matchStatus, item.roomStatus) === "comparing"
   ).length;
   const endingConsultations = siblings
     .filter(
       (item) =>
         item.chatRoomId !== room.chatRoomId &&
-        toMatchGroup(item.matchStatus, item.roomStatus) === "comparing",
+        toMatchGroup(item.matchStatus, item.roomStatus) === "comparing"
     )
     .map((item) => ({ name: item.counterpart.name }));
 
-  const subtitle = [
-    room.caseNo,
-    SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.roomStatus].label,
-  ]
+  const subtitle = [room.caseNo, SUBTITLE_SUFFIX[group] ?? ROOM_STATUS_META[room.roomStatus].label]
     .filter(Boolean)
     .join(" · ");
 
@@ -96,80 +94,53 @@ export function CustomerChatThreadContent({
   const confirmReject = () =>
     reject.mutate(undefined, {
       onSuccess: () => setRejectOpen(false),
-      onError: () =>
-        toast.error("매칭 거절에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      onError: () => toast.error("매칭 거절에 실패했어요. 잠시 후 다시 시도해 주세요.")
     });
   const confirmMatch = () =>
     accept.mutate(undefined, {
       onSuccess: () => setConfirmOpen(false),
-      onError: () =>
-        toast.error("매칭 완료에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      onError: () => toast.error("매칭 완료에 실패했어요. 잠시 후 다시 시도해 주세요.")
     });
 
-  const actions =
-    group === "comparing" ? (
-      // Figma 1012:11044/11042 — 매칭 완료(primary·ink)가 앞, 매칭 거절(terra)이 뒤
-      <>
-        <button
-          type="button"
-          onClick={() => setConfirmOpen(true)}
-          disabled={matchPending}
-          className="flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
-        >
-          매칭 완료
-          <CheckCircle className="text-[0.9375rem]" />
-        </button>
-        <button
-          type="button"
-          onClick={rejectMatch}
-          disabled={matchPending}
-          className="flex items-center gap-1.5 rounded-full bg-terra px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
-        >
-          매칭 거절
-          <X className="text-[0.875rem]" />
-        </button>
-      </>
-    ) : group === "matched" ? (
-      <Link
-        href={sharedReportHref}
-        className="flex items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96]"
-      >
-        사건 진행 보기
-        <ArrowRight className="text-[0.9375rem]" />
-      </Link>
-    ) : null;
+  const matchActions: ChatThreadHeaderMenuAction[] =
+    group === "comparing"
+      ? [
+          {
+            key: "accept",
+            label: "매칭 완료",
+            icon: <CheckCircle />,
+            onClick: () => setConfirmOpen(true),
+            disabled: matchPending,
+            // 데스크톱은 비교 배너에 전용 버튼이 있어 더보기에선 모바일에만 노출
+            mobileOnly: true
+          },
+          {
+            key: "reject",
+            label: "매칭 거절",
+            icon: <X />,
+            onClick: rejectMatch,
+            tone: "danger",
+            disabled: matchPending,
+            // 데스크톱에선 접근 경로 없음(모바일 더보기 전용) — 팀 결정
+            mobileOnly: true
+          }
+        ]
+      : group === "matched"
+        ? [
+            {
+              key: "progress",
+              label: "사건 진행 보기",
+              icon: <ArrowRight />,
+              href: sharedReportHref
+            }
+          ]
+        : [];
 
-  // Figma 1012:9931 — 모바일 헤더 매칭 버튼(거절=terra-soft·완료=navy, 컴팩트). 데스크톱 actions보다 작고 순서·톤 상이
-  const mobileActions =
-    group === "comparing" ? (
-      <>
-        <button
-          type="button"
-          onClick={rejectMatch}
-          disabled={matchPending}
-          className="rounded-button bg-terra-soft px-2.5 py-2 text-[0.75rem] font-bold text-terra transition hover:brightness-[.97] disabled:cursor-not-allowed disabled:opacity-[.42]"
-        >
-          매칭 거절
-        </button>
-        <button
-          type="button"
-          onClick={() => setConfirmOpen(true)}
-          disabled={matchPending}
-          className="flex items-center gap-1 rounded-button bg-navy px-2.5 py-2 text-[0.75rem] font-bold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
-        >
-          <CheckCircle className="text-[0.9375rem]" />
-          매칭 완료
-        </button>
-      </>
-    ) : group === "matched" ? (
-      <Link
-        href={sharedReportHref}
-        className="flex items-center gap-1 rounded-button bg-navy px-2.5 py-2 text-[0.75rem] font-bold text-white transition hover:brightness-[.96]"
-      >
-        사건 진행
-        <ArrowRight className="text-[0.9375rem]" />
-      </Link>
-    ) : null;
+  const menuActions: ChatThreadHeaderMenuAction[] = [
+    { key: "report", label: "리포트 보기", icon: <FileText />, href: sharedReportHref },
+    ...matchActions,
+    { key: "report-chat", label: "신고", icon: <AlertTriangle />, onClick: reportDialog.openDialog }
+  ];
 
   return (
     <div className="flex h-full flex-col">
@@ -177,13 +148,11 @@ export function CustomerChatThreadContent({
         name={room.counterpart.name}
         caseNo={room.caseNo}
         roomStatus={room.roomStatus}
-        reportHref={sharedReportHref}
         // customer 방의 상대는 항상 사정사 — counterpart.userId가 곧 adjusterId
         profileHref={`/customer/adjusters/${room.counterpart.userId}`}
         subtitle={subtitle}
         badge={group === "matched" ? <MatchStatusBadge group={group} /> : undefined}
-        actions={actions}
-        mobileActions={mobileActions}
+        menuActions={menuActions}
         onBack={() => router.push(chatBasePath)}
       />
 
@@ -194,6 +163,8 @@ export function CustomerChatThreadContent({
             variant="comparing"
             reportTypeLabel={accidentTypeLabel(room.reportTypeLabel)}
             comparingCount={comparingCount}
+            onMatchComplete={() => setConfirmOpen(true)}
+            matchCompletePending={matchPending}
           />
         </div>
       )}
@@ -221,8 +192,7 @@ export function CustomerChatThreadContent({
         sendFailed={sendMessage.isError}
         onPickFile={(file) =>
           sendAttachment.mutate(file, {
-            onError: () =>
-              toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요."),
+            onError: () => toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요.")
           })
         }
         attachPending={sendAttachment.isPending}
@@ -244,11 +214,20 @@ export function CustomerChatThreadContent({
         onConfirm={confirmReject}
         onCancel={() => setRejectOpen(false)}
       />
+
+      <ReportChatDialog
+        open={reportDialog.open}
+        counterpartName={room.counterpart.name}
+        pending={reportDialog.pending}
+        errorMessage={reportDialog.errorMessage}
+        onSubmit={reportDialog.submit}
+        onClose={reportDialog.closeDialog}
+      />
     </div>
   );
 }
 
 const SUBTITLE_SUFFIX: Partial<Record<ReturnType<typeof toMatchGroup>, string>> = {
   comparing: "상담 중 · 비교 중",
-  matched: "매칭 완료 · 진행 중",
+  matched: "매칭 완료 · 진행 중"
 };

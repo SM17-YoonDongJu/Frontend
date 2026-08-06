@@ -3,6 +3,7 @@ import { accidentTypeSchema } from "@/shared/model/accident-type";
 import type {
   Attachment,
   ChatMessageResponse as GenChatMessageResponse,
+  ChatReportResponse,
   ChatRoomSummaryResponse,
   ConsultationDecisionResponse,
   ReadResponse,
@@ -139,6 +140,35 @@ export const readChatResponseSchema = z.object({
   readAt: z.string(),
 });
 
+// POST /chats/{chatRoomId}/report — 백엔드가 OpenAPI 스펙에 반영(2026-08-06 dev #248 코드젠 확인), FE 확정 계약과 필드 일치. 중복 신고 제한 없음.
+export const chatReportReasonSchema = z.enum([
+  "SPAM",
+  "ABUSE",
+  "FRAUD",
+  "PRIVACY_VIOLATION",
+  "OTHER",
+]);
+
+export const REPORT_DETAIL_MAX_LENGTH = 500;
+
+export const reportChatBodySchema = z
+  .object({
+    reason: chatReportReasonSchema,
+    reasonDetail: z.string().max(REPORT_DETAIL_MAX_LENGTH).nullable(),
+  })
+  .refine(
+    (body) =>
+      body.reason !== "OTHER" || (body.reasonDetail?.trim().length ?? 0) > 0,
+    { message: "기타 사유는 상세 내용을 입력해 주세요.", path: ["reasonDetail"] },
+  );
+
+export const reportChatResponseSchema = z.object({
+  chatReportId: z.uuid(),
+  chatRoomId: z.uuid(),
+  reason: chatReportReasonSchema,
+  createdAt: z.string(),
+});
+
 export type RoomStatus = z.infer<typeof roomStatusSchema>;
 export type MatchStatus = z.infer<typeof matchStatusSchema>;
 export type ChatRoom = z.infer<typeof chatRoomSchema>;
@@ -157,6 +187,9 @@ export type UploadChatAttachmentResponse = z.infer<
 export type AcceptChatResponse = z.infer<typeof acceptChatResponseSchema>;
 export type RejectChatResponse = z.infer<typeof rejectChatResponseSchema>;
 export type ReadChatResponse = z.infer<typeof readChatResponseSchema>;
+export type ChatReportReason = z.infer<typeof chatReportReasonSchema>;
+export type ReportChatBody = z.infer<typeof reportChatBodySchema>;
+export type ReportChatResponse = z.infer<typeof reportChatResponseSchema>;
 
 // counterpart는 nested 커스텀 스키마라 얕은 키 대조 대상에서 제외.
 type _ChatRoomDriftCheck = ExpectDriftCheck<
@@ -179,4 +212,7 @@ type _RejectChatResponseDriftCheck = ExpectDriftCheck<
 >;
 type _ReadChatResponseDriftCheck = ExpectDriftCheck<
   AssertFieldsExistInSpec<ReadChatResponse, ReadResponse>
+>;
+type _ReportChatResponseDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<ReportChatResponse, ChatReportResponse>
 >;

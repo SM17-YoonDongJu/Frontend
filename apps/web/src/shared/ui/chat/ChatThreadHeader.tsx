@@ -1,34 +1,45 @@
+"use client";
+
 import Link from "next/link";
-import type { ReactNode } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import type { RoomStatus } from "@/shared/api/chat/chat.schema";
+import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/ui/Avatar";
+import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
-import { FileText } from "@/shared/ui/icons/FileText";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
-import { X } from "@/shared/ui/icons/X";
+import { Popover } from "@/shared/ui/Popover";
 import { ROOM_STATUS_META } from "./room-status";
+
+export interface ChatThreadHeaderMenuAction {
+  key: string;
+  label: string;
+  icon: ReactNode;
+  /** 있으면 링크, 없으면 버튼 */
+  href?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  /** danger = 매칭 거절·상담 종료 */
+  tone?: "default" | "danger";
+  /** 데스크톱에서 다른 곳에 전용 버튼으로 노출돼 더보기 목록에선 숨김(모바일만) */
+  mobileOnly?: boolean;
+}
 
 export interface ChatThreadHeaderProps {
   name: string;
   /** 사건번호 — 사정사 검색 방(리포트 없음)은 null */
   caseNo: string | null;
   roomStatus: RoomStatus;
-  reportHref: string;
   /** 모바일 뒤로가기 — 없으면 버튼 미노출 */
   onBack?: () => void;
   /** 이름 옆 배지(매칭 완료 등). 없으면 미표시 */
   badge?: ReactNode;
   /** 서브타이틀 오버라이드. 없으면 기존 caseNo·roomStatus 라벨 */
   subtitle?: string;
-  /** 우측 액션 슬롯(데스크톱). 리포트 보기 다음에 붙는다(customer 매칭 버튼 등) */
-  actions?: ReactNode;
-  /** 모바일 우측 액션 슬롯. 전달 시 모바일 리포트 아이콘 대신 표시(customer 매칭 버튼). 미전달(partner)=현행 리포트 아이콘 */
-  mobileActions?: ReactNode;
-  /** 상담 종료(데스크톱 전용 버튼, partner 하위호환). ACTIVE 방에서만 노출 */
-  onClose?: () => void;
-  closePending?: boolean;
   /** 상대 프로필 링크(customer→사정사 프로필). 없으면(partner) 링크 없이 렌더 */
   profileHref?: string;
+  /** 헤더 보조 액션 — 데스크톱·모바일 공통으로 "더보기" 패널에 세로 나열 */
+  menuActions: ChatThreadHeaderMenuAction[];
 }
 
 /** href가 있으면 아바타·이름 묶음을 프로필 링크로, 없으면(partner) 헤더 flex에 그대로 편다. */
@@ -45,26 +56,81 @@ function ProfileLink({ href, children }: { href?: string; children: ReactNode })
   );
 }
 
+function MenuActionItem({
+  action,
+  onSelect
+}: {
+  action: ChatThreadHeaderMenuAction;
+  onSelect: () => void;
+}) {
+  const danger = action.tone === "danger";
+  const className = cn(
+    "flex w-full items-center gap-3 px-3.5 py-3 text-left text-[0.8125rem] font-semibold transition",
+    danger ? "text-terra hover:bg-terra-soft/60" : "text-ink hover:bg-paper-2",
+    action.disabled && "pointer-events-none cursor-not-allowed opacity-[.42]",
+    action.mobileOnly && "md:hidden"
+  );
+  const content = (
+    <>
+      <span
+        className={cn(
+          "flex size-8 shrink-0 items-center justify-center rounded-full text-[0.9375rem]",
+          danger ? "bg-terra-soft text-terra" : "bg-paper-2 text-ink-2"
+        )}
+      >
+        {action.icon}
+      </span>
+      {action.label}
+    </>
+  );
+
+  if (action.href) {
+    return (
+      <Link
+        href={action.href}
+        role="menuitem"
+        aria-disabled={action.disabled}
+        className={className}
+        onClick={onSelect}
+      >
+        {content}
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      disabled={action.disabled}
+      className={className}
+      onClick={() => {
+        onSelect();
+        action.onClick?.();
+      }}
+    >
+      {content}
+    </button>
+  );
+}
+
 export function ChatThreadHeader({
   name,
   caseNo,
   roomStatus,
-  reportHref,
   onBack,
   badge,
   subtitle: subtitleOverride,
-  actions,
-  mobileActions,
-  onClose,
-  closePending,
   profileHref,
+  menuActions
 }: ChatThreadHeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const subtitle =
-    subtitleOverride ??
-    [caseNo, ROOM_STATUS_META[roomStatus].label].filter(Boolean).join(" · ");
+    subtitleOverride ?? [caseNo, ROOM_STATUS_META[roomStatus].label].filter(Boolean).join(" · ");
 
   return (
-    <header className="flex items-center gap-2.5 border-b border-line-2 bg-paper px-4 py-3 md:bg-card md:px-5">
+    <header className="relative flex items-center gap-2.5 border-b border-line-2 bg-paper px-4 py-3 md:bg-card md:px-5">
       {onBack && (
         <button
           type="button"
@@ -93,41 +159,41 @@ export function ChatThreadHeader({
         </div>
       </ProfileLink>
 
-      {/* 모바일 — 매칭 액션 주입 시(customer) 리포트 아이콘 대신 표시, 아니면(partner) 리포트 아이콘. Figma 1012:9931 */}
-      {mobileActions ? (
-        <div className="flex shrink-0 items-center gap-1.5 md:hidden">{mobileActions}</div>
-      ) : (
-        <Link
-          href={reportHref}
-          aria-label="리포트 보기"
-          className="flex size-9 items-center justify-center rounded-button text-[1.1875rem] text-ink transition hover:bg-paper-2 md:hidden"
-        >
-          <FileText />
-        </Link>
-      )}
-
-      {/* 데스크톱 — 리포트 보기·상담 종료 버튼 */}
-      <div className="hidden items-center gap-2 md:flex">
-        <Link
-          href={reportHref}
-          className="flex items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-1.5 text-[0.8125rem] font-semibold text-ink transition hover:bg-paper-2"
-        >
-          리포트 보기
-          <FileText className="text-[0.9375rem]" />
-        </Link>
-        {actions}
-        {onClose && roomStatus === "ACTIVE" && (
+      {menuActions.length > 0 && (
+        <div className="relative shrink-0">
           <button
+            ref={triggerRef}
             type="button"
-            onClick={onClose}
-            disabled={closePending}
-            className="flex items-center gap-1.5 rounded-full bg-terra px-3.5 py-1.5 text-[0.8125rem] font-semibold text-white transition hover:brightness-[.96] disabled:cursor-not-allowed disabled:opacity-[.42]"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="flex items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-1.5 text-[0.8125rem] font-semibold text-ink-2 transition hover:bg-paper-2"
           >
-            상담 종료
-            <X className="text-[0.875rem]" />
+            더보기
+            <ChevronDown
+              className={cn("text-[0.9375rem] transition-transform", menuOpen && "rotate-180")}
+            />
           </button>
-        )}
-      </div>
+
+          <Popover
+            open={menuOpen}
+            onClose={() => setMenuOpen(false)}
+            triggerRef={triggerRef}
+            label="더보기"
+            className="w-56 overflow-hidden rounded-card"
+          >
+            <div role="menu" className="flex flex-col divide-y divide-line-2">
+              {menuActions.map((action) => (
+                <MenuActionItem
+                  key={action.key}
+                  action={action}
+                  onSelect={() => setMenuOpen(false)}
+                />
+              ))}
+            </div>
+          </Popover>
+        </div>
+      )}
     </header>
   );
 }

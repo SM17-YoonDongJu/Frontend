@@ -8,10 +8,15 @@ import { useReadChat } from "@/shared/api/chat/use-read-chat";
 import { useRejectChat } from "@/shared/api/chat/use-reject-chat";
 import { useSendChatAttachment } from "@/shared/api/chat/use-send-chat-attachment";
 import { useSendChatMessage } from "@/shared/api/chat/use-send-chat-message";
+import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
+import { FileText } from "@/shared/ui/icons/FileText";
+import { X } from "@/shared/ui/icons/X";
 import { toast } from "@/shared/ui/toast";
-import { ChatThreadHeader } from "./ChatThreadHeader";
+import { ChatThreadHeader, type ChatThreadHeaderMenuAction } from "./ChatThreadHeader";
 import { ChatThreadView } from "./ChatThreadView";
 import { MessageInputBar } from "./MessageInputBar";
+import { ReportChatDialog } from "./ReportChatDialog";
+import { useReportChatDialog } from "./use-report-chat-dialog";
 
 export interface ChatThreadContentProps {
   chatRoomId: string;
@@ -24,7 +29,7 @@ export interface ChatThreadContentProps {
 export function ChatThreadContent({
   chatRoomId,
   chatBasePath,
-  reportBasePath,
+  reportBasePath
 }: ChatThreadContentProps) {
   const router = useRouter();
   const { data: room } = useChatRoom(chatRoomId);
@@ -34,6 +39,7 @@ export function ChatThreadContent({
   // 상담 종료 UX는 명세상 reject(방 종료)로 매핑. 형제 방 유지·서버 미러.
   const endChat = useRejectChat(chatRoomId);
   const { mutate: markRead } = useReadChat(chatRoomId);
+  const reportDialog = useReportChatDialog(chatRoomId);
 
   useEffect(() => {
     markRead();
@@ -41,21 +47,46 @@ export function ChatThreadContent({
 
   const closed = room.roomStatus === "CLOSED";
 
+  const endChatConsultation = () =>
+    endChat.mutate(undefined, {
+      onError: () => toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요.")
+    });
+
+  const menuActions: ChatThreadHeaderMenuAction[] = [
+    {
+      key: "report",
+      label: "리포트 보기",
+      icon: <FileText />,
+      href: room.reportId ? `${reportBasePath}/${room.reportId}` : "#"
+    },
+    ...(room.roomStatus === "ACTIVE"
+      ? [
+          {
+            key: "close",
+            label: "상담 종료",
+            icon: <X />,
+            onClick: endChatConsultation,
+            tone: "danger" as const,
+            disabled: endChat.isPending
+          }
+        ]
+      : []),
+    {
+      key: "report-chat",
+      label: "신고",
+      icon: <AlertTriangle />,
+      onClick: reportDialog.openDialog
+    }
+  ];
+
   return (
     <div className="flex h-full flex-col">
       <ChatThreadHeader
         name={room.counterpart.name}
         caseNo={room.caseNo}
         roomStatus={room.roomStatus}
-        reportHref={room.reportId ? `${reportBasePath}/${room.reportId}` : "#"}
         onBack={() => router.push(chatBasePath)}
-        onClose={() =>
-          endChat.mutate(undefined, {
-            onError: () =>
-              toast.error("상담 종료에 실패했어요. 잠시 후 다시 시도해 주세요."),
-          })
-        }
-        closePending={endChat.isPending}
+        menuActions={menuActions}
       />
 
       <ChatThreadView
@@ -72,11 +103,19 @@ export function ChatThreadContent({
         sendFailed={sendMessage.isError}
         onPickFile={(file) =>
           sendAttachment.mutate(file, {
-            onError: () =>
-              toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요."),
+            onError: () => toast.error("파일 전송에 실패했어요. 잠시 후 다시 시도해 주세요.")
           })
         }
         attachPending={sendAttachment.isPending}
+      />
+
+      <ReportChatDialog
+        open={reportDialog.open}
+        counterpartName={room.counterpart.name}
+        pending={reportDialog.pending}
+        errorMessage={reportDialog.errorMessage}
+        onSubmit={reportDialog.submit}
+        onClose={reportDialog.closeDialog}
       />
     </div>
   );

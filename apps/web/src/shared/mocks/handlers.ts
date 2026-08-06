@@ -1,6 +1,7 @@
 import { delay, http, HttpResponse } from "msw";
 import { z } from "zod";
 import { camelToSnakeDeep, toSnakeKey } from "@/shared/api/case-convert";
+import { chatReportReasonSchema } from "@/shared/api/chat/chat.schema";
 import { API_BASE_URL } from "@/shared/api/config";
 import {
   consumeReissue,
@@ -1518,6 +1519,55 @@ export const handlers = [
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({ chatRoomId, readAt: new Date().toISOString() }),
     });
+  }),
+
+  // 채팅 상대 신고 (POST /chats/{id}/report, 이슈 #244) — 매 요청 새 접수(중복 제한 없음, 방 상태 불변).
+  //  - x-mock-failure: chat-report → 500 INTERNAL_SERVER_ERROR(E2E 실패·재제출 시나리오)
+  http.post(`${API_BASE_URL}/chats/:chatRoomId/report`, async ({ params, request }) => {
+    await delay(300);
+
+    if (request.headers.get("x-mock-failure") === "chat-report") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "신고를 접수하지 못했습니다." },
+        { status: 500 },
+      );
+    }
+
+    const chatRoomId = String(params.chatRoomId);
+    const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
+    if (!room) {
+      return HttpResponse.json(
+        { status: "404", code: "CHAT_ROOM_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    const body = (await request.json()) as {
+      reason?: string;
+      reason_detail?: string | null;
+    };
+    const reasons: string[] = chatReportReasonSchema.options;
+    const detailMissing = body.reason === "OTHER" && !body.reason_detail?.trim();
+    if (!body.reason || !reasons.includes(body.reason) || detailMissing) {
+      return HttpResponse.json(
+        { status: "400", code: "VALIDATION_ERROR", message: "신고 사유를 확인해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    return HttpResponse.json(
+      {
+        status: "201",
+        message: "신고가 접수되었습니다.",
+        data: camelToSnakeDeep({
+          chatReportId: crypto.randomUUID(),
+          chatRoomId,
+          reason: body.reason,
+          createdAt: new Date().toISOString(),
+        }),
+      },
+      { status: 201 },
+    );
   }),
 
   // 공유 리포트 (GET /chats/{id}/shared-report, 이슈 #187) — 방에 공유된 사정사 검수 결과.

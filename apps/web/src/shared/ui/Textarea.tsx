@@ -22,6 +22,8 @@ export interface TextareaProps {
   counterPlacement?: "outside" | "inside";
   /** 세로 리사이즈 허용 여부. inside 카운터가 핸들 자리와 겹치면 끈다. */
   resizable?: boolean;
+  /** 입력 잠금(제출 중 등) */
+  disabled?: boolean;
   className?: string;
 }
 
@@ -38,6 +40,7 @@ export function Textarea({
   counterClassName,
   counterPlacement = "outside",
   resizable = true,
+  disabled = false,
   className,
 }: TextareaProps) {
   const showCounter = maxLength != null;
@@ -60,8 +63,9 @@ export function Textarea({
           rows={rows}
           placeholder={placeholder}
           aria-label={ariaLabel}
+          disabled={disabled}
           className={cn(
-            "w-full rounded-input border border-line bg-card px-3.5 py-3 text-[0.9375rem] leading-relaxed text-ink outline-none transition placeholder:text-ink-3 focus:border-gold focus:ring-[3px] focus:ring-gold-soft",
+            "w-full rounded-input border border-line bg-card px-3.5 py-3 text-[0.9375rem] leading-relaxed text-ink outline-none transition placeholder:text-ink-3 focus:border-gold focus:ring-[3px] focus:ring-gold-soft disabled:cursor-not-allowed disabled:opacity-[.42]",
             resizable ? "resize-y" : "resize-none",
             insideCounter && "pb-8", // 카운터가 겹쳐 앉는 자리 확보
           )}
