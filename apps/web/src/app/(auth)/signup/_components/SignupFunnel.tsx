@@ -1,124 +1,20 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import type { UserType } from "@/shared/model/user";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { AuthHeader } from "../../_shared/ui/AuthHeader";
-import { getRegisterErrorCode, useRegister } from "../_api/use-register";
+import { useSignupForm } from "../_hooks/use-signup-form";
 import { AdjusterNotice } from "./AdjusterNotice";
 import { CompleteStep } from "./CompleteStep";
 import { ConsentStep } from "./ConsentStep";
 import { IdentityStep } from "./IdentityStep";
 import { RoleSelectStep } from "./RoleSelectStep";
 import { SignupProgress } from "./SignupProgress";
-import { useSignupFunnel, type SignupStep } from "../_hooks/use-signup-funnel";
-import { useSignupSocial } from "../_hooks/use-signup-social";
-import { isRequiredConsentMet, type ConsentState } from "../_model/consent-config";
-import { toRegisterBody, type RegisterResponse } from "../_model/register.schema";
-import { clearSignupTicket } from "../../_shared/lib/signup-ticket";
-import {
-  clearSignupDraft,
-  loadSignupDraft,
-  saveSignupDraft,
-  type IdentityDraft,
-} from "../_model/signup-draft";
-import type { TermsType } from "@/shared/model/terms-content";
-
-const CUSTOMER_DASHBOARD_PATH = "/customer/dashboard";
-const ADJUSTER_CERTIFY_PATH = "/signup/verification";
-
-/** 뒤로가기 대상 단계. 첫 단계·완료는 없음. */
-const BACK_TARGET: Partial<Record<SignupStep, SignupStep>> = {
-  terms: "role",
-  identity: "terms",
-};
 
 export function SignupFunnel() {
-  const router = useRouter();
-  const funnel = useSignupFunnel();
-  const social = useSignupSocial();
-  const register = useRegister();
+  const { state, derived, actions } = useSignupForm();
 
-  const [selectedUserType, setSelectedUserType] = useState<UserType | null>(
-    () => loadSignupDraft().userType,
-  );
-  const [consent, setConsent] = useState<ConsentState>(() => loadSignupDraft().consent);
-  const [identity, setIdentity] = useState<IdentityDraft>(() => loadSignupDraft().identity);
-  const [showAdjusterNotice, setShowAdjusterNotice] = useState(false);
-  const [result, setResult] = useState<RegisterResponse | null>(null);
-
-  // 약관 상세 페이지 왕복 시 선택 역할·동의·본인 확인 입력 유지(전체 페이지 이동 대비).
-  useEffect(() => {
-    saveSignupDraft({ userType: selectedUserType, consent, identity });
-  }, [selectedUserType, consent, identity]);
-
-  // 소셜 인증 컨텍스트(티켓·쿼리) 없이 직접 진입하면 로그인으로 되돌림.
-  useEffect(() => {
-    if (!social) router.replace("/login");
-  }, [social, router]);
-
-  // 직접 URL 진입 가드: 선행 단계 미완이면 첫 단계로 되돌림.
-  useEffect(() => {
-    if (funnel.step === "terms" && selectedUserType !== "insured_person") {
-      funnel.goTo("role", { replace: true });
-    }
-    if (
-      funnel.step === "identity" &&
-      (selectedUserType !== "insured_person" || !isRequiredConsentMet(consent))
-    ) {
-      funnel.goTo("role", { replace: true });
-    }
-    if (funnel.step === "done" && !result) {
-      funnel.goTo("role", { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [funnel.step]);
-
-  const handleStart = () => {
-    if (selectedUserType === "insured_person") {
-      funnel.goTo("terms");
-      return;
-    }
-    if (selectedUserType === "adjuster") setShowAdjusterNotice(true);
-  };
-
-  const handleToggle = (type: TermsType, checked: boolean) => {
-    setConsent((prev) => ({ ...prev, [type]: checked }));
-  };
-
-  const handleToggleAll = (checked: boolean) => {
-    setConsent({ service: checked, privacy: checked, marketing: checked });
-  };
-
-  const handleSubmit = () => {
-    if (selectedUserType !== "insured_person" || !social || !identity.gender) return;
-
-    const body = toRegisterBody({
-      provider: social.provider,
-      socialToken: social.socialToken,
-      userType: selectedUserType,
-      nickname: social.nickname,
-      gender: identity.gender,
-      birthDate: identity.birthDate,
-      phoneNumber: identity.phoneNumber,
-    });
-
-    register.mutate(body, {
-      onSuccess: (data) => {
-        clearSignupDraft();
-        clearSignupTicket();
-        setResult(data);
-        funnel.goTo("done", { replace: true });
-      },
-    });
-  };
-
-  if (!social) return null;
-
-  const backTarget = BACK_TARGET[funnel.step];
-  const goBack = backTarget ? () => funnel.goTo(backTarget) : undefined;
+  if (!derived.ready) return null;
 
   return (
     <div className="flex min-h-dvh w-full flex-col">
@@ -138,18 +34,18 @@ export function SignupFunnel() {
       />
 
       <div className="mx-auto flex w-full flex-1 flex-col pb-8 pt-6 sm:pt-10 md:max-w-[35rem] md:px-5 md:pb-16 md:pt-12">
-      {funnel.step !== "done" && (
+      {derived.showProgress && (
         <div className="md:hidden">
-          <SignupProgress current={funnel.stepNumber} total={funnel.total} onBack={goBack} />
+          <SignupProgress current={derived.stepNumber} total={derived.total} onBack={actions.goBack} />
         </div>
       )}
 
       <div className="mt-6 flex flex-1 flex-col justify-center md:mt-0">
         <div className="rounded-card-lg border border-line bg-card p-6 sm:p-8 md:p-9 md:shadow-modal">
-        {goBack && (
+        {derived.canGoBack && (
           <button
             type="button"
-            onClick={goBack}
+            onClick={actions.goBack}
             aria-label="이전 단계로"
             className="-ml-2 mb-4 hidden size-9 items-center justify-center rounded-chip text-ink transition hover:bg-paper md:flex"
           >
@@ -157,48 +53,48 @@ export function SignupFunnel() {
           </button>
         )}
 
-        {funnel.step === "role" && (
+        {derived.step === "role" && (
           <RoleSelectStep
-            selected={selectedUserType}
-            onSelect={setSelectedUserType}
-            onStart={handleStart}
+            selected={state.selectedUserType}
+            onSelect={actions.selectUserType}
+            onStart={actions.start}
           />
         )}
 
-        {funnel.step === "terms" && (
+        {derived.step === "terms" && (
           <ConsentStep
-            consent={consent}
-            onToggle={handleToggle}
-            onToggleAll={handleToggleAll}
-            onNext={() => funnel.goTo("identity")}
+            consent={state.consent}
+            onToggle={actions.toggleConsent}
+            onToggleAll={actions.toggleAllConsent}
+            onNext={actions.goToIdentity}
           />
         )}
 
-        {funnel.step === "identity" && (
+        {derived.step === "identity" && (
           <IdentityStep
-            identity={identity}
-            onChange={setIdentity}
-            onSubmit={handleSubmit}
-            loading={register.isPending}
-            errorCode={getRegisterErrorCode(register.error)}
+            identity={state.identity}
+            onChange={actions.changeIdentity}
+            onSubmit={actions.submit}
+            loading={derived.registerPending}
+            errorCode={derived.registerErrorCode}
           />
         )}
 
-        {funnel.step === "done" && result && (
+        {derived.step === "done" && state.result && (
           <CompleteStep
-            nickname={result.nickname}
-            email={social.email}
-            onStartAnalysis={() => router.push(CUSTOMER_DASHBOARD_PATH)}
+            nickname={state.result.nickname}
+            email={derived.email}
+            onStartAnalysis={actions.startAnalysis}
           />
         )}
         </div>
       </div>
       </div>
 
-      {showAdjusterNotice && (
+      {state.showAdjusterNotice && (
         <AdjusterNotice
-          onClose={() => setShowAdjusterNotice(false)}
-          onProceed={() => router.push(ADJUSTER_CERTIFY_PATH)}
+          onClose={actions.closeAdjusterNotice}
+          onProceed={actions.proceedAdjusterNotice}
         />
       )}
     </div>
