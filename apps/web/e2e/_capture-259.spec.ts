@@ -22,6 +22,11 @@ test.describe("앱 UA", () => {
 
   test("01 앱 하단 탭바 높이", async ({ page }) => {
     await page.goto("/customer/dashboard");
+    // 지금 할 일 카드는 서스펜스 폴백(스켈레톤)을 거친다 — 본문이 뜬 뒤 찍는다.
+    // 같은 문구가 데스크톱 트리에도 있어(md 분기) 보이는 요소만 고른다.
+    await expect(
+      page.getByText("새 제안 3건이 도착했어요").filter({ visible: true }),
+    ).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole("link", { name: "내정보", exact: true })).toBeVisible({
       timeout: 15000,
     });
