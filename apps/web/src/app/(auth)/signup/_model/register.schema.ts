@@ -17,6 +17,8 @@ export const registerBodySchema = z.object({
   gender: genderSchema,
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   phoneNumber: z.string().regex(/^01\d-\d{3,4}-\d{4}$/),
+  // 명세상 optional이지만 본인 확인 스텝에서 필수로 받는다. 표기는 프로필 수정과 같은 "서울 강남구".
+  region: z.string().min(1),
 });
 
 // register 응답 역할 필드. 요청 body의 `userType`(insured_person/adjuster)와 이름·값이 다름 —
@@ -52,6 +54,7 @@ export interface SignupDraft {
   gender: Gender;
   birthDate: string;
   phoneNumber: string;
+  region: string;
 }
 
 export function toRegisterBody(draft: SignupDraft): RegisterBody {
@@ -63,5 +66,6 @@ export function toRegisterBody(draft: SignupDraft): RegisterBody {
     gender: draft.gender,
     birthDate: draft.birthDate,
     phoneNumber: draft.phoneNumber,
+    region: draft.region,
   });
 }
