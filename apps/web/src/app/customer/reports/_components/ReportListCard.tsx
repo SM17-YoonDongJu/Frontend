@@ -5,6 +5,7 @@ import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
 import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
 import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
+import { deriveReportTitle } from "@/app/customer/_shared/model/report-title";
 import { ReportStatusBadges } from "./ReportStatusBadges";
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -42,7 +43,7 @@ function bottomLeftText(item: ReportListItem): string {
 }
 
 export function ReportListCard({ item }: { item: ReportListItem }) {
-  const heading = item.title ?? item.accidentType ?? "";
+  const heading = item.title ?? deriveReportTitle(item);
   const isArrived = item.status === "AWAITING_ADOPTION";
   const isPending = item.status === "AWAITING_INSPECTION";
   const { muted } = REPORT_STATUS_META[item.status];

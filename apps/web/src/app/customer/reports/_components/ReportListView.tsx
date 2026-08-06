@@ -30,7 +30,10 @@ export function ReportListView() {
           <ReportListEmpty />
         ) : (
           <>
-            <ul className="flex flex-col gap-3 px-5 pb-5 md:grid md:grid-cols-2 md:items-start md:gap-6 md:px-0 md:pb-8">
+            <ul
+              aria-label="리포트 목록"
+              className="flex flex-col gap-3 px-5 pb-5 md:grid md:grid-cols-2 md:items-start md:gap-6 md:px-0 md:pb-8"
+            >
               {list.map((report) => (
                 <li key={report.reportId}>
                   <ReportListCard item={report} />
