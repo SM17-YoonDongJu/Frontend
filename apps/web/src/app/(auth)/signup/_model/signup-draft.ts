@@ -3,7 +3,7 @@ import type { UserType } from "@/shared/model/user";
 import { EMPTY_CONSENT, type ConsentState } from "./consent-config";
 import type { Gender } from "./register.schema";
 
-/** 본인 확인 스텝 입력값. 이름·지역은 명세 미확정으로 register 미전송(드래프트 보관만). */
+/** 본인 확인 스텝 입력값. 전 필드가 register 요청 body로 전송된다. */
 export interface IdentityDraft {
   name: string;
   gender: Gender | null;

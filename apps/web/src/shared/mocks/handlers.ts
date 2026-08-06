@@ -1822,8 +1822,9 @@ export const handlers = [
 
   // 회원가입 (#43·#173, 명세 2026-07-09 개정) — 전역 봉투 거울. 성공 201.
   // 토큰은 HttpOnly 쿠키(Set-Cookie access_token 30분/refresh_token 14일)로만 내려가고 body엔 없음 → data = { user_id, nickname, role }.
-  // birth_date·phone_number·gender는 본인 확인 스텝(#173)에서 수집·전송 — dev 백엔드 실측대로 누락 시 400 미러링.
-  // 에러 재현: nickname "중복닉네임"→409 DUPLICATE_RESOURCE, 1자 미만·30자 초과→400 VALIDATION_ERROR,
+  // name·birth_date·phone_number·gender·region은 본인 확인 스텝(#173·#256)에서 수집·전송 —
+  //   dev 백엔드 실측대로 누락 시 400 미러링(region은 명세상 optional이라 누락 허용).
+  // 에러 재현: name "중복닉네임"→409 DUPLICATE_RESOURCE, 1자 미만·30자 초과→400 VALIDATION_ERROR,
   //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD,
   //   gender/birth_date/phone_number 누락→400 VALIDATION_ERROR("<필드>: must not be null"),
   //   x-mock-failure:social→500 EXTERNAL_API_ERROR.
@@ -1833,12 +1834,13 @@ export const handlers = [
     const body = (await request.json().catch(() => ({}))) as {
       provider?: string;
       social_token?: string;
-      // CONTRACT(드리프트, 2026-08-05 실측): 명세 요청 필드는 name — 응답은 여전히 nickname.
+      // 요청 필드는 name, 응답 필드는 nickname — 명세상 비대칭.
       name?: string;
       user_type?: string;
       gender?: string;
       birth_date?: string;
       phone_number?: string;
+      region?: string;
     };
 
     if (request.headers.get("x-mock-failure") === "social") {

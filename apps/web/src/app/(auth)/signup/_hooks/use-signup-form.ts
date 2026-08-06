@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { formatRegionLabel } from "@/shared/model/regions";
 import type { TermsType } from "@/shared/model/terms-content";
 import type { UserType } from "@/shared/model/user";
 import { clearSignupTicket } from "../../_shared/lib/signup-ticket";
@@ -84,16 +85,18 @@ export function useSignupForm() {
 
   const { mutate: submitRegister } = register;
   const submit = useCallback(() => {
-    if (selectedUserType !== "insured_person" || !social || !identity.gender) return;
+    if (selectedUserType !== "insured_person" || !social || !identity.gender || !identity.region)
+      return;
 
     const body = toRegisterBody({
       provider: social.provider,
       socialToken: social.socialToken,
       userType: selectedUserType,
-      nickname: social.nickname,
+      name: identity.name,
       gender: identity.gender,
       birthDate: identity.birthDate,
       phoneNumber: identity.phoneNumber,
+      region: formatRegionLabel(identity.region),
     });
 
     submitRegister(body, {

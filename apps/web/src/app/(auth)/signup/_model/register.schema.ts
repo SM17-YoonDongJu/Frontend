@@ -7,17 +7,18 @@ import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/dri
 export const genderSchema = z.enum(["M", "F"]);
 
 // POST /auth/register 요청 body — 명세(2026-07-09 개정) 필수 필드 반영(#173).
-// gender·birthDate·phoneNumber는 본인 확인 스텝에서 수집(dev 백엔드 실측으로 필수 확정).
-// Figma의 이름·지역은 명세에 없어 미전송(백엔드 수용 확정 시 추가) — 드래프트에만 보관. 이메일 미수집.
+// name·gender·birthDate·phoneNumber는 본인 확인 스텝에서 수집(dev 백엔드 실측으로 필수 확정). 이메일 미수집.
 // 약관 동의(이용약관/개인정보/마케팅)는 프론트 게이트 전용이며 body 미제출(#43 확정).
 export const registerBodySchema = z.object({
   provider: z.enum(["kakao", "naver", "apple"]),
   socialToken: z.string(),
-  nickname: z.string().min(1).max(30),
+  name: z.string().min(1).max(30),
   userType: userTypeSchema,
   gender: genderSchema,
   birthDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   phoneNumber: z.string().regex(/^01\d-\d{3,4}-\d{4}$/),
+  // 명세상 optional이지만 본인 확인 스텝에서 필수로 받는다. 표기는 프로필 수정과 같은 "서울 강남구".
+  region: z.string().min(1),
 });
 
 // register 응답 역할 필드. 요청 body의 `userType`(insured_person/adjuster)와 이름·값이 다름 —
@@ -36,34 +37,35 @@ export type Gender = z.infer<typeof genderSchema>;
 export type RegisterBody = z.infer<typeof registerBodySchema>;
 export type RegisterResponse = z.infer<typeof registerResponseSchema>;
 
-// nickname은 register.ts 호출부에서 명세 필드 name으로 매핑해 전송(드리프트 정정, 2026-08-05).
 type _RegisterBodyDriftCheck = ExpectDriftCheck<
-  AssertFieldsExistInSpec<Omit<RegisterBody, "nickname">, RegisterRequest>
+  AssertFieldsExistInSpec<RegisterBody, RegisterRequest>
 >;
 type _RegisterResponseDriftCheck = ExpectDriftCheck<
   AssertFieldsExistInSpec<RegisterResponse, GenRegisterResponse>
 >;
 
-// UI 로컬 퍼널 상태(선택역할·닉네임·소셜값·본인 확인 입력) → 명세 body 매핑.
+// UI 로컬 퍼널 상태(선택역할·소셜값·본인 확인 입력) → 명세 body 매핑.
 // 약관 동의는 프론트 게이트 전용이므로 여기서 제외된다.
 export interface SignupDraft {
   provider: RegisterBody["provider"];
   socialToken: string;
   userType: RegisterBody["userType"];
-  nickname: string;
+  name: string;
   gender: Gender;
   birthDate: string;
   phoneNumber: string;
+  region: string;
 }
 
 export function toRegisterBody(draft: SignupDraft): RegisterBody {
   return registerBodySchema.parse({
     provider: draft.provider,
     socialToken: draft.socialToken,
-    nickname: draft.nickname,
+    name: draft.name,
     userType: draft.userType,
     gender: draft.gender,
     birthDate: draft.birthDate,
     phoneNumber: draft.phoneNumber,
+    region: draft.region,
   });
 }

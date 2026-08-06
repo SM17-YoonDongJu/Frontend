@@ -13,15 +13,9 @@ import type { RegisterBody } from "../_model/register.schema";
 export interface SignupSocialContext {
   provider: RegisterBody["provider"];
   socialToken: string;
-  /** 닉네임 기본값·완료 화면 표시 */
-  nickname: string;
-  /** 완료 화면 표시·register email 후보 */
+  /** 완료 화면 표시 */
   email?: string;
 }
-
-// nickname = 사용자 이름(소셜 프로필 표시명). 콜백 응답에 프로필이 없어 임시 기본값.
-// TODO: 백엔드가 register 시 signupTicket에서 이름을 추출하는지 확인 후 교체(그렇다면 이 필드 전송 제거).
-const DEFAULT_NICKNAME = "바른보상 회원";
 
 function toProvider(value: string | null): RegisterBody["provider"] {
   if (value === "naver") return "naver";
@@ -39,7 +33,6 @@ export function useSignupSocial(): SignupSocialContext | null {
     return {
       provider: toProvider(searchParams.get("provider")),
       socialToken: queryToken,
-      nickname: searchParams.get("nickname") ?? DEFAULT_NICKNAME,
       email: searchParams.get("email") ?? undefined,
     };
   }
@@ -48,7 +41,6 @@ export function useSignupSocial(): SignupSocialContext | null {
     return {
       provider: stored.provider,
       socialToken: stored.ticket,
-      nickname: DEFAULT_NICKNAME,
     };
   }
 
