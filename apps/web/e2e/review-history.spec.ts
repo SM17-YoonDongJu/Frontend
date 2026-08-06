@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 사정사 검수 내역 E2E (이슈 #59).
@@ -14,6 +15,7 @@ import { expect, test } from "@playwright/test";
 const PATH = "/partner/mypage/review-history";
 
 test("진입하면 검수한 사건 카드가 유형·사건번호·완료일·제목·상태와 함께 보인다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(PATH);
 
   await expect(page.getByRole("heading", { name: "검수 내역" })).toBeVisible();
@@ -29,25 +31,27 @@ test("진입하면 검수한 사건 카드가 유형·사건번호·완료일·�
   await expect(firstCard.getByText("상담 전환")).toBeVisible();
 });
 
-test("종결 필터를 누르면 종결 사건만 남고 칩이 활성화되며 URL에 status가 반영된다", async ({ page }) => {
+test("채택 필터를 누르면 채택 사건만 남고 칩이 활성화되며 URL에 status가 반영된다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(PATH);
   await expect(page.getByRole("heading", { name: "검수 내역" })).toBeVisible();
 
-  const closedChip = page.getByRole("button", { name: "종결" });
+  const acceptedChip = page.getByRole("button", { name: "채택" });
 
   await expect(async () => {
-    await closedChip.click();
-    await expect(page).toHaveURL(/status=CLOSED/);
+    await acceptedChip.click();
+    await expect(page).toHaveURL(/status=ACCEPTED/);
   }).toPass({ timeout: 10000 });
 
-  await expect(closedChip).toHaveAttribute("aria-pressed", "true");
+  await expect(acceptedChip).toHaveAttribute("aria-pressed", "true");
 
-  // 종결(CLOSED) 사건은 남고, 상담 전환(CONSULTATION) 전용 사건은 사라진다.
+  // 채택(ACCEPTED) 사건은 남고, 상담 전환(COUNSELING) 전용 사건은 사라진다.
   await expect(page.getByText("일실수입 과소 산정")).toBeVisible();
   await expect(page.getByText("견관절 회전근개 파열")).toHaveCount(0);
 });
 
 test("더보기를 누르면 다음 페이지 사건이 이어 붙는다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.goto(PATH);
   await expect(page.getByRole("heading", { name: "검수 내역" })).toBeVisible();
 
@@ -64,6 +68,7 @@ test("더보기를 누르면 다음 페이지 사건이 이어 붙는다", async
 });
 
 test("검수 이력이 없으면 빈 안내가 보인다", async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.setExtraHTTPHeaders({ "x-mock-reviewed": "empty" });
   await page.goto(PATH);
 
@@ -71,6 +76,8 @@ test("검수 이력이 없으면 빈 안내가 보인다", async ({ page }) => {
 });
 
 test("권한이 없으면 접근 권한 안내가 보인다", async ({ page }) => {
+  // 403은 유효 세션에서의 업무 규칙 실패 — 미들웨어 통과를 위해 쿠키가 필요하다.
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
   await page.setExtraHTTPHeaders({ "x-mock-failure": "reviewed-forbidden" });
   await page.goto(PATH);
 
@@ -80,13 +87,14 @@ test("권한이 없으면 접근 권한 안내가 보인다", async ({ page }) =
   });
 });
 
-test("로그인이 필요하면 로그인 안내가 보인다", async ({ page }) => {
+test("로그인이 필요하면 로그인 안내 화면으로 이동한다", async ({ page }) => {
   await page.setExtraHTTPHeaders({ "x-mock-failure": "reviewed-unauthorized" });
   await page.goto(PATH);
 
-  await expect(page.getByRole("heading", { name: "로그인이 필요해요" })).toBeVisible({
-    timeout: 15000,
-  });
+  await expect(page).toHaveURL(/\/login-required/, { timeout: 15000 });
+  await expect(
+    page.getByRole("heading", { name: "서비스를 이용하시려면 로그인이 필요합니다" }),
+  ).toBeVisible();
 });
 
 /*

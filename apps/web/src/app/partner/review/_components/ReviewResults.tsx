@@ -6,14 +6,19 @@ import { ReviewCaseList } from "./ReviewCaseList";
 import { ReviewEmpty } from "./ReviewEmpty";
 
 export function ReviewResults() {
-  const { type } = useReviewFilter();
+  const { type, status, statusValues } = useReviewFilter();
   const accidentType = type === "전체" ? undefined : type;
+  // 백엔드가 status 다중값을 못 받아 프리셋(다중)은 전체를 받아 클라이언트 필터링.
+  const statusFilter = statusValues?.length === 1 ? statusValues[0] : undefined;
 
-  const { data } = useReviewList({ status: "AWAITING_INSPECTION", accidentType });
+  const { data } = useReviewList({ status: statusFilter, accidentType });
+  const items = statusValues && statusValues.length > 1
+    ? data.list.filter((item) => !!item.status && statusValues.includes(item.status))
+    : data.list;
 
-  if (data.list.length === 0) {
-    return <ReviewEmpty activeType={type} />;
+  if (items.length === 0) {
+    return <ReviewEmpty activeType={type} activeStatus={status} />;
   }
 
-  return <ReviewCaseList items={data.list} />;
+  return <ReviewCaseList items={items} />;
 }

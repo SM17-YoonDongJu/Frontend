@@ -1,30 +1,18 @@
 "use client";
 
-import { QueryErrorResetBoundary } from "@tanstack/react-query";
-import { Suspense } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-import { useHydrated } from "@/shared/lib/use-hydrated";
-import { MypageError } from "./MypageError";
+import { AsyncBoundary } from "@/shared/ui/AsyncBoundary";
 import { MypageSkeleton } from "./MypageSkeleton";
 import { MypageView } from "./MypageView";
 
 export function MypageBoundary() {
-  if (!useHydrated()) return <MypageSkeleton />;
-
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary
-          onReset={reset}
-          fallbackRender={({ resetErrorBoundary }) => (
-            <MypageError onRetry={resetErrorBoundary} />
-          )}
-        >
-          <Suspense fallback={<MypageSkeleton />}>
-            <MypageView />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    <AsyncBoundary
+      fallback={<MypageSkeleton />}
+      errorLayout="card"
+      errorTitle="내 정보를 불러오지 못했어요"
+      errorClassName="mt-5.5"
+    >
+      <MypageView />
+    </AsyncBoundary>
   );
 }

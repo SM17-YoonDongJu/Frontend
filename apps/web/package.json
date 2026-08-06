@@ -12,12 +12,14 @@
     "typecheck": "tsc --noEmit",
     "test:e2e": "playwright test",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "generate:api": "openapi-ts -f openapi-ts.config.ts && node scripts/patch-generated-zod.mjs",
+    "spec:pull": "node scripts/spec-snapshot.mjs --write",
+    "spec:check": "node scripts/spec-snapshot.mjs --check"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "@insurance/bridge": "workspace:*",
-    "@insurance/shared": "workspace:*",
     "@lukemorales/query-key-factory": "^1.3.4",
     "@react-pdf/renderer": "^4.5.1",
     "@sentry/nextjs": "^10.64.0",
@@ -35,6 +37,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@hey-api/client-fetch": "^0.13.1",
+    "@hey-api/openapi-ts": "^0.99.0",
     "@insurance/config": "workspace:*",
     "@playwright/test": "^1.61.0",
     "@storybook/addon-a11y": "10.4.4",

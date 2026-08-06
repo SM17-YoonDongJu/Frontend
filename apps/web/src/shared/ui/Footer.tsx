@@ -4,22 +4,23 @@ const FOOTER_COLUMNS = [
   {
     heading: "서비스",
     links: [
-      { label: "서비스 소개", href: "#" },
-      { label: "이용방법", href: "#" }
+      { label: "서비스 소개", href: "/about" },
+      { label: "이용 방법", href: "/guide" }
     ]
   },
   {
     heading: "고객지원",
     links: [
-      { label: "FAQ", href: "#" },
-      { label: "문의하기", href: "#" }
+      { label: "FAQ", href: "/guide#faq" },
+      { label: "문의하기", href: "/contact" }
     ]
   },
   {
     heading: "정책",
     links: [
-      { label: "이용약관", href: "#" },
-      { label: "개인정보처리방침", href: "#" }
+      { label: "이용약관", href: "/terms" },
+      { label: "개인정보처리방침", href: "/privacy" },
+      { label: "계정 삭제", href: "/account-deletion" }
     ]
   }
 ] as const;

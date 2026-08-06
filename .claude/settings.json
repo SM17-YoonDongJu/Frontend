@@ -24,6 +24,11 @@
             "type": "command",
             "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/inline-svg-lint.sh\"",
             "statusMessage": "인라인 SVG 아이콘 검사"
+          },
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/.claude/hooks/one-component-lint.sh\"",
+            "statusMessage": "1파일 1컴포넌트 검사"
           }
         ]
       }

@@ -1,11 +1,13 @@
 import Link from "next/link";
 import type { AdjusterListItem } from "../_model/types";
 import { cn } from "@/shared/lib/utils";
+import { Avatar } from "@/shared/ui/Avatar";
 import { buttonVariants } from "@/shared/ui/Button";
 import { StarRating } from "@/shared/ui/StarRating";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { CheckCircle } from "@/shared/ui/icons/CheckCircle";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
+import { StatBox } from "./StatBox";
 
 const numberFormatter = new Intl.NumberFormat("ko-KR");
 
@@ -28,18 +30,16 @@ export function AdjusterCard({ adjuster }: { adjuster: AdjusterListItem }) {
 
   return (
     <article className="flex flex-col rounded-card border border-line bg-card p-5 md:p-6">
-      <div className="flex gap-4">
-        <span
-          aria-hidden
-          className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy font-serif text-xl font-semibold text-white"
-        >
-          {avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={avatarUrl} alt="" className="size-full object-cover" />
-          ) : (
-            name.trim().charAt(0) || "?"
-          )}
-        </span>
+      <Link
+        href={`/customer/adjusters/${adjusterId}`}
+        className="flex gap-4 transition hover:opacity-80"
+      >
+        <Avatar
+          src={avatarUrl}
+          name={name}
+          size="lg"
+          className="font-semibold [--avatar-initial:0.357em]"
+        />
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
@@ -62,7 +62,7 @@ export function AdjusterCard({ adjuster }: { adjuster: AdjusterListItem }) {
             <span className="hidden text-ink-3 md:inline">(후기 {numberFormatter.format(reviewCount)})</span>
           </div>
         </div>
-      </div>
+      </Link>
 
       {headline && <p className="mt-4 hidden text-sm text-ink-2 md:block">{headline}</p>}
 
@@ -107,15 +107,5 @@ export function AdjusterCard({ adjuster }: { adjuster: AdjusterListItem }) {
         </div>
       </div>
     </article>
-  );
-}
-
-function StatBox({ value, label }: { value: string; label: string }) {
-  return (
-    <div className="rounded-input border border-line bg-paper-2 py-3 text-center">
-      <dt className="sr-only">{label}</dt>
-      <dd className="font-serif text-xl font-semibold text-ink">{value}</dd>
-      <p className="mt-0.5 text-xs text-ink-3">{label}</p>
-    </div>
   );
 }

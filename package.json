@@ -11,6 +11,8 @@
   "scripts": {
     "prepare": "git config core.hooksPath .githooks || true",
     "dev": "pnpm --filter @insurance/web dev",
+    "dev:mobile": "pnpm --filter @insurance/mobile start",
+    "dev:app": "pnpm --parallel --filter @insurance/web --filter @insurance/mobile dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "typecheck": "pnpm -r typecheck"

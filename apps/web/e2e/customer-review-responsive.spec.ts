@@ -1,16 +1,21 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 고객 리뷰 작성 화면 반응형 E2E (이슈 #76).
  *
  * 원칙: 사용자 행동·룩 회귀. 모바일(앱바·풀폭 버튼·30일 안내) / 데스크톱(브레드크럼·확정 보상금·2버튼).
  * + done 새로고침 fallback(스냅샷 유실 시 상세로 복귀) 가드.
- * 응답은 기본 MSW 핸들러(test-id-123 = 검수완료 MATCHED, offeredAmount 850만 원).
+ * 응답은 기본 MSW 핸들러(test-id-123 = 종결 CLOSED, offeredAmount 850만 원).
  * 뷰포트는 각 describe에서 명시 고정해 3개 프로젝트에서 동일 통과.
  */
 
 const REVIEW_PATH = "/customer/report/test-id-123/review";
 const DONE_PATH = "/customer/report/test-id-123/review/done";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test.describe("모바일 뷰(454px)", () => {
   test.use({ viewport: { width: 454, height: 900 } });

@@ -14,8 +14,7 @@
     "isolatedModules": true,
     "declaration": true,
     "paths": {
-      "@insurance/bridge": ["./packages/bridge/src"],
-      "@insurance/shared": ["./packages/shared/src"]
+      "@insurance/bridge": ["./packages/bridge/src"]
     }
   }
 }

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useFieldArray, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
 import type { ProfileFormValues } from "../_model/types";
 import { CareerItemForm } from "./CareerItemForm";
-import { ConfirmDialog } from "./ConfirmDialog";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 
 interface CareerSectionProps {
   control: Control<ProfileFormValues>;

@@ -2,6 +2,7 @@
 
 import { useState, type KeyboardEvent } from "react";
 import { cn } from "@/shared/lib/utils";
+import { RatingStar } from "@/shared/ui/icons/RatingStar";
 
 const STAR_SIZE = { lg: "size-10", sm: "size-6" } as const;
 const STAR_GAP = { lg: "gap-2", sm: "gap-1" } as const;
@@ -15,23 +16,6 @@ export interface StarRatingInputProps {
   /** radiogroup 접근성 라벨 */
   label: string;
   className?: string;
-}
-
-function StarShape({ filled }: { filled: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={cn("size-full transition", filled ? "text-gold-2" : "text-line")}
-      fill={filled ? "currentColor" : "none"}
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden
-    >
-      <path d="M12 3l2.7 5.4 6 .9-4.3 4.2 1 6L12 17l-5.4 2.8 1-6L3.3 9.3l6-.9L12 3z" />
-    </svg>
-  );
 }
 
 export function StarRatingInput({
@@ -83,7 +67,7 @@ export function StarRatingInput({
               STAR_SIZE[size],
             )}
           >
-            <StarShape filled={star <= highlighted} />
+            <RatingStar filled={star <= highlighted} className="size-full transition" />
           </button>
         );
       })}

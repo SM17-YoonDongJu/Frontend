@@ -5,10 +5,11 @@ import { useEffect, useState } from "react";
 import { useForm, type Resolver } from "react-hook-form";
 import { Button } from "@/shared/ui/Button";
 import { Check } from "@/shared/ui/icons/Check";
-import { useProfile } from "../_api/use-profile";
+import { useProfileSuspense } from "@/app/partner/_shared/api/use-profile";
+import type { AdjusterProfile } from "@/app/partner/_shared/model/adjuster-profile.schema";
 import { useUpdateProfile } from "../_api/use-update-profile";
 import { profileFormSchema, updateProfileBodySchema } from "../_model/adjuster-profile.schema";
-import type { AdjusterProfile, ProfileFormValues, UpdateProfileBody } from "../_model/types";
+import type { ProfileFormValues, UpdateProfileBody } from "../_model/types";
 import { BasicInfoSection } from "./BasicInfoSection";
 import { CareerSection } from "./CareerSection";
 import { PreviewCard } from "./PreviewCard";
@@ -17,13 +18,16 @@ import { SpecialtySection } from "./SpecialtySection";
 
 function toFormValues(profile: AdjusterProfile): ProfileFormValues {
   return {
-    headline: profile.headline,
-    introduction: profile.introduction,
-    career: profile.career,
+    headline: profile.headline ?? "",
+    introduction: profile.introduction ?? "",
+    career: profile.career ?? 0,
     activityRegion: profile.activityRegion,
     avatarUrl: profile.avatarUrl,
     specialties: profile.specialties,
-    careers: profile.careers
+    careers: profile.careers.map((item) => ({
+      period: item.period ?? "",
+      company: item.company ?? ""
+    }))
   };
 }
 
@@ -40,7 +44,7 @@ function pickDirty(
 }
 
 export function ProfileEditView() {
-  const { data: profile } = useProfile();
+  const { data: profile } = useProfileSuspense();
   const updateProfile = useUpdateProfile();
   const [isUploading, setIsUploading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -109,17 +113,7 @@ export function ProfileEditView() {
             type="submit"
             loading={isSubmitting}
             disabled={isSaveDisabled}
-            icon={
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path
-                  d="m5 13 4 4L19 7"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            }
+            icon={<Check className="text-[1.0625rem]" />}
           >
             저장하기
           </Button>

@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 손해사정사 검수 흐름 E2E (happy-path CUJ).
@@ -15,17 +16,26 @@ const LIST_PATH = "/partner/review";
 // MSW 상세 핸들러는 어떤 reportId든 동일 리치 데이터를 반환 → 상세 직접 진입에 사용.
 const DETAIL_PATH = "/partner/review/11111111-1111-4111-8111-111111111111";
 
-test("대기 목록에서 카드의 검수 버튼을 누르면 상세로 진입한다", async ({ page }) => {
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+});
+
+test("대기 목록에서 검수를 시작하면 상세로 진입한다", async ({ page, isMobile }) => {
   await page.goto(LIST_PATH);
 
-  // #62 재설계: 카드는 <article> + 검수 링크(상세로 직접 이동, 중간 선택 패널 제거)
+  // #94 반응형: 모바일은 카드의 검수 링크로, 데스크톱은 카드 선택 → 프리뷰 패널의 검수 시작으로 진입.
   const firstCard = page
     .getByRole("listitem")
     .filter({ hasText: /우측 슬관절 인대 파열/ });
   await expect(firstCard).toBeVisible();
 
   await expect(async () => {
-    await firstCard.getByRole("link", { name: /검수/ }).click();
+    if (isMobile) {
+      await firstCard.getByRole("link", { name: /검수/ }).click();
+    } else {
+      await firstCard.click();
+      await page.getByRole("button", { name: /검수 시작/ }).click();
+    }
     await expect(page).toHaveURL(/\/partner\/review\/[0-9a-f-]{36}/);
   }).toPass({ timeout: 10000 });
 
@@ -68,22 +78,24 @@ test("쟁점을 인정·수정·제외하면 진행현황과 카운트가 즉시
   const completeButton = page.getByRole("button", { name: "검수 완료 · 고객 전송" });
   await expect(completeButton).toBeEnabled();
 
-  const patchRequest = page.waitForRequest(
-    (req) => req.method() === "PATCH" && /\/reports\/[^/]+$/.test(req.url()),
-  );
-
   await completeButton.click();
 
-  const req = await patchRequest;
-  const body = req.postDataJSON() as {
+  // MSW SW 경유 요청은 request.postData() 캡처가 불안정(client-fetch가 Request 객체
+  // 단일인자로 fetch) — mock:reissueCount와 동일하게 핸들러가 localStorage에 남긴 걸로 검증.
+  const readSubmitBody = () =>
+    page.evaluate((key) => window.localStorage.getItem(key), "mock:lastReviewSubmitBody");
+  await expect.poll(readSubmitBody).not.toBeNull();
+  const body = JSON.parse((await readSubmitBody()) as string) as {
     status?: string;
     review?: string;
-    issues?: { issueId?: string; reviewStatus?: string }[];
+    issues?: { issue_id?: string | null; review_status?: string }[];
   };
-  expect(body.status).toBe("AWAITING_ADOPTION");
+  // status는 서버가 파생 — 클라이언트 전송 금지(#130).
+  expect(body).not.toHaveProperty("status");
   expect(Array.isArray(body.issues)).toBe(true);
-  expect(body.issues?.[0]).toHaveProperty("issueId");
-  expect(body.issues?.[0]).toHaveProperty("reviewStatus");
+  expect(body.issues?.length).toBe(3);
+  expect(body.issues?.[0]).toHaveProperty("issue_id");
+  expect(body.issues?.[0]).toHaveProperty("review_status");
   expect(body.review).toContain("후유장해");
 
   await expect(

@@ -4,18 +4,13 @@ import { useState, type FormEvent } from "react";
 import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Input";
 import { Search } from "@/shared/ui/icons/Search";
-import { REGION_OPTIONS } from "../_model/filter-options";
 
 interface SearchBarProps {
   keyword: string;
-  region: string;
   onSearch: (keyword: string) => void;
-  onRegionChange: (region: string) => void;
 }
 
-const ALL_REGIONS = "";
-
-export function SearchBar({ keyword, region, onSearch, onRegionChange }: SearchBarProps) {
+export function SearchBar({ keyword, onSearch }: SearchBarProps) {
   const [draft, setDraft] = useState(keyword);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -41,21 +36,6 @@ export function SearchBar({ keyword, region, onSearch, onRegionChange }: SearchB
           </button>
         }
       />
-
-      <Input
-        type="select"
-        aria-label="지역 선택"
-        className="hidden w-40 md:block"
-        value={region}
-        onChange={(event) => onRegionChange(event.target.value)}
-      >
-        <option value={ALL_REGIONS}>지역 전체</option>
-        {REGION_OPTIONS.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </Input>
 
       <Button type="submit" size="lg" className="hidden shrink-0 md:inline-flex" iconLeft={<Search />}>
         검색

@@ -2,21 +2,29 @@
 
 import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
+import { formatManwon } from "@/shared/lib/format-amount";
 import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
-import type { IssueItem, IssueStatus } from "../_model/types";
+import type { IssueItem } from "../_model/types";
 
 type Tone = NonNullable<StatusBadgeProps["tone"]>;
 
-const ISSUE_STATUS_META: Record<IssueStatus, { label: string; tone: Tone }> = {
+const ISSUE_STATUS_META: Record<string, { label: string; tone: Tone }> = {
   CONFIRMED: { label: "확정", tone: "green" },
   TRUSTED: { label: "신뢰", tone: "gold" },
   INFO: { label: "안내", tone: "neutral" },
 };
 
+const ISSUE_STATUS_FALLBACK = { label: "안내", tone: "neutral" as Tone };
+
 function issueTags(issue: IssueItem): string[] {
-  if (issue.tags?.length) return issue.tags;
-  return issue.tag ? [issue.tag] : [];
+  return issue.tags ?? [];
+}
+
+function formatImpact(won: number | null | undefined): string | null {
+  if (won == null || won === 0) return null;
+  const manwon = formatManwon(Math.abs(won));
+  return won > 0 ? `+ 약 ${manwon}만` : `- 약 ${manwon}만`;
 }
 
 export interface IssueReviewProps {
@@ -37,7 +45,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
 
       <ol className="mt-4 space-y-4 lg:space-y-3">
         {issues.map((issue, i) => {
-          const meta = ISSUE_STATUS_META[issue.status];
+          const meta = ISSUE_STATUS_META[issue.aiStatus] ?? ISSUE_STATUS_FALLBACK;
           const tags = issueTags(issue);
           const isOpen = openIndex === i;
           const canToggle = tags.length > 0;
@@ -62,9 +70,9 @@ export function IssueReview({ issues }: IssueReviewProps) {
                 <span className="flex-1">
                   <span className="flex items-start justify-between gap-2">
                     <span className="text-[0.89rem] font-bold text-ink">{issue.title}</span>
-                    {issue.impactAmount != null && (
+                    {formatImpact(issue.impactAmount) && (
                       <span className="shrink-0 font-serif text-[0.9rem] font-bold text-gold-ink">
-                        + 약 {issue.impactAmount.toLocaleString("ko-KR")}만
+                        {formatImpact(issue.impactAmount)}
                       </span>
                     )}
                   </span>
@@ -83,7 +91,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
               </button>
 
               <p className="mt-2 pl-[2.125rem] text-[0.75rem] leading-[1.26rem] text-ink-2 lg:pl-0 lg:text-[0.875rem] lg:leading-relaxed">
-                {issue.opinion}
+                {issue.description}
               </p>
 
               {tags.length > 0 && (

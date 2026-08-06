@@ -13,7 +13,7 @@ description: 손해사정 플랫폼 프론트엔드 코드 컨벤션. 변경하�
 - **복잡 조건 변수화**: `if (user.role === 'partner' && report.status === 'pending' && !report.locked)` → `const canReview = ...; if (canReview)`. 이름이 의도를 설명.
 - **시점 이동 줄이기**: 코드를 읽다 다른 파일/함수로 점프해야 이해되면 가독성 저하. 한 번에 한 맥락만 보이게. 단, 무지성 인라인화도 금물 — 추상화 레벨을 맞춘다.
 - **삼항·중첩 줄이기**: 중첩 삼항은 if/early-return으로. 한 함수 안에서 추상화 레벨을 섞지 않는다(고수준 호출과 저수준 DOM 조작 혼재 금지).
-- **구현 세부 감추기**: 컴포넌트는 "무엇을" 보여줄지만 드러내고 "어떻게"는 훅/유틸로.
+- **구현 세부 감추기**: 컴포넌트는 "무엇을" 보여줄지만 드러내고 "어떻게"는 훅/유틸로 (→ 「비즈니스 로직 ↔ 프레젠테이션 분리」).
 
 ## 2. 예측가능성 (Predictability) — 이름·시그니처로 동작을 예측 가능한가
 
@@ -32,7 +32,7 @@ description: 손해사정 플랫폼 프론트엔드 코드 컨벤션. 변경하�
 ## 4. 결합도 (Coupling) — 한 곳 수정이 다른 곳에 번지지 않는가
 
 - **성급한 추상화 경계**: 중복 제거가 항상 옳지 않다. 두 코드가 **다른 이유로 바뀐다면** 중복을 허용하는 게 결합도 측면에서 낫다. "비슷해 보임"이 아니라 "같은 이유로 변경됨"일 때만 합친다.
-- **책임 분리**: 거대한 useEffect/거대 컴포넌트는 관심사별로 쪼갠다. 하나가 바뀌어도 나머지에 영향 없게.
+- **책임 분리**: 층위별 분리 규칙은 「비즈니스 로직 ↔ 프레젠테이션 분리」로 통합.
 - **Props Drilling 대신**: 깊은 prop 전달은 합성(composition)·context로 결합 완화.
 - **형제 세그먼트 `_internal` 직접 import 금지**: 한 라우트 세그먼트가 다른 세그먼트의 `_components`/`_api`/`_model` 내부를 직접 import하면 강결합. 공유가 필요하면 **가장 가까운 공통 조상의 `_shared/`**(또는 앱 전역 `src/shared/`)로 올린다.
 - **의존 방향 고정**: 의존은 `_components`/`_hooks` → `_api` → 외부 한 방향. **`_api`/`_model`이 `_components`/`_hooks`를 import하면 안 된다**(데이터층이 UI에 의존 = 역방향 강결합).
@@ -65,8 +65,13 @@ src/
 3. 형제 세그먼트 2곳+이 공유하는가? → **가장 가까운 공통 조상의 `_shared/`로 승격**
 4. 앱 전역(여러 그룹)에서 공유하는가? → `src/shared/`. **1곳만 쓰면 승격하지 말고 세그먼트 안에 둔다** (성급한 공유화 = 결합도 ↑).
 
+**파일 구조 — 1파일 1컴포넌트:**
+- 한 파일에는 **컴포넌트 선언 하나만** 둔다. export 여부와 무관하다 — 파일 내부에서만 쓰는 사적 헬퍼(아이콘·스피너·`OptionRow` 같은 로컬 프리미티브·Skeleton/Empty/ErrorFallback 폴백)도 같은 디렉토리의 형제 파일로 분리한다.
+- 폴백(Skeleton·Empty·ErrorFallback)을 형제 파일로 빼면 Boundary가 재사용할 수 있다. 본체 파일에 묻어두면 못 쓴다.
+- 파일명 = 컴포넌트명. 분리 위치는 위 배치 결정 트리를 그대로 따른다(세그먼트 전용이면 같은 `_components/`, 2곳+ 공유면 `_shared/`·`src/shared/`로 승격).
+- **기계가 강제한다**: `.oxlintrc.json`의 `react/no-multi-comp` + `.claude/hooks/one-component-lint.sh`(PostToolUse)가 다중 선언 파일을 차단한다. 예외는 `*.stories.tsx`뿐(데모 컴포넌트 다중 정의는 정상).
+
 **네이밍:**
-- **1파일 1컴포넌트**: 한 파일은 컴포넌트 하나만 export. 파일 내부 사적 헬퍼 컴포넌트(아이콘·스피너 등)도 별도 파일로 분리한다.
 - **사적 SVG 아이콘은 `shared/ui/icons/`로 격리**: 도메인 컴포넌트(`shared/ui` flat)와 섞지 않는다. 아이콘 파일은 순수 SVG만 두고, 위치·여백 클래스는 소비처에서 준다(단일 소비처면 둬도 무방).
 - 컴포넌트 파일·이름: PascalCase (`ReportCard.tsx`)
 - 훅: `use` 접두 camelCase (`useReportList.ts`)
@@ -74,6 +79,30 @@ src/
 - 라우트 폴더: kebab 또는 한글 경로는 영문 슬러그
 - zod 스키마: `<domain>Schema`, 타입은 `z.infer`로 도출한 PascalCase
 - **도메인 식별자(필드·enum·ID·훅/쿼리키 이름)는 `frontend-feature/references/naming-dictionary.md`가 단일 진실.** 같은 개념엔 같은 이름 — API 명세 필드명을 그대로 쓰고 임의 별칭 금지.
+
+## 비즈니스 로직 ↔ 프레젠테이션 분리
+
+컴포넌트는 "무엇을" 보여줄지만 드러내고 "어떻게"는 훅·유틸이 갖는다. 층위를 다음으로 고정한다.
+
+| 층 | 위치 | 담당 |
+|---|---|---|
+| 서버 상태 | `_api/use-*.ts` | 쿼리·뮤테이션·쿼리키 |
+| 폼·상태머신 | `_hooks/use-*.ts` | react-hook-form, 스텝 진행, 로컬 상호작용 상태 |
+| 도메인 변환 | `_model/` | zod 스키마, DTO→뷰모델 매핑, 파생 계산 |
+| 프레젠테이션 | `.tsx` | 렌더링과 이벤트 위임만 |
+
+- **원시 `useQuery`/`useMutation`을 `.tsx`에 직접 쓰지 않는다.** 반드시 `_api/use-*.ts` 훅으로 감싸 호출한다(현행 위반 0건 — 유지한다).
+- **추출 신호**: 한 컴포넌트 안에 로컬 React 훅(`useState`/`useEffect`/`useMemo`/`useCallback` 등)이 3개 이상 쌓이면 커스텀 훅으로 뺄 때다.
+- 거대한 `useEffect`·거대 컴포넌트는 관심사별로 쪼갠다. 하나가 바뀌어도 나머지에 영향 없게.
+- `page.tsx`·`layout.tsx`는 라우팅·셸만 — 비즈니스 로직을 두지 않는다.
+- 참조 구현: `app/partner/review/[reportId]/_hooks/use-review-draft.ts` · `app/customer/mypage/_hooks/use-profile-settings-form.ts` · `app/customer/adjust-request/_hooks/use-funnel.ts`
+
+## 금액 표기 규칙 (#190)
+
+- **데이터 계약은 원(won) 단위 정수** — 목 데이터·zod 스키마 전부 원 단위(`12_000_000`). 화면 코드에서 임의 단위 가공 금지.
+- **표시 기본은 만원 요약**(목록·카드·대시보드·PDF 요약), **원 전액 표기는 금액 입력 필드·입력 확인 단계 한정**("원" 접미사 명시). 같은 값이 화면마다 다른 단위로 보이면 안 된다.
+- **금액 포맷은 `src/shared/lib` 공용 유틸로만.** 컴포넌트 안 인라인 `/10_000` 나눗셈·`toLocaleString()` 직접 호출 금지 — 로케일은 유틸에서 `"ko-KR"` 고정(서버/브라우저 하이드레이션 불일치 방지).
+- 기존 중복 13곳(`AmountRange`·`ActionCenterCard`·`ReportCard`·`ReportPdfDocument` 등)은 #190에서 `formatManwon`/`formatManwonRange`/`formatWon` 유틸로 회수 완료 — **새 코드가 인라인 `/10_000`·로컬 `toManwon` 패턴을 다시 만들지 말 것.**
 
 ## 코드 스타일 (oxlint/prettier 프리셋 준수)
 - `prefer-const`, `eqeqeq: smart`, `no-console`(warn/error만 허용)

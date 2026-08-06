@@ -38,7 +38,7 @@ auth · user · settings · report · review · matching · chat · payment · a
 쿼리키 factory의 최상위 도메인 키와 이 enum을 일치시킨다. 새 도메인을 임의로 만들지 않는다.
 
 ## 전역 응답 봉투 (모든 엔드포인트 공통 — 안정적, 여기 고정)
-**base url**: `https://example.com/api/v1` (MVP 플레이스홀더 — 실제 값은 env로 주입)
+**base url**: `https://example.com` (버저닝 없음 — 백엔드 확정, 실제 값은 env로 주입)
 
 성공:
 ```json
@@ -58,17 +58,28 @@ auth · user · settings · report · review · matching · chat · payment · a
 | HTTP | code | 의미 |
 |------|------|------|
 | 400 | `INVALID_REQUEST` | 요청 형식/구조 이상(깨진 JSON, 타입 불일치) |
+| 400 | `BAD_REQUEST` | ⚠️ register 400이 사용(전역 GlobalExceptionHandler `@Valid` 실패) — INVALID_REQUEST와 이중, 백엔드 단일화 확인 필요 |
 | 400 | `VALIDATION_ERROR` | 필드 값 검증 위반(형식·길이·범위) |
 | 400 | `MISSING_REQUIRED_FIELD` | 필수 입력값 누락 |
 | 400 | `UNSUPPORTED_OPERATION` | 미지원 동작(MVP 미지원 보험사, 미적재 약관 리포트 등) |
+| 400 | `UNSUPPORTED_PROVIDER` | 미지원 소셜 로그인 provider(kakao·naver 외) — `/auth/oauth2/{provider}/callback` |
+| 400 | `UPLOAD_CONTENT_TYPE_NOT_ALLOWED` | 허용되지 않는 파일 형식·매직바이트 위장 — `POST /uploads` |
+| 400 | `UPLOAD_FILE_EMPTY` | 빈 파일 업로드 — `POST /uploads` |
+| 413 | `UPLOAD_FILE_TOO_LARGE` | purpose별 용량 상한 초과 — `POST /uploads` |
 | 401 | `INVALID_TOKEN` | 토큰 위조·변조·서명 오류 |
 | 401 | `EXPIRED_TOKEN` | 토큰 만료 → Refresh 재발급 필요 |
 | 401 | `LOGIN_REQUIRED` | 비로그인 상태로 보호 리소스 접근 |
+| 401 | `REFRESH_TOKEN_NOT_FOUND` | 서버(Redis)에 저장된 refresh 토큰 없음 — `/auth/reissue` |
 | 403 | `FORBIDDEN` | 인증됐으나 권한 없음(미활성 사정사 채택, 타인 리포트) |
+| 403 | `CHAT_NOT_A_MEMBER` | 채팅방 멤버 아님 — `/chats/{chatRoomId}/shared-report` 등 방 참여자 전용 리소스 |
 | 404 | `USER_NOT_FOUND` | 사용자 없음 |
-| 404 | `POST_NOT_FOUND` | 게시물/리포트 없음 |
+| 404 | `POST_NOT_FOUND` | 게시물 없음 |
+| 404 | `REPORT_NOT_FOUND` | 리포트 없음 — `/reports/{id}/review`·`/hold`·`/chats/{chatRoomId}/shared-report` 404가 사용 |
+| 404 | `CHAT_ROOM_NOT_FOUND` | 채팅방 없음 — `/chats/{chatRoomId}/shared-report` |
+| 404 | `PROPOSAL_NOT_FOUND` | 제안(공유리포트=report_review) 없음 — `/chats/{chatRoomId}/shared-report` |
 | 404 | `SUBSCRIPTION_NOT_FOUND` | 구독 정보 없음 |
 | 409 | `DUPLICATE_RESOURCE` | 중복 생성 시도 |
+| 409 | `CLOSED` | ⚠️ Notion 명세 409 근거·enum 반영 요청 — 종료(CLOSED)된 상담방에 메시지 전송 시도(이슈 #48 채팅) |
 | 422 | `PAYMENT_FAILED` | 결제 실패(PG 거절·한도·잔액) |
 | 500 | `INTERNAL_SERVER_ERROR` | 처리되지 않은 서버 예외 |
 | 500 | `DATABASE_ERROR` | DB 조회/저장 실패 |

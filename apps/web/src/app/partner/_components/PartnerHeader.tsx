@@ -1,16 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { Chat } from "@/shared/ui/icons/Chat";
 import { Scale } from "@/shared/ui/icons/Scale";
-import { Bell } from "@/shared/ui/icons/Bell";
-import { useProfile } from "../_api/use-profile";
+import { NotificationBellMenu } from "@/shared/ui/NotificationBellMenu";
+import { useProfile } from "../_shared/api/use-profile";
 
-// href: null → 준비 중(미구현) 탭. 링크 대신 비활성 표시로 렌더.
 const NAV_ITEMS = [
   { label: "홈", href: "/partner", showCount: false },
   { label: "검수 대기", href: "/partner/review", showCount: true },
-  { label: "진행 중", href: null, showCount: false },
-  { label: "완료", href: null, showCount: false },
+  { label: "진행 중", href: "/partner/review?status=진행중", showCount: false },
 ] as const;
 
 export function PartnerHeader() {
@@ -21,7 +20,10 @@ export function PartnerHeader() {
     <header className="sticky top-0 z-40 border-b border-line bg-card">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2 font-serif text-xl font-bold text-navy">
+          <Link
+            href="/partner"
+            className="flex items-center gap-2 font-serif text-xl font-bold text-navy"
+          >
             <Scale className="text-2xl text-gold" />
             바른보상
             <span className="rounded-pill bg-gold px-2 py-0.5 font-sans text-xs font-semibold text-white">
@@ -36,19 +38,6 @@ export function PartnerHeader() {
                   {pendingCount}
                 </span>
               );
-
-              if (item.href === null) {
-                return (
-                  <span
-                    key={item.label}
-                    aria-disabled
-                    title="준비 중"
-                    className="flex cursor-default items-center gap-1.5 text-sm text-ink-3"
-                  >
-                    {item.label}
-                  </span>
-                );
-              }
 
               return (
                 <Link
@@ -66,12 +55,13 @@ export function PartnerHeader() {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/notifications"
-            aria-label="알림"
+            href="/partner/chat"
+            aria-label="채팅"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-ink-2 transition hover:bg-paper hover:text-ink"
           >
-            <Bell />
+            <Chat />
           </Link>
+          <NotificationBellMenu settingsHref="/partner/mypage?panel=notifications" />
           <Link href="/partner/mypage" className="flex items-center gap-2">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy text-lg text-gold">
               <Scale className="text-base" />

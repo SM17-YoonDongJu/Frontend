@@ -1,17 +1,14 @@
 "use client";
 
 import { cn } from "@/shared/lib/utils";
-import { Checkbox } from "@/shared/ui/Checkbox";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
-import { REGION_OPTIONS, SPECIALTY_OPTIONS } from "../_model/filter-options";
+import { SPECIALTY_OPTIONS } from "../_model/filter-options";
 import type { AdjusterListItem } from "../_model/types";
 
 interface FilterSidebarProps {
   specialty: string;
-  region: string;
   list: AdjusterListItem[];
   onSpecialtyChange: (specialty: string) => void;
-  onRegionChange: (region: string) => void;
 }
 
 const ALL_SPECIALTY = "전체";
@@ -21,13 +18,7 @@ function countBySpecialty(list: AdjusterListItem[], specialty: string): number {
   return list.filter((item) => item.specialties.includes(specialty)).length;
 }
 
-export function FilterSidebar({
-  specialty,
-  region,
-  list,
-  onSpecialtyChange,
-  onRegionChange,
-}: FilterSidebarProps) {
+export function FilterSidebar({ specialty, list, onSpecialtyChange }: FilterSidebarProps) {
   const activeSpecialty = specialty || ALL_SPECIALTY;
 
   return (
@@ -56,21 +47,6 @@ export function FilterSidebar({
               </li>
             );
           })}
-        </ul>
-      </section>
-
-      <section className="rounded-card border border-line bg-card p-5">
-        <h2 className="text-sm font-semibold text-ink">지역</h2>
-        <ul className="mt-3 space-y-2.5">
-          {REGION_OPTIONS.map((option) => (
-            <li key={option}>
-              <Checkbox
-                checked={region === option}
-                onChange={(checked) => onRegionChange(checked ? option : "")}
-                label={option}
-              />
-            </li>
-          ))}
         </ul>
       </section>
 

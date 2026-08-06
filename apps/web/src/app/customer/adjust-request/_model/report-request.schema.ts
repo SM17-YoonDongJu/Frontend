@@ -3,7 +3,9 @@ import {
   accidentTypeSchema,
   SUPPORTED_ACCIDENT_TYPE,
 } from "@/shared/model/accident-type";
-import { documentSlotsSchema } from "./document-slots";
+import { documentSlotsSchema, flattenDocuments } from "./document-slots";
+import type { CreateReportRequest, CreateReportResponse as GenCreateReportResponse } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /** 손해사정 요청 퍼널 입력 스키마. 도메인 = report (슬러그만 adjust-request). */
 
@@ -17,7 +19,7 @@ export const treatmentTypeSchema = z.enum(["ADMISSION", "OUTPATIENT", "MEDICATIO
 export const nonCoveredOptionSchema = z.enum(["INCLUDED", "EXCLUDED", "UNKNOWN"]);
 
 export const step1AccidentTypeSchema = z.object({
-  accidentType: accidentTypeSchema,
+  accidentType: z.enum(accidentTypeSchema.options, { message: "사고 유형을 선택하세요." }),
 });
 
 /** 입원 1건 — "입원 추가하기"로 동적 추가. */
@@ -38,36 +40,74 @@ export const step3DateSchema = z.object({
 });
 
 export const step2TreatmentSchema = z.object({
-  treatmentTypes: z.array(treatmentTypeSchema).min(1, "치료 형태를 선택하세요."),
-  diagnosis: z.array(z.string().min(1)).min(1, "진단명을 입력하세요."),
-  treatmentCount: z.number().int().min(0).nullish(), // 입원·통원 횟수(회), 선택
-  totalTreatmentCost: z.number().int().min(0).nullish(), // 총 치료비 본인부담(원), 선택
-  nonCoveredOption: nonCoveredOptionSchema,
+  treatmentTypes: z
+    .array(treatmentTypeSchema, { message: "치료 형태를 선택하세요." })
+    .min(1, "치료 형태를 선택하세요."),
+  diagnosis: z
+    .array(z.string(), { message: "진단명을 입력하세요." })
+    .refine((rows) => rows.some((r) => r.trim().length > 0), "진단명을 입력하세요."),
+  treatmentCount: z
+    .number({ message: "숫자를 입력하세요." })
+    .int("숫자를 입력하세요.")
+    .min(0, "0 이상의 숫자를 입력하세요.")
+    .nullish(), // 입원·통원 횟수(회), 선택
+  totalTreatmentCost: z
+    .number({ message: "숫자를 입력하세요." })
+    .int("숫자를 입력하세요.")
+    .min(0, "0 이상의 숫자를 입력하세요.")
+    .nullish(), // 총 치료비 본인부담(원), 선택
+  nonCoveredOption: z.enum(nonCoveredOptionSchema.options, {
+    message: "비급여 포함 여부를 선택하세요.",
+  }),
   enrolledInsurance: z.string().nullish(),
 });
 
 export const step4InsuranceSchema = z
   .object({
-    insuranceNotOffered: z.boolean(),
-    insuranceOffered: z.number().int().min(0).nullish(), // 제안받은 보험금(원)
+    insuranceNotOffered: z.boolean().optional(), // 미체크 = 미선택(false 취급)
+    insuranceOffered: z
+      .number({ message: "숫자를 입력하세요." })
+      .int("숫자를 입력하세요.")
+      .min(0, "0 이상의 숫자를 입력하세요.")
+      .nullish(), // 제안받은 보험금(원)
   })
   .refine((v) => v.insuranceNotOffered || v.insuranceOffered != null, {
     path: ["insuranceOffered"],
     message: "제안받은 보험금을 입력하거나 '아직 제안받지 않았어요'를 선택하세요.",
   });
 
-export const step5DocumentSchema = z.object({
-  documentUrls: z.array(z.url()).nullish(), // 업로드된 증빙 url, 선택
+export const QUESTION_MAX_LENGTH = 500;
+
+export const step5QuestionSchema = z.object({
+  question: z
+    .string()
+    .max(QUESTION_MAX_LENGTH, `${QUESTION_MAX_LENGTH}자까지 입력할 수 있어요.`)
+    .nullish(), // 손해사정사에게 전할 말, 선택
 });
 
-/** POST /uploads 응답 data. */
-export const uploadDocumentResponseSchema = z.object({
-  url: z.url(),
+export const step6DocumentSchema = z.object({
+  documentUrls: z
+    .array(z.url("파일 업로드 상태를 다시 확인해 주세요."), {
+      message: "파일 업로드 상태를 다시 확인해 주세요.",
+    })
+    .nullish(), // 업로드된 증빙 url, 선택
 });
 
-export const step6ConsentSchema = z.object({
+export const step7ConsentSchema = z.object({
   agreedToPrivacy: z.literal(true, { message: "민감정보 처리에 동의해 주세요." }),
   agreedToTerms: z.literal(true, { message: "필수 고지사항을 확인해 주세요." }),
+});
+
+/**
+ * POST /reports body의 documents[] 항목. 명세(37b30798…570d) Document:
+ * s3_url·name·report_type·file_type 전부 Y(요청 시 camel→snake 자동 변환).
+ */
+export const documentSchema = z.object({
+  s3Url: z.url(),
+  name: z.string().min(1),
+  reportType: z.string().min(1),
+  // CONTRACT: 명세는 file_type 필수(.pdf/.jpg 등)이나 업로드 url에 확장자가 없을 수 있어 빈 문자열 허용.
+  fileType: z.string(),
 });
 
 /** POST /reports 요청 body (naming-dictionary §3). */
@@ -88,7 +128,7 @@ export const createReportBodySchema = z.object({
     .nullable(),
   description: z.string().nullable(),
   additionalInformation: z.string().nullable(),
-  documentUrls: z.array(z.url()).nullable(),
+  documents: z.array(documentSchema).nullable(),
   question: z.string().nullable(),
 });
 
@@ -97,6 +137,13 @@ export const createReportResponseSchema = z.object({
   reportId: z.uuid(),
   status: z.string(), // CONTRACT: 생성 직후 status 백엔드 확인(MSW는 AWAITING_INSPECTION)
 });
+
+type _CreateReportBodyDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof createReportBodySchema>, CreateReportRequest>
+>;
+type _CreateReportResponseDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof createReportResponseSchema>, GenCreateReportResponse>
+>;
 
 /** 자동저장용 — 부분 입력 허용. 슬라이스마다 필드 추가. */
 export const adjustRequestDraftSchema = z.object({
@@ -111,6 +158,7 @@ export const adjustRequestDraftSchema = z.object({
   hospitalizations: z.array(hospitalizationSchema).optional(),
   insuranceNotOffered: z.boolean().optional(),
   insuranceOffered: z.number().int().min(0).nullish(),
+  question: z.string().max(QUESTION_MAX_LENGTH).nullish(),
   documentUrls: z.array(z.url()).nullish(),
   documentSlots: documentSlotsSchema.optional(), // 슬롯→업로드 결과(복원용). 제출은 documentUrls로 평면화.
   agreedToPrivacy: z.boolean().optional(),
@@ -154,6 +202,7 @@ export function toCreateReportBody(
   draft: AdjustRequestDraftInput,
 ): z.infer<typeof createReportBodySchema> {
   const stays = draft.hospitalizations ?? [];
+  const documents = flattenDocuments(draft.documentSlots, draft.documentUrls ?? []);
 
   return createReportBodySchema.parse({
     accidentType: draft.accidentType ?? SUPPORTED_ACCIDENT_TYPE,
@@ -169,7 +218,7 @@ export function toCreateReportBody(
       : null,
     description: null,
     additionalInformation: serializeAdditionalInformation(draft),
-    documentUrls: draft.documentUrls ?? null,
-    question: null,
+    documents: documents.length ? documents : null,
+    question: draft.question?.trim() || null,
   });
 }

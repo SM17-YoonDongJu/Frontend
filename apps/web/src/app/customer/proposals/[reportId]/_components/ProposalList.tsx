@@ -22,7 +22,13 @@ export function ProposalList({ reportId, proposals }: ProposalListProps) {
     <ul className="space-y-4">
       {proposals.map((proposal) => (
         <li key={proposal.adjusterId}>
-          <ProposalCard reportId={reportId} proposal={proposal} />
+          <ProposalCard
+            reportId={reportId}
+            proposal={proposal}
+            otherProposalNames={proposals
+              .filter((other) => other.adjusterId !== proposal.adjusterId)
+              .map((other) => other.nickname)}
+          />
         </li>
       ))}
     </ul>

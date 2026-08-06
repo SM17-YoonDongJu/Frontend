@@ -1,0 +1,128 @@
+"use client";
+
+import { useRef, useState, type ReactNode } from "react";
+import type { RoomStatus } from "@/shared/api/chat/chat.schema";
+import { cn } from "@/shared/lib/utils";
+import { Avatar } from "@/shared/ui/Avatar";
+import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
+import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
+import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
+import { Popover } from "@/shared/ui/Popover";
+import { ChatProfileLink } from "./ChatProfileLink";
+import { MenuActionItem } from "./MenuActionItem";
+import { ROOM_STATUS_META } from "./room-status";
+
+export interface ChatThreadHeaderMenuAction {
+  key: string;
+  label: string;
+  icon: ReactNode;
+  /** 있으면 링크, 없으면 버튼 */
+  href?: string;
+  onClick?: () => void;
+  disabled?: boolean;
+  /** danger = 매칭 거절·상담 종료 */
+  tone?: "default" | "danger";
+  /** 데스크톱에서 다른 곳에 전용 버튼으로 노출돼 더보기 목록에선 숨김(모바일만) */
+  mobileOnly?: boolean;
+}
+
+export interface ChatThreadHeaderProps {
+  name: string;
+  /** 사건번호 — 사정사 검색 방(리포트 없음)은 null */
+  caseNo: string | null;
+  roomStatus: RoomStatus;
+  /** 모바일 뒤로가기 — 없으면 버튼 미노출 */
+  onBack?: () => void;
+  /** 이름 옆 배지(매칭 완료 등). 없으면 미표시 */
+  badge?: ReactNode;
+  /** 서브타이틀 오버라이드. 없으면 기존 caseNo·roomStatus 라벨 */
+  subtitle?: string;
+  /** 상대 프로필 링크(customer→사정사 프로필). 없으면(partner) 링크 없이 렌더 */
+  profileHref?: string;
+  /** 헤더 보조 액션 — 데스크톱·모바일 공통으로 "더보기" 패널에 세로 나열 */
+  menuActions: ChatThreadHeaderMenuAction[];
+}
+
+export function ChatThreadHeader({
+  name,
+  caseNo,
+  roomStatus,
+  onBack,
+  badge,
+  subtitle: subtitleOverride,
+  profileHref,
+  menuActions
+}: ChatThreadHeaderProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const subtitle =
+    subtitleOverride ?? [caseNo, ROOM_STATUS_META[roomStatus].label].filter(Boolean).join(" · ");
+
+  return (
+    <header className="relative flex items-center gap-2.5 border-b border-line-2 bg-paper px-4 py-3 md:bg-card md:px-5">
+      {onBack && (
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label="목록으로"
+          className="-ml-1 flex size-8 items-center justify-center rounded-full text-[1.25rem] text-ink transition hover:bg-paper-2 md:hidden"
+        >
+          {/* Figma 663:3801 — 얇은 좌측 셰브런 */}
+          <ChevronRight className="rotate-180" />
+        </button>
+      )}
+
+      <ChatProfileLink href={profileHref}>
+        <Avatar name={name} size="sm" />
+
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1.5 truncate text-[0.85rem] font-bold text-ink">
+            {name}
+            {/* Figma 95:4611 — 이름 옆 인증 마크 */}
+            <ShieldCheck className="shrink-0 text-[0.8125rem] text-ink-3" />
+            {badge}
+          </p>
+          {/* Figma 모바일(663:3796) 헤더는 이름만 — 사건번호·상태는 데스크톱(95:4571) 전용 */}
+          <p className="hidden truncate text-[0.6875rem] text-ink-3 md:block">{subtitle}</p>
+          <span className="sr-only md:hidden">{subtitle}</span>
+        </div>
+      </ChatProfileLink>
+
+      {menuActions.length > 0 && (
+        <div className="relative shrink-0">
+          <button
+            ref={triggerRef}
+            type="button"
+            onClick={() => setMenuOpen((open) => !open)}
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="flex items-center gap-1.5 rounded-full border border-line bg-card px-3.5 py-1.5 text-[0.8125rem] font-semibold text-ink-2 transition hover:bg-paper-2"
+          >
+            더보기
+            <ChevronDown
+              className={cn("text-[0.9375rem] transition-transform", menuOpen && "rotate-180")}
+            />
+          </button>
+
+          <Popover
+            open={menuOpen}
+            onClose={() => setMenuOpen(false)}
+            triggerRef={triggerRef}
+            label="더보기"
+            className="w-56 overflow-hidden rounded-card"
+          >
+            <div role="menu" className="flex flex-col divide-y divide-line-2">
+              {menuActions.map((action) => (
+                <MenuActionItem
+                  key={action.key}
+                  action={action}
+                  onSelect={() => setMenuOpen(false)}
+                />
+              ))}
+            </div>
+          </Popover>
+        </div>
+      )}
+    </header>
+  );
+}

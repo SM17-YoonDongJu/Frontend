@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 알림 페이지 E2E (이슈 #49).
@@ -10,6 +11,10 @@ import { expect, test } from "@playwright/test";
  */
 
 const PATH = "/notifications";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "USER");
+});
 
 test("진입하면 알림 목록과 날짜 그룹이 보인다", async ({ page }) => {
   await page.goto(PATH);
@@ -37,6 +42,42 @@ test("모두 읽음을 누르면 안읽음 표시가 사라진다", async ({ pag
   }).toPass({ timeout: 10000 });
 });
 
+test("안 읽은 알림 카드를 탭하면 안읽음 표시가 사라진다", async ({ page }) => {
+  await page.goto(PATH);
+
+  const unreadDots = page.getByLabel("읽지 않은 알림");
+  // 기본 핸들러: 안읽음 2건
+  await expect(unreadDots).toHaveCount(2);
+
+  await expect(async () => {
+    await page.getByRole("button", { name: "알림 읽음 처리" }).first().click();
+    await expect(unreadDots).toHaveCount(1);
+  }).toPass({ timeout: 10000 });
+});
+
+test("읽음 처리에 실패하면 토스트 안내가 보인다", async ({ page }) => {
+  // MSW는 브라우저 서비스워커라 page.route로는 못 가로챈다 — fetch를 감싸 실패 헤더 주입.
+  await page.addInitScript(() => {
+    const originalFetch = window.fetch;
+    window.fetch = (input, init = {}) => {
+      const headers = new Headers(init.headers);
+      headers.set("x-mock-failure", "notification-read");
+      return originalFetch(input, { ...init, headers });
+    };
+  });
+  await page.goto(PATH);
+
+  const unreadDots = page.getByLabel("읽지 않은 알림");
+  await expect(unreadDots).toHaveCount(2);
+
+  await expect(async () => {
+    await page.getByRole("button", { name: "알림 읽음 처리" }).first().click();
+    await expect(page.getByText("알림 읽음 처리에 실패했어요", { exact: false })).toBeVisible();
+  }).toPass({ timeout: 10000 });
+
+  await expect(unreadDots).toHaveCount(2);
+});
+
 test("알림이 없으면 빈 상태 안내가 보인다", async ({ page }) => {
   // 빈 목록은 MSW 기본 핸들러가 못 만들므로 fetch를 감싸 빈 응답을 직접 반환(SW 우회).
   await page.addInitScript(() => {
@@ -46,7 +87,11 @@ test("알림이 없으면 빈 상태 안내가 보인다", async ({ page }) => {
       if (url.includes("/users/me/notifications") && !url.includes("read-all")) {
         return Promise.resolve(
           new Response(
-            JSON.stringify({ status: "200", message: "정상 처리되었습니다.", data: { list: [] } }),
+            JSON.stringify({
+              status: "200",
+              message: "정상 처리되었습니다.",
+              data: { items: [], unread_count: 0, page: 0, size: 20, total_elements: 0, total_pages: 0 },
+            }),
             { status: 200, headers: { "Content-Type": "application/json" } },
           ),
         );

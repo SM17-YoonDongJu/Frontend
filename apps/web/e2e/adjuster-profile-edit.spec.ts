@@ -1,4 +1,11 @@
 import { expect, test } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
+import { hideQueryDevtools, selectRegions } from "./_region-helpers";
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+  await hideQueryDevtools(page);
+});
 
 /**
  * 손해사정사 프로필 수정 E2E (happy-path, 이슈 #31).
@@ -92,6 +99,24 @@ test("경력을 추가했다가 확인 절차로 삭제한다", async ({ page })
 
   // 행 제거됨
   await expect(page.getByRole("textbox", { name: "경력 3 기간" })).toHaveCount(0);
+});
+
+test("활동 지역을 드롭다운에서 다시 골라 저장한다", async ({ page }) => {
+  await page.goto(PATH);
+
+  // MSW 프로필의 활동 지역("서울 · 경기")이 시·도 전체 2곳으로 복원된다
+  const trigger = page.getByRole("button", { name: /서울 전체 외 1곳/ });
+  await expect(trigger).toBeVisible();
+
+  await selectRegions(page, [["서울특별시", "강남구"]], {
+    reset: true,
+    trigger: /서울 전체 외 1곳/,
+  });
+
+  await expect(page.getByRole("button", { name: /서울 강남구/ })).toBeVisible();
+
+  await page.getByRole("button", { name: "저장하기" }).click();
+  await expect(page.getByText("프로필을 저장했어요.")).toBeVisible();
 });
 
 test("변경 후 저장하면 성공 안내가 보인다", async ({ page }) => {

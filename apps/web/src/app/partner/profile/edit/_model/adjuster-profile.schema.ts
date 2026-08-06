@@ -1,24 +1,12 @@
 import { z } from "zod";
 import { HEADLINE_MAX, INTRODUCTION_MAX, MAX_SPECIALTIES } from "./specialty-options";
+import type { UpdateAdjusterProfileRequest } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
+// 응답 스키마는 홈 헤더와 공유 — @/app/partner/_shared/model/adjuster-profile.schema
 export const careerItemSchema = z.object({
   period: z.string().min(1),
   company: z.string().min(1),
-});
-
-export const adjusterProfileSchema = z.object({
-  adjusterId: z.string().uuid(),
-  nickname: z.string(),
-  headline: z.string(),
-  introduction: z.string(),
-  career: z.number().int().nonnegative(),
-  activityRegion: z.string(),
-  avatarUrl: z.string().url().nullable(),
-  specialties: z.array(z.string()),
-  careers: z.array(careerItemSchema),
-  // 실 API 미정 필드(MSW 선제공) — 명세 확정 시 필수로 승격
-  registrationNo: z.string().nullish(),
-  updatedAt: z.string(),
 });
 
 export const profileFormSchema = z.object({
@@ -36,7 +24,7 @@ export const profileFormSchema = z.object({
     .number({ error: "숫자를 입력해 주세요." })
     .int()
     .min(0, "0 이상으로 입력해 주세요."),
-  activityRegion: z.string().trim().min(1, "활동지역을 입력해 주세요."),
+  activityRegion: z.string().trim().min(1, "활동 지역을 선택해 주세요."),
   avatarUrl: z.string().url().nullable(),
   specialties: z
     .array(z.string())
@@ -47,4 +35,6 @@ export const profileFormSchema = z.object({
 
 export const updateProfileBodySchema = profileFormSchema.partial();
 
-export const uploadAvatarResponseSchema = z.object({ url: z.string().url() });
+type _UpdateProfileBodyDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.infer<typeof updateProfileBodySchema>, UpdateAdjusterProfileRequest>
+>;

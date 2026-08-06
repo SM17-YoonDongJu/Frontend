@@ -4,6 +4,7 @@ import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { CREDENTIAL_PROOF } from "../_model/credential-proof.fixture";
+import { CredentialInfoRow } from "./CredentialInfoRow";
 
 interface CredentialProofModalProps {
   open: boolean;
@@ -26,10 +27,10 @@ export function CredentialProofModal({ open, licenseNo, onClose }: CredentialPro
       </div>
 
       <dl className="mt-4 divide-y divide-line-2">
-        <InfoRow label="등록번호" value={licenseNo} />
-        <InfoRow label="자격 구분" value={CREDENTIAL_PROOF.speciality} />
+        <CredentialInfoRow label="등록번호" value={licenseNo} />
+        <CredentialInfoRow label="자격 구분" value={CREDENTIAL_PROOF.speciality} />
         {CREDENTIAL_PROOF.documents.map((doc) => (
-          <InfoRow
+          <CredentialInfoRow
             key={doc.label}
             label={doc.label}
             value={`${doc.fileName} · ${doc.fileSize}`}
@@ -49,19 +50,5 @@ export function CredentialProofModal({ open, licenseNo, onClose }: CredentialPro
         </Button>
       </div>
     </Modal>
-  );
-}
-
-function InfoRow({ label, value, action }: { label: string; value: string; action?: boolean }) {
-  return (
-    <div className="flex items-center gap-4 py-3">
-      <dt className="w-18 shrink-0 text-[0.8125rem] text-ink-3">{label}</dt>
-      <dd className="min-w-0 flex-1 truncate text-[0.875rem] font-semibold text-ink">{value}</dd>
-      {action && (
-        <button type="button" className="shrink-0 text-[0.8125rem] font-semibold text-gold-ink">
-          보기
-        </button>
-      )}
-    </div>
   );
 }

@@ -5,9 +5,9 @@ import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import { useReportList } from "../_api/use-report-list";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
 import { EmptyState } from "./EmptyState";
-import { ReportCard } from "./ReportCard";
+import { ReportSummaryCard } from "./ReportSummaryCard";
 
-const VISIBLE_REPORT_COUNT = 4;
+const VISIBLE_REPORT_COUNT = 3;
 
 export function MyReportsSection() {
   const { data: reportList } = useReportList();
@@ -32,9 +32,9 @@ export function MyReportsSection() {
           cta={{ label: "새 분석 시작", href: DASHBOARD_LINKS.newAnalysis }}
         />
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="grid gap-4 md:grid-cols-3">
           {reports.map((report) => (
-            <ReportCard key={report.reportId} report={report} />
+            <ReportSummaryCard key={report.reportId} report={report} />
           ))}
         </div>
       )}

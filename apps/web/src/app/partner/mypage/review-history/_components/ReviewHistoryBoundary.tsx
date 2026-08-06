@@ -1,30 +1,25 @@
 "use client";
 
-import { QueryErrorResetBoundary } from "@tanstack/react-query";
-import { Suspense, useEffect, useState } from "react";
-import { ErrorBoundary, type FallbackProps } from "react-error-boundary";
-import { ReviewHistoryError } from "./ReviewHistoryError";
+import { AsyncBoundary } from "@/shared/ui/AsyncBoundary";
 import { ReviewHistorySkeleton } from "./ReviewHistorySkeleton";
 import { ReviewHistoryView } from "./ReviewHistoryView";
 
-function ReviewHistoryErrorFallback({ error, resetErrorBoundary }: FallbackProps) {
-  return <ReviewHistoryError code={(error as Error).name} onRetry={resetErrorBoundary} />;
-}
+const ERROR_MESSAGES = {
+  FORBIDDEN: {
+    title: "접근 권한이 없어요",
+    desc: "활성 손해사정사만 검수 내역을 볼 수 있어요.",
+  },
+};
 
 export function ReviewHistoryBoundary() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  if (!mounted) return <ReviewHistorySkeleton />;
-
   return (
-    <QueryErrorResetBoundary>
-      {({ reset }) => (
-        <ErrorBoundary onReset={reset} FallbackComponent={ReviewHistoryErrorFallback}>
-          <Suspense fallback={<ReviewHistorySkeleton />}>
-            <ReviewHistoryView />
-          </Suspense>
-        </ErrorBoundary>
-      )}
-    </QueryErrorResetBoundary>
+    <AsyncBoundary
+      fallback={<ReviewHistorySkeleton />}
+      errorLayout="flow"
+      errorTitle="내역을 불러오지 못했어요"
+      errorMessages={ERROR_MESSAGES}
+    >
+      <ReviewHistoryView />
+    </AsyncBoundary>
   );
 }

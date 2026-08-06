@@ -1,8 +1,9 @@
-import { API_BASE_URL } from "@/shared/api/config";
-import { fetchJson } from "@/shared/api/fetch-json";
+import "@/shared/api/client";
+import { summary } from "@/shared/api/generated/sdk.gen";
 import { reviewSummarySchema } from "../_model/review.schema";
 import type { ReviewSummary } from "../_model/types";
 
-export function getReviewSummary(): Promise<ReviewSummary> {
-  return fetchJson(`${API_BASE_URL}/reports/pending-review/summary`, reviewSummarySchema);
+export async function getReviewSummary(): Promise<ReviewSummary> {
+  const { data } = await summary({ throwOnError: true });
+  return reviewSummarySchema.parse(data);
 }

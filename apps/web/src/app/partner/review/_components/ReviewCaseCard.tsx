@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
+import { formatManwon } from "@/shared/lib/format-amount";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { StatusBadge, type StatusBadgeProps } from "@/shared/ui/StatusBadge";
 import type { ReviewListItem } from "../../_shared/model/types";
@@ -15,10 +16,8 @@ const TYPE_TONE: Record<string, Tone> = {
 
 const NEW_THRESHOLD_MS = 2 * 24 * 60 * 60 * 1000;
 
-const toManwon = (won: number) => Math.round(won / 10_000).toLocaleString("ko-KR");
-
 // 제안 대비 금액 — 부호를 값에서 분리해 음수여도 "+-N만"으로 깨지지 않게 표기.
-const formatHeadroom = (won: number) => `${won < 0 ? "−" : "+"}${toManwon(Math.abs(won))}만`;
+const formatHeadroom = (won: number) => `${won < 0 ? "−" : "+"}${formatManwon(Math.abs(won))}만`;
 
 function isNew(createdAt: string) {
   return Date.now() - new Date(createdAt).getTime() < NEW_THRESHOLD_MS;
@@ -35,9 +34,11 @@ export function ReviewCaseCard({ item }: Props) {
   return (
     <article className="flex flex-col gap-[0.5625rem] rounded-card border border-line bg-card p-[1.0625rem] shadow-[0_1px_1px_rgba(21,32,46,0.03)]">
       <div className="flex flex-wrap items-center gap-2">
-        <StatusBadge tone={TYPE_TONE[item.accidentType] ?? "neutral"}>
-          {accidentTypeLabel(item.accidentType)}
-        </StatusBadge>
+        {item.accidentType && (
+          <StatusBadge tone={TYPE_TONE[item.accidentType] ?? "neutral"}>
+            {accidentTypeLabel(item.accidentType)}
+          </StatusBadge>
+        )}
         {isNew(item.createdAt) && <StatusBadge tone="terra">NEW</StatusBadge>}
         {item.caseId && <span className="text-[0.72rem] text-ink-3">#{item.caseId}</span>}
       </div>
@@ -52,7 +53,7 @@ export function ReviewCaseCard({ item }: Props) {
             <div className="flex-1 rounded-[0.625rem] border border-line-2 px-3 py-2.5">
               <p className="text-[0.61rem] text-ink-3">예상 범위</p>
               <p className="mt-0.5 font-serif text-sm tabular-nums text-ink">
-                {toManwon(item.claimedMinAmount!)}–{toManwon(item.claimedMaxAmount!)}만
+                {formatManwon(item.claimedMinAmount!)}–{formatManwon(item.claimedMaxAmount!)}만
               </p>
             </div>
           )}

@@ -6,7 +6,10 @@ import {
   type FieldErrors,
   type UseFormRegister,
 } from "react-hook-form";
+import { formatRegionList, parseRegionList } from "@/shared/model/regions";
+import { FieldLabel } from "@/shared/ui/FieldLabel";
 import { Input } from "@/shared/ui/Input";
+import { RegionSelect } from "@/shared/ui/RegionSelect/RegionSelect";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { HEADLINE_MAX, INTRODUCTION_MAX } from "../_model/specialty-options";
 import type { ProfileFormValues } from "../_model/types";
@@ -21,21 +24,6 @@ interface BasicInfoSectionProps {
   headlineLength: number;
   introductionLength: number;
   onUploadingChange?: (uploading: boolean) => void;
-}
-
-function FieldLabel({
-  children,
-  counter,
-}: {
-  children: React.ReactNode;
-  counter?: string;
-}) {
-  return (
-    <div className="mb-2 flex items-center justify-between">
-      <span className="text-[0.8125rem] font-semibold text-ink-2">{children}</span>
-      {counter && <span className="hidden text-[0.75rem] text-ink-3 lg:inline">{counter}</span>}
-    </div>
-  );
 }
 
 export function BasicInfoSection({
@@ -110,10 +98,18 @@ export function BasicInfoSection({
         </div>
         <div>
           <FieldLabel>활동 지역</FieldLabel>
-          <Input
-            placeholder="예) 서울 · 경기"
-            error={errors.activityRegion?.message}
-            {...register("activityRegion")}
+          <Controller
+            control={control}
+            name="activityRegion"
+            render={({ field }) => (
+              <RegionSelect
+                mode="multiple"
+                value={parseRegionList(field.value)}
+                onChange={(regions) => field.onChange(formatRegionList(regions))}
+                error={errors.activityRegion?.message}
+                className="w-full"
+              />
+            )}
           />
         </div>
       </div>

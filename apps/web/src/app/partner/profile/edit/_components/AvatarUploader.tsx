@@ -1,11 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { getInitial } from "@/shared/lib/initial";
 import { cn } from "@/shared/lib/utils";
 import { Button } from "@/shared/ui/Button";
 import { Pencil } from "@/shared/ui/icons/Pencil";
+import { uploadErrorMessage } from "@/shared/api/upload-file";
+import {
+  UPLOAD_LIMITS,
+  uploadAcceptAttr,
+  validateUploadFile,
+} from "@/shared/model/upload.schema";
 import { useUploadAvatar } from "../_api/use-upload-avatar";
-import { AVATAR_ACCEPT, AVATAR_MAX_BYTES } from "../_model/specialty-options";
 
 interface AvatarUploaderProps {
   value: string | null;
@@ -14,18 +20,8 @@ interface AvatarUploaderProps {
   nickname: string;
 }
 
-const ACCEPT_ATTR = AVATAR_ACCEPT.join(",");
-const MAX_MB = AVATAR_MAX_BYTES / (1024 * 1024);
-
-function validate(file: File): string | null {
-  if (!(AVATAR_ACCEPT as readonly string[]).includes(file.type)) {
-    return "JPG 또는 PNG 형식만 올릴 수 있어요.";
-  }
-  if (file.size > AVATAR_MAX_BYTES) {
-    return `${MAX_MB}MB 이하 이미지만 올릴 수 있어요.`;
-  }
-  return null;
-}
+const ACCEPT_ATTR = uploadAcceptAttr("avatar");
+const MAX_MB = UPLOAD_LIMITS.avatar.maxBytes / (1024 * 1024);
 
 export function AvatarUploader({ value, onChange, onUploadingChange, nickname }: AvatarUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -44,7 +40,7 @@ export function AvatarUploader({ value, onChange, onUploadingChange, nickname }:
   }, [preview]);
 
   async function handleFile(file: File) {
-    const validationError = validate(file);
+    const validationError = validateUploadFile(file, "avatar");
     if (validationError) {
       setError(validationError);
       return;
@@ -58,8 +54,8 @@ export function AvatarUploader({ value, onChange, onUploadingChange, nickname }:
       const { url } = await uploadAvatar.mutateAsync(file);
       onChange(url);
       setPreview(null);
-    } catch {
-      setError("사진 업로드에 실패했어요. 잠시 후 다시 시도해 주세요.");
+    } catch (uploadError) {
+      setError(uploadErrorMessage(uploadError));
       setPreview(null);
     } finally {
       URL.revokeObjectURL(objectUrl);
@@ -67,7 +63,7 @@ export function AvatarUploader({ value, onChange, onUploadingChange, nickname }:
   }
 
   const shownImage = preview ?? value;
-  const initial = nickname.trim().charAt(0) || "?";
+  const initial = getInitial(nickname);
 
   return (
     <div className="flex flex-col items-center gap-2 lg:items-stretch">

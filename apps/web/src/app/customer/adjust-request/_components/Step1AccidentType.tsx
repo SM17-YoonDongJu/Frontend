@@ -12,19 +12,23 @@ import { Pencil } from "@/shared/ui/icons/Pencil";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { TrendingUp } from "@/shared/ui/icons/TrendingUp";
+import { Tooltip } from "@/shared/ui/Tooltip";
 import { AccidentTypeCard } from "./AccidentTypeCard";
 import type { AdjustRequestDraft } from "../_model/types";
 
 const ACCIDENT_TYPES: { value: AccidentType; description: string; icon: ReactNode }[] = [
+  { value: "medical_indemnity", description: "치료비·통원 보상", icon: <FileText /> },
   { value: "traffic", description: "자동차·이륜차 사고 보상", icon: <TrendingUp /> },
   { value: "disability", description: "장해등급·후유증 보상", icon: <Scale /> },
-  { value: "medical_indemnity", description: "치료비·통원 보상", icon: <FileText /> },
   { value: "cancer_diagnosis", description: "진단·수술 보상", icon: <ShieldCheck /> },
   { value: "other", description: "직접 입력", icon: <Pencil /> },
 ];
 
+const LOCKED_TOOLTIP = "추후에 지원 예정입니다.";
+
 export function Step1AccidentType() {
-  const { watch, setValue } = useFormContext<AdjustRequestDraft>();
+  const { watch, setValue, formState } = useFormContext<AdjustRequestDraft>();
+  const { errors } = formState;
   const selected = watch("accidentType");
 
   return (
@@ -36,19 +40,45 @@ export function Step1AccidentType() {
         유형에 맞춰 약관·특약을 분석해드려요.
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2" role="radiogroup">
-        {ACCIDENT_TYPES.map((type) => (
+      <div className="mt-6" role="radiogroup">
+        {ACCIDENT_TYPES.filter((type) => type.value === SUPPORTED_ACCIDENT_TYPE).map((type) => (
           <AccidentTypeCard
             key={type.value}
             icon={type.icon}
             title={accidentTypeLabel(type.value)}
             description={type.description}
             selected={selected === type.value}
-            disabled={type.value !== SUPPORTED_ACCIDENT_TYPE}
             onSelect={() =>
               setValue("accidentType", SUPPORTED_ACCIDENT_TYPE, { shouldValidate: true })
             }
           />
+        ))}
+      </div>
+
+      {errors.accidentType && (
+        <p className="mt-3 text-[0.75rem] font-medium text-terra">{errors.accidentType.message}</p>
+      )}
+
+      <div className="mt-6 flex items-center gap-3" aria-hidden>
+        <span className="h-px flex-1 bg-line" />
+        <span className="text-[0.75rem] font-medium text-ink-3">추후 지원 예정</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+
+      <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {ACCIDENT_TYPES.filter((type) => type.value !== SUPPORTED_ACCIDENT_TYPE).map((type) => (
+          <Tooltip key={type.value} label={LOCKED_TOOLTIP} className="w-full cursor-not-allowed">
+            <AccidentTypeCard
+              icon={type.icon}
+              title={accidentTypeLabel(type.value)}
+              description={type.description}
+              selected={false}
+              disabled
+              onSelect={() =>
+                setValue("accidentType", SUPPORTED_ACCIDENT_TYPE, { shouldValidate: true })
+              }
+            />
+          </Tooltip>
         ))}
       </div>
 

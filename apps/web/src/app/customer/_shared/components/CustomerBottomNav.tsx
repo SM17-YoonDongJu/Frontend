@@ -16,9 +16,14 @@ const TABS: { label: string; href: string; Icon: IconComponent }[] = [
 ];
 
 /** 고객 앱 하단 탭바. active는 현재 화면 탭 라벨(예: "상담"). */
-export function CustomerBottomNav({ active }: { active: string }) {
+export function CustomerBottomNav({ active, className }: { active: string; className?: string }) {
   return (
-    <nav className="sticky bottom-0 z-10 flex border-t border-line bg-paper-2/[0.92] backdrop-blur">
+    <nav
+      className={cn(
+        "sticky bottom-0 z-10 flex border-t border-line bg-paper-2/[0.92] backdrop-blur",
+        className,
+      )}
+    >
       {TABS.map(({ label, href, Icon }) => {
         const isActive = label === active;
         return (

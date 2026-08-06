@@ -2,40 +2,24 @@ import { cn } from "@/shared/lib/utils";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { Check } from "@/shared/ui/icons/Check";
 import { Button } from "@/shared/ui/Button";
-import type { RegisterErrorCode } from "../_api/use-register";
 import {
   CONSENT_ITEMS,
   isRequiredConsentMet,
   type ConsentState,
 } from "../_model/consent-config";
-import type { TermsType } from "../_shared/model/terms";
+import type { TermsType } from "@/shared/model/terms-content";
 import { ConsentCheckItem } from "./ConsentCheckItem";
 
 interface ConsentStepProps {
   consent: ConsentState;
   onToggle: (type: TermsType, checked: boolean) => void;
   onToggleAll: (checked: boolean) => void;
-  onSubmit: () => void;
-  loading: boolean;
-  errorCode: RegisterErrorCode | null;
+  /** 필수 약관 충족 시 다음 단계(본인 확인)로 이동 */
+  onNext: () => void;
 }
 
-const ERROR_MESSAGE: Record<RegisterErrorCode, string> = {
-  DUPLICATE_RESOURCE: "이미 가입된 계정이에요. 로그인으로 진행해 주세요.",
-  VALIDATION_ERROR: "입력한 정보를 다시 확인해 주세요.",
-  MISSING_REQUIRED_FIELD: "필수 정보가 누락됐어요. 다시 시도해 주세요.",
-  EXTERNAL_API_ERROR: "소셜 인증에 실패했어요. 잠시 후 다시 시도해 주세요.",
-};
-
-/** Step2: 전체 동의 + 약관 3종 + 동의하고 가입. */
-export function ConsentStep({
-  consent,
-  onToggle,
-  onToggleAll,
-  onSubmit,
-  loading,
-  errorCode,
-}: ConsentStepProps) {
+/** Step2: 전체 동의 + 약관 3종. 가입 요청은 본인 확인 스텝(#173)에서 수행. */
+export function ConsentStep({ consent, onToggle, onToggleAll, onNext }: ConsentStepProps) {
   const allChecked = CONSENT_ITEMS.every((item) => consent[item.type]);
   const canSubmit = isRequiredConsentMet(consent);
 
@@ -73,22 +57,15 @@ export function ConsentStep({
         ))}
       </div>
 
-      {errorCode && (
-        <p role="alert" className="mt-5 rounded-input bg-terra-soft px-4 py-3 text-[0.8125rem] font-medium text-terra">
-          {ERROR_MESSAGE[errorCode]}
-        </p>
-      )}
-
       <Button
         full
         size="lg"
         className="mt-6"
         disabled={!canSubmit}
-        loading={loading}
-        onClick={onSubmit}
+        onClick={onNext}
         icon={<ArrowRight className="text-[1.1rem]" />}
       >
-        동의하고 가입
+        다음
       </Button>
     </div>
   );

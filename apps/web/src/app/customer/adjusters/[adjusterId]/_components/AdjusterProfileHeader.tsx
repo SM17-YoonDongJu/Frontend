@@ -1,5 +1,7 @@
+import { Avatar } from "@/shared/ui/Avatar";
 import { StarRating } from "@/shared/ui/StarRating";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
+import { AdjusterStat } from "./AdjusterStat";
 
 interface AdjusterProfileHeaderProps {
   nickname: string;
@@ -38,17 +40,11 @@ export function AdjusterProfileHeader({
         </nav>
 
         <div className="flex flex-col items-center gap-2 text-center lg:flex-row lg:items-center lg:gap-7 lg:text-left">
-          <span
-            aria-hidden
-            className="flex size-[5.25rem] shrink-0 items-center justify-center overflow-hidden rounded-full bg-navy text-3xl font-semibold text-white lg:size-24"
-          >
-            {avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={avatarUrl} alt="" className="size-full object-cover" />
-            ) : (
-              nickname.trim().charAt(0) || "?"
-            )}
-          </span>
+          <Avatar
+            src={avatarUrl}
+            name={nickname}
+            className="text-[5.25rem] font-sans font-semibold [--avatar-initial:0.357em] lg:text-[6rem]"
+          />
 
           <div className="flex min-w-0 flex-col items-center lg:items-start">
             <div className="flex flex-wrap items-center justify-center gap-2 pt-1.5 lg:justify-start lg:gap-3 lg:pt-0">
@@ -84,7 +80,7 @@ export function AdjusterProfileHeader({
         </div>
 
         <dl className="mt-8 hidden grid-cols-3 divide-x divide-line lg:grid">
-          <Stat
+          <AdjusterStat
             label="평점"
             value={
               <span className="flex items-center gap-1.5">
@@ -94,13 +90,13 @@ export function AdjusterProfileHeader({
             }
             caption={`후기 ${numberFormatter.format(reviewCount)}건`}
           />
-          <Stat
+          <AdjusterStat
             label="상담 완료"
             value={`${numberFormatter.format(completedConsultCount)}+`}
             caption="누적 의뢰"
             inset
           />
-          <Stat
+          <AdjusterStat
             label="처리 사건"
             value={`${numberFormatter.format(handledCaseCount)}건`}
             caption="누적 처리"
@@ -109,25 +105,5 @@ export function AdjusterProfileHeader({
         </dl>
       </div>
     </header>
-  );
-}
-
-function Stat({
-  label,
-  value,
-  caption,
-  inset,
-}: {
-  label: string;
-  value: React.ReactNode;
-  caption: string;
-  inset?: boolean;
-}) {
-  return (
-    <div className={inset ? "pl-3 sm:pl-6" : undefined}>
-      <dt className="text-xs text-ink-3">{label}</dt>
-      <dd className="mt-1 text-2xl font-semibold text-ink sm:text-3xl">{value}</dd>
-      <p className="mt-1 text-xs text-ink-3">{caption}</p>
-    </div>
   );
 }

@@ -26,9 +26,9 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
   return (
     <div className="mx-auto w-full max-w-[67.5rem] px-5 pb-9 pt-[1.125rem] tracking-[-0.01rem] lg:px-4 lg:py-8">
       <ReportHeader
-        accidentType={data.accidentType}
+        accidentType={data.accidentType ?? ""}
         treatment={data.treatment}
-        issueCount={data.issue.length}
+        issueCount={data.issues.length}
         actions={<ReportActions report={data} />}
         mobileShare={<ReportActions report={data} compact />}
       />
@@ -40,9 +40,9 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
             <span className="break-keep rounded-pill bg-paper px-2.5 py-1 text-[0.75rem] font-semibold text-ink-2">
               {data.accidentType}
             </span>
-            {data.reportNo && (
+            {data.caseNo && (
               <span className="shrink-0 whitespace-nowrap text-[0.75rem] text-ink-3">
-                No.{data.reportNo}
+                No.{data.caseNo}
               </span>
             )}
             {data.reviewedAt != null && (
@@ -66,7 +66,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
             reviewComment={data.reviewComment}
             reviewedAt={data.reviewedAt}
             adjusterName={data.adjuster?.nickname}
-            adjusterCareer={data.adjuster?.career}
+            adjusterCareer={data.adjuster?.career != null ? `${data.adjuster.career}년차` : null}
             adjusterId={data.adjusterId}
           />
           <EstimatedPayout
@@ -75,7 +75,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
             offeredAmount={data.offeredAmount}
             confidenceLevel={data.confidenceLevel}
           />
-          <IssueReview issues={data.issue} />
+          <IssueReview issues={data.issues} />
           <div className="space-y-[1.125rem] md:grid md:grid-cols-2 md:gap-6 md:space-y-0 lg:block lg:space-y-6">
             <CoverageApplicable guarantees={data.applicableGuarantees} />
             <CoveragePotentialMissing contracts={data.omittedSpecialContract} />

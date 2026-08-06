@@ -1,0 +1,42 @@
+name: API Spec Drift
+
+# 백엔드 OpenAPI 스펙이 커밋된 스냅샷과 달라졌는지 매일 확인한다.
+# 프론트는 스냅샷으로 코드를 생성하므로, 백엔드 변경을 사람이 발견하기 전에 여기서 잡는다.
+# PR을 막지 않는다(별도 워크플로) — 실패하면 스냅샷 갱신 + 재생성이 필요하다는 신호.
+
+on:
+  schedule:
+    - cron: "0 0 * * 1-5" # 평일 09:00 KST
+  workflow_dispatch:
+
+concurrency:
+  group: api-spec-drift
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: 원격 스펙 ↔ 스냅샷 비교
+        run: pnpm --filter @insurance/web spec:check
+
+      - name: 변경 내용 표시
+        if: failure()
+        run: |
+          pnpm --filter @insurance/web spec:pull
+          git --no-pager diff --stat -- apps/web/openapi/api-docs.json
+          git --no-pager diff -- apps/web/openapi/api-docs.json | head -c 100000

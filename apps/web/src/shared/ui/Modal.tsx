@@ -52,7 +52,7 @@ export function Modal({
         tabIndex={-1}
         onClick={(e) => e.stopPropagation()}
         className={cn(
-          "max-h-[85dvh] w-full max-w-[31.25rem] overflow-y-auto rounded-[1.25rem] bg-card px-8 pb-6.5 pt-7.5 shadow-[0_2rem_5rem_-1.5rem_rgba(21,32,46,0.5)] outline-none",
+          "max-h-[85dvh] w-full max-w-[31.25rem] overflow-y-auto rounded-[1.25rem] bg-card px-8 pb-6.5 pt-7.5 shadow-modal outline-none",
           className,
         )}
       >

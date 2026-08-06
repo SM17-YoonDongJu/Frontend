@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { setAuthCookie } from "./_auth-cookie-helpers";
 
 /**
  * 파트너 대시보드 모바일 E2E (happy-path CUJ, 이슈 #45).
@@ -18,6 +19,10 @@ const PATH = "/partner";
 
 // 모바일 트리(md:hidden, <768px)를 강제로 렌더 — 프로젝트 프리셋 뷰포트를 덮어쓴다.
 test.use({ viewport: { width: 402, height: 900 } });
+
+test.beforeEach(async ({ page }) => {
+  await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
+});
 
 const visibleText = (page: Page, text: string | RegExp, exact?: boolean): Locator =>
   page.getByText(text, exact ? { exact } : undefined).filter({ visible: true });
@@ -88,7 +93,7 @@ test("전체보기를 누르면 검수 대기 목록으로 이동한다", async 
 });
 
 test("대시보드 요약 로드에 실패하면 섹션 에러가 표시된다", async ({ page }) => {
-  await page.setExtraHTTPHeaders({ "x-mock-failure": "dashboard" });
+  await page.setExtraHTTPHeaders({ "x-mock-failure": "home" });
   await page.goto(PATH);
 
   // useSuspenseQuery 기본 재시도(3회)·백오프를 지나 에러 바운더리에 도달할 때까지 여유를 둔다.
@@ -96,4 +101,15 @@ test("대시보드 요약 로드에 실패하면 섹션 에러가 표시된다",
   await expect(
     page.getByRole("button", { name: "다시 시도" }).filter({ visible: true }),
   ).toBeVisible();
+});
+
+test("헤더 로고를 누르면 랜딩을 거치지 않고 파트너 홈에 머문다", async ({ page }) => {
+  await page.goto(PATH);
+
+  const logo = page.locator("header").getByRole("link", { name: /바른보상/ });
+  await expect(logo).toHaveAttribute("href", "/partner");
+  await expect(async () => {
+    await logo.click();
+    await expect(page).toHaveURL(/\/partner$/);
+  }).toPass({ timeout: 10000 });
 });

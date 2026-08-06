@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getInitial } from "@/shared/lib/initial";
 import { buttonVariants } from "@/shared/ui/Button";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import type { MypageProfile } from "../_model/types";
@@ -15,7 +16,7 @@ export function ProfileSummaryCard({ profile, licenseNo }: ProfileSummaryCardPro
     <section className="flex items-center gap-4 rounded-[1.25rem] bg-navy p-4 md:gap-5.5 md:p-6.5">
       <div className="flex size-14 shrink-0 items-center justify-center rounded-card bg-white/10 md:size-21">
         <span className="font-serif text-[1.5rem] font-bold text-gold-2 md:text-[2.25rem]">
-          {profile.nickname.charAt(0)}
+          {getInitial(profile.nickname)}
         </span>
       </div>
 
@@ -42,7 +43,7 @@ export function ProfileSummaryCard({ profile, licenseNo }: ProfileSummaryCardPro
           등록번호 {licenseNo}
         </p>
         <p className="mt-1 hidden truncate text-[0.8125rem] text-white/50 md:block">
-          {profile.email} · {profile.activityRegion}
+          {profile.activityRegion}
         </p>
       </div>
 

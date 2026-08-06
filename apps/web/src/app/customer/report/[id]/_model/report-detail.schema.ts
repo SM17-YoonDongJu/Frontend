@@ -1,33 +1,45 @@
 import { z } from "zod";
+import type { CustomerReportDetailResponse, IssueItem } from "@/shared/api/generated/types.gen";
+import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
-/** 리포트 상세. 출처: API 명세 GET /reports/{reportId}. 필드명 명세 그대로. */
+/**
+ * 리포트 상세. 출처: API 명세 GET /reports/{reportId}(백엔드 CustomerReportDetailResponse).
+ * 백엔드 필드 issue(단수)·reportNo는 기존 소비처(issues·caseNo) 무변경을 위해 파싱 시 별칭을 추가한다.
+ */
 
 export const reportStatusSchema = z.enum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
+  // 백엔드가 고객 노출 시 CLOSED를 MATCHED로 매핑 — CLOSED는 내려오지 않는다.
   "MATCHED",
+  "NOT_SELECTED",
 ]);
 
-export const issueStatusSchema = z.enum(["CONFIRMED", "TRUSTED", "INFO"]);
+// 백엔드 IssueItem{title,opinion,status,tags,impactAmount} → 기존 소비처(description·aiStatus) 필드명 유지.
+export const issueItemSchema = z
+  .object({
+    title: z.string(),
+    opinion: z.string(),
+    status: z.string(),
+    tags: z.array(z.string()),
+    impactAmount: z.number().int().nullable(),
+  })
+  .transform((issue) => ({
+    title: issue.title,
+    description: issue.opinion,
+    aiStatus: issue.status,
+    tags: issue.tags,
+    impactAmount: issue.impactAmount,
+  }));
 
-export const issueItemSchema = z.object({
-  title: z.string(),
-  opinion: z.string(),
-  status: issueStatusSchema,
-  tag: z.string().nullable(),
-  // 명세 GET 응답에 없는 디자인용 필드 — 부재 허용(nullish).
-  impactAmount: z.number().int().nullish(),
-  tags: z.array(z.string()).nullish(),
-});
-
-export const reportDetailSchema = z.object({
+const rawReportDetailSchema = z.object({
   reportId: z.uuid(),
   status: reportStatusSchema,
-  accidentType: z.string(),
+  accidentType: z.string().nullable(),
   treatment: z.string(),
-  claimedMinAmount: z.number().int(),
-  claimedMaxAmount: z.number().int(),
+  claimedMinAmount: z.number().int().nullable(),
+  claimedMaxAmount: z.number().int().nullable(),
   offeredAmount: z.number().int().nullable(),
   applicableGuarantees: z.array(z.string()),
   omittedSpecialContract: z.array(z.string()),
@@ -35,15 +47,34 @@ export const reportDetailSchema = z.object({
   issue: z.array(issueItemSchema),
   question: z.string().nullable(),
   adjusterId: z.uuid().nullable(),
-  // 명세 GET 응답에 없는 디자인용 필드 — 부재 허용(nullish).
-  confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullish(),
-  reportNo: z.string().nullish(),
+  confidenceLevel: z.enum(["LOW", "MEDIUM", "HIGH"]).nullable(),
+  reportNo: z.string().nullable(),
   reviewComment: z.string().nullable(),
   reviewedAt: z.string().nullable(),
   adjuster: z
     .object({
       nickname: z.string(),
-      career: z.string().nullable(),
+      // 연차(정수). 표시용 포맷("N년차")은 소비처 책임.
+      career: z.number().int().nullable(),
     })
     .nullable(),
 });
+
+export const reportDetailSchema = rawReportDetailSchema.transform((data) => ({
+  ...data,
+  issues: data.issue,
+  caseNo: data.reportNo,
+}));
+
+type _IssueItemDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<z.input<typeof issueItemSchema>, IssueItem>
+>;
+
+// 변환 전(rawReportDetailSchema) 필드명이 명세와 그대로 일치 — issue/reportNo→issues/caseNo 별칭은
+// 여기서만 일어나므로 원본 키 기준으로 대조한다.
+type _ReportDetailDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<
+    Omit<z.infer<typeof rawReportDetailSchema>, "adjuster">,
+    CustomerReportDetailResponse
+  >
+>;

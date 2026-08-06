@@ -1,62 +1,18 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/shared/lib/utils";
 import { Button, buttonVariants } from "@/shared/ui/Button";
-import { useFocusTrap } from "@/shared/lib/use-focus-trap";
+import { Search } from "@/shared/ui/icons/Search";
 import type { ReviewAttachment } from "../_model/types";
+import { AttachmentPreviewModal } from "./AttachmentPreviewModal";
+import { FileTypeIcon } from "./FileTypeIcon";
 
-function PreviewModal({ file, onClose }: { file: ReviewAttachment; onClose: () => void }) {
-  const isImage = /jpe?g|png|gif|webp|image/i.test(file.fileType);
-  const panelRef = useRef<HTMLDivElement>(null);
-  useFocusTrap(panelRef, true);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
-
-  return (
-    <div
-      ref={panelRef}
-      role="dialog"
-      aria-modal="true"
-      aria-label={`${file.name} 원본 미리보기`}
-      onClick={onClose}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-ink/60 p-4 sm:p-8"
-    >
-      <div className="flex w-full max-w-4xl items-center justify-between gap-2 text-white">
-        <p className="text-[0.9375rem] font-semibold">{file.name}</p>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="닫기"
-          className="rounded-full p-2 transition hover:bg-white/15"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-        </button>
-      </div>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[80vh] w-full max-w-4xl items-center justify-center overflow-auto rounded-card bg-card"
-      >
-        {isImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={file.url} alt={file.name} className="max-h-[80vh] w-auto object-contain" />
-        ) : (
-          <iframe
-            src={file.url}
-            title={file.name}
-            sandbox=""
-            className="h-[80vh] w-full"
-          />
-        )}
-      </div>
-    </div>
-  );
+/** "application/pdf" → "PDF", "image/jpeg" → "JPG". */
+function mimeLabel(mimeType: string): string {
+  const subtype = mimeType.split("/")[1] ?? mimeType;
+  if (/jpe?g/i.test(subtype)) return "JPG";
+  return subtype.toUpperCase();
 }
 
 export interface AttachmentSectionProps {
@@ -65,29 +21,7 @@ export interface AttachmentSectionProps {
 
 function fileMeta(file: ReviewAttachment): string {
   const pages = file.pageCount != null ? ` · ${file.pageCount}page` : "";
-  return `${file.fileType}${pages}`;
-}
-
-function FileTypeIcon({ fileType }: { fileType: string }) {
-  const isImage = /jpe?g|png|gif|webp|image/i.test(fileType);
-
-  if (isImage) {
-    return (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-        <rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" strokeWidth="1.6" />
-        <circle cx="8.5" cy="9.5" r="1.5" stroke="currentColor" strokeWidth="1.4" />
-        <path d="M5 18l4.5-4.5 3 3 3-3L19 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    );
-  }
-
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
-      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M14 3v5h5" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
-      <path d="M8.5 13h7M8.5 16h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
+  return `${mimeLabel(file.mimeType)}${pages}`;
 }
 
 function downloadAll(attachments: ReviewAttachment[]) {
@@ -103,9 +37,10 @@ function downloadAll(attachments: ReviewAttachment[]) {
 }
 
 export function AttachmentSection({ attachments }: AttachmentSectionProps) {
-  const [selectedId, setSelectedId] = useState(attachments[0]?.id ?? null);
+  const [selectedId, setSelectedId] = useState(attachments[0]?.attachmentId ?? null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const selected = attachments.find((file) => file.id === selectedId) ?? attachments[0];
+  const selected =
+    attachments.find((file) => file.attachmentId === selectedId) ?? attachments[0];
 
   if (!attachments.length) {
     return (
@@ -130,13 +65,13 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
       <div className="mt-4 grid gap-4 md:grid-cols-[12.5rem_1fr]">
         <ul className="flex flex-col gap-2" aria-label="첨부 파일 목록">
           {attachments.map((file) => {
-            const active = file.id === selected?.id;
+            const active = file.attachmentId === selected?.attachmentId;
             return (
-              <li key={file.id}>
+              <li key={file.attachmentId}>
                 <button
                   type="button"
                   aria-pressed={active}
-                  onClick={() => setSelectedId(file.id)}
+                  onClick={() => setSelectedId(file.attachmentId)}
                   className={cn(
                     "w-full rounded-card border p-3 text-left transition",
                     active
@@ -151,7 +86,7 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
                         active ? "text-gold-ink" : "text-ink-3",
                       )}
                     >
-                      <FileTypeIcon fileType={file.fileType} />
+                      <FileTypeIcon mimeType={file.mimeType} />
                     </span>
                     <div>
                       <p className="text-[0.875rem] font-semibold text-ink">{file.name}</p>
@@ -195,17 +130,7 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
                 variant="outline"
                 size="sm"
                 onClick={() => setPreviewOpen(true)}
-                iconLeft={
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden>
-                    <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.7" />
-                    <path
-                      d="M20 20l-3.2-3.2"
-                      stroke="currentColor"
-                      strokeWidth="1.7"
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                }
+                iconLeft={<Search className="size-[0.9375rem]" />}
               >
                 원본 크게 보기
               </Button>
@@ -222,7 +147,7 @@ export function AttachmentSection({ attachments }: AttachmentSectionProps) {
       </div>
 
       {previewOpen && selected && (
-        <PreviewModal file={selected} onClose={() => setPreviewOpen(false)} />
+        <AttachmentPreviewModal file={selected} onClose={() => setPreviewOpen(false)} />
       )}
     </div>
   );

@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, dev]
+    branches: [main, dev, release]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -63,9 +63,11 @@ jobs:
           SENTRY_ORG: ${{ vars.SENTRY_ORG }}
           SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
 
-  e2e:
+  # 커밋된 스펙 스냅샷으로 재생성했을 때 생성물이 그대로인지 확인한다.
+  # 생성물 직접 수정·스냅샷만 갱신하고 재생성 누락한 커밋을 잡는다. 네트워크를 타지 않음.
+  api-codegen:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -76,11 +78,33 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @insurance/web generate:api
+      - name: 생성물이 스냅샷과 일치하는지 확인
+        run: git diff --exit-code -- apps/web/src/shared/api/generated
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Playwright 버전 확인
+        id: playwright-version
+        run: echo "version=$(node -p "require('./apps/web/node_modules/@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
       - name: Playwright 브라우저 캐시
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          key: playwright-browsers-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
+          restore-keys: |
+            playwright-browsers-${{ runner.os }}-
       - name: Playwright 브라우저 설치 (chromium, webkit)
         run: pnpm --filter @insurance/web exec playwright install --with-deps chromium webkit
       - name: E2E 테스트

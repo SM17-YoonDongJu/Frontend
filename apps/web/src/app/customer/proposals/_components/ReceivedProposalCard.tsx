@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { cn } from "@/shared/lib/utils";
 import { Chat } from "@/shared/ui/icons/Chat";
-import { Check } from "@/shared/ui/icons/Check";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
-import { Spinner } from "@/shared/ui/icons/Spinner";
-import { StatusBadge } from "@/shared/ui/StatusBadge";
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
+import { ProposalTopBadges } from "./ProposalTopBadges";
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -30,60 +28,24 @@ function bottomLeftText(item: ReportListItem): string {
     return `제안 ${item.proposalCount}건이 도착했어요`;
   }
   if (item.status === "AWAITING_INSPECTION") return "검수 완료 후 제안을 받을 수 있어요";
-  if (item.status === "CLOSED") {
+  if (item.status === "MATCHED") {
     if (item.adjusterNickname) return `상담 종결 · ${item.adjusterNickname} 사정사`;
     return `제안 ${item.proposalCount}건 · 미진행 종결`;
   }
   return `제안 ${item.proposalCount}건`;
 }
 
-function TopBadges({ item }: { item: ReportListItem }) {
-  if (item.status === "AWAITING_ADOPTION") {
-    return (
-      <>
-        <StatusBadge tone="gold" className="rounded-pill">
-          제안 도착
-        </StatusBadge>
-        {item.newProposalCount ? (
-          <StatusBadge tone="terra" className="rounded-[0.3125rem] px-1.5 py-0.5 text-[0.625rem]">
-            NEW {item.newProposalCount}
-          </StatusBadge>
-        ) : null}
-      </>
-    );
-  }
-  if (item.status === "AWAITING_INSPECTION") {
-    return (
-      <StatusBadge tone="gold" className="rounded-pill" icon={<Spinner />}>
-        검수 대기 중
-      </StatusBadge>
-    );
-  }
-  if (item.status === "CLOSED") {
-    return (
-      <StatusBadge
-        tone="neutral"
-        className="rounded-pill bg-ink-3/[0.13] text-ink-3"
-        icon={<Check className="size-3" />}
-      >
-        종결
-      </StatusBadge>
-    );
-  }
-  return null;
-}
-
 export function ReceivedProposalCard({ item }: { item: ReportListItem }) {
-  const heading = item.title ?? item.accidentType;
+  const heading = item.title ?? item.accidentType ?? "";
   const isArrived = item.status === "AWAITING_ADOPTION";
   const isPending = item.status === "AWAITING_INSPECTION";
-  const isClosed = item.status === "CLOSED";
+  const isClosed = item.status === "MATCHED";
 
   return (
     <Link
       href={`/customer/proposals/${item.reportId}`}
       className={cn(
-        "block rounded-card border p-4 shadow-card transition hover:brightness-[.99]",
+        "block rounded-card border p-4 shadow-card transition hover:brightness-[.99] md:p-5",
         isArrived
           ? "border-line bg-card"
           : isClosed
@@ -92,7 +54,7 @@ export function ReceivedProposalCard({ item }: { item: ReportListItem }) {
       )}
     >
       <div className="flex items-center gap-1.5">
-        <TopBadges item={item} />
+        <ProposalTopBadges item={item} />
         {!isPending && (
           <span className="ml-auto text-[0.71875rem] text-ink-3">
             {toDisplayDate(item.reviewedAt ?? item.createdAt)}

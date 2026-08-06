@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMypage } from "../_api/use-mypage";
+import { usePanelParam } from "@/shared/lib/use-panel-param";
 import { CredentialProofModal } from "./CredentialProofModal";
-import { LogoutButton } from "./LogoutButton";
 import { MonthlyActivityCard } from "./MonthlyActivityCard";
 import { MypageMenuList } from "./MypageMenuList";
 import { NotificationSettingsModal } from "./NotificationSettingsModal";
@@ -12,14 +12,19 @@ import { StatCards } from "./StatCards";
 
 export function MypageView() {
   const { data } = useMypage();
-  const [notificationOpen, setNotificationOpen] = useState(false);
+  const { panel, clearPanel } = usePanelParam();
+  const [notificationOpen, setNotificationOpen] = useState(panel === "notifications");
   const [credentialOpen, setCredentialOpen] = useState(false);
+
+  useEffect(() => {
+    if (panel === "notifications") setNotificationOpen(true);
+  }, [panel]);
 
   return (
     <div className="mt-5.5">
       <ProfileSummaryCard
         profile={data.profile}
-        licenseNo={data.certification.licenseNo}
+        licenseNo={data.certification.licenseNo ?? "미등록"}
       />
 
       <div className="mt-5.5 grid grid-cols-3 gap-2.5 md:gap-4">
@@ -42,17 +47,16 @@ export function MypageView() {
         </div>
       </div>
 
-      <div className="mt-4">
-        <LogoutButton />
-      </div>
-
       <NotificationSettingsModal
         open={notificationOpen}
-        onClose={() => setNotificationOpen(false)}
+        onClose={() => {
+          setNotificationOpen(false);
+          if (panel === "notifications") clearPanel();
+        }}
       />
       <CredentialProofModal
         open={credentialOpen}
-        licenseNo={data.certification.licenseNo}
+        licenseNo={data.certification.licenseNo ?? "미등록"}
         onClose={() => setCredentialOpen(false)}
       />
     </div>

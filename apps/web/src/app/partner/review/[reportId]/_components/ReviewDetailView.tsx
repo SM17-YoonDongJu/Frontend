@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useReviewDetail } from "../_api/use-review-detail";
 import { useSubmitReview } from "../_api/use-submit-review";
 import { clearReviewDraft, useReviewDraft } from "../_hooks/use-review-draft";
-import { ConfirmDialog } from "./ConfirmDialog";
+import { ConfirmDialog } from "@/shared/ui/ConfirmDialog";
 import { AccidentNarrativeSection } from "./AccidentNarrativeSection";
 import { AttachmentSection } from "./AttachmentSection";
 import { ClaimInfoSection } from "./ClaimInfoSection";
@@ -16,8 +16,23 @@ import { OverallOpinionSection } from "./OverallOpinionSection";
 import { ReviewHeader } from "./ReviewHeader";
 import { ReviewSidebar } from "./ReviewSidebar";
 
+// 리포트 소유자 정보(users)가 없으면 client·claim 둘 다 null — 표시용 빈 값으로 대체.
+const EMPTY_CLIENT = { nickname: "정보 없음", gender: "", birthDate: "", region: "", joinedAt: "" };
+const EMPTY_CLAIM = {
+  accidentType: "",
+  diagnosis: "",
+  accidentDate: "",
+  hospitalization: null,
+  description: null,
+  additionalInformation: null,
+  productName: null,
+  insurerName: null,
+};
+
 export function ReviewDetailView({ reportId }: { reportId: string }) {
   const { data } = useReviewDetail(reportId);
+  const client = data.client ?? EMPTY_CLIENT;
+  const claim = data.claim ?? EMPTY_CLAIM;
   const { state, derived, actions, toSubmitBody, draftPrompt } = useReviewDraft(data);
   const submitReview = useSubmitReview(reportId);
   const router = useRouter();
@@ -55,7 +70,7 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
     }
     clearReviewDraft(reportId);
     router.push(
-      `/partner/review/${reportId}/complete?caseId=${encodeURIComponent(data.caseId)}`,
+      `/partner/review/${reportId}/complete?caseId=${encodeURIComponent(data.caseNo)}`,
     );
   }
 
@@ -64,11 +79,11 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
       <div className="border-b border-line bg-card">
         <div className="mx-auto w-full max-w-6xl px-6 py-5">
           <ReviewHeader
-            caseId={data.caseId}
-            treatment={data.treatment}
-            accidentType={data.accidentType}
-            region={data.client.region}
-            clientName={data.client.maskedName}
+            caseNo={data.caseNo}
+            diagnosis={claim.diagnosis}
+            accidentType={data.accidentType ?? ""}
+            region={data.region}
+            clientName={client.nickname}
             onSaveDraft={handleSaveDraft}
             isSaving={isSavingDraft}
           />
@@ -78,24 +93,25 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
       <div className="mx-auto w-full max-w-6xl px-6 py-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-6">
           <section className="space-y-5 rounded-card-lg border border-line bg-card p-6">
-            <ClientAccidentSection client={data.client} isMasked={data.isMasked} />
+            <ClientAccidentSection client={client} isMasked={data.isMasked} />
             <ClaimInfoSection
-              accidentType={data.accidentType}
-              treatment={data.treatment}
-              accidentDate={data.accidentDate}
-              hospitalizations={data.hospitalizations}
+              accidentType={claim.accidentType}
+              diagnosis={claim.diagnosis}
+              accidentDate={claim.accidentDate}
+              hospitalization={claim.hospitalization}
               offeredAmount={data.offeredAmount}
-              insuranceName={data.insuranceName}
+              insurerName={claim.insurerName}
+              productName={claim.productName}
               applicableGuarantees={data.applicableGuarantees}
             />
-            <AccidentNarrativeSection description={data.description} />
+            <AccidentNarrativeSection description={claim.description} />
             <AttachmentSection attachments={data.attachments} />
           </section>
           <EstimatedRangeSection
-            aiMin={data.claimedMinAmount}
-            aiMax={data.claimedMaxAmount}
-            confirmedMin={state.confirmedMinAmount}
-            confirmedMax={state.confirmedMaxAmount}
+            aiMin={data.aiEstimate.min}
+            aiMax={data.aiEstimate.max}
+            confirmedMin={state.estimateMin}
+            confirmedMax={state.estimateMax}
             onChangeRange={actions.setRange}
           />
           <IssueBoard issues={state.issues} actions={actions} />
@@ -106,8 +122,8 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
           <ReviewSidebar
             progress={derived.progress}
             counts={derived.counts}
-            confirmedMin={state.confirmedMinAmount}
-            confirmedMax={state.confirmedMaxAmount}
+            confirmedMin={state.estimateMin}
+            confirmedMax={state.estimateMax}
             reflectedIssueCount={derived.reflectedIssueCount}
             hasOpinion={derived.hasOpinion}
             isSubmitting={submitReview.isPending && !isSavingDraft}

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 /**
  * 서류 슬롯 단일 진실. 명명된 슬롯은 순수 FE/UX 구성 —
- * 제출 계약(POST /reports)의 documentUrls는 이 순서대로 평면화한 string[]이다.
+ * 제출 계약(POST /reports)의 documents[]는 이 순서대로 평면화한다.
  */
 export const DOCUMENT_SLOT_KEYS = [
   "diagnosis",
@@ -34,7 +34,7 @@ export interface DocumentSlotDef {
   hint?: string;
 }
 
-/** 슬롯 정의(라벨·필수여부·부제). 배열 순서 = documentUrls 평면화 순서. */
+/** 슬롯 정의(라벨·필수여부·부제). 배열 순서 = documents[] 평면화 순서. */
 export const DOCUMENT_SLOTS: DocumentSlotDef[] = [
   { key: "diagnosis", label: "진단서", required: true },
   { key: "insurancePolicy", label: "보험증권", required: true },
@@ -44,3 +44,57 @@ export const DOCUMENT_SLOTS: DocumentSlotDef[] = [
 ];
 
 export const REQUIRED_DOCUMENT_SLOTS = DOCUMENT_SLOTS.filter((s) => s.required);
+
+/** POST /reports body의 documents[] 항목(명세 s3_url/name/report_type/file_type의 camel형). */
+export interface DocumentPayload {
+  s3Url: string;
+  name: string;
+  reportType: string;
+  fileType: string;
+}
+
+/** 슬롯 외 업로드(기타 서류)의 report_type. */
+const EXTRA_REPORT_TYPE = "기타";
+
+function fileNameFromUrl(url: string): string {
+  try {
+    const base = new URL(url).pathname.split("/").filter(Boolean).pop();
+    return base ? decodeURIComponent(base) : "첨부 파일";
+  } catch {
+    return "첨부 파일";
+  }
+}
+
+/** 파일 확장자(소문자, 점 제외) → file_type. 확장자 없으면 빈 문자열. */
+function fileTypeOf(name: string): string {
+  const idx = name.lastIndexOf(".");
+  return idx > 0 ? name.slice(idx + 1).toLowerCase() : "";
+}
+
+/**
+ * 슬롯(파일명·유형 보유) + 기타 url을 명세 documents[] 구조로 평면화.
+ * 슬롯: report_type=슬롯 라벨, name=업로드 파일명. 기타: url에서 파일명 추출, report_type="기타".
+ */
+export function flattenDocuments(
+  slots: DocumentSlots | undefined,
+  documentUrls: string[],
+): DocumentPayload[] {
+  const items: DocumentPayload[] = [];
+  const slotUrls = new Set<string>();
+
+  for (const def of DOCUMENT_SLOTS) {
+    const value = slots?.[def.key];
+    if (!value?.url) continue;
+    slotUrls.add(value.url);
+    const name = value.fileName || fileNameFromUrl(value.url);
+    items.push({ s3Url: value.url, name, reportType: def.label, fileType: fileTypeOf(name) });
+  }
+
+  for (const url of documentUrls) {
+    if (slotUrls.has(url)) continue;
+    const name = fileNameFromUrl(url);
+    items.push({ s3Url: url, name, reportType: EXTRA_REPORT_TYPE, fileType: fileTypeOf(name) });
+  }
+
+  return items;
+}
