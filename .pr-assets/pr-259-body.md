@@ -10,7 +10,7 @@ Closes #259
 
 | 앱 탭바(56px) | 받은 제안 화면(탭바 1개) |
 |---|---|
-| <img alt="앱 하단 탭바" src="https://raw.githubusercontent.com/SM17-YoonDongJu/Frontend/a80c44d0/.pr-assets/issue-259/01-tabbar-app-mobile.png" /> | <img alt="받은 제안 화면" src="https://raw.githubusercontent.com/SM17-YoonDongJu/Frontend/a80c44d0/.pr-assets/issue-259/02-proposals-app-mobile.png" /> |
+| <img alt="앱 하단 탭바" src="https://raw.githubusercontent.com/SM17-YoonDongJu/Frontend/3dcfc0bc/.pr-assets/issue-259/01-tabbar-app-mobile.png" /> | <img alt="받은 제안 화면" src="https://raw.githubusercontent.com/SM17-YoonDongJu/Frontend/3dcfc0bc/.pr-assets/issue-259/02-proposals-app-mobile.png" /> |
 
 <br/>
 
