@@ -38,7 +38,7 @@ export function Step6Documents() {
       </div>
 
       {derived.missingRequired.length > 0 && (
-        <p className="flex items-center gap-1.5 text-[0.75rem] text-ink-3">
+        <p role="status" className="flex items-center gap-1.5 text-[0.75rem] text-ink-3">
           <AlertTriangle className="shrink-0 text-[0.875rem] text-gold-ink" />
           정확한 분석을 위해 {derived.missingRequired.map((d) => d.label).join("·")} 첨부를 권장해요.
         </p>

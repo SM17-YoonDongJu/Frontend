@@ -82,9 +82,10 @@ export function useDocumentUpload() {
         slotUrls.add(v.url);
       }
     }
-    const restoredExtras: ExtraItem[] = draftUrls
+    // url이 곧 고유 식별자 — crypto.randomUUID는 비보안 컨텍스트(http LAN 접속 등)에서 없을 수 있다.
+    const restoredExtras: ExtraItem[] = [...new Set(draftUrls)]
       .filter((u) => !slotUrls.has(u))
-      .map((u) => ({ id: crypto.randomUUID(), status: "done", name: fileNameFromUrl(u), size: 0, url: u }));
+      .map((u) => ({ id: u, status: "done", name: fileNameFromUrl(u), size: 0, url: u }));
 
     setSlots(nextSlots);
     setExtras(restoredExtras);
