@@ -60,7 +60,7 @@ export function AppTabBar({ variant }: { variant: TabVariant }) {
   if (!isRoleMatched || !isTabRoute) return null;
 
   return (
-    <nav className="sticky bottom-0 z-10 flex border-t border-line bg-paper-2/[0.92] pb-[env(safe-area-inset-bottom)] backdrop-blur">
+    <nav className="sticky bottom-0 z-10 flex border-t border-line bg-paper-2/[0.92] pb-[max(env(safe-area-inset-bottom),var(--app-inset-bottom))] backdrop-blur">
       {tabs.map(({ label, href, Icon }) => {
         const isActive = href === pathname;
         return (

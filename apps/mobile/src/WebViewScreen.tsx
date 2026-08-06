@@ -3,16 +3,8 @@ import * as Linking from 'expo-linking';
 import { StatusBar } from 'expo-status-bar';
 import * as WebBrowser from 'expo-web-browser';
 import { useEffect, useRef, useState } from 'react';
-import {
-  ActivityIndicator,
-  BackHandler,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
+import { ActivityIndicator, BackHandler, Pressable, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WebView } from 'react-native-webview';
 
 import { EXTERNAL_AUTH_HOSTS, getAllowedHosts, getServiceHosts } from './config/allowed-hosts';
@@ -28,15 +20,19 @@ const decideLoad = createLoadDecider(getAllowedHosts(), EXTERNAL_AUTH_HOSTS);
 const AUTH_SESSION_RETURN_URL = `${APP_SCHEME}://login/oauth2/code`;
 const SERVICE_HOSTS = getServiceHosts();
 
-// iOS 웹뷰는 env(safe-area-inset-bottom)을 보고하므로 하단 안전영역은 웹 탭바가 전담한다
-// (네이티브가 먹으면 흰 여백으로 이중 계상). 안드로이드 웹뷰는 보고가 불안정해 네이티브가 처리한다.
-const SAFE_AREA_EDGES: Edge[] = Platform.OS === 'ios' ? ['top'] : ['top', 'bottom'];
+// 하단 안전영역은 웹 탭바가 전담한다 — 네이티브가 먹으면 탭바 아래 흰 띠로 이중 계상된다.
+// 안드로이드 웹뷰는 env(safe-area-inset-*) 보고가 불안정해 네이티브 인셋을 CSS 변수로 주입한다.
+const SAFE_AREA_EDGES = ['top'] as const;
+
+const insetBottomScript = (bottom: number) =>
+  `document.documentElement.style.setProperty('--app-inset-bottom', '${bottom}px'); true;`;
 
 export function WebViewScreen() {
   const webViewRef = useRef<WebView>(null);
   const [canGoBack, setCanGoBack] = useState(false);
   const [sourceUri, setSourceUri] = useState(getWebUrl);
   const webReadyRef = useRef(false);
+  const insets = useSafeAreaInsets();
 
   useDeepLink(setSourceUri);
   useNotificationResponse(setSourceUri);
@@ -73,6 +69,10 @@ export function WebViewScreen() {
     return () => subscription.remove();
   }, [canGoBack]);
 
+  useEffect(() => {
+    webViewRef.current?.injectJavaScript(insetBottomScript(insets.bottom));
+  }, [insets.bottom]);
+
   return (
     <SafeAreaView style={styles.container} edges={SAFE_AREA_EDGES}>
       <WebView
@@ -83,6 +83,7 @@ export function WebViewScreen() {
         thirdPartyCookiesEnabled
         allowsBackForwardNavigationGestures
         allowFileAccess
+        injectedJavaScript={insetBottomScript(insets.bottom)}
         onMessage={(event) => handleWebMessage(event.nativeEvent.data)}
         onShouldStartLoadWithRequest={(request) => {
           const decision = decideLoad(request);
