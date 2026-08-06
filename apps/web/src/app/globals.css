@@ -64,6 +64,9 @@
 
   --radius: 11px; /* rounded-button 기준 */
 
+  /* 앱 웹뷰가 네이티브 하단 인셋을 주입한다(안드로이드는 env() 보고가 불안정). 웹은 0. */
+  --app-inset-bottom: 0px;
+
   --background: var(--color-paper);
   --foreground: var(--color-ink);
   /* card 표면색은 #12 --color-card(#fff) 그대로 사용 (재정의 시 순환참조) */

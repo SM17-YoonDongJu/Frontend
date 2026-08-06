@@ -60,7 +60,7 @@ export function AppTabBar({ variant }: { variant: TabVariant }) {
   if (!isRoleMatched || !isTabRoute) return null;
 
   return (
-    <nav className="sticky bottom-0 z-10 flex border-t border-line bg-paper-2/[0.92] pb-[env(safe-area-inset-bottom)] backdrop-blur">
+    <nav className="sticky bottom-0 z-10 flex border-t border-line bg-paper-2/[0.92] pb-[max(env(safe-area-inset-bottom),var(--app-inset-bottom))] backdrop-blur">
       {tabs.map(({ label, href, Icon }) => {
         const isActive = href === pathname;
         return (
@@ -68,7 +68,7 @@ export function AppTabBar({ variant }: { variant: TabVariant }) {
             key={label}
             href={href}
             aria-current={isActive ? "page" : undefined}
-            className="flex flex-1 flex-col items-center gap-1 py-2.5"
+            className="flex h-14 flex-1 flex-col items-center justify-center gap-0.5"
           >
             <Icon className={cn("size-[1.375rem]", isActive ? "text-ink" : "text-ink-3")} />
             <span

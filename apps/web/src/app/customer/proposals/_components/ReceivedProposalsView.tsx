@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 import { useReceivedProposals } from "@/app/customer/_shared/api/use-received-proposals";
-import { CustomerBottomNav } from "@/app/customer/_shared/components/CustomerBottomNav";
 import { ReceivedProposalCard } from "./ReceivedProposalCard";
 import { ReceivedProposalsEmpty } from "./ReceivedProposalsEmpty";
 
@@ -54,8 +53,6 @@ export function ReceivedProposalsView() {
           </>
         )}
       </div>
-
-      <CustomerBottomNav active="상담" className="md:hidden" />
     </div>
   );
 }
