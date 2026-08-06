@@ -5,7 +5,6 @@ export const DASHBOARD_LINKS = {
   allReports: "/customer/reports",
   report: reportDetailHref,
   proposals: (reportId: string) => `/customer/proposals/${reportId}`,
-  proposalsList: "/customer/proposals",
   chat: "/customer/chat",
   chatRoom: (chatRoomId: string) => `/customer/chat/${chatRoomId}`,
   adjusterFinder: "/customer/adjusters",
