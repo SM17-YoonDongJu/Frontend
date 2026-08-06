@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, type FormEvent } from "react";
 import { useMe } from "@/shared/api/use-me";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { useReportDetail } from "../../_shared/use-report-detail";
 import { useCreateReview } from "../_api/use-create-review";
 import { maskNickname, saveReviewDonePreview } from "../_hooks/done-preview";
@@ -79,7 +80,7 @@ export function ReviewFormInner({ reportId }: { reportId: string }) {
 
       <CaseSummaryCard
         adjusterName={adjusterName}
-        subtitle={`${report.accidentType ?? ""} 보상 분석`}
+        subtitle={`${accidentTypeLabel(report.accidentType)} 보상 분석`}
         confirmedAmount={report.offeredAmount}
       />
 

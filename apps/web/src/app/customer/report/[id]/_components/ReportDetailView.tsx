@@ -1,6 +1,7 @@
 "use client";
 
 import { useMe } from "@/shared/api/use-me";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { Check } from "@/shared/ui/icons/Check";
 import { useReportDetail } from "../_api/use-report-detail";
 import { AdjusterContact } from "./AdjusterContact";
@@ -30,7 +31,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
   return (
     <div className="mx-auto w-full max-w-[67.5rem] px-5 pb-9 pt-[1.125rem] tracking-[-0.01rem] lg:px-4 lg:py-8">
       <ReportHeader
-        accidentType={data.accidentType ?? ""}
+        accidentType={accidentTypeLabel(data.accidentType)}
         treatment={data.treatment}
         issueCount={data.issues.length}
         actions={<ReportActions report={data} />}
@@ -42,7 +43,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
           {/* 모바일 메타 행 */}
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 lg:hidden">
             <span className="break-keep rounded-pill bg-paper px-2.5 py-1 text-[0.75rem] font-semibold text-ink-2">
-              {data.accidentType}
+              {accidentTypeLabel(data.accidentType)}
             </span>
             {data.caseNo && (
               <span className="shrink-0 whitespace-nowrap text-[0.75rem] text-ink-3">

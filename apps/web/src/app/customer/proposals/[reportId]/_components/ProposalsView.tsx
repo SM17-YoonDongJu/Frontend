@@ -1,5 +1,6 @@
 "use client";
 
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { useProposalList } from "../../../_shared/api/use-proposal-list";
 import { AnalysisTargetCard } from "./AnalysisTargetCard";
 import { ProposalList } from "./ProposalList";
@@ -30,7 +31,7 @@ export function ProposalsView({ reportId }: { reportId: string }) {
         <div className="mt-6">
           <AnalysisTargetCard
             reportId={reportId}
-            accidentType={target.accidentType}
+            accidentType={accidentTypeLabel(target.accidentType)}
             reportNo={target.reportNo}
             proposalCount={proposalCount}
           />
