@@ -57,6 +57,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @insurance/web build
+        env:
+          # main/dev push에서만 소스맵 업로드 — PR 빌드는 토큰 미주입으로 자동 스킵
+          SENTRY_AUTH_TOKEN: ${{ github.event_name == 'push' && secrets.SENTRY_AUTH_TOKEN || '' }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
 
   # 커밋된 스펙 스냅샷으로 재생성했을 때 생성물이 그대로인지 확인한다.
   # 생성물 직접 수정·스냅샷만 갱신하고 재생성 누락한 커밋을 잡는다. 네트워크를 타지 않음.

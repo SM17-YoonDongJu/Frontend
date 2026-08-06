@@ -39,9 +39,14 @@
 
 → `isError`(쿼리 실패)는 그대로 두고, **세그먼트마다 `error.tsx`를 추가**해 렌더 예외 안전망을 깐다.
 
+**신규 `error.tsx`는 `Sentry.captureException(error)` 호출 필수.** 중첩 `error.tsx`가 `global-error.tsx`보다 먼저 가로채므로, 누락하면 해당 세그먼트의 렌더 에러가 화면엔 잡혀도 Sentry에선 유실된다. (DSN 미주입 환경에선 자동 no-op이라 로컬·E2E 걱정 없음)
+
 ```tsx
 // app/customer/report/[id]/error.tsx
 "use client"; // 에러 바운더리는 클라이언트 컴포넌트여야 함
+
+import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 
 export default function ReportError({
   error,
@@ -50,6 +55,10 @@ export default function ReportError({
   error: Error & { digest?: string };
   reset: () => void; // 에러 상태 초기화 후 자식 재렌더(재요청은 안 함)
 }) {
+  useEffect(() => {
+    Sentry.captureException(error); // 누락 = 이 세그먼트 렌더 에러 유실
+  }, [error]);
+
   return (
     <div role="alert">
       <p>리포트를 불러오는 중 문제가 발생했어요.</p>
