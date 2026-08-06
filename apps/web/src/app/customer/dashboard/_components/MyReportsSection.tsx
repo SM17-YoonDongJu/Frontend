@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
+import { dedupeByReportId } from "@/app/customer/_shared/model/dedupe-report-list";
 import { useReportList } from "../_api/use-report-list";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
 import { EmptyState } from "./EmptyState";
@@ -11,7 +12,7 @@ const VISIBLE_REPORT_COUNT = 3;
 
 export function MyReportsSection() {
   const { data: reportList } = useReportList();
-  const reports = reportList.list.slice(0, VISIBLE_REPORT_COUNT);
+  const reports = dedupeByReportId(reportList.list).slice(0, VISIBLE_REPORT_COUNT);
 
   return (
     <section>
