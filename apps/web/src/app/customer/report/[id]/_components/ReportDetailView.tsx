@@ -1,6 +1,7 @@
 "use client";
 
 import { useMe } from "@/shared/api/use-me";
+import { Check } from "@/shared/ui/icons/Check";
 import { useReportDetail } from "../_api/use-report-detail";
 import { AdjusterContact } from "./AdjusterContact";
 import { CoverageApplicable } from "./CoverageApplicable";
@@ -10,6 +11,7 @@ import { IssueReview } from "./IssueReview";
 import { LegalBasis } from "./LegalBasis";
 import { ReportActions } from "./ReportActions";
 import { ReportHeader } from "./ReportHeader";
+import { ReportReviewPending } from "./ReportReviewPending";
 import { ReportSummary } from "./ReportSummary";
 import { ReportSummaryAside } from "./ReportSummaryAside";
 
@@ -22,6 +24,8 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
   const isAdjuster = me.userType === "adjuster";
 
   const showAdjusterContact = !isAdjuster && data.adjuster?.nickname != null;
+  // 사정사 검수 전에는 검수 의견 자리에 대기 안내를 둔다(사정사는 검수하러 들어온 화면이라 제외).
+  const isAwaitingReview = data.status === "AWAITING_INSPECTION" || data.reviewedAt == null;
 
   return (
     <div className="mx-auto w-full max-w-[67.5rem] px-5 pb-9 pt-[1.125rem] tracking-[-0.01rem] lg:px-4 lg:py-8">
@@ -47,40 +51,44 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
             )}
             {data.reviewedAt != null && (
               <span className="ml-auto flex shrink-0 items-center gap-1 whitespace-nowrap rounded-tag bg-green-soft px-2 py-1 text-[0.6875rem] font-semibold text-green">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-                  <path
-                    d="M5 13l4 4L19 7"
-                    stroke="currentColor"
-                    strokeWidth="2.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
+                <Check className="text-[0.75rem]" />
                 검수 완료
               </span>
             )}
           </div>
 
-          <ReportSummary
-            status={data.status}
-            reviewComment={data.reviewComment}
-            reviewedAt={data.reviewedAt}
-            adjusterName={data.adjuster?.nickname}
-            adjusterCareer={data.adjuster?.career != null ? `${data.adjuster.career}년차` : null}
-            adjusterId={data.adjusterId}
-          />
-          <EstimatedPayout
-            claimedMinAmount={data.claimedMinAmount}
-            claimedMaxAmount={data.claimedMaxAmount}
-            offeredAmount={data.offeredAmount}
-            confidenceLevel={data.confidenceLevel}
-          />
-          <IssueReview issues={data.issues} />
-          <div className="space-y-[1.125rem] md:grid md:grid-cols-2 md:gap-6 md:space-y-0 lg:block lg:space-y-6">
-            <CoverageApplicable guarantees={data.applicableGuarantees} />
-            <CoveragePotentialMissing contracts={data.omittedSpecialContract} />
+          {isAwaitingReview ? (
+            !isAdjuster && <ReportReviewPending reportId={reportId} />
+          ) : (
+            <ReportSummary
+              status={data.status}
+              reviewComment={data.reviewComment}
+              reviewedAt={data.reviewedAt}
+              adjusterName={data.adjuster?.nickname}
+              adjusterCareer={data.adjuster?.career != null ? `${data.adjuster.career}년차` : null}
+              adjusterId={data.adjusterId}
+            />
+          )}
+
+          <div>
+            <p className="mb-2.5 text-[0.75rem] font-semibold uppercase tracking-[0.08em] text-gold-ink lg:text-[0.8125rem]">
+              AI 분석 결과
+            </p>
+            <div className="space-y-[1.125rem] lg:space-y-6">
+              <EstimatedPayout
+                claimedMinAmount={data.claimedMinAmount}
+                claimedMaxAmount={data.claimedMaxAmount}
+                offeredAmount={data.offeredAmount}
+                confidenceLevel={data.confidenceLevel}
+              />
+              <IssueReview issues={data.issues} />
+              <div className="space-y-[1.125rem] md:grid md:grid-cols-2 md:gap-6 md:space-y-0 lg:block lg:space-y-6">
+                <CoverageApplicable guarantees={data.applicableGuarantees} />
+                <CoveragePotentialMissing contracts={data.omittedSpecialContract} />
+              </div>
+              <LegalBasis items={data.basisTermsPrecedents} />
+            </div>
           </div>
-          <LegalBasis items={data.basisTermsPrecedents} />
 
           {showAdjusterContact && (
             <div className="lg:hidden">
