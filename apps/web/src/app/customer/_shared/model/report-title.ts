@@ -11,8 +11,3 @@ export function deriveReportTitle(
   const label = accidentTypeLabel(report.accidentType);
   return report.treatment ? `${label} · ${report.treatment} 분석 요청` : `${label} 분석 요청`;
 }
-
-/** 목록 카드 CTA — 도착한 제안 수를 반영, 0건이면 현황 문구로. */
-export function proposalsCtaLabel(proposalCount: number): string {
-  return proposalCount > 0 ? `제안 ${proposalCount}건 보기` : "제안 현황 보기";
-}

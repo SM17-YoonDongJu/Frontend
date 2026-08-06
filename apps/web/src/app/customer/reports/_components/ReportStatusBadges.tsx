@@ -1,9 +1,10 @@
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
+import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 import { Check } from "@/shared/ui/icons/Check";
 import { Spinner } from "@/shared/ui/icons/Spinner";
 
-export function ProposalTopBadges({ item }: { item: ReportListItem }) {
+export function ReportStatusBadges({ item }: { item: ReportListItem }) {
   if (item.status === "AWAITING_ADOPTION") {
     return (
       <>
@@ -36,5 +37,11 @@ export function ProposalTopBadges({ item }: { item: ReportListItem }) {
       </StatusBadge>
     );
   }
-  return null;
+
+  const meta = REPORT_STATUS_META[item.status];
+  return (
+    <StatusBadge tone={meta.tone} className="rounded-pill">
+      {meta.label}
+    </StatusBadge>
+  );
 }

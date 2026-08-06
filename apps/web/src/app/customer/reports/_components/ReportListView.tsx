@@ -1,69 +1,62 @@
 "use client";
 
 import { useMemo } from "react";
-import { ReportCard } from "@/app/customer/_shared/components/ReportCard";
-import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
-import { proposalsCtaLabel } from "@/app/customer/_shared/model/report-title";
+import { dedupeByReportId } from "@/app/customer/_shared/model/dedupe-report-list";
 import { useReportListInfinite } from "../_api/use-report-list-infinite";
+import { ReportListCard } from "./ReportListCard";
 import { ReportListEmpty } from "./ReportListEmpty";
 
 export function ReportListView() {
   const { data, hasNextPage, fetchNextPage, isFetchingNextPage } = useReportListInfinite();
 
-  // InfiniteData → 화면 소비용 파생값.
-  const list = useMemo(() => data.pages.flatMap((page) => page.list), [data.pages]);
-  // useSuspenseInfiniteQuery는 최소 1페이지 보장(initialPageParam) → totalElements는 첫 페이지 기준.
-  const totalCount = data.pages[0]!.pagination.totalElements;
+  const list = useMemo(
+    () => dedupeByReportId(data.pages.flatMap((page) => page.list)),
+    [data.pages],
+  );
 
   return (
-    <div className="mx-auto w-full max-w-[42rem] px-5 pt-6 pb-14 md:px-0 md:pt-10">
-      <header>
-        <p className="text-[0.75rem] font-semibold uppercase tracking-[0.12em] text-gold-ink">
-          손해사정 리포트
-        </p>
-        <div className="mt-1.5 flex items-end justify-between gap-3">
-          <h1 className="font-serif text-[1.75rem] font-bold leading-[1.2] tracking-[-0.0144rem] text-ink">
+    <div className="mx-auto flex min-h-dvh w-full max-w-[25.125rem] flex-col bg-paper md:min-h-0 md:max-w-6xl md:px-6 md:py-10">
+      <div className="flex-1">
+        <header className="px-5 pt-6 pb-4 md:px-0 md:pt-0 md:pb-8">
+          <h1 className="font-serif text-[1.625rem] font-bold leading-[1.3] tracking-[-0.0144rem] text-ink md:text-[2rem]">
             내 리포트
           </h1>
-          <span className="pb-1 text-[0.8125rem] text-ink-3">
-            전체 <span className="font-semibold text-ink-2">{totalCount}</span>건
-          </span>
-        </div>
-        <p className="mt-2 text-[0.8125rem] leading-[1.5] text-ink-3">
-          분석부터 검수, 받은 제안까지 진행 상황을 한눈에 확인하세요.
-        </p>
-      </header>
+          <p className="mt-2 text-[0.8125rem] leading-[1.45] text-ink-3 md:text-[0.9375rem]">
+            분석부터 검수, 받은 제안까지 진행 상황을 한눈에 확인하세요.
+          </p>
+        </header>
 
-      {list.length === 0 ? (
-        <ReportListEmpty />
-      ) : (
-        <>
-          <ul className="mt-6 flex flex-col gap-3.5">
-            {list.map((report) => (
-              <li key={report.reportId}>
-                <ReportCard
-                  report={report}
-                  href={reportProposalsHref(report.reportId)}
-                  ctaLabel={proposalsCtaLabel(report.proposalCount)}
-                />
-              </li>
-            ))}
-          </ul>
+        {list.length === 0 ? (
+          <ReportListEmpty />
+        ) : (
+          <>
+            <ul className="flex flex-col gap-3 px-5 pb-5 md:grid md:grid-cols-2 md:items-start md:gap-6 md:px-0 md:pb-8">
+              {list.map((report) => (
+                <li key={report.reportId}>
+                  <ReportListCard item={report} />
+                </li>
+              ))}
+            </ul>
 
-          {hasNextPage && (
-            <div className="mt-6">
-              <button
-                type="button"
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                className="flex w-full items-center justify-center gap-2 rounded-button border border-line bg-paper-2 py-3.5 text-[0.875rem] font-semibold text-ink-2 transition hover:border-gold hover:text-gold-ink disabled:cursor-not-allowed disabled:opacity-[.42]"
-              >
-                {isFetchingNextPage ? "불러오는 중…" : "더보기"}
-              </button>
-            </div>
-          )}
-        </>
-      )}
+            {hasNextPage && (
+              <div className="px-5 pb-4 md:mx-auto md:w-full md:max-w-[25.125rem] md:px-0 md:pb-6">
+                <button
+                  type="button"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                  className="w-full rounded-button border border-line bg-card py-3 text-[0.875rem] font-semibold text-ink-2 transition hover:brightness-[.98] disabled:cursor-not-allowed disabled:opacity-[.42]"
+                >
+                  {isFetchingNextPage ? "불러오는 중…" : "더보기"}
+                </button>
+              </div>
+            )}
+
+            <p className="px-5 pb-6 text-center text-[0.6875rem] leading-[1.5] text-ink-3 md:px-0 md:text-[0.75rem]">
+              리포트를 선택하면 도착한 제안 목록으로 이동합니다.
+            </p>
+          </>
+        )}
+      </div>
     </div>
   );
 }
