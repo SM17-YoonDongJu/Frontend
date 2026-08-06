@@ -90,7 +90,7 @@ export function useSignupForm() {
       provider: social.provider,
       socialToken: social.socialToken,
       userType: selectedUserType,
-      nickname: social.nickname,
+      name: identity.name,
       gender: identity.gender,
       birthDate: identity.birthDate,
       phoneNumber: identity.phoneNumber,
