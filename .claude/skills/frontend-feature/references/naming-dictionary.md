@@ -58,9 +58,11 @@
 ## 3. 필드 사전 (도메인별, API 명세 출처)
 
 ### auth — `POST /auth/register`
-`provider`(`kakao`|`naver`) · `socialToken` · `nickname`(2~20자) · `userType` · `email`(N)
-→ resp: `userId` · `nickname` · `userType` · `accessToken` · `refreshToken`
-- `nickname` = **사용자 이름**(소셜 프로필 표시명, 팀 확정 2026-07-12). 별도 "이름/실명" 필드를 만들지 말 것(사정사 자격신청의 `name`(실명)은 별개). ⚠️ 콜백 응답에 프로필이 없어 프론트가 이름을 알 수 없음 — 백엔드가 signupTicket에서 추출하는지 확인 필요.
+`provider`(`kakao`|`naver`|`apple`) · `socialToken` · `name`(1~30자) · `userType` · `gender`(`M`|`F`) · `birthDate` · `phoneNumber` · `region`(N)
+→ resp: `userId` · `nickname` · `role`
+- 요청은 `name`, 응답은 `nickname` — 명세상 비대칭이니 FE에서 한쪽으로 통일하지 말 것(#256).
+- `name` = **사용자 이름**(본인 확인 스텝 입력값). 소셜 프로필 표시명이 아니라 사용자가 직접 입력한 값을 전송한다.
+- `region` = `"서울 강남구"` 형태 라벨 문자열(`formatRegionLabel`). 명세상 optional이나 가입 폼에선 필수.
 
 ### user — `GET /users/me`
 `userId` · `nickname` · `email` · `userType` · `createdAt`
