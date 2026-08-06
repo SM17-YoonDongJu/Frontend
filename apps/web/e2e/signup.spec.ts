@@ -3,22 +3,23 @@ import { setAuthCookie } from "./_auth-cookie-helpers";
 import { hideQueryDevtools, selectRegion } from "./_region-helpers";
 
 /**
- * 일반 사용자 회원가입 퍼널 E2E (이슈 #43·#173).
+ * 일반 사용자 회원가입 퍼널 E2E (이슈 #43·#173·#256).
  *
  * 원칙: 핵심 사용자 흐름만 — 역할 선택 → 약관 동의 → 본인 확인 → 가입 완료(CUJ),
  *   필수 약관 게이트, 전체 동의 토글, 본인 확인 필수값 게이트, 중복 계정 에러(고가치),
  *   약관 상세 왕복, 손해사정사 분기, 단계 직접 진입 가드.
  * 응답은 기본 MSW 핸들러(POST /auth/register: 성공 201 + 토큰)가 제공.
- *   소셜 컨텍스트(socialToken/nickname/email)는 진입 쿼리로 주입(개발·E2E 경로) —
+ *   소셜 컨텍스트(socialToken/email)는 진입 쿼리로 주입(개발·E2E 경로) —
  *   컨텍스트 없이 직접 진입하면 /login으로 가드되므로 mock 폴백 없음.
  * 로그인 가드(#185): 가입자는 비로그인이 정상 흐름 — 기본 MSW /users/me가 로그인 유저를
  *   반환하므로 beforeEach에서 비로그인 시나리오 헤더를 주입한다(로그인 상태 진입 테스트만 예외).
- * DUPLICATE_RESOURCE는 nickname "중복닉네임" 진입 쿼리로 MSW 409 분기를 태워 검증(핸들러 override 대체).
- * 필드 형식·범위(닉네임 2~20자 등) 검증은 zod·MSW 계약에 위임(미테스트).
+ * DUPLICATE_RESOURCE는 이름 "중복닉네임" 입력으로 MSW 409 분기를 태워 검증(핸들러 override 대체).
+ * 필드 형식·범위(이름 1~30자 등) 검증은 zod·MSW 계약에 위임(미테스트).
+ * 요청 body는 MSW 서비스워커 경유라 Playwright가 못 읽는다 — 이름은 완료 화면 echo·409 분기로,
+ *   지역 전송은 zod 필수 계약(registerBodySchema)으로 담보한다.
  */
 
-const PATH = "/signup?socialToken=e2e-social-token&nickname=%EC%9C%A4%EC%84%9C&email=yunseo%40email.com";
-const DUPLICATE_PATH = "/signup?socialToken=dup&nickname=%EC%A4%91%EB%B3%B5%EB%8B%89%EB%84%A4%EC%9E%84";
+const PATH = "/signup?socialToken=e2e-social-token&email=yunseo%40email.com";
 
 // 하이드레이션 전 클릭 유실 방지: 클릭+상태확인을 묶어 재시도.
 async function selectRole(page: Page, name: RegExp) {
@@ -43,8 +44,8 @@ async function goThroughToIdentity(page: Page, path = PATH) {
   await expect(page.getByRole("heading", { name: "본인 확인을 해주세요" })).toBeVisible();
 }
 
-async function fillIdentity(page: Page) {
-  await page.getByLabel("이름").fill("윤서");
+async function fillIdentity(page: Page, name = "윤서") {
+  await page.getByLabel("이름").fill(name);
   await page.getByRole("radio", { name: "여성" }).click();
   await page.getByLabel("생년월일").fill("19950615");
   await page.getByLabel("휴대폰 번호").fill("01012345678");
@@ -65,7 +66,7 @@ test("역할·약관 동의·본인 확인을 마치고 가입하면 완료 화�
   await page.getByRole("button", { name: "다음" }).click();
 
   await expect(page.getByRole("heading", { name: "가입이 완료됐어요" })).toBeVisible();
-  // 소셜 mock 이메일·닉네임(=이름) 노출
+  // 소셜 mock 이메일 + 본인 확인 스텝에 입력한 이름(#256) — 완료 화면 이름은 register 응답 echo.
   await expect(page.getByText("yunseo@email.com")).toBeVisible();
   await expect(page.getByText("윤서", { exact: true })).toBeVisible();
 
@@ -116,9 +117,9 @@ test("전체 동의를 누르면 마케팅을 포함한 세 항목이 모두 체
 });
 
 test("이미 가입된 계정이면 가입 시 중복 안내가 노출된다", async ({ page }) => {
-  await goThroughToIdentity(page, DUPLICATE_PATH);
+  await goThroughToIdentity(page);
 
-  await fillIdentity(page);
+  await fillIdentity(page, "중복닉네임");
   await page.getByRole("button", { name: "다음" }).click();
 
   await expect(page.getByText("이미 가입된 계정이에요. 로그인으로 진행해 주세요.")).toBeVisible();
