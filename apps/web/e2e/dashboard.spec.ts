@@ -139,6 +139,23 @@ test("전부 종료: 진행 중 분석·제안이 없으면 타임라인·제안
   ).toBeVisible();
 });
 
+test("내 분석 리포트 카드를 누르면 그 건의 제안 목록으로 이동한다", async ({ page }) => {
+  await page.goto(PATH);
+
+  const card = page
+    .getByRole("link")
+    .filter({ hasText: "진행 상태" })
+    .filter({ visible: true })
+    .first();
+
+  await expect(async () => {
+    await card.click();
+    await expect(page).toHaveURL(/\/customer\/proposals\/[^/]+$/);
+  }).toPass({ timeout: 10000 });
+
+  await expect(page.getByRole("heading", { name: "받은 제안" })).toBeVisible();
+});
+
 test("헤더 로고를 누르면 랜딩을 거치지 않고 대시보드에 머문다", async ({ page }) => {
   await page.goto(PATH);
 

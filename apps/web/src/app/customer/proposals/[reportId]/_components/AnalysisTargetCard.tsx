@@ -4,8 +4,9 @@ import { FileText } from "@/shared/ui/icons/FileText";
 
 interface AnalysisTargetCardProps {
   reportId: string;
-  accidentType: string;
-  reportNo: string;
+  /** 분석 대상 요약은 명세 미확정 확장 필드 — 없으면 기본 문구로 리포트 진입점만 유지한다. */
+  accidentType?: string;
+  reportNo?: string;
   proposalCount: number;
 }
 
@@ -27,9 +28,11 @@ export function AnalysisTargetCard({
         <FileText className="text-[1.25rem]" />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[1rem] font-semibold text-ink">{accidentType} 리포트</p>
+        <p className="truncate text-[1rem] font-semibold text-ink">
+          {accidentType ? `${accidentType} 리포트` : "분석 리포트"}
+        </p>
         <p className="mt-1 text-[0.8125rem] text-ink-3">
-          No.{reportNo} · 제안 {proposalCount}건
+          {reportNo ? `No.${reportNo} · ` : ""}제안 {proposalCount}건
         </p>
       </div>
       <ChevronRight className="shrink-0 text-[1rem] text-ink-3" />

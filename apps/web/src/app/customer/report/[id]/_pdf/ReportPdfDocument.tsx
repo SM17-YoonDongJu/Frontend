@@ -1,5 +1,6 @@
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { formatManwon, formatManwonRange } from "@/shared/lib/format-amount";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { REPORT_TITLE } from "../_model/report-meta";
 import type { ReportDetail } from "../_model/types";
 
@@ -50,7 +51,8 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
     <Document>
       <Page size="A4" style={s.page}>
         <Text style={s.crumb}>
-          {report.accidentType ?? ""} · {report.treatment} · 검수 의견 {report.issues.length}건
+          {accidentTypeLabel(report.accidentType)} · {report.treatment} · 쟁점{" "}
+          {report.issues.length}건
         </Text>
         <Text style={s.title}>{REPORT_TITLE}</Text>
 

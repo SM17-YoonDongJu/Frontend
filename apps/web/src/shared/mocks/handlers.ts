@@ -3355,7 +3355,8 @@ export const handlers = [
       data: camelToSnakeDeep({
         reportId: responseReportId,
         status: isCustomerSample ? "MATCHED" : "AWAITING_INSPECTION",
-        accidentType: "교통사고(후유장해)",
+        // 백엔드는 사고 유형 슬러그를 내려준다(표시 라벨 변환은 소비처 accidentTypeLabel 책임).
+        accidentType: "traffic",
         treatment: "우측 슬관절 후방십자인대 파열",
         claimedMinAmount: isCustomerSample ? 13_500_000 : 12_000_000,
         claimedMaxAmount: isCustomerSample ? 17_000_000 : 18_000_000,
@@ -3394,12 +3395,13 @@ export const handlers = [
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
         reportNo: "20260520-017",
-        adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : crypto.randomUUID(),
+        adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : null,
         reviewComment: isCustomerSample
           ? "누락된 청구 검토가 가능한 출발점입니다. 장해등급은 재검사 결과를 보고 판단하는 편이 안전합니다."
           : null,
         reviewedAt: isCustomerSample ? "2026-05-22T09:00:00Z" : null,
-        adjuster: { nickname: "정우성", career: 12 },
+        // 검수 전에는 검수한 사정사가 없다.
+        adjuster: isCustomerSample ? { nickname: "정우성", career: 12 } : null,
       }),
     });
   }),

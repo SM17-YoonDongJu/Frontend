@@ -43,6 +43,7 @@ function bottomLeftText(item: ReportListItem): string {
 }
 
 export function ReportListCard({ item }: { item: ReportListItem }) {
+  // deriveReportTitle이 사고 유형 한글 라벨 변환을 포함한다(#261 정합).
   const heading = item.title ?? deriveReportTitle(item);
   const isArrived = item.status === "AWAITING_ADOPTION";
   const isPending = item.status === "AWAITING_INSPECTION";
