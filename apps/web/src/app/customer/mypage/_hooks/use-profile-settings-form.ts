@@ -26,6 +26,8 @@ export function useProfileSettingsForm({
   const [region, setRegion] = useState(profile.region[0] ?? "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatarUrl);
   const objectUrlRef = useRef<string | null>(null);
+  const confirmedAvatarUrlRef = useRef<string | null>(profile.avatarUrl);
+  const uploadSequenceRef = useRef(0);
 
   const { mutate: updateMe, isPending: isSaving } = useUpdateMe();
   const { mutateAsync: uploadFile, isPending: isUploading } = useUploadFile("avatar");
@@ -43,7 +45,8 @@ export function useProfileSettingsForm({
       return;
     }
 
-    const previousAvatarUrl = avatarUrl;
+    // 업로드 도중 다른 사진을 다시 고를 수 있어, 먼저 시작한 업로드의 응답이 나중 선택을 덮어쓰지 않도록 순번으로 가른다.
+    const sequence = ++uploadSequenceRef.current;
     if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
     const objectUrl = URL.createObjectURL(file);
     objectUrlRef.current = objectUrl;
@@ -51,10 +54,15 @@ export function useProfileSettingsForm({
 
     try {
       const { url } = await uploadFile(file);
-      setAvatarUrl(url);
+      if (uploadSequenceRef.current === sequence) {
+        confirmedAvatarUrlRef.current = url;
+        setAvatarUrl(url);
+      }
     } catch (error) {
-      setAvatarUrl(previousAvatarUrl);
-      toast.error(uploadErrorMessage(error));
+      if (uploadSequenceRef.current === sequence) {
+        setAvatarUrl(confirmedAvatarUrlRef.current);
+        toast.error(uploadErrorMessage(error));
+      }
     } finally {
       URL.revokeObjectURL(objectUrl);
       if (objectUrlRef.current === objectUrl) objectUrlRef.current = null;
