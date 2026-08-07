@@ -8,7 +8,6 @@ import { cn } from "@/shared/lib/utils";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { Home } from "@/shared/ui/icons/Home";
 import { MessageCircle } from "@/shared/ui/icons/MessageCircle";
-import { MessageSquare } from "@/shared/ui/icons/MessageSquare";
 import { LogoutButton } from "./LogoutButton";
 
 type IconComponent = ComponentType<{ className?: string }>;
@@ -16,7 +15,6 @@ type IconComponent = ComponentType<{ className?: string }>;
 const ICON_BY_KEY: Record<MypageSidebarLink["key"], IconComponent> = {
   dashboard: Home,
   reports: FileText,
-  proposals: MessageSquare,
   consult: MessageCircle,
 };
 

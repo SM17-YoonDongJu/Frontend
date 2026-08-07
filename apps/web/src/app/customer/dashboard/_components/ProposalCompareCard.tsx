@@ -18,7 +18,7 @@ export function ProposalCompareCard() {
       <header className="flex items-center justify-between">
         <h2 className="text-base font-bold text-ink">받은 제안 비교</h2>
         <Link
-          href={DASHBOARD_LINKS.proposalsList}
+          href={DASHBOARD_LINKS.allReports}
           className="text-[0.8125rem] font-medium text-ink-3 transition hover:text-ink-2"
         >
           <span className="md:hidden">전체</span>
@@ -106,7 +106,7 @@ export function ProposalCompareCard() {
       </ul>
 
       <Link
-        href={DASHBOARD_LINKS.proposalsList}
+        href={DASHBOARD_LINKS.allReports}
         className="mt-4 flex w-full items-center justify-center rounded-button border border-line bg-paper-2 p-[0.8125rem] text-center text-sm font-semibold text-ink transition hover:brightness-[.98]"
       >
         제안 {summary.count}건 비교하기

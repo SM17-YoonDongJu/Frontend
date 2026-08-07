@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { cn } from "@/shared/lib/utils";
-import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { Chat } from "@/shared/ui/icons/Chat";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
-import { ProposalTopBadges } from "./ProposalTopBadges";
+import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
+import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
+import { deriveReportTitle } from "@/app/customer/_shared/model/report-title";
+import { ReportStatusBadges } from "./ReportStatusBadges";
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -29,6 +31,10 @@ function bottomLeftText(item: ReportListItem): string {
     return `제안 ${item.proposalCount}건이 도착했어요`;
   }
   if (item.status === "AWAITING_INSPECTION") return "검수 완료 후 제안을 받을 수 있어요";
+  if (item.status === "COUNSELING") {
+    if (item.adjusterNickname) return `${item.adjusterNickname} 사정사와 상담 중`;
+    return "상담 진행 중";
+  }
   if (item.status === "MATCHED") {
     if (item.adjusterNickname) return `상담 종결 · ${item.adjusterNickname} 사정사`;
     return `제안 ${item.proposalCount}건 · 미진행 종결`;
@@ -36,26 +42,23 @@ function bottomLeftText(item: ReportListItem): string {
   return `제안 ${item.proposalCount}건`;
 }
 
-export function ReceivedProposalCard({ item }: { item: ReportListItem }) {
-  const heading = item.title ?? accidentTypeLabel(item.accidentType);
+export function ReportListCard({ item }: { item: ReportListItem }) {
+  // deriveReportTitle이 사고 유형 한글 라벨 변환을 포함한다(#261 정합).
+  const heading = item.title ?? deriveReportTitle(item);
   const isArrived = item.status === "AWAITING_ADOPTION";
   const isPending = item.status === "AWAITING_INSPECTION";
-  const isClosed = item.status === "MATCHED";
+  const { muted } = REPORT_STATUS_META[item.status];
 
   return (
     <Link
-      href={`/customer/proposals/${item.reportId}`}
+      href={reportProposalsHref(item.reportId)}
       className={cn(
         "block rounded-card border p-4 shadow-card transition hover:brightness-[.99] md:p-5",
-        isArrived
-          ? "border-line bg-card"
-          : isClosed
-            ? "border-line-2 bg-paper-2"
-            : "border-line bg-paper-2",
+        isArrived ? "border-line bg-card" : muted ? "border-line-2 bg-paper-2" : "border-line bg-paper-2",
       )}
     >
       <div className="flex items-center gap-1.5">
-        <ProposalTopBadges item={item} />
+        <ReportStatusBadges item={item} />
         {!isPending && (
           <span className="ml-auto text-[0.71875rem] text-ink-3">
             {toDisplayDate(item.reviewedAt ?? item.createdAt)}
@@ -64,10 +67,7 @@ export function ReceivedProposalCard({ item }: { item: ReportListItem }) {
       </div>
 
       <p
-        className={cn(
-          "mt-3 text-[0.9375rem] font-bold leading-[1.2]",
-          isClosed ? "text-ink-3" : "text-ink",
-        )}
+        className={cn("mt-3 text-[0.9375rem] font-bold leading-[1.2]", muted ? "text-ink-3" : "text-ink")}
       >
         {heading}
       </p>
@@ -75,10 +75,7 @@ export function ReceivedProposalCard({ item }: { item: ReportListItem }) {
 
       <div className="mt-3 flex items-center justify-between border-t border-line-2 pt-2.5">
         <span
-          className={cn(
-            "min-w-0 flex-1 truncate text-[0.75rem]",
-            isClosed ? "text-ink-3" : "text-ink-2",
-          )}
+          className={cn("min-w-0 flex-1 truncate text-[0.75rem]", muted ? "text-ink-3" : "text-ink-2")}
         >
           {bottomLeftText(item)}
         </span>

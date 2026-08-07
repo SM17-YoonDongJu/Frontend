@@ -31,9 +31,9 @@ test.describe("PC 내 정보 · 프로필 수정", () => {
     await expect(
       page.getByText("일반 회원").filter({ visible: true }),
     ).toBeVisible();
-    // 사이드바 메뉴 + 강조 배지(받은 제안 proposalCount 2)
+    // 사이드바 메뉴 + 카운트 배지(내 분석 리포트 reportCount)
     await expect(
-      page.getByRole("link", { name: /받은 제안/ }).filter({ visible: true }),
+      page.getByRole("link", { name: /내 분석 리포트/ }).filter({ visible: true }),
     ).toBeVisible();
   });
 

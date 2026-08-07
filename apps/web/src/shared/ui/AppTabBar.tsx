@@ -23,7 +23,7 @@ interface Tab {
 
 const CUSTOMER_TABS: Tab[] = [
   { label: "홈", href: "/customer/dashboard", Icon: Home },
-  { label: "리포트", href: "/customer/proposals", Icon: FileText },
+  { label: "리포트", href: "/customer/reports", Icon: FileText },
   { label: "채팅", href: "/customer/chat", Icon: Chat },
   { label: "내정보", href: "/customer/mypage", Icon: User },
 ];

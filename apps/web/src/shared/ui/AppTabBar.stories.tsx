@@ -64,7 +64,7 @@ export const Customer: Story = {
 export const CustomerReportActive: Story = {
   args: { variant: "customer" },
   decorators: [authenticatedAs(CUSTOMER_ME)],
-  parameters: { nextjs: { appDirectory: true, navigation: { pathname: "/customer/proposals" } } }
+  parameters: { nextjs: { appDirectory: true, navigation: { pathname: "/customer/reports" } } }
 };
 
 /** 사정사 홈 — 홈 탭 활성. */

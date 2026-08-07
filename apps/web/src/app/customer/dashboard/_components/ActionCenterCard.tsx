@@ -40,7 +40,7 @@ function buildTodos(
     const count = proposalSummary.count;
     list.push({
       key: "proposal",
-      href: DASHBOARD_LINKS.proposalsList,
+      href: DASHBOARD_LINKS.allReports,
       heading: (
         <>
           새 제안 <span className="text-gold-2">{count}건</span>이 도착했어요

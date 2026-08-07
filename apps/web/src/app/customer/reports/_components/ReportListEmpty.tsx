@@ -6,7 +6,7 @@ import { Plus } from "@/shared/ui/icons/Plus";
 
 export function ReportListEmpty() {
   return (
-    <div className="mt-6 flex flex-col items-center rounded-card-lg border border-line bg-paper-2 px-6 py-14 text-center">
+    <div className="mx-5 flex flex-col items-center rounded-card-lg border border-line bg-paper-2 px-6 py-14 text-center md:mx-0">
       <div className="relative">
         <span className="flex size-14 items-center justify-center rounded-card border border-line bg-card text-ink shadow-raised">
           <FileText className="text-[1.5rem]" />
