@@ -9,7 +9,7 @@ import { hideQueryDevtools, selectRegion } from "./_region-helpers";
  *   필수 약관 게이트, 전체 동의 토글, 본인 확인 필수값 게이트, 중복 계정 에러(고가치),
  *   약관 상세 왕복, 손해사정사 분기, 단계 직접 진입 가드.
  * 응답은 기본 MSW 핸들러(POST /auth/register: 성공 201 + 토큰)가 제공.
- *   소셜 컨텍스트(socialToken/email)는 진입 쿼리로 주입(개발·E2E 경로) —
+ *   소셜 컨텍스트(socialToken)는 진입 쿼리로 주입(개발·E2E 경로) —
  *   컨텍스트 없이 직접 진입하면 /login으로 가드되므로 mock 폴백 없음.
  * 로그인 가드(#185): 가입자는 비로그인이 정상 흐름 — 기본 MSW /users/me가 로그인 유저를
  *   반환하므로 beforeEach에서 비로그인 시나리오 헤더를 주입한다(로그인 상태 진입 테스트만 예외).
@@ -19,7 +19,7 @@ import { hideQueryDevtools, selectRegion } from "./_region-helpers";
  *   지역 전송은 zod 필수 계약(registerBodySchema)으로 담보한다.
  */
 
-const PATH = "/signup?socialToken=e2e-social-token&email=yunseo%40email.com";
+const PATH = "/signup?socialToken=e2e-social-token";
 
 // 하이드레이션 전 클릭 유실 방지: 클릭+상태확인을 묶어 재시도.
 async function selectRole(page: Page, name: RegExp) {
@@ -66,8 +66,7 @@ test("역할·약관 동의·본인 확인을 마치고 가입하면 완료 화�
   await page.getByRole("button", { name: "다음" }).click();
 
   await expect(page.getByRole("heading", { name: "가입이 완료됐어요" })).toBeVisible();
-  // 소셜 mock 이메일 + 본인 확인 스텝에 입력한 이름(#256) — 완료 화면 이름은 register 응답 echo.
-  await expect(page.getByText("yunseo@email.com")).toBeVisible();
+  // 본인 확인 스텝에 입력한 이름(#256) — 완료 화면 이름은 register 응답 echo.
   await expect(page.getByText("윤서", { exact: true })).toBeVisible();
 
   const startButton = page.getByRole("button", { name: "보상 분석 시작" });
