@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/shared/lib/utils";
+import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { Chat } from "@/shared/ui/icons/Chat";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
@@ -36,7 +37,7 @@ function bottomLeftText(item: ReportListItem): string {
 }
 
 export function ReceivedProposalCard({ item }: { item: ReportListItem }) {
-  const heading = item.title ?? item.accidentType ?? "";
+  const heading = item.title ?? accidentTypeLabel(item.accidentType);
   const isArrived = item.status === "AWAITING_ADOPTION";
   const isPending = item.status === "AWAITING_INSPECTION";
   const isClosed = item.status === "MATCHED";

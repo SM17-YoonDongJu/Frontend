@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
+import { Check } from "@/shared/ui/icons/Check";
+import { ChevronLeft } from "@/shared/ui/icons/ChevronLeft";
 import { REPORT_TITLE } from "../_model/report-meta";
 
 export interface ReportHeaderProps {
@@ -33,15 +35,7 @@ export function ReportHeader({
           aria-label="뒤로 가기"
           className="flex size-[2.375rem] items-center justify-center rounded-full text-ink transition hover:bg-paper-2"
         >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
-            <path
-              d="M15 6l-6 6 6 6"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
+          <ChevronLeft className="text-[1.375rem]" />
         </button>
         <h1 className="text-[0.9375rem] font-bold text-ink">분석 리포트</h1>
         <div className="flex size-[2.375rem] items-center justify-center">{mobileShare}</div>
@@ -54,16 +48,8 @@ export function ReportHeader({
             <span className="rounded-pill bg-paper-2 px-2.5 py-1">{accidentType}</span>
             <span className="rounded-pill bg-paper-2 px-2.5 py-1">{treatment}</span>
             <span className="flex items-center gap-1 rounded-pill bg-green-soft px-2.5 py-1 text-green">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden>
-                <path
-                  d="M5 13l4 4L19 7"
-                  stroke="currentColor"
-                  strokeWidth="2.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              검수 의견 {issueCount}건
+              <Check className="text-[0.8125rem]" />
+              쟁점 {issueCount}건
             </span>
           </div>
           <h1 className="mt-2 font-serif text-[1.625rem] font-bold text-ink">{REPORT_TITLE}</h1>

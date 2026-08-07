@@ -5,7 +5,7 @@ import type {
   ReportListItem,
   ReportStatus,
 } from "@/app/customer/_shared/model/report-list.schema";
-import { reportDetailHref } from "@/app/customer/_shared/model/report-routes";
+import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
 import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
 import { deriveReportTitle } from "@/app/customer/_shared/model/report-title";
 
@@ -58,7 +58,7 @@ export function ReportSummaryCard({ report }: { report: ReportListItem }) {
 
   return (
     <Link
-      href={reportDetailHref(report.reportId)}
+      href={reportProposalsHref(report.reportId)}
       className="flex flex-col rounded-card border border-line bg-card p-[1.3125rem] transition hover:brightness-[.98]"
     >
       <div className="flex items-center justify-between">
