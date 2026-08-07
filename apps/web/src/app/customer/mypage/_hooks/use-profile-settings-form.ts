@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useUpdateMe } from "@/shared/api/use-update-me";
 import { uploadErrorMessage } from "@/shared/api/upload-file";
 import { useUploadFile } from "@/shared/api/use-upload-file";
@@ -25,9 +25,16 @@ export function useProfileSettingsForm({
   // UI는 단일 지역 선택 — 명세 region은 배열이라 첫 항목만 편집하고 저장 시 배열로 감싼다.
   const [region, setRegion] = useState(profile.region[0] ?? "");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatarUrl);
+  const objectUrlRef = useRef<string | null>(null);
 
   const { mutate: updateMe, isPending: isSaving } = useUpdateMe();
   const { mutateAsync: uploadFile, isPending: isUploading } = useUploadFile("avatar");
+
+  useEffect(() => {
+    return () => {
+      if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    };
+  }, []);
 
   const pickFile = async (file: File) => {
     const invalid = validateUploadFile(file, "avatar");
@@ -35,11 +42,22 @@ export function useProfileSettingsForm({
       toast.error(invalid);
       return;
     }
+
+    const previousAvatarUrl = avatarUrl;
+    if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current);
+    const objectUrl = URL.createObjectURL(file);
+    objectUrlRef.current = objectUrl;
+    setAvatarUrl(objectUrl);
+
     try {
       const { url } = await uploadFile(file);
       setAvatarUrl(url);
     } catch (error) {
+      setAvatarUrl(previousAvatarUrl);
       toast.error(uploadErrorMessage(error));
+    } finally {
+      URL.revokeObjectURL(objectUrl);
+      if (objectUrlRef.current === objectUrl) objectUrlRef.current = null;
     }
   };
 
