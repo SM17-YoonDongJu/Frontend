@@ -121,7 +121,6 @@ export function useSignupForm() {
       canGoBack: backTarget !== undefined,
       registerPending: register.isPending,
       registerErrorCode: getRegisterErrorCode(register.error),
-      email: social?.email,
     }),
     [social, funnel.step, funnel.stepNumber, funnel.total, backTarget, register.isPending, register.error],
   );

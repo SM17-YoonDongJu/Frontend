@@ -83,7 +83,6 @@ export function SignupFunnel() {
         {derived.step === "done" && state.result && (
           <CompleteStep
             nickname={state.result.nickname}
-            email={derived.email}
             onStartAnalysis={actions.startAnalysis}
           />
         )}

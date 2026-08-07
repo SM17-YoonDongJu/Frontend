@@ -13,8 +13,6 @@ import type { RegisterBody } from "../_model/register.schema";
 export interface SignupSocialContext {
   provider: RegisterBody["provider"];
   socialToken: string;
-  /** 완료 화면 표시 */
-  email?: string;
 }
 
 function toProvider(value: string | null): RegisterBody["provider"] {
@@ -33,7 +31,6 @@ export function useSignupSocial(): SignupSocialContext | null {
     return {
       provider: toProvider(searchParams.get("provider")),
       socialToken: queryToken,
-      email: searchParams.get("email") ?? undefined,
     };
   }
 
