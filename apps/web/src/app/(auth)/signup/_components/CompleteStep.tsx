@@ -4,7 +4,6 @@ import { Button } from "@/shared/ui/Button";
 
 interface CompleteStepProps {
   nickname: string;
-  email?: string;
   onStartAnalysis: () => void;
 }
 
@@ -14,9 +13,8 @@ interface SummaryRow {
 }
 
 /** Step3: 가입 완료 안내 + 계정 요약 + 보상 분석 시작 CTA. */
-export function CompleteStep({ nickname, email, onStartAnalysis }: CompleteStepProps) {
+export function CompleteStep({ nickname, onStartAnalysis }: CompleteStepProps) {
   const rows: SummaryRow[] = [
-    { label: "이메일", value: email ?? "미등록" },
     { label: "이름", value: nickname },
     { label: "본인 인증", value: "완료" },
   ];
