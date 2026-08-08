@@ -37,5 +37,6 @@ test("01 완료 화면 — 이메일 행 없음", async ({ page }) => {
 
   await page.getByRole("button", { name: "다음" }).click();
   await expect(page.getByRole("heading", { name: "가입이 완료됐어요" })).toBeVisible();
+  await expect(page.getByText("이메일", { exact: true })).toHaveCount(0);
   await page.screenshot({ path: `${DIR}/01-complete-desktop.png` });
 });

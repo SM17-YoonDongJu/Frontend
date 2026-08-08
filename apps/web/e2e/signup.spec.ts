@@ -68,6 +68,8 @@ test("역할·약관 동의·본인 확인을 마치고 가입하면 완료 화�
   await expect(page.getByRole("heading", { name: "가입이 완료됐어요" })).toBeVisible();
   // 본인 확인 스텝에 입력한 이름(#256) — 완료 화면 이름은 register 응답 echo.
   await expect(page.getByText("윤서", { exact: true })).toBeVisible();
+  // 이메일 행 제거(#267) — 소셜 응답에 이메일이 없어도 "미등록" 노출 없이 화면에서 아예 빠져야 한다.
+  await expect(page.getByText("이메일", { exact: true })).toHaveCount(0);
 
   const startButton = page.getByRole("button", { name: "보상 분석 시작" });
   await expect(startButton).toBeVisible();
