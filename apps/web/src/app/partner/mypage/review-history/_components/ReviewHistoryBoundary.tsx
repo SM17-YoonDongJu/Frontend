@@ -1,0 +1,25 @@
+"use client";
+
+import { AsyncBoundary } from "@/shared/ui/AsyncBoundary";
+import { ReviewHistorySkeleton } from "./ReviewHistorySkeleton";
+import { ReviewHistoryView } from "./ReviewHistoryView";
+
+const ERROR_MESSAGES = {
+  FORBIDDEN: {
+    title: "접근 권한이 없어요",
+    desc: "활성 손해사정사만 검수 내역을 볼 수 있어요.",
+  },
+};
+
+export function ReviewHistoryBoundary() {
+  return (
+    <AsyncBoundary
+      fallback={<ReviewHistorySkeleton />}
+      errorLayout="flow"
+      errorTitle="내역을 불러오지 못했어요"
+      errorMessages={ERROR_MESSAGES}
+    >
+      <ReviewHistoryView />
+    </AsyncBoundary>
+  );
+}

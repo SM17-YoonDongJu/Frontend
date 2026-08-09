@@ -1,0 +1,4627 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BRBS Backend API",
+    "description": "보험금 검토·손해사정사 매칭 서비스 API 문서",
+    "version": "v0.1.0"
+  },
+  "servers": [
+    {
+      "url": "http://api-dev.brbosang.com",
+      "description": "Generated server url"
+    }
+  ],
+  "security": [
+    {
+      "cookieAuth": []
+    }
+  ],
+  "paths": {
+    "/users/me/device-tokens": {
+      "post": {
+        "tags": [
+          "device-token-controller"
+        ],
+        "operationId": "register",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDeviceTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDeviceTokenResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "device-token-controller"
+        ],
+        "operationId": "deregister",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteDeviceTokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/adjuster-applications": {
+      "post": {
+        "tags": [
+          "adjuster-application-controller"
+        ],
+        "operationId": "apply",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdjusterApplicationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCreateAdjusterApplicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/uploads": {
+      "post": {
+        "tags": [
+          "upload-controller"
+        ],
+        "operationId": "upload",
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUploadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports": {
+      "get": {
+        "tags": [
+          "report-controller"
+        ],
+        "operationId": "list",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportCardListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "report-controller"
+        ],
+        "operationId": "create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCreateReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/{reportId}/hold": {
+      "post": {
+        "tags": [
+          "pending-review-controller"
+        ],
+        "operationId": "addHold",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HoldReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseHoldResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats/{chatRoomId}/report": {
+      "post": {
+        "tags": [
+          "chat-report-controller"
+        ],
+        "operationId": "report",
+        "parameters": [
+          {
+            "name": "chatRoomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseChatReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats/{chatRoomId}/read": {
+      "post": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "operationId": "read",
+        "parameters": [
+          {
+            "name": "chatRoomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReadResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats/{chatRoomId}/messages": {
+      "get": {
+        "tags": [
+          "chat-message-controller"
+        ],
+        "operationId": "getMessages",
+        "parameters": [
+          {
+            "name": "chatRoomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 30
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseChatMessageListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "chat-message-controller"
+        ],
+        "operationId": "send",
+        "parameters": [
+          {
+            "name": "chatRoomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SendMessageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseChatMessageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats/{chatRoomId}/attachments": {
+      "post": {
+        "tags": [
+          "chat-message-controller"
+        ],
+        "operationId": "uploadAttachment",
+        "parameters": [
+          {
+            "name": "chatRoomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary"
+                  }
+                },
+                "required": [
+                  "file"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUploadAttachmentResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/reissue": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "reissue",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "register_1",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseRegisterResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "logout",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/adjusters/{adjusterId}/reviews": {
+      "get": {
+        "tags": [
+          "adjuster-review-controller"
+        ],
+        "operationId": "getReviews",
+        "parameters": [
+          {
+            "name": "adjusterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAdjusterReviewListResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "adjuster-review-controller"
+        ],
+        "operationId": "createReview",
+        "parameters": [
+          {
+            "name": "adjusterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAdjusterReviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCreateAdjusterReviewResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me": {
+      "get": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "getMe",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserMeResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "withdraw",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "user-controller"
+        ],
+        "operationId": "updateMe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserMeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/notifications/{notificationId}/read": {
+      "patch": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "read_1",
+        "parameters": [
+          {
+            "name": "notificationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/notifications/read-all": {
+      "patch": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "readAll",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/notification-settings": {
+      "get": {
+        "tags": [
+          "notification-setting-controller"
+        ],
+        "operationId": "getMySettings",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseNotificationSettingResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "notification-setting-controller"
+        ],
+        "operationId": "updateMySettings",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotificationSettingUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseNotificationSettingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/{reportId}": {
+      "get": {
+        "tags": [
+          "report-controller"
+        ],
+        "operationId": "detail",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseCustomerReportDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "pending-review-controller"
+        ],
+        "operationId": "reviewReport",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReviewReportRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReviewReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/{reportId}/proposals/{proposalId}": {
+      "patch": {
+        "tags": [
+          "report-controller"
+        ],
+        "operationId": "decide",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "proposalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProposalDecisionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProposalDecisionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats/{chatRoomId}/reject": {
+      "patch": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "operationId": "reject",
+        "parameters": [
+          {
+            "name": "chatRoomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseConsultationDecisionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats/{chatRoomId}/accept": {
+      "patch": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "operationId": "accept",
+        "parameters": [
+          {
+            "name": "chatRoomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseConsultationDecisionResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/adjusters/me/profile": {
+      "get": {
+        "tags": [
+          "adjuster-profile-controller"
+        ],
+        "operationId": "getProfile",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAdjusterProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "adjuster-profile-controller"
+        ],
+        "operationId": "updateProfile",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAdjusterProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAdjusterProfileResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/notifications": {
+      "get": {
+        "tags": [
+          "notification-controller"
+        ],
+        "operationId": "getMyNotifications",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseNotificationListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/insurances": {
+      "get": {
+        "tags": [
+          "user-insurance-controller"
+        ],
+        "operationId": "getMyInsurances",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserInsuranceListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/dashboard": {
+      "get": {
+        "tags": [
+          "user-dashboard-controller"
+        ],
+        "operationId": "dashboard",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserDashboardResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/me/activity-summary": {
+      "get": {
+        "tags": [
+          "user-activity-summary-controller"
+        ],
+        "operationId": "activitySummary",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseUserActivitySummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/adjuster-applications/me": {
+      "get": {
+        "tags": [
+          "adjuster-application-controller"
+        ],
+        "operationId": "getMyApplication",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAdjusterApplicationResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/{reportId}/review": {
+      "get": {
+        "tags": [
+          "pending-review-controller"
+        ],
+        "operationId": "reviewWorkspace",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReviewWorkspaceResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/{reportId}/proposals": {
+      "get": {
+        "tags": [
+          "report-controller"
+        ],
+        "operationId": "proposals",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseProposalListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/pending-review": {
+      "get": {
+        "tags": [
+          "pending-review-controller"
+        ],
+        "operationId": "pendingReview",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "accidentType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePendingReviewListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/reports/pending-review/summary": {
+      "get": {
+        "tags": [
+          "pending-review-controller"
+        ],
+        "operationId": "summary",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePendingReviewSummaryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/me/received-proposals": {
+      "get": {
+        "tags": [
+          "report-controller"
+        ],
+        "operationId": "receivedProposals",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportCardListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats": {
+      "get": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "operationId": "listMyRooms",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseChatRoomListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats/{chatRoomId}": {
+      "get": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "operationId": "getRoom",
+        "parameters": [
+          {
+            "name": "chatRoomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseChatRoomDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/chats/{chatRoomId}/shared-report": {
+      "get": {
+        "tags": [
+          "chat-room-controller"
+        ],
+        "operationId": "getSharedReport",
+        "parameters": [
+          {
+            "name": "chatRoomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseSharedReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/oauth2/{provider}/callback": {
+      "get": {
+        "tags": [
+          "auth-controller"
+        ],
+        "operationId": "oauthCallback",
+        "parameters": [
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "redirect_uri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOAuthCallbackResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/adjusters": {
+      "get": {
+        "tags": [
+          "adjuster-controller"
+        ],
+        "operationId": "getAdjusters",
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "specialty",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 1
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 12
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAdjusterListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/adjusters/{adjusterId}": {
+      "get": {
+        "tags": [
+          "adjuster-controller"
+        ],
+        "operationId": "getAdjusterDetail",
+        "parameters": [
+          {
+            "name": "adjusterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAdjusterDetailResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/adjusters/me/reviewed-reports": {
+      "get": {
+        "tags": [
+          "reviewed-report-controller"
+        ],
+        "operationId": "reviewedReports",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "ALL"
+            }
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReviewedReportListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/adjusters/me/mypage": {
+      "get": {
+        "tags": [
+          "adjuster-profile-controller"
+        ],
+        "operationId": "getMyPage",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAdjusterMyPageResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/adjusters/me/home": {
+      "get": {
+        "tags": [
+          "adjuster-home-controller"
+        ],
+        "operationId": "home",
+        "parameters": [
+          {
+            "name": "in_progress_limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseAdjusterHomeResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "RegisterDeviceTokenRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "platform": {
+            "type": "string",
+            "enum": [
+              "ANDROID",
+              "IOS",
+              "WEB"
+            ]
+          }
+        },
+        "required": [
+          "platform",
+          "token"
+        ]
+      },
+      "ApiResponseDeviceTokenResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DeviceTokenResponse"
+          }
+        }
+      },
+      "DeviceTokenResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "platform": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateAdjusterApplicationRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "phone": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 0
+          },
+          "specialties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 30,
+              "minLength": 0
+            },
+            "minItems": 1
+          },
+          "licenseNo": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "licenseImageUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          },
+          "career": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "introduction": {
+            "type": "string"
+          },
+          "affiliation": {
+            "type": "string",
+            "minLength": 1
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "registrationImageUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "affiliation",
+          "name",
+          "phone",
+          "region",
+          "registrationImageUrl",
+          "specialties"
+        ]
+      },
+      "ApiResponseCreateAdjusterApplicationResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CreateAdjusterApplicationResponse"
+          }
+        }
+      },
+      "CreateAdjusterApplicationResponse": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseUploadResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadResponse"
+          }
+        }
+      },
+      "UploadResponse": {
+        "type": "object",
+        "properties": {
+          "s3Url": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateReportRequest": {
+        "type": "object",
+        "properties": {
+          "productId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accidentType": {
+            "type": "string",
+            "enum": [
+              "medical_indemnity",
+              "traffic",
+              "disability",
+              "cancer_diagnosis",
+              "fire",
+              "liability",
+              "other"
+            ]
+          },
+          "accidentDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "diagnosis": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "offeredAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hospitalizations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Hospitalization"
+            }
+          },
+          "description": {
+            "type": "string"
+          },
+          "additionalInformation": {
+            "type": "string"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Document"
+            }
+          },
+          "question": {
+            "type": "string"
+          }
+        }
+      },
+      "Document": {
+        "type": "object",
+        "properties": {
+          "s3Url": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "reportType": {
+            "type": "string"
+          },
+          "fileType": {
+            "type": "string"
+          }
+        }
+      },
+      "Hospitalization": {
+        "type": "object",
+        "properties": {
+          "hospitalStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "hospitalEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "hospitalReason": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseCreateReportResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CreateReportResponse"
+          }
+        }
+      },
+      "CreateReportResponse": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AWAITING_INSPECTION",
+              "AWAITING_ADOPTION",
+              "COUNSELING",
+              "CLOSED",
+              "NOT_SELECTED"
+            ]
+          }
+        }
+      },
+      "HoldReportRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "reasonDetail": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseHoldResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/HoldResponse"
+          }
+        }
+      },
+      "HoldResponse": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "held": {
+            "type": "boolean"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "reasonDetail": {
+            "type": "string"
+          }
+        }
+      },
+      "ChatReportRequest": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "reasonDetail": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseChatReportResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ChatReportResponse"
+          }
+        }
+      },
+      "ChatReportResponse": {
+        "type": "object",
+        "properties": {
+          "chatReportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "chatRoomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "SPAM",
+              "ABUSE",
+              "FRAUD",
+              "PRIVACY_VIOLATION",
+              "OTHER"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseReadResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReadResponse"
+          }
+        }
+      },
+      "ReadResponse": {
+        "type": "object",
+        "properties": {
+          "chatRoomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "readAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Attachment": {
+        "type": "object",
+        "properties": {
+          "attachmentKey": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "SendMessageRequest": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Attachment"
+            }
+          }
+        }
+      },
+      "ApiResponseChatMessageResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ChatMessageResponse"
+          }
+        }
+      },
+      "ChatMessageResponse": {
+        "type": "object",
+        "properties": {
+          "messageId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "chatRoomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "senderId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "messageType": {
+            "type": "string",
+            "enum": [
+              "TEXT",
+              "IMAGE",
+              "FILE",
+              "SYSTEM"
+            ]
+          },
+          "content": {
+            "type": "string"
+          },
+          "attachment": {
+            "$ref": "#/components/schemas/Attachment"
+          },
+          "isMine": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseUploadAttachmentResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UploadAttachmentResponse"
+          }
+        }
+      },
+      "UploadAttachmentResponse": {
+        "type": "object",
+        "properties": {
+          "attachmentKey": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApiResponseVoid": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {}
+        }
+      },
+      "RegisterRequest": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "minLength": 1
+          },
+          "socialToken": {
+            "type": "string",
+            "minLength": 1
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 1
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "phoneNumber": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^01[0-9]-?\\d{3,4}-?\\d{4}$"
+          },
+          "gender": {
+            "type": "string",
+            "maxLength": 10,
+            "minLength": 0
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "userType": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "birthDate",
+          "gender",
+          "name",
+          "phoneNumber",
+          "provider",
+          "socialToken",
+          "userType"
+        ]
+      },
+      "ApiResponseRegisterResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/RegisterResponse"
+          }
+        }
+      },
+      "RegisterResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateAdjusterReviewRequest": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 5,
+            "minimum": 1
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "score"
+        ]
+      },
+      "ApiResponseCreateAdjusterReviewResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CreateAdjusterReviewResponse"
+          }
+        }
+      },
+      "CreateAdjusterReviewResponse": {
+        "type": "object",
+        "properties": {
+          "reviewId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adjusterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "UserUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "phoneNumber": {
+            "type": "string",
+            "pattern": "^01[0-9]-?\\d{3,4}-?\\d{4}$"
+          },
+          "region": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 100,
+              "minLength": 0
+            },
+            "maxItems": 10,
+            "minItems": 0
+          },
+          "avatarUrl": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          }
+        }
+      },
+      "ApiResponseUserMeResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserMeResponse"
+          }
+        }
+      },
+      "UserMeResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "region": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "socialProvider": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NotificationSettingUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "newReviewRequest": {
+            "type": "boolean"
+          },
+          "consultMessage": {
+            "type": "boolean"
+          },
+          "settlementNotice": {
+            "type": "boolean"
+          },
+          "reviewDeadlineSoon": {
+            "type": "boolean"
+          },
+          "reviewComplete": {
+            "type": "boolean"
+          },
+          "receivedProposal": {
+            "type": "boolean"
+          },
+          "consultAccepted": {
+            "type": "boolean"
+          },
+          "analysisComplete": {
+            "type": "boolean"
+          },
+          "identityVerified": {
+            "type": "boolean"
+          },
+          "marketing": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ApiResponseNotificationSettingResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/NotificationSettingResponse"
+          }
+        }
+      },
+      "NotificationSettingResponse": {
+        "type": "object",
+        "properties": {
+          "newReviewRequest": {
+            "type": "boolean"
+          },
+          "consultMessage": {
+            "type": "boolean"
+          },
+          "settlementNotice": {
+            "type": "boolean"
+          },
+          "reviewDeadlineSoon": {
+            "type": "boolean"
+          },
+          "reviewComplete": {
+            "type": "boolean"
+          },
+          "receivedProposal": {
+            "type": "boolean"
+          },
+          "consultAccepted": {
+            "type": "boolean"
+          },
+          "analysisComplete": {
+            "type": "boolean"
+          },
+          "identityVerified": {
+            "type": "boolean"
+          },
+          "marketing": {
+            "type": "boolean"
+          }
+        }
+      },
+      "IssueReview": {
+        "type": "object",
+        "properties": {
+          "reviewIssueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "issueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reviewStatus": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "impactAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "adjusterOpinion": {
+            "type": "string"
+          },
+          "modifiedReason": {
+            "type": "string"
+          },
+          "excludedReason": {
+            "type": "string"
+          }
+        }
+      },
+      "ReviewReportRequest": {
+        "type": "object",
+        "properties": {
+          "estimateMinAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "estimateMaxAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "applicableGuarantees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "omittedSpecialContract": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "basisTermsPrecedents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IssueReview"
+            }
+          },
+          "review": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseReviewReportResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReviewReportResponse"
+          }
+        }
+      },
+      "ReviewReportResponse": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reportReviewId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reviewStatus": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProposalDecisionRequest": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseProposalDecisionResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProposalDecisionResponse"
+          }
+        }
+      },
+      "ProposalDecisionResponse": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proposalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adjusterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportStatus": {
+            "type": "string",
+            "enum": [
+              "AWAITING_INSPECTION",
+              "AWAITING_ADOPTION",
+              "COUNSELING",
+              "CLOSED",
+              "NOT_SELECTED"
+            ]
+          },
+          "reviewStatus": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "COUNSELING",
+              "REJECTED",
+              "ACCEPTED"
+            ]
+          }
+        }
+      },
+      "ApiResponseConsultationDecisionResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ConsultationDecisionResponse"
+          }
+        }
+      },
+      "ConsultationDecisionResponse": {
+        "type": "object",
+        "properties": {
+          "chatRoomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "chatRoomStatus": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CLOSED"
+            ]
+          },
+          "reviewStatus": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "COUNSELING",
+              "REJECTED",
+              "ACCEPTED"
+            ]
+          },
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportStatus": {
+            "type": "string",
+            "enum": [
+              "AWAITING_INSPECTION",
+              "AWAITING_ADOPTION",
+              "COUNSELING",
+              "CLOSED",
+              "NOT_SELECTED"
+            ]
+          }
+        }
+      },
+      "CareerItem": {
+        "type": "object",
+        "properties": {
+          "period": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "company": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "company",
+          "period"
+        ]
+      },
+      "UpdateAdjusterProfileRequest": {
+        "type": "object",
+        "properties": {
+          "headline": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "introduction": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 0
+          },
+          "career": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activityRegion": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "specialties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 30,
+              "minLength": 0
+            },
+            "maxItems": 3,
+            "minItems": 0
+          },
+          "careers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CareerItem"
+            }
+          }
+        }
+      },
+      "AdjusterProfileResponse": {
+        "type": "object",
+        "properties": {
+          "adjusterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "headline": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "activityRegion": {
+            "type": "string"
+          },
+          "introduction": {
+            "type": "string"
+          },
+          "specialties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "careers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CareerItem"
+            }
+          },
+          "career": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageRating": {
+            "type": "number",
+            "format": "double"
+          },
+          "reviewCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recentReviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecentReview"
+            }
+          },
+          "completedConsultCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "handledCaseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingReviewCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseAdjusterProfileResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdjusterProfileResponse"
+          }
+        }
+      },
+      "RecentReview": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "score": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "item": {
+            "type": "string"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseNotificationListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/NotificationListResponse"
+          }
+        }
+      },
+      "Item": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "isRead": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NotificationListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "unreadCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ApiResponseUserInsuranceListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserInsuranceListResponse"
+          }
+        }
+      },
+      "UserInsuranceListResponse": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          }
+        }
+      },
+      "ActiveReport": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "accidentType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "firstReviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "proposalCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApiResponseUserDashboardResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserDashboardResponse"
+          }
+        }
+      },
+      "ProposalSummary": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "minAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "avgAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          }
+        }
+      },
+      "UserDashboardResponse": {
+        "type": "object",
+        "properties": {
+          "reportCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "activeReport": {
+            "$ref": "#/components/schemas/ActiveReport"
+          },
+          "proposalSummary": {
+            "$ref": "#/components/schemas/ProposalSummary"
+          }
+        }
+      },
+      "ApiResponseUserActivitySummaryResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/UserActivitySummaryResponse"
+          }
+        }
+      },
+      "UserActivitySummaryResponse": {
+        "type": "object",
+        "properties": {
+          "reportCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "proposalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "consultCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "closedCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AdjusterApplicationResponse": {
+        "type": "object",
+        "properties": {
+          "applicationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "name": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string"
+          },
+          "specialties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "speciality": {
+            "type": "string"
+          },
+          "licenseNo": {
+            "type": "string"
+          },
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Document"
+            }
+          },
+          "rejectedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "rejectReason": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseAdjusterApplicationResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdjusterApplicationResponse"
+          }
+        }
+      },
+      "ApiResponseReportCardListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReportCardListResponse"
+          }
+        }
+      },
+      "Card": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "accidentType": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reportNo": {
+            "type": "string"
+          },
+          "claimedMinAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimedMaxAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "proposalCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "adjusterNickname": {
+            "type": "string"
+          },
+          "offeredAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "treatment": {
+            "type": "string"
+          }
+        }
+      },
+      "Pagination": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ReportCardListResponse": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Card"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "Adjuster": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "career": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ApiResponseCustomerReportDetailResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/CustomerReportDetailResponse"
+          }
+        }
+      },
+      "CustomerReportDetailResponse": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "accidentType": {
+            "type": "string"
+          },
+          "treatment": {
+            "type": "string"
+          },
+          "claimedMinAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "claimedMaxAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "offeredAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "applicableGuarantees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "omittedSpecialContract": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "basisTermsPrecedents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "issue": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IssueItem"
+            }
+          },
+          "question": {
+            "type": "string"
+          },
+          "adjusterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "confidenceLevel": {
+            "type": "string"
+          },
+          "reportNo": {
+            "type": "string"
+          },
+          "reviewComment": {
+            "type": "string"
+          },
+          "reviewedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "adjuster": {
+            "$ref": "#/components/schemas/Adjuster"
+          }
+        }
+      },
+      "IssueItem": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "opinion": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "impactAmount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApiResponseReviewWorkspaceResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReviewWorkspaceResponse"
+          }
+        }
+      },
+      "AttachmentItem": {
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "reportType": {
+            "type": "string"
+          },
+          "pageCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "issuedBy": {
+            "type": "string"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date"
+          },
+          "aiSummary": {
+            "type": "string"
+          }
+        }
+      },
+      "ClaimContext": {
+        "type": "object",
+        "properties": {
+          "accidentType": {
+            "type": "string"
+          },
+          "accidentDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "diagnosis": {
+            "type": "string"
+          },
+          "hospitalization": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "additionalInformation": {
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "insurerName": {
+            "type": "string"
+          }
+        }
+      },
+      "Client": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "birthDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "region": {
+            "type": "string"
+          },
+          "joinedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Estimate": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "max": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Progress": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "accepted": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "modified": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "excluded": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ReviewWorkspaceResponse": {
+        "type": "object",
+        "properties": {
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "accidentType": {
+            "type": "string"
+          },
+          "region": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "confidenceLevel": {
+            "type": "string"
+          },
+          "isMasked": {
+            "type": "boolean"
+          },
+          "offeredAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "client": {
+            "$ref": "#/components/schemas/Client"
+          },
+          "claim": {
+            "$ref": "#/components/schemas/ClaimContext"
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentItem"
+            }
+          },
+          "aiEstimate": {
+            "$ref": "#/components/schemas/Estimate"
+          },
+          "adjusterEstimate": {
+            "$ref": "#/components/schemas/Estimate"
+          },
+          "applicableGuarantees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "omittedSpecialContract": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "basisTermsPrecedents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IssueItem"
+            }
+          },
+          "review": {
+            "type": "string"
+          },
+          "reviewStatus": {
+            "type": "string"
+          },
+          "started": {
+            "type": "boolean"
+          },
+          "progress": {
+            "$ref": "#/components/schemas/Progress"
+          }
+        }
+      },
+      "ApiResponseProposalListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ProposalListResponse"
+          }
+        }
+      },
+      "Proposal": {
+        "type": "object",
+        "properties": {
+          "proposalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "adjusterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "number",
+            "format": "double"
+          },
+          "proposalSummary": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ProposalListResponse": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Proposal"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "ApiResponsePendingReviewListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PendingReviewListResponse"
+          }
+        }
+      },
+      "PendingReviewListResponse": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "ApiResponsePendingReviewSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PendingReviewSummaryResponse"
+          }
+        }
+      },
+      "PendingReviewSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dueSoonCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inProgressCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "specialtyMatchCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ApiResponseChatRoomListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ChatRoomListResponse"
+          }
+        }
+      },
+      "ChatRoomListResponse": {
+        "type": "object",
+        "properties": {
+          "rooms": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatRoomSummaryResponse"
+            }
+          }
+        }
+      },
+      "ChatRoomSummaryResponse": {
+        "type": "object",
+        "properties": {
+          "chatRoomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proposalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roomStatus": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CLOSED"
+            ]
+          },
+          "matchStatus": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "COUNSELING",
+              "REJECTED",
+              "ACCEPTED"
+            ]
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "reportTypeLabel": {
+            "type": "string",
+            "enum": [
+              "medical_indemnity",
+              "traffic",
+              "disability",
+              "cancer_diagnosis",
+              "fire",
+              "liability",
+              "other"
+            ]
+          },
+          "counterpart": {
+            "$ref": "#/components/schemas/Counterpart"
+          },
+          "lastMessage": {
+            "type": "string"
+          },
+          "lastMessageAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Counterpart": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseChatRoomDetailResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ChatRoomDetailResponse"
+          }
+        }
+      },
+      "ChatRoomDetailResponse": {
+        "type": "object",
+        "properties": {
+          "chatRoomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proposalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "roomStatus": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CLOSED"
+            ]
+          },
+          "matchStatus": {
+            "type": "string",
+            "enum": [
+              "SENT",
+              "COUNSELING",
+              "REJECTED",
+              "ACCEPTED"
+            ]
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "reportTypeLabel": {
+            "type": "string",
+            "enum": [
+              "medical_indemnity",
+              "traffic",
+              "disability",
+              "cancer_diagnosis",
+              "fire",
+              "liability",
+              "other"
+            ]
+          },
+          "counterpart": {
+            "$ref": "#/components/schemas/Counterpart"
+          },
+          "lastMessage": {
+            "type": "string"
+          },
+          "lastMessageAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "unreadCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ApiResponseSharedReportResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/SharedReportResponse"
+          }
+        }
+      },
+      "Issue": {
+        "type": "object",
+        "properties": {
+          "issueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reviewIssueId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "adjusterOpinion": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "impactAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "reviewStatus": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SharedReportResponse": {
+        "type": "object",
+        "properties": {
+          "chatRoomId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "reportId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "proposalId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "caseNo": {
+            "type": "string"
+          },
+          "accidentType": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "reportStatus": {
+            "type": "string"
+          },
+          "reviewStatus": {
+            "type": "string"
+          },
+          "reportUpdatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "submittedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "adjuster": {
+            "$ref": "#/components/schemas/Adjuster"
+          },
+          "estimate": {
+            "$ref": "#/components/schemas/Estimate"
+          },
+          "offeredAmount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "issues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Issue"
+            }
+          },
+          "issueCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "applicableGuarantees": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "omittedSpecialContract": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "basisTermsPrecedents": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ApiResponseChatMessageListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ChatMessageListResponse"
+          }
+        }
+      },
+      "ChatMessageListResponse": {
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessageResponse"
+            }
+          },
+          "nextCursor": {
+            "type": "string"
+          },
+          "hasNext": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ApiResponseOAuthCallbackResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/OAuthCallbackResponse"
+          }
+        }
+      },
+      "OAuthCallbackResponse": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isNewUser": {
+            "type": "boolean"
+          },
+          "signupTicket": {
+            "type": "string"
+          }
+        }
+      },
+      "AdjusterListResponse": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/Meta"
+          }
+        }
+      },
+      "ApiResponseAdjusterListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdjusterListResponse"
+          }
+        }
+      },
+      "Meta": {
+        "type": "object",
+        "properties": {
+          "totalAdjusterCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "averageRating": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalConsultCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "averageCareer": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AdjusterDetailResponse": {
+        "type": "object",
+        "properties": {
+          "adjusterId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "headline": {
+            "type": "string"
+          },
+          "activityRegion": {
+            "type": "string"
+          },
+          "introduction": {
+            "type": "string"
+          },
+          "specialties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "careers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CareerItem"
+            }
+          },
+          "career": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageRating": {
+            "type": "number",
+            "format": "double"
+          },
+          "reviewCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "recentReviews": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecentReview"
+            }
+          },
+          "completedConsultCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "handledCaseCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "verified": {
+            "type": "boolean"
+          },
+          "consultGuide": {
+            "$ref": "#/components/schemas/ConsultGuide"
+          },
+          "certification": {
+            "$ref": "#/components/schemas/Certification"
+          }
+        }
+      },
+      "ApiResponseAdjusterDetailResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdjusterDetailResponse"
+          }
+        }
+      },
+      "Certification": {
+        "type": "object",
+        "properties": {
+          "registrationNo": {
+            "type": "string"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ConsultGuide": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string"
+          },
+          "initialConsult": {
+            "type": "string"
+          },
+          "feeBasis": {
+            "type": "string"
+          }
+        }
+      },
+      "AdjusterReviewListResponse": {
+        "type": "object",
+        "properties": {
+          "list": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        }
+      },
+      "ApiResponseAdjusterReviewListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdjusterReviewListResponse"
+          }
+        }
+      },
+      "ApiResponseReviewedReportListResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReviewedReportListResponse"
+          }
+        }
+      },
+      "ReviewedReportListResponse": {
+        "type": "object",
+        "properties": {
+          "stats": {
+            "$ref": "#/components/schemas/Stats"
+          },
+          "statusCounts": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Stats": {
+        "type": "object",
+        "properties": {
+          "monthlyReviewCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "previousMonthReviewCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "consultationConvertedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "consultationConversionRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "AdjusterMyPageResponse": {
+        "type": "object",
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/Profile"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/Stats"
+          },
+          "monthlyActivity": {
+            "$ref": "#/components/schemas/MonthlyActivity"
+          },
+          "certification": {
+            "$ref": "#/components/schemas/Certification"
+          }
+        }
+      },
+      "ApiResponseAdjusterMyPageResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdjusterMyPageResponse"
+          }
+        }
+      },
+      "MonthlyActivity": {
+        "type": "object",
+        "properties": {
+          "completedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "consultationConvertedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "averageRating": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "Profile": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "headline": {
+            "type": "string"
+          },
+          "specialties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "career": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activityRegion": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        }
+      },
+      "AdjusterHomeResponse": {
+        "type": "object",
+        "properties": {
+          "adjuster": {
+            "$ref": "#/components/schemas/Adjuster"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/Summary"
+          },
+          "inProgressCases": {
+            "$ref": "#/components/schemas/InProgressCases"
+          }
+        }
+      },
+      "ApiResponseAdjusterHomeResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/AdjusterHomeResponse"
+          }
+        }
+      },
+      "InProgressCases": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Item"
+            }
+          }
+        }
+      },
+      "Rating": {
+        "type": "object",
+        "properties": {
+          "average": {
+            "type": "number",
+            "format": "double"
+          },
+          "reviewCount": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Summary": {
+        "type": "object",
+        "properties": {
+          "pendingCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pendingNewCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "inProgressCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "monthlyCompletedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalCompletedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "consultationConvertedCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "rating": {
+            "$ref": "#/components/schemas/Rating"
+          }
+        }
+      },
+      "DeleteDeviceTokenRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 0
+          }
+        },
+        "required": [
+          "token"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "description": "로그인 시 서버가 Set-Cookie로 발급하는 HttpOnly access_token 쿠키로 인증한다",
+        "name": "access_token",
+        "in": "cookie"
+      }
+    }
+  }
+}

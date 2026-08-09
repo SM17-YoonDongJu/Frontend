@@ -1,0 +1,39 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "nextjs", "import", "oxc", "unicorn"],
+  "categories": {
+    "correctness": "error",
+    "suspicious": "warn"
+  },
+  "rules": {
+    "react/react-in-jsx-scope": "off",
+    "react/no-unstable-nested-components": ["warn", { "allowAsProps": true }],
+    "react/no-multi-comp": ["error", { "ignoreStateless": false }],
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "prefer-const": "error",
+    "eqeqeq": ["error", "smart"],
+    "no-unused-vars": [
+      "warn",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }
+    ],
+    "no-underscore-dangle": ["warn", { "allow": ["_def"] }],
+    "import/no-unassigned-import": "off"
+  },
+  "overrides": [
+    {
+      "files": ["scripts/**"],
+      "rules": { "no-console": "off" }
+    },
+    {
+      "files": ["**/*.stories.tsx"],
+      "rules": { "react/no-multi-comp": "off" }
+    }
+  ],
+  "ignorePatterns": [
+    "dist",
+    ".next",
+    "storybook-static",
+    "public/mockServiceWorker.js",
+    "src/shared/api/generated"
+  ]
+}

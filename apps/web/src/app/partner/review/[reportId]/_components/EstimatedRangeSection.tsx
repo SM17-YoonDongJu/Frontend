@@ -1,0 +1,70 @@
+"use client";
+
+import { AmountRange } from "@/shared/ui/AmountRange";
+import { Label } from "@/shared/ui/Label";
+import { ConfirmedAmountInput } from "./ConfirmedAmountInput";
+
+const MANWON = 10_000;
+
+function toManwonValue(won: number | null): string {
+  return won != null ? String(Math.round(won / MANWON)) : "";
+}
+
+function parseManwon(text: string): number | null {
+  const digits = text.replace(/[^\d]/g, "");
+  return digits ? Number(digits) * MANWON : null;
+}
+
+export interface EstimatedRangeSectionProps {
+  aiMin: number | null;
+  aiMax: number | null;
+  confirmedMin: number | null;
+  confirmedMax: number | null;
+  onChangeRange: (min: number | null, max: number | null) => void;
+}
+
+export function EstimatedRangeSection({
+  aiMin,
+  aiMax,
+  confirmedMin,
+  confirmedMax,
+  onChangeRange,
+}: EstimatedRangeSectionProps) {
+  return (
+    <section className="rounded-card-lg border border-line bg-card p-6">
+      <h2 className="font-serif text-[1.0625rem] font-bold text-ink">예상 보상 범위</h2>
+
+      <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="rounded-card border border-line-2 bg-paper-2 p-4">
+          <Label kicker>AI 추정</Label>
+          <p className="mt-2">
+            {aiMin != null && aiMax != null ? (
+              <AmountRange min={aiMin} max={aiMax} size="lg" />
+            ) : (
+              <span className="font-serif text-[1.25rem] font-bold text-ink">미산정</span>
+            )}
+          </p>
+        </div>
+
+        <div className="rounded-card border border-navy bg-navy p-4">
+          <p className="text-[0.78125rem] font-semibold uppercase tracking-[0.12em] text-gold-2">
+            사정사 확정 (직접 입력)
+          </p>
+          <div className="mt-2 flex items-center gap-2">
+            <ConfirmedAmountInput
+              label="확정 보상 최소 금액(만원)"
+              value={toManwonValue(confirmedMin)}
+              onValueChange={(text) => onChangeRange(parseManwon(text), confirmedMax)}
+            />
+            <span className="text-white">~</span>
+            <ConfirmedAmountInput
+              label="확정 보상 최대 금액(만원)"
+              value={toManwonValue(confirmedMax)}
+              onValueChange={(text) => onChangeRange(confirmedMin, parseManwon(text))}
+            />
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

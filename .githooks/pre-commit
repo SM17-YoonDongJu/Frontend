@@ -1,0 +1,46 @@
+#!/usr/bin/env sh
+# 커밋 직전 typecheck + lint 게이트.
+# 스테이징에 .ts/.tsx 변경이 있을 때만 실행(문서/설정만 바꾼 커밋은 빠르게 통과).
+# 실패 시 커밋 차단 — 타입 깨짐/lint 위반을 커밋에 섞지 않는다.
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR \
+  | grep -E '(\.(ts|tsx)$|(^|/)package\.json$|(^|/)tsconfig(\..+)?\.json$|(^|/)\.oxlintrc\.json$|(^|/)next\.config\.(js|mjs|cjs)$)' || true)
+if [ -z "$staged" ]; then
+  exit 0
+fi
+
+# Windows: git의 sh가 자식 프로세스에 넘기는 PATH가 잘려 node를 못 찾는 경우 대응 — node 디렉터리를 PATH 맨 앞에 고정.
+node_dir=$(dirname "$(command -v node 2>/dev/null)" 2>/dev/null)
+if [ -n "$node_dir" ]; then
+  PATH="$node_dir:$PATH"
+  export PATH
+fi
+
+# 커밋 시점에 의존성을 멋대로 재설치하지 않도록 실행 전 검사를 끈다(설치된 deps로 검사).
+PNPM="pnpm --filter @insurance/web --config.verify-deps-before-run=false"
+
+echo "▶ pre-commit: typecheck (tsc --noEmit)..."
+if ! $PNPM typecheck; then
+  echo "✘ typecheck 실패 — 커밋 중단. 타입 오류를 고치고 다시 커밋하라."
+  echo "  (의도적으로 건너뛰려면: git commit --no-verify)"
+  exit 1
+fi
+
+echo "▶ pre-commit: lint (스테이징된 파일만)..."
+web_ts=$(printf '%s\n' "$staged" | grep -E '^apps/web/.*\.(ts|tsx)$' | sed 's#^apps/web/##' || true)
+# Windows: 대량 스테이징(머지 등)은 인자 목록이 명령줄 한계를 넘으므로 전체 lint로 폴백.
+if [ -n "$web_ts" ] && [ "$(printf '%s\n' "$web_ts" | wc -l)" -gt 50 ]; then
+  echo "  (스테이징 파일 다수 — apps/web 전체 lint로 폴백)"
+  web_ts="."
+fi
+if [ -n "$web_ts" ]; then
+  if ! (cd apps/web && pnpm --config.verify-deps-before-run=false exec oxlint --max-warnings=0 $web_ts); then
+    echo "✘ lint 실패 — 커밋 중단. lint 오류를 고치고 다시 커밋하라."
+    echo "  (의도적으로 건너뛰려면: git commit --no-verify)"
+    exit 1
+  fi
+else
+  echo "  (스테이징된 apps/web .ts/.tsx 없음 — lint 건너뜀)"
+fi
+
+echo "✔ pre-commit 통과"
