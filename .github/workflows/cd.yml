@@ -39,6 +39,7 @@ jobs:
             --comment "release 배포 (${{ github.sha }})" \
             --parameters commands='[
               "set -e",
+              "chown -R ubuntu:ubuntu /home/ubuntu/Frontend",
               "sudo -u ubuntu -i bash -lc '\''cd ~/Frontend && git fetch origin && git checkout release && git reset --hard origin/release && pnpm install --frozen-lockfile && NODE_OPTIONS=--max-old-space-size=3072 pnpm --filter @insurance/web build && pm2 restart web'\''"
             ]' \
             --query "Command.CommandId" --output text)
