@@ -1,0 +1,10 @@
+{
+  "name": "@insurance/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "공유 prettier 프리셋 (web + RN)",
+  "exports": {
+    "./prettier": "./prettier/index.js"
+  }
+}

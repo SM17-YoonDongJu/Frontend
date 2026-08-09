@@ -1,0 +1,99 @@
+import { createQueryKeys } from "@lukemorales/query-key-factory";
+
+export interface ReportListFilter {
+  status?: string;
+  page?: number;
+}
+
+// 내 리포트 목록(무한 조회, 이슈 #128). page는 useInfiniteQuery의 pageParam이 관리 → 키에서 제외.
+export interface ReportListInfiniteFilter {
+  status?: string;
+  size?: number;
+}
+
+export interface ReviewListFilter {
+  status?: string;
+  accidentType?: string;
+  region?: string;
+  page?: number;
+  size?: number;
+}
+
+// 검수 내역(이슈 #59). page는 useInfiniteQuery의 pageParam이 관리 → 키에서 제외.
+export interface ReviewedReportsFilter {
+  status?: string;
+  month?: string;
+  size?: number;
+}
+
+export const reportKeys = createQueryKeys("report", {
+  list: (filter?: ReportListFilter) => [{ filter: filter ?? {} }],
+  // 내 리포트 목록(무한 조회, 이슈 #128). dashboard용 list(suspense query)와 캐시 분리.
+  listInfinite: (filter?: ReportListInfiniteFilter) => [{ filter: filter ?? {} }],
+  detail: (reportId: string) => [reportId],
+  pendingReview: (filter?: ReviewListFilter) => [{ filter: filter ?? {} }],
+  pendingReviewSummary: () => ["summary"],
+  // 검수 대기 PC 프리뷰 패널 전용(고객 상세 detail 키와 스키마가 달라 캐시 분리).
+  draftPreview: (reportId: string) => [reportId],
+  reviewedReports: (filter?: ReviewedReportsFilter) => [{ filter: filter ?? {} }],
+});
+
+export const userKeys = createQueryKeys("user", {
+  me: null,
+  // 고객 홈 대시보드 BFF(이슈 #142) — GET /users/me/dashboard. 홈 초기 렌더 조합 데이터.
+  dashboard: null,
+  // 고객 마이페이지(이슈 #105) — 활동 카운트·보험 목록. insurance 도메인 미신설(user 배치).
+  activitySummary: null,
+  insurances: null,
+  // 손해사정사 자격 신청 상태(이슈 #44) — GET /users/adjuster-applications/me
+  adjusterApplication: null,
+});
+
+export const authKeys = createQueryKeys("auth", {
+  oauthCallback: (provider: string, code: string) => [provider, code],
+});
+
+export const settingsKeys = createQueryKeys("settings", {
+  notification: null,
+});
+
+export const proposalKeys = createQueryKeys("proposal", {
+  list: (reportId: string) => [reportId],
+});
+
+export const reviewKeys = createQueryKeys("review", {
+  detail: (reportId: string) => [reportId],
+});
+
+export const chatKeys = createQueryKeys("chat", {
+  list: null,
+  detail: (chatRoomId: string) => [chatRoomId],
+  messages: (chatRoomId: string) => [chatRoomId],
+  // 채팅방 공유 리포트(사정사 검수 결과) — 등록 후 불변. 방마다 검수본이 달라 chatRoomId가 키.
+  sharedReport: (chatRoomId: string) => [chatRoomId],
+});
+
+export const notificationKeys = createQueryKeys("notification", {
+  list: null,
+});
+
+export interface AdjusterListFilter {
+  keyword?: string;
+  specialty?: string;
+  /** ⚠️ 전송 포맷 백엔드 미확정. 현재는 지역 라벨 콤마 조인(_model/region-filter.ts). */
+  region?: string;
+  sort?: string;
+  page?: number;
+  size?: number;
+}
+
+export const adjusterKeys = createQueryKeys("adjuster", {
+  // 편집 화면·홈 헤더가 같은 응답(GET /adjusters/me/profile)을 공유 — 캐시 한 벌
+  meProfile: () => ["me", "profile"],
+  home: (inProgressLimit?: number) => [{ inProgressLimit: inProgressLimit ?? 5 }],
+  // 홈 추천 손해사정사(이슈 #142) — 평점순 첫 페이지. 목록 화면 list(무한 조회)와 캐시 분리.
+  recommended: null,
+  mypage: () => ["me", "mypage"],
+  list: (filter?: AdjusterListFilter) => [{ filter: filter ?? {} }],
+  detail: (adjusterId: string) => [adjusterId],
+});

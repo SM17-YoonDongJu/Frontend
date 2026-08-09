@@ -1,0 +1,78 @@
+---
+name: component-build
+description: 손해사정 플랫폼 Next.js App Router UI 구현 패턴. 페이지·컴포넌트 작성, 라우트그룹((customer)/(partner)/(auth)), Server/Client 경계, Tailwind 스타일, 로딩/빈/에러 상태, 접근성. React 컴포넌트나 page.tsx를 만들거나 화면을 구현할 때 반드시 사용.
+---
+
+# Next.js App Router 컴포넌트 구현 패턴
+
+대상: React 19 + Next.js 16 App Router + Tailwind 4. 코드 컨벤션은 `code-conventions` 스킬과 함께 적용한다(이 스킬은 "어떻게 만드나", 컨벤션 스킬은 "어떻게 잘 쓰나"). 시각 디자인 완성도가 필요한 화면은 `frontend-design` 스킬을 품질 가이드로 참조하되, 아래 프로젝트 규칙(Tailwind 토큰·3상태·접근성)이 항상 우선한다. 색·radius·폰트 토큰은 `references/design-tokens.md`가 단일 진실 — **화면·컴포넌트 작업은 착수 전 이 문서를 먼저 확인**한다. Figma 디자인을 코드로 옮길 때는 `figma-design-convert` 스킬을 사용한다(raw 출력 그대로 쓰지 말고 토큰·프렉탈로 매핑).
+
+**1파일 1컴포넌트** — 한 파일에 컴포넌트 선언은 하나만. 로컬 프리미티브·아이콘·Skeleton/Empty/ErrorFallback도 형제 파일로 분리한다(`*.stories.tsx`만 예외). 로직은 `_api`/`_hooks`/`_model`, `.tsx`는 렌더만. 규칙 본문은 `code-conventions` 스킬이 단일 진실이며, `react/no-multi-comp` 룰과 PostToolUse 훅이 기계로 강제한다.
+
+## 라우트그룹 = 역할 경계
+```
+app/
+├─ ()/            랜딩·공개 (SSG 기본)
+├─ (customer)/    일반 사용자 — 홈·분석신청·리포트결과·내리포트
+├─ (partner)/     손해사정사 — 검수대기·검수화면·검수완료
+└─ (auth)/        로그인·회원가입 퍼널
+```
+- 라우트그룹별 `layout.tsx`로 역할 셸(네비·가드) 분리. 역할 가드는 레이아웃에서 한 번.
+- 회원가입 퍼널처럼 단계마다 고유 URL이 필요하면 중첩 폴더로 단계 분리(`(auth)/signup/verify`, `/terms`, `/done`).
+
+## Server / Client 경계
+- **기본은 서버 컴포넌트.** `"use client"`는 상호작용·브라우저 API·TanStack Query 훅을 쓰는 잎(leaf)에만.
+- 페이지 셸(레이아웃·정적 영역)은 서버 컴포넌트로 두고, 인터랙티브 조각만 클라이언트 컴포넌트로 분리해 import.
+- CSR 화면(마이·상세·폼·업로드)도 전체를 클라이언트로 만들지 말고, 데이터 의존 부분만 클라이언트 경계로.
+- `query-provider`·`mock-provider`는 이미 `app/layout.tsx`에 있음 — 페이지에서 다시 감싸지 않는다.
+
+## Next.js 특수 파일 (loading/error/not-found/route…)
+세그먼트 로딩·렌더 예외·404/403/401·API 핸들러는 Next.js 파일 컨벤션으로 처리한다. 특히 **`error.tsx`(렌더 예외 바운더리, `"use client"` 필수)는 현재 repo에 없어 반드시 보강**하고, 404/403/401은 `notFound()`/`forbidden()`/`unauthorized()` + 해당 파일로 api-spec 에러코드와 연결한다. 어떤 파일을 언제 쓰는지·서버/클라 구분·아래 3상태와의 역할 분리는 `references/nextjs-file-conventions.md`(공식 문서 기준)를 읽는다.
+
+## 데이터 화면 3상태 (필수)
+데이터를 받는 컴포넌트는 세 상태를 빠짐없이 표현. 누락 = 빈 화면 버그.
+```tsx
+"use client";
+function ReportList() {
+  const { data, isPending, isError } = useReportList();
+  if (isPending) return <ReportListSkeleton />;        // 로딩
+  if (isError) return <ErrorState onRetry={...} />;    // 에러
+  if (data.length === 0) return <EmptyState />;        // 빈
+  return <ul>{data.map(r => <ReportCard key={r.id} report={r} />)}</ul>;
+}
+```
+- 빈 상태 문구는 기획 카피 사용(예: "조건에 맞는 사정사가 없어요").
+- 폴링 리스트(요청 리스트·프로세스)는 staleTime 0 훅을 그대로 소비. 컴포넌트는 폴링을 모른다(예측가능성).
+
+## 타입은 소비만
+- 데이터 타입은 data-engineer의 `z.infer` export를 import. **컴포넌트에서 interface 재정의 금지**(드리프트 원인).
+- props는 도메인 타입을 받되, 필요한 필드만 좁혀 받는다(`Pick`).
+
+## Tailwind 스타일
+- **디자인 토큰 따르기** — 색·radius·폰트는 `@theme` 토큰 유틸로(`bg-paper`/`text-ink`/`border-line`/`rounded-card`/`font-serif`). 인라인 hex·임의 색 금지. 전체 토큰표·상태 유틸 레시피는 `references/design-tokens.md`.
+- **길이값은 rem** — 폰트 크기·간격·너비는 rem(16px=1rem), Tailwind 스케일 유틸 우선. **`[Npx]` 임의값 금지(1px 보더·헤어라인 `[1px]`만 예외)**. 기존 코드에 px가 있어도 새 코드는 rem. 규칙은 `references/design-tokens.md` 「길이값」 절.
+- **light 전용** — 디자인 시스템은 라이트 테마만. `dark:` 변형 쓰지 않는다.
+- 인라인 long-class는 논리 그룹 순서(layout → spacing → color → state)로 정렬.
+- 모바일 우선: 기본이 모바일, `md:` 이상에서 데스크탑. 기획의 "모바일은 필터칩+카드" 같은 반응형 분기 반영.
+
+## 아이콘 (인라인 svg 금지)
+페이지·컴포넌트에 **인라인 `<svg>` 금지.** `src/shared/ui/icons/`에서 의미로 재사용하고(예: `ChevronLeft`·`ChevronRight`·`Send`·`Bell`·`User`·`Check`), 없으면 그곳에 새 아이콘 컴포넌트로 추가한다(currentColor + `width/height="1em"`, 크기·색은 소비처 `className`의 `size-*`(rem)·색 토큰으로). 로컬 인라인 아이콘 모음(`_components/icons.tsx` 등)도 금지. 상세는 `figma-design-convert/references/figma-mapping.md §8`. `.claude/hooks/inline-svg-lint.sh`가 app 트리 인라인 `<svg>`를 차단한다(차트·일러스트 등 비아이콘 svg는 `svg-lint-ignore` 주석으로 예외).
+
+## 접근성
+표준 a11y(의미 태그·label 연결·aria-label·focus 가시성) 지킨다. 기획이 모바일 반응형·툴팁·쉬운말 토글을 요구하므로 접근성은 선택 아닌 요구사항.
+
+**인터랙티브 요소 중첩 금지.** `<Link>`(=`<a>`)로 `<Button>`(=`<button>`)을 감싸지 말 것 — 중첩 인터랙티브는 키보드 탭/스크린리더 해석을 깨뜨린다. 액션이 곧 이동(navigation)이면 요소는 하나만:
+- 링크처럼 보이는 버튼 → `<Link className={buttonVariants({ variant, size })}>`로 `buttonVariants`를 `<Link>`에 직접 적용(`Button`은 `asChild` 미지원, `buttonVariants` export로 이 용도를 지원). 기존 `AttachmentSection`이 `<a className={buttonVariants(...)}>` 패턴.
+- 같은 원칙으로 `<button>` 안의 `<a>`, `<a>` 안의 `<a>`, `<button>` 안의 `<button>`도 금지.
+
+## 공통 UI 승격 기준
+같은 컴포넌트를 형제 세그먼트 2곳+이 쓰면 가장 가까운 공통 조상의 `_shared/ui/`로, 여러 그룹이 쓰면 앱 전역 `src/shared/ui/`로 승격. 1곳만 쓰면 그 세그먼트의 `_components/`에 유지(성급한 공유화 = 결합도 ↑).
+
+## Storybook 스토리 (공용 UI 필수)
+`src/shared/ui/`(및 `_shared/ui/`) 재사용 컴포넌트는 만들 때 **같은 폴더에 `<Name>.stories.tsx`를 반드시 함께 작성**한다(기존 `Button.stories.tsx` 패턴 따름). 같은 커밋에 포함.
+- import: `import type { Meta, StoryObj } from "@storybook/nextjs-vite";`
+- `meta` = `{ title: "UI/<Name>", component, parameters: { layout } }` (`layout`: 작은 컴포넌트 `centered`, 셸/풀폭 `fullscreen`) `satisfies Meta<typeof X>`.
+- 기본 `export const Default: Story = {}` + variant/size/상태/반응형(mobile viewport)별 스토리. props 있으면 `argTypes`로 컨트롤 노출.
+
+## 합성·재사용 패턴
+custom hook(로직 추출)·compound component(복합 UI, 예: 검수화면)·render props가 필요하면 `references/react-patterns.md`를 읽는다. 각 패턴을 4원칙으로 판단하는 기준이 정리돼 있다. 조각이 단순하면 패턴 없이 props가 정답.

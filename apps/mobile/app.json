@@ -1,0 +1,48 @@
+{
+  "expo": {
+    "name": "바른보상",
+    "slug": "mobile",
+    "version": "1.0.0",
+    "scheme": "brbosang",
+    "plugins": [
+      "expo-notifications",
+      "expo-web-browser"
+    ],
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.brbosang.app",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "사진 첨부를 위해 사진 보관함 접근 권한이 필요합니다.",
+        "NSCameraUsageDescription": "사진 촬영 후 첨부를 위해 카메라 접근 권한이 필요합니다.",
+        "NSMicrophoneUsageDescription": "동영상 촬영 후 첨부를 위해 마이크 접근 권한이 필요합니다."
+      }
+    },
+    "android": {
+      "package": "com.brbosang.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#2f3648",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e452ee69-2a3a-439a-90f8-4239eeddd608"
+      }
+    },
+    "owner": "teambrbosang"
+  }
+}
