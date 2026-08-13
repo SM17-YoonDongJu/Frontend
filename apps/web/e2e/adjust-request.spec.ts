@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { setAuthCookie } from "./_auth-cookie-helpers";
+import { attachRequiredDocuments } from "./_document-upload-helpers";
 
 const PATH = "/customer/adjust-request";
 
@@ -43,10 +44,12 @@ async function fillThroughConsent(page: import("@playwright/test").Page) {
   await expect(page.getByRole("heading", { name: "손해사정사에게 전할 말이 있나요?" })).toBeVisible();
   await page.getByRole("button", { name: /다음/ }).click();
 
-  // step6 서류 업로드 — 선택 단계, 생략. 드래그앤드롭 영역 없이 슬롯 "올리기"만 노출(이슈 #144)
+  // step6 서류 업로드 — 필수 서류 첨부 후 진행(이슈 #271).
+  // 드래그앤드롭 영역 없이 슬롯 "올리기"만 노출(이슈 #144)
   await expect(page.getByRole("heading", { name: "관련 서류를 올려주세요" })).toBeVisible();
   await expect(page.getByText(/끌어다/)).toHaveCount(0);
   await expect(page.getByRole("button", { name: "올리기" }).first()).toBeVisible();
+  await attachRequiredDocuments(page);
   await page.getByRole("button", { name: /다음/ }).click();
 
   // step7 확인
