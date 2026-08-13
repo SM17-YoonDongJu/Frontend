@@ -17,7 +17,7 @@ export function FilterChips({
   onSortToggle,
 }: FilterChipsProps) {
   return (
-    <div className="flex flex-wrap gap-2 md:hidden">
+    <div className="flex items-center gap-2">
       {MOBILE_FILTER_CHIPS.map((chip) => {
         const selected =
           chip.kind === "specialty" ? specialty === chip.value : sort === chip.value;
@@ -32,7 +32,7 @@ export function FilterChips({
                 : onSortToggle(chip.value)
             }
             className={cn(
-              "rounded-chip border px-4 py-2 text-[0.8125rem] font-medium transition",
+              "inline-flex h-[2.625rem] shrink-0 items-center whitespace-nowrap rounded-chip border px-4 text-[0.8125rem] font-medium transition",
               selected
                 ? "border-ink bg-ink text-white"
                 : "border-line bg-card text-ink-2 hover:border-ink/40",
