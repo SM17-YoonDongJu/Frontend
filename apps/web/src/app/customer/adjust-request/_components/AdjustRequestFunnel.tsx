@@ -39,7 +39,7 @@ const STEP_COMPONENTS: Record<FunnelStepKey, ComponentType> = {
 export function AdjustRequestFunnel() {
   const funnel = useFunnel();
   const createReport = useCreateReport();
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [blockMessage, setBlockMessage] = useState<string | null>(null);
   const [result, setResult] = useState<CreateReportResponse | null>(null);
 
   const form = useForm<AdjustRequestDraft>({ defaultValues: {} });
@@ -71,17 +71,22 @@ export function AdjustRequestFunnel() {
   };
 
   const handleSubmit = () => {
-    setSubmitError(null);
     createReport.mutate(toCreateReportBody(form.getValues()), {
       onSuccess: (data) => {
         clearDraft();
         setResult(data);
       },
-      onError: (e) => setSubmitError(e.message),
+      onError: (e) => setBlockMessage(e.message),
     });
   };
 
   const handleNext = () => {
+    // 업로드 응답 전에 넘어가면 documents 없이 제출돼 OCR 분석이 시작되지 않는다.
+    if (documentUpload.isUploading) {
+      setBlockMessage("서류 업로드가 끝난 뒤에 진행할 수 있어요.");
+      return;
+    }
+    setBlockMessage(null);
     if (!validateStep()) return;
     if (funnel.isLast) {
       handleSubmit();
@@ -121,8 +126,10 @@ export function AdjustRequestFunnel() {
         </DocumentUploadProvider>
       </FormProvider>
 
-      {submitError && (
-        <p className="mt-3 text-[0.8125rem] font-medium text-terra">{submitError}</p>
+      {blockMessage && (
+        <p role="alert" className="mt-3 text-[0.8125rem] font-medium text-terra">
+          {blockMessage}
+        </p>
       )}
 
       <FunnelFooter

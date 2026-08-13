@@ -74,6 +74,8 @@ export interface DocumentUploadValue {
     retryExtra: (item: ExtraItem) => void;
     removeExtra: (id: string) => void;
   };
+  /** 업로드 진행 중 — 퍼널이 이 값으로 다음 단계·제출을 막는다. */
+  isUploading: boolean;
 }
 
 function fileNameFromUrl(url: string): string {
@@ -259,12 +261,19 @@ export function useDocumentUploadState(
     };
   }, [slots, hydrated, accidentType]);
 
+  const isUploading = useMemo(
+    () =>
+      DOCUMENT_SLOTS.some((def) => slots[def.key]?.status === "uploading") ||
+      extras.some((e) => e.status === "uploading"),
+    [slots, extras],
+  );
+
   const actions = useMemo(
     () => ({ pickSlotFile, retrySlot, removeSlot, retryExtra, removeExtra }),
     [pickSlotFile, retrySlot, removeSlot, retryExtra, removeExtra],
   );
 
-  return { state: { extras }, derived, actions };
+  return { state: { extras }, derived, actions, isUploading };
 }
 
 const DocumentUploadContext = createContext<DocumentUploadValue | null>(null);
