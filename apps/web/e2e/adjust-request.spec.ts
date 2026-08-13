@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { setAuthCookie } from "./_auth-cookie-helpers";
-
-const PATH = "/customer/adjust-request";
+import {
+  ADJUST_REQUEST_PATH as PATH,
+  attachRequiredDocuments,
+  fillToDocumentStep,
+} from "./_adjust-request-helpers";
 
 test.beforeEach(async ({ page }) => {
   await setAuthCookie(page, "USER");
@@ -9,44 +12,13 @@ test.beforeEach(async ({ page }) => {
 
 /** step1~7을 사용자 행동대로 채워 제출 직전까지 진행. */
 async function fillThroughConsent(page: import("@playwright/test").Page) {
-  // step1 사고 유형 — 실손 의료비만 활성.
-  // 하이드레이션 전 클릭 유실 방지: 선택될 때까지 재시도(toPass).
-  const medicalCard = page.getByRole("radio", { name: /실손 의료비/ });
-  await expect(async () => {
-    await medicalCard.click();
-    await expect(medicalCard).toHaveAttribute("aria-checked", "true");
-  }).toPass({ timeout: 10000 });
-  await page.getByRole("button", { name: /다음/ }).click();
+  await fillToDocumentStep(page);
 
-  // step2 치료 정보 — 진단명(복수 입력) + 치료 형태 + 비급여
-  await expect(page.getByRole("heading", { name: "어떤 진단을 받으셨나요?" })).toBeVisible();
-  await page.getByRole("button", { name: "통원", exact: true }).click();
-  await page.getByPlaceholder("예) 우측 슬관절 골절").fill("우측 슬관절 골절");
-  await page.getByRole("button", { name: "포함", exact: true }).click();
-  await page.getByRole("button", { name: /다음/ }).click();
-
-  // step3 사고 일자 — 달력에서 날짜 선택
-  await expect(page.getByRole("heading", { name: "언제 있었던 일인가요?" })).toBeVisible();
-  await page.getByRole("button", { name: "사고 발생일 선택" }).click();
-  await page
-    .getByRole("button", { name: /15일|15/ })
-    .first()
-    .click();
-  await page.getByRole("button", { name: /다음/ }).click();
-
-  // step4 보험금 — 미제안 선택(숫자 입력 생략)
-  await expect(page.getByRole("heading", { name: "제안받은 보험금이 있나요?" })).toBeVisible();
-  await page.getByText("아직 제안받지 않았어요").click();
-  await page.getByRole("button", { name: /다음/ }).click();
-
-  // step5 전할 말 — 선택 단계, 적지 않고 통과
-  await expect(page.getByRole("heading", { name: "손해사정사에게 전할 말이 있나요?" })).toBeVisible();
-  await page.getByRole("button", { name: /다음/ }).click();
-
-  // step6 서류 업로드 — 선택 단계, 생략. 드래그앤드롭 영역 없이 슬롯 "올리기"만 노출(이슈 #144)
-  await expect(page.getByRole("heading", { name: "관련 서류를 올려주세요" })).toBeVisible();
+  // step6 서류 업로드 — 필수 서류 첨부 후 진행(이슈 #271).
+  // 드래그앤드롭 영역 없이 슬롯 "올리기"만 노출(이슈 #144)
   await expect(page.getByText(/끌어다/)).toHaveCount(0);
   await expect(page.getByRole("button", { name: "올리기" }).first()).toBeVisible();
+  await attachRequiredDocuments(page);
   await page.getByRole("button", { name: /다음/ }).click();
 
   // step7 확인

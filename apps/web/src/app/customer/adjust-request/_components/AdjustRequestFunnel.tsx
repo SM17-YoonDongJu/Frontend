@@ -6,6 +6,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import type { FieldPath } from "react-hook-form";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { toast } from "@/shared/ui/toast";
 import { useCreateReport } from "../_api/use-create-report";
 import { SubmitComplete } from "./SubmitComplete";
 import { FunnelFooter } from "./FunnelFooter";
@@ -17,6 +18,7 @@ import { Step4OfferedAmount } from "./Step4OfferedAmount";
 import { Step5Question } from "./Step5Question";
 import { Step6Documents } from "./Step6Documents";
 import { Step7Confirm } from "./Step7Confirm";
+import { DocumentUploadProvider, useDocumentUploadState } from "../_hooks/use-document-upload";
 import { useDraftPrompt, clearDraft } from "../_hooks/use-draft";
 import { useFunnel } from "../_hooks/use-funnel";
 import { FUNNEL_STEPS, firstIncompleteStep } from "../_model/funnel-config";
@@ -38,11 +40,12 @@ const STEP_COMPONENTS: Record<FunnelStepKey, ComponentType> = {
 export function AdjustRequestFunnel() {
   const funnel = useFunnel();
   const createReport = useCreateReport();
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [result, setResult] = useState<CreateReportResponse | null>(null);
 
   const form = useForm<AdjustRequestDraft>({ defaultValues: {} });
   const draftPrompt = useDraftPrompt(form);
+  // 업로드 상태는 단계가 아니라 퍼널이 소유한다 — 단계 이동으로 언마운트되면 응답 url이 유실된다.
+  const documentUpload = useDocumentUploadState(form, !draftPrompt.open);
 
   const step = FUNNEL_STEPS[funnel.currentStep - 1]!; // currentStep은 1..total로 clamp됨
   const StepView = STEP_COMPONENTS[step.key];
@@ -62,23 +65,29 @@ export function AdjustRequestFunnel() {
         const name = issue.path.join(".");
         if (name) form.setError(name as FieldPath<AdjustRequestDraft>, { message: issue.message });
       }
+      // 서류 단계는 입력 필드가 없어 폼 에러가 화면에 드러나지 않는다 → 토스트로 알린다.
+      if (step.key === "document") toast.error(parsed.error.issues[0]!.message);
       return false;
     }
     return true;
   };
 
   const handleSubmit = () => {
-    setSubmitError(null);
     createReport.mutate(toCreateReportBody(form.getValues()), {
       onSuccess: (data) => {
         clearDraft();
         setResult(data);
       },
-      onError: (e) => setSubmitError(e.message),
+      onError: (e) => toast.error(e.message),
     });
   };
 
   const handleNext = () => {
+    // 업로드 응답 전에 넘어가면 documents 없이 제출돼 OCR 분석이 시작되지 않는다.
+    if (documentUpload.isUploading) {
+      toast.error("서류 업로드가 끝난 뒤에 진행할 수 있어요.");
+      return;
+    }
     if (!validateStep()) return;
     if (funnel.isLast) {
       handleSubmit();
@@ -111,14 +120,12 @@ export function AdjustRequestFunnel() {
       />
 
       <FormProvider {...form}>
-        <div className="mt-6 sm:rounded-card-lg sm:border sm:border-line sm:bg-card sm:p-6 md:p-8">
-          <StepView />
-        </div>
+        <DocumentUploadProvider value={documentUpload}>
+          <div className="mt-6 sm:rounded-card-lg sm:border sm:border-line sm:bg-card sm:p-6 md:p-8">
+            <StepView />
+          </div>
+        </DocumentUploadProvider>
       </FormProvider>
-
-      {submitError && (
-        <p className="mt-3 text-[0.8125rem] font-medium text-terra">{submitError}</p>
-      )}
 
       <FunnelFooter
         isFirst={funnel.isFirst}
