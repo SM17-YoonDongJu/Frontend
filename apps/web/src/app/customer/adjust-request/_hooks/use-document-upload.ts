@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
+import type { UseFormReturn } from "react-hook-form";
 import { uploadErrorMessage } from "@/shared/api/upload-file";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { validateUploadFile } from "@/shared/model/upload.schema";
@@ -49,6 +50,23 @@ export interface SlotView {
   canRetry: boolean;
 }
 
+export interface DocumentUploadValue {
+  state: { extras: ExtraItem[] };
+  derived: {
+    accept: string;
+    caseLabel: string;
+    missingRequired: DocumentSlotDef[];
+    slotViews: SlotView[];
+  };
+  actions: {
+    pickSlotFile: (key: DocumentSlotKey, file: File) => void;
+    retrySlot: (key: DocumentSlotKey) => void;
+    removeSlot: (key: DocumentSlotKey) => void;
+    retryExtra: (item: ExtraItem) => void;
+    removeExtra: (id: string) => void;
+  };
+}
+
 function fileNameFromUrl(url: string): string {
   try {
     const base = new URL(url).pathname.split("/").filter(Boolean).pop();
@@ -58,8 +76,18 @@ function fileNameFromUrl(url: string): string {
   }
 }
 
-export function useDocumentUpload() {
-  const { getValues, setValue, watch } = useFormContext<AdjustRequestDraft>();
+/**
+ * 서류 업로드 상태. 반드시 단계(step) 밖 = 퍼널에서 호출한다.
+ * 단계 컴포넌트에서 호출하면 다음 단계로 넘어가는 순간 언마운트되면서
+ * 진행 중이던 업로드의 응답 url이 폼에 반영되지 못하고 유실된다.
+ *
+ * ready=false 동안은 draft 복원 결정(이어서 작성/새로 시작) 전이므로 복원을 미룬다.
+ */
+export function useDocumentUploadState(
+  form: UseFormReturn<AdjustRequestDraft>,
+  ready: boolean,
+): DocumentUploadValue {
+  const { getValues, setValue, watch } = form;
   const { mutate: uploadFile } = useUploadDocument();
 
   const [slots, setSlots] = useState<SlotMap>({});
@@ -69,7 +97,7 @@ export function useDocumentUpload() {
   // 복원: documentSlots → 슬롯, 슬롯에 없는 documentUrls → 기타 서류.
   // (File은 복원 불가 → url·파일명만. SSR 불일치 방지로 마운트 후 1회.)
   useEffect(() => {
-    if (hydrated) return;
+    if (!ready || hydrated) return;
     const draftSlots = getValues("documentSlots");
     const draftUrls = getValues("documentUrls") ?? [];
 
@@ -90,7 +118,7 @@ export function useDocumentUpload() {
     setSlots(nextSlots);
     setExtras(restoredExtras);
     setHydrated(true);
-  }, [getValues, hydrated]);
+  }, [ready, getValues, hydrated]);
 
   // canonical documentSlots + 파생 documentUrls(슬롯 순서 + 기타) 폼 반영.
   useEffect(() => {
@@ -213,4 +241,25 @@ export function useDocumentUpload() {
   );
 
   return { state: { extras }, derived, actions };
+}
+
+const DocumentUploadContext = createContext<DocumentUploadValue | null>(null);
+
+/** 퍼널이 소유한 업로드 상태를 단계 컴포넌트로 내려보낸다(단계는 상태를 소유하지 않는다). */
+export function DocumentUploadProvider({
+  value,
+  children,
+}: {
+  value: DocumentUploadValue;
+  children: ReactNode;
+}) {
+  return createElement(DocumentUploadContext.Provider, { value }, children);
+}
+
+export function useDocumentUpload(): DocumentUploadValue {
+  const value = useContext(DocumentUploadContext);
+  if (!value) {
+    throw new Error("useDocumentUpload must be used within DocumentUploadProvider");
+  }
+  return value;
 }

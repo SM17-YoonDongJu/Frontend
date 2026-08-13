@@ -17,6 +17,7 @@ import { Step4OfferedAmount } from "./Step4OfferedAmount";
 import { Step5Question } from "./Step5Question";
 import { Step6Documents } from "./Step6Documents";
 import { Step7Confirm } from "./Step7Confirm";
+import { DocumentUploadProvider, useDocumentUploadState } from "../_hooks/use-document-upload";
 import { useDraftPrompt, clearDraft } from "../_hooks/use-draft";
 import { useFunnel } from "../_hooks/use-funnel";
 import { FUNNEL_STEPS, firstIncompleteStep } from "../_model/funnel-config";
@@ -43,6 +44,8 @@ export function AdjustRequestFunnel() {
 
   const form = useForm<AdjustRequestDraft>({ defaultValues: {} });
   const draftPrompt = useDraftPrompt(form);
+  // 업로드 상태는 단계가 아니라 퍼널이 소유한다 — 단계 이동으로 언마운트되면 응답 url이 유실된다.
+  const documentUpload = useDocumentUploadState(form, !draftPrompt.open);
 
   const step = FUNNEL_STEPS[funnel.currentStep - 1]!; // currentStep은 1..total로 clamp됨
   const StepView = STEP_COMPONENTS[step.key];
@@ -111,9 +114,11 @@ export function AdjustRequestFunnel() {
       />
 
       <FormProvider {...form}>
-        <div className="mt-6 sm:rounded-card-lg sm:border sm:border-line sm:bg-card sm:p-6 md:p-8">
-          <StepView />
-        </div>
+        <DocumentUploadProvider value={documentUpload}>
+          <div className="mt-6 sm:rounded-card-lg sm:border sm:border-line sm:bg-card sm:p-6 md:p-8">
+            <StepView />
+          </div>
+        </DocumentUploadProvider>
       </FormProvider>
 
       {submitError && (
