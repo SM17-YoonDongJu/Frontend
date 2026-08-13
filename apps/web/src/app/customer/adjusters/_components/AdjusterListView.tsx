@@ -89,9 +89,7 @@ export function AdjusterListView() {
         />
         <FilterChips
           specialty={activeSpecialty}
-          sort={activeSort}
           onSpecialtyToggle={handleSpecialtyChange}
-          onSortToggle={handleSortChange}
         />
       </div>
 

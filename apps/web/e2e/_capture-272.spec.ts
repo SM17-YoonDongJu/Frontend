@@ -20,7 +20,7 @@ test.describe("모바일", () => {
     await expect(page.getByRole("heading", { name: "손해사정사 찾기" })).toBeVisible({
       timeout: 15000,
     });
-    await expect(page.getByRole("button", { name: "평점순" })).toBeVisible({
+    await expect(page.getByRole("button", { name: "실손" })).toBeVisible({
       timeout: 15000,
     });
     await page.screenshot({ path: `${DIR}/01-adjuster-filter-mobile-${LABEL}.png` });

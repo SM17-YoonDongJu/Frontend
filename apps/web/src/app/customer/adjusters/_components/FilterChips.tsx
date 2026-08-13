@@ -5,32 +5,20 @@ import { MOBILE_FILTER_CHIPS } from "../_model/filter-options";
 
 interface FilterChipsProps {
   specialty: string;
-  sort: string;
   onSpecialtyToggle: (specialty: string) => void;
-  onSortToggle: (sort: string) => void;
 }
 
-export function FilterChips({
-  specialty,
-  sort,
-  onSpecialtyToggle,
-  onSortToggle,
-}: FilterChipsProps) {
+export function FilterChips({ specialty, onSpecialtyToggle }: FilterChipsProps) {
   return (
     <div className="flex items-center gap-2">
       {MOBILE_FILTER_CHIPS.map((chip) => {
-        const selected =
-          chip.kind === "specialty" ? specialty === chip.value : sort === chip.value;
+        const selected = specialty === chip.value;
         return (
           <button
             key={chip.label}
             type="button"
             aria-pressed={selected}
-            onClick={() =>
-              chip.kind === "specialty"
-                ? onSpecialtyToggle(chip.value)
-                : onSortToggle(chip.value)
-            }
+            onClick={() => onSpecialtyToggle(chip.value)}
             className={cn(
               "inline-flex h-[2.625rem] shrink-0 items-center whitespace-nowrap rounded-chip border px-4 text-[0.8125rem] font-medium transition",
               selected
