@@ -1,6 +1,15 @@
 "use client";
 
-import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  createElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { ReactNode } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { uploadErrorMessage } from "@/shared/api/upload-file";
@@ -88,11 +97,15 @@ export function useDocumentUploadState(
   ready: boolean,
 ): DocumentUploadValue {
   const { getValues, setValue, watch } = form;
-  const { mutate: uploadFile } = useUploadDocument();
+  const { mutateAsync: uploadFile } = useUploadDocument();
 
   const [slots, setSlots] = useState<SlotMap>({});
   const [extras, setExtras] = useState<ExtraItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+
+  // 슬롯별 최신 요청 표식. 같은 슬롯에 재선택·삭제가 겹칠 때
+  // 늦게 도착한 응답이 최신 상태를 덮어쓰지 않게 한다.
+  const latestRequest = useRef<Partial<Record<DocumentSlotKey, number>>>({});
 
   // 복원: documentSlots → 슬롯, 슬롯에 없는 documentUrls → 기타 서류.
   // (File은 복원 불가 → url·파일명만. SSR 불일치 방지로 마운트 후 1회.)
@@ -139,18 +152,24 @@ export function useDocumentUploadState(
     setValue("documentUrls", urls.length ? urls : null);
   }, [slots, extras, hydrated, setValue]);
 
-  const startSlotUpload = useCallback(
-    (key: DocumentSlotKey, file: File) => {
+  // mutate 콜백이 아니라 mutateAsync를 쓴다 — mutation 훅의 관찰자는 하나뿐이라
+  // 여러 슬롯을 연달아 올리면 앞선 mutate의 onSuccess가 호출되지 않는다.
+  const runSlotUpload = useCallback(
+    async (key: DocumentSlotKey, file: File) => {
+      const token = (latestRequest.current[key] ?? 0) + 1;
+      latestRequest.current[key] = token;
       setSlots((prev) => ({ ...prev, [key]: { status: "uploading", fileName: file.name, file } }));
-      uploadFile(file, {
-        onSuccess: (data) =>
-          setSlots((prev) => ({ ...prev, [key]: { status: "done", url: data.url, fileName: file.name } })),
-        onError: (e) =>
-          setSlots((prev) => ({
-            ...prev,
-            [key]: { status: "error", error: uploadErrorMessage(e), fileName: file.name, file },
-          })),
-      });
+      try {
+        const { url } = await uploadFile(file);
+        if (latestRequest.current[key] !== token) return;
+        setSlots((prev) => ({ ...prev, [key]: { status: "done", url, fileName: file.name } }));
+      } catch (e) {
+        if (latestRequest.current[key] !== token) return;
+        setSlots((prev) => ({
+          ...prev,
+          [key]: { status: "error", error: uploadErrorMessage(e), fileName: file.name, file },
+        }));
+      }
     },
     [uploadFile],
   );
@@ -162,44 +181,49 @@ export function useDocumentUploadState(
         setSlots((prev) => ({ ...prev, [key]: { status: "error", error: invalid, fileName: file.name } }));
         return;
       }
-      startSlotUpload(key, file);
+      void runSlotUpload(key, file);
     },
-    [startSlotUpload],
+    [runSlotUpload],
   );
 
   const retrySlot = useCallback(
     (key: DocumentSlotKey) => {
       const file = slots[key]?.file;
-      if (file) startSlotUpload(key, file);
+      if (file) void runSlotUpload(key, file);
     },
-    [slots, startSlotUpload],
+    [slots, runSlotUpload],
   );
 
-  const removeSlot = useCallback(
-    (key: DocumentSlotKey) =>
-      setSlots((prev) => {
-        const next = { ...prev };
-        delete next[key];
-        return next;
-      }),
-    [],
+  const removeSlot = useCallback((key: DocumentSlotKey) => {
+    // 진행 중 응답이 삭제된 슬롯을 되살리지 않도록 표식을 넘긴다.
+    latestRequest.current[key] = (latestRequest.current[key] ?? 0) + 1;
+    setSlots((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }, []);
+
+  const runExtraUpload = useCallback(
+    async (item: ExtraItem, file: File) => {
+      setExtras((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "uploading", error: undefined } : i)));
+      try {
+        const { url } = await uploadFile(file);
+        setExtras((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "done", url } : i)));
+      } catch (e) {
+        setExtras((prev) =>
+          prev.map((i) => (i.id === item.id ? { ...i, status: "error", error: uploadErrorMessage(e) } : i)),
+        );
+      }
+    },
+    [uploadFile],
   );
 
   const retryExtra = useCallback(
     (item: ExtraItem) => {
-      if (!item.file) return;
-      const file = item.file;
-      setExtras((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "uploading", error: undefined } : i)));
-      uploadFile(file, {
-        onSuccess: (data) =>
-          setExtras((prev) => prev.map((i) => (i.id === item.id ? { ...i, status: "done", url: data.url } : i))),
-        onError: (e) =>
-          setExtras((prev) =>
-            prev.map((i) => (i.id === item.id ? { ...i, status: "error", error: uploadErrorMessage(e) } : i)),
-          ),
-      });
+      if (item.file) void runExtraUpload(item, item.file);
     },
-    [uploadFile],
+    [runExtraUpload],
   );
 
   const removeExtra = useCallback(
