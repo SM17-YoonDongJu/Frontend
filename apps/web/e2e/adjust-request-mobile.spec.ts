@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { setAuthCookie } from "./_auth-cookie-helpers";
-import { attachRequiredDocuments } from "./_document-upload-helpers";
+import { attachRequiredDocuments } from "./_adjust-request-helpers";
 
 /**
  * 손해사정 요청 퍼널 모바일 뷰포트(375) happy-path E2E (이슈 #55).
