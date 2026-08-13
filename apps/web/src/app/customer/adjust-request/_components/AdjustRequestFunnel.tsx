@@ -6,6 +6,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import type { FieldPath } from "react-hook-form";
 import { Button } from "@/shared/ui/Button";
 import { Modal } from "@/shared/ui/Modal";
+import { toast } from "@/shared/ui/toast";
 import { useCreateReport } from "../_api/use-create-report";
 import { SubmitComplete } from "./SubmitComplete";
 import { FunnelFooter } from "./FunnelFooter";
@@ -39,7 +40,6 @@ const STEP_COMPONENTS: Record<FunnelStepKey, ComponentType> = {
 export function AdjustRequestFunnel() {
   const funnel = useFunnel();
   const createReport = useCreateReport();
-  const [blockMessage, setBlockMessage] = useState<string | null>(null);
   const [result, setResult] = useState<CreateReportResponse | null>(null);
 
   const form = useForm<AdjustRequestDraft>({ defaultValues: {} });
@@ -65,6 +65,8 @@ export function AdjustRequestFunnel() {
         const name = issue.path.join(".");
         if (name) form.setError(name as FieldPath<AdjustRequestDraft>, { message: issue.message });
       }
+      // 서류 단계는 입력 필드가 없어 폼 에러가 화면에 드러나지 않는다 → 토스트로 알린다.
+      if (step.key === "document") toast.error(parsed.error.issues[0]!.message);
       return false;
     }
     return true;
@@ -76,17 +78,16 @@ export function AdjustRequestFunnel() {
         clearDraft();
         setResult(data);
       },
-      onError: (e) => setBlockMessage(e.message),
+      onError: (e) => toast.error(e.message),
     });
   };
 
   const handleNext = () => {
     // 업로드 응답 전에 넘어가면 documents 없이 제출돼 OCR 분석이 시작되지 않는다.
     if (documentUpload.isUploading) {
-      setBlockMessage("서류 업로드가 끝난 뒤에 진행할 수 있어요.");
+      toast.error("서류 업로드가 끝난 뒤에 진행할 수 있어요.");
       return;
     }
-    setBlockMessage(null);
     if (!validateStep()) return;
     if (funnel.isLast) {
       handleSubmit();
@@ -125,12 +126,6 @@ export function AdjustRequestFunnel() {
           </div>
         </DocumentUploadProvider>
       </FormProvider>
-
-      {blockMessage && (
-        <p role="alert" className="mt-3 text-[0.8125rem] font-medium text-terra">
-          {blockMessage}
-        </p>
-      )}
 
       <FunnelFooter
         isFirst={funnel.isFirst}

@@ -9,6 +9,11 @@ export const PNG_1PX = Buffer.from(
 /** 첨부해야 진행할 수 있는 서류 슬롯. */
 export const REQUIRED_DOCUMENT_LABELS = ["진단서", "보험증권"];
 
+/** 에러 토스트 노출 확인(Next 라우트 안내 영역도 role=alert이라 문구로 좁힌다). */
+export async function expectErrorToast(page: Page, message: string) {
+  await expect(page.getByRole("alert").filter({ hasText: message })).toBeVisible();
+}
+
 /** 분석 신청 퍼널 진입 경로. */
 export const ADJUST_REQUEST_PATH = "/customer/adjust-request";
 

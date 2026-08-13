@@ -4,6 +4,7 @@ import {
   ADJUST_REQUEST_PATH as PATH,
   attachDocument,
   attachRequiredDocuments,
+  expectErrorToast,
   fillToDocumentStep,
 } from "./_adjust-request-helpers";
 
@@ -62,7 +63,17 @@ test("서류 업로드가 끝나기 전에 다음을 누르면 안내와 함께 
 
   await page.getByRole("button", { name: /다음/ }).click();
 
-  await expect(page.getByText("서류 업로드가 끝난 뒤에 진행할 수 있어요.")).toBeVisible();
+  await expectErrorToast(page, "서류 업로드가 끝난 뒤에 진행할 수 있어요.");
+  await expect(page.getByRole("heading", { name: "관련 서류를 올려주세요" })).toBeVisible();
+});
+
+test("필수 서류 없이 다음을 누르면 안내가 뜨고 서류 단계에 머문다", async ({ page }) => {
+  await page.goto(PATH);
+  await fillToDocumentStep(page);
+
+  await page.getByRole("button", { name: /다음/ }).click();
+
+  await expectErrorToast(page, "진단서·보험증권 첨부 후 진행할 수 있어요.");
   await expect(page.getByRole("heading", { name: "관련 서류를 올려주세요" })).toBeVisible();
 });
 
