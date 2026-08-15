@@ -102,12 +102,15 @@ gh issue view <NN> --json title,labels,assignees,body -q '.body'
 | Tag | 라벨 |
 |-----|------|
 | `[Feature]` | `FE,Feature` |
-| `[Infra]` | `FE,Feature` (Infra 라벨 없음 → Feature) |
+| `[Infra]` / `[Settings]` | `FE,Infra` / `FE,Settings` |
 | `[Refactor]` | `FE,Refactor` |
 | `[Design]` | `FE,Design` |
 | `[Docs]` | `FE,Docs` |
+| 릴리즈·배포 | `Release` |
 
-> 존재하는 라벨: `Epic · FE · Feature · Fix · Settings · Story · Design · Docs · Refactor`. 없는 라벨을 지어내지 말 것. 확신 없으면 `gh label list`로 확인.
+릴리즈는 `FE`를 붙이지 않는다 — 앱 전체 배포라 프론트 한정이 아니다. 제목도 대괄호 태그가 아니라 `release (1.0.0) 배포` 형식이고 base가 `release` 브랜치다(#269).
+
+> 존재하는 라벨: `Epic · FE · Feature · Fix · Settings · Story · Design · Docs · Refactor · Infra · Release`. 없는 라벨을 지어내지 말 것. 확신 없으면 `gh label list --limit 50`으로 확인(기본 출력이 잘려 라벨을 놓칠 수 있다).
 
 ## 4. 본문 작성 규칙
 
@@ -178,7 +181,7 @@ gh issue create \
 - 모바일 RN 웹뷰 기준 레이아웃이 깨지지 않는다
 ```
 
-### B. 인프라 (#58 트림) — 라벨 `FE,Feature` · 제목 `[Infra] …`(접미사 없음)
+### B. 인프라 (#58 트림) — 라벨 `FE,Infra` · 제목 `[Infra] …`(접미사 없음)
 ```markdown
 ## 배경
 ## 작업 항목
