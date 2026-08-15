@@ -19,6 +19,8 @@ const STATUS_TO_STEP: Record<ReportListItemStatus, AnalysisStep> = {
   COUNSELING: "EXPERT_REVIEW",
   MATCHED: "PROPOSAL_ARRIVED",
   NOT_SELECTED: "PROPOSAL_ARRIVED",
+  // 명세에 없는 상태 — 스테퍼를 앞당기지 않고 첫 단계로 둔다.
+  UNKNOWN: "INFO_INPUT",
 };
 
 export function toAnalysisStep(status: string): AnalysisStep {

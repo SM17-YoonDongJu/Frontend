@@ -2,6 +2,7 @@ import { z } from "zod";
 import { accidentTypeSchema } from "@/shared/model/accident-type";
 import type { Stats } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
+import { enumWithFallback } from "@/shared/lib/enum-with-fallback";
 
 /**
  * 사정사 검수 내역. 출처: API 명세 GET /adjusters/me/reviewed-reports.
@@ -9,7 +10,7 @@ import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/dri
  */
 
 /** items[].status — 사정사 검수 상태(방향). 명세 Query status의 ALL(전체)은 제외. */
-export const reviewStatusSchema = z.enum([
+export const reviewStatusSchema = enumWithFallback([
   "SENT",
   "COUNSELING",
   "REJECTED",

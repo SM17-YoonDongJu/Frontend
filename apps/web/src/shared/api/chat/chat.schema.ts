@@ -9,11 +9,12 @@ import type {
   ReadResponse,
 } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
+import { enumWithFallback } from "@/shared/lib/enum-with-fallback";
 
 // 채팅 도메인 계약(응답 래퍼 내부 data만 — client가 래퍼 해제·snake→camel 변환).
 // mine/theirs 판별은 서버 isMine(GET/POST messages)로 정합 — senderId 문자열 비교 제거.
 
-export const roomStatusSchema = z.enum(["ACTIVE", "CLOSED"]);
+export const roomStatusSchema = enumWithFallback(["ACTIVE", "CLOSED"]);
 
 // match_status — 파이프라인(사정사 검수) 방만. 사정사 검색으로 만든 방은 null.
 export const matchStatusSchema = z.enum([

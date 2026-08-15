@@ -80,7 +80,9 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
                 claimedMinAmount={data.claimedMinAmount}
                 claimedMaxAmount={data.claimedMaxAmount}
                 offeredAmount={data.offeredAmount}
-                confidenceLevel={data.confidenceLevel}
+                confidenceLevel={
+                  data.confidenceLevel === "UNKNOWN" ? null : data.confidenceLevel
+                }
               />
               <IssueReview issues={data.issues} />
               <div className="space-y-[1.125rem] md:grid md:grid-cols-2 md:gap-6 md:space-y-0 lg:block lg:space-y-6">
