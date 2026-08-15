@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { CreateAdjusterApplicationResponseSchema } from "@/shared/api/generated/zod.gen";
 import type {
   AdjusterApplicationResponse as GenAdjusterApplicationStatus,
   CreateAdjusterApplicationRequest,
+  CreateAdjusterApplicationResponse as GenCreateAdjusterApplicationResponse,
 } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
@@ -66,8 +66,13 @@ export type AdjusterApplicationExtendedBody = z.infer<
 >;
 
 // ── 신청 응답(201) ──
-// 생성 스키마 그대로 사용 — status는 명세도 string(enum 미확정).
-export const adjusterApplicationResponseSchema = CreateAdjusterApplicationResponseSchema;
+// 생성 스키마는 와이어 필드명(snake)인데 client가 응답을 camel로 바꿔 넘기므로 여기선 쓸 수 없다.
+// 응답 스키마를 스펙 필드명으로 옮기는 작업(#283)이 끝나면 생성 스키마로 되돌린다.
+// status는 명세도 string(enum 미확정).
+export const adjusterApplicationResponseSchema = z.object({
+  applicationId: z.uuid(),
+  status: z.string(),
+});
 export type AdjusterApplicationResponse = z.infer<
   typeof adjusterApplicationResponseSchema
 >;
@@ -91,4 +96,6 @@ export type AdjusterApplicationStatus = z.infer<
 type _AdjusterApplicationStatusDriftCheck = ExpectDriftCheck<
   AssertFieldsExistInSpec<Omit<AdjusterApplicationStatus, "documents">, GenAdjusterApplicationStatus>
 >;
-// 신청 응답은 생성 스키마를 그대로 쓰므로 대조할 대상이 자기 자신이다 — 별도 가드를 두지 않는다.
+type _AdjusterApplicationResponseDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<AdjusterApplicationResponse, GenCreateAdjusterApplicationResponse>
+>;
