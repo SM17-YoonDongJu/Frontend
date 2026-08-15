@@ -2,7 +2,7 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptData, AcceptResponses, ActivitySummaryData, ActivitySummaryResponses, AddHoldData, AddHoldResponses, ApplyData, ApplyResponses, CreateData, CreateResponses, CreateReviewData, CreateReviewResponses, DashboardData, DashboardResponses, DecideData, DecideResponses, DeregisterData, DeregisterResponses, DetailData, DetailResponses, GetAdjusterDetailData, GetAdjusterDetailResponses, GetAdjustersData, GetAdjustersResponses, GetMeData, GetMeResponses, GetMessagesData, GetMessagesResponses, GetMyApplicationData, GetMyApplicationResponses, GetMyInsurancesData, GetMyInsurancesResponses, GetMyNotificationsData, GetMyNotificationsResponses, GetMyPageData, GetMyPageResponses, GetMySettingsData, GetMySettingsResponses, GetProfileData, GetProfileResponses, GetReviewsData, GetReviewsResponses, GetRoomData, GetRoomResponses, GetSharedReportData, GetSharedReportResponses, HomeData, HomeResponses, ListData, ListMyRoomsData, ListMyRoomsResponses, ListResponses, LogoutData, LogoutResponses, OauthCallbackData, OauthCallbackResponses, PendingReviewData, PendingReviewResponses, ProposalsData, ProposalsResponses, Read1Data, Read1Responses, ReadAllData, ReadAllResponses, ReadData, ReadResponses, ReceivedProposalsData, ReceivedProposalsResponses, Register1Data, Register1Responses, RegisterData, RegisterResponses, ReissueData, ReissueResponses, RejectData, RejectResponses, ReportData, ReportResponses, ReviewedReportsData, ReviewedReportsResponses, ReviewReportData, ReviewReportResponses, ReviewWorkspaceData, ReviewWorkspaceResponses, SendData, SendResponses, SummaryData, SummaryResponses, UpdateMeData, UpdateMeResponses, UpdateMySettingsData, UpdateMySettingsResponses, UpdateProfileData, UpdateProfileResponses, UploadAttachmentData, UploadAttachmentResponses, UploadData, UploadResponses, WithdrawData, WithdrawResponses } from './types.gen';
+import type { AcceptData, AcceptResponses, ActivitySummaryData, ActivitySummaryResponses, AddHoldData, AddHoldResponses, AnalysisStatusData, AnalysisStatusResponses, ApplyData, ApplyResponses, CreateData, CreateResponses, CreateReviewData, CreateReviewResponses, DashboardData, DashboardResponses, DecideData, DecideResponses, DeregisterData, DeregisterResponses, DetailData, DetailResponses, GetAdjusterDetailData, GetAdjusterDetailResponses, GetAdjustersData, GetAdjustersResponses, GetMeData, GetMeResponses, GetMessagesData, GetMessagesResponses, GetMyApplicationData, GetMyApplicationResponses, GetMyInsurancesData, GetMyInsurancesResponses, GetMyNotificationsData, GetMyNotificationsResponses, GetMyPageData, GetMyPageResponses, GetMySettingsData, GetMySettingsResponses, GetProfileData, GetProfileResponses, GetReviewsData, GetReviewsResponses, GetRoomData, GetRoomResponses, GetSharedReportData, GetSharedReportResponses, HomeData, HomeResponses, ListData, ListMyRoomsData, ListMyRoomsResponses, ListResponses, LogoutData, LogoutResponses, OauthCallbackData, OauthCallbackResponses, PendingReviewData, PendingReviewResponses, ProposalsData, ProposalsResponses, Read1Data, Read1Responses, ReadAllData, ReadAllResponses, ReadData, ReadResponses, ReceivedProposalsData, ReceivedProposalsResponses, Register1Data, Register1Responses, RegisterData, RegisterResponses, ReissueData, ReissueResponses, RejectData, RejectResponses, ReportData, ReportResponses, ReviewedReportsData, ReviewedReportsResponses, ReviewReportData, ReviewReportResponses, ReviewWorkspaceData, ReviewWorkspaceResponses, SendData, SendResponses, SummaryData, SummaryResponses, UpdateMeData, UpdateMeResponses, UpdateMySettingsData, UpdateMySettingsResponses, UpdateProfileData, UpdateProfileResponses, UploadAttachmentData, UploadAttachmentResponses, UploadData, UploadResponses, WithdrawData, WithdrawResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -460,6 +460,16 @@ export const proposals = <ThrowOnError extends boolean = false>(options: Options
             type: 'apiKey'
         }],
     url: '/reports/{reportId}/proposals',
+    ...options
+});
+
+export const analysisStatus = <ThrowOnError extends boolean = false>(options: Options<AnalysisStatusData, ThrowOnError>): RequestResult<AnalysisStatusResponses, unknown, ThrowOnError> => (options.client ?? client).get<AnalysisStatusResponses, unknown, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: 'access_token',
+            type: 'apiKey'
+        }],
+    url: '/reports/{reportId}/analysis-status',
     ...options
 });
 
