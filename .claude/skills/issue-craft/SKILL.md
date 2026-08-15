@@ -106,8 +106,11 @@ gh issue view <NN> --json title,labels,assignees,body -q '.body'
 | `[Refactor]` | `FE,Refactor` |
 | `[Design]` | `FE,Design` |
 | `[Docs]` | `FE,Docs` |
+| 릴리즈·배포 | `Release` |
 
-> 존재하는 라벨: `Epic · FE · Feature · Fix · Settings · Story · Design · Docs · Refactor · Infra`. 없는 라벨을 지어내지 말 것. 확신 없으면 `gh label list`로 확인.
+릴리즈는 `FE`를 붙이지 않는다 — 앱 전체 배포라 프론트 한정이 아니다. 제목도 대괄호 태그가 아니라 `release (1.0.0) 배포` 형식이고 base가 `release` 브랜치다(#269).
+
+> 존재하는 라벨: `Epic · FE · Feature · Fix · Settings · Story · Design · Docs · Refactor · Infra · Release`. 없는 라벨을 지어내지 말 것. 확신 없으면 `gh label list --limit 50`으로 확인(기본 출력이 잘려 라벨을 놓칠 수 있다).
 
 ## 4. 본문 작성 규칙
 
