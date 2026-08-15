@@ -18,6 +18,8 @@ const STATUS_PILL_LABEL: Record<ReportStatus, string> = {
   COUNSELING: "매칭 완료",
   MATCHED: "매칭 완료",
   NOT_SELECTED: "제안 도착",
+  // 명세에 없는 상태 — 단정하지 않고 검수 중으로 보여준다.
+  UNKNOWN: "검수 중",
 };
 
 // 활성 리포트는 백엔드가 MATCHED(구 CLOSED)·NOT_SELECTED를 제외하고 내려주지만, 방어적으로 매칭(4단계)까지 다룬다.

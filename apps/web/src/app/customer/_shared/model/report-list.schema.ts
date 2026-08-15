@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ReportCardListResponse } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
+import { tolerantEnum } from "@/shared/lib/tolerant-enum";
 
 /**
  * 고객 리포트 목록 정본 — 대시보드·받은 제안·검수 내역·내 리포트 목록 공유(이슈 #128 통합).
@@ -8,7 +9,7 @@ import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/dri
  * 이 단일본으로 통합. 응답 래퍼(status/message/code)는 client가 해제 — 여기선 data 페이로드만 모델링.
  */
 // 백엔드 ReportResponseSupport.customerStatus — CLOSED는 고객 노출 시 MATCHED로 매핑되어 CLOSED는 내려오지 않는다.
-export const reportListStatusSchema = z.enum([
+export const reportListStatusSchema = tolerantEnum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",

@@ -13,4 +13,6 @@ export const REPORT_STATUS_META: Record<
   COUNSELING: { label: "상담 중", tone: "navy", nextStep: "상담 진행" },
   MATCHED: { label: "종결", tone: "green", nextStep: "후기 작성" },
   NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral", nextStep: "다른 제안 검토" },
+  // 명세에 없는 상태가 내려왔을 때의 폴백 — 단정하지 않고 진행 중으로 보여준다.
+  UNKNOWN: { label: "진행 중", tone: "neutral", nextStep: "진행 상황 확인" },
 };

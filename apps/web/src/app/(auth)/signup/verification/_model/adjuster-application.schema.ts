@@ -8,6 +8,7 @@ import type {
   CreateAdjusterApplicationResponse as GenCreateAdjusterApplicationResponse,
 } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
+import { tolerantEnum } from "@/shared/lib/tolerant-enum";
 
 // 소속: 독립(개업) / 손해사정법인 소속
 export const affiliationSchema = z.enum(["INDEPENDENT", "FIRM"]);
@@ -26,7 +27,7 @@ export const submittedDocumentSchema = z.object({
 export type SubmittedDocument = z.infer<typeof submittedDocumentSchema>;
 
 // 신청/심사 상태 — 서버 enum(admin accept/reject와 동일)
-export const applicationStatusSchema = z.enum(["PENDING", "APPROVED", "REJECTED"]);
+export const applicationStatusSchema = tolerantEnum(["PENDING", "APPROVED", "REJECTED"]);
 
 // ── 신청 body ──
 // 생성 스키마 베이스 + 우리 제약(licenseImageUrl/registrationImageUrl url() 형식, affiliation enum,

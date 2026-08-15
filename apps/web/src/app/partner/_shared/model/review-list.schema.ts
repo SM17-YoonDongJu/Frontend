@@ -1,10 +1,11 @@
 import { z } from "zod";
 import type { PendingReviewListResponse } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
+import { tolerantEnum } from "@/shared/lib/tolerant-enum";
 
 /** 검수 대기 목록. 출처: API 명세 GET /reports/pending-review. 필드명 명세 그대로. */
 
-export const reviewStatusSchema = z.enum([
+export const reviewStatusSchema = tolerantEnum([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
