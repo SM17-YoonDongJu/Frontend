@@ -18,20 +18,20 @@ export type ApiResponseDeviceTokenResponse = {
 export type DeviceTokenResponse = {
     id: string;
     platform: string;
-    createdAt: string;
+    created_at: string;
 };
 
 export type CreateAdjusterApplicationRequest = {
     name: string;
     phone: string;
     specialties: Array<string>;
+    license_no?: string | null;
+    license_image_url?: string | null;
     career?: number | null;
     introduction?: string | null;
     affiliation: string;
     region: string;
-    licenseNo?: string | null;
-    licenseImageUrl?: string | null;
-    registrationImageUrl: string;
+    registration_image_url: string;
 };
 
 export type ApiResponseCreateAdjusterApplicationResponse = {
@@ -41,8 +41,8 @@ export type ApiResponseCreateAdjusterApplicationResponse = {
 };
 
 export type CreateAdjusterApplicationResponse = {
+    application_id: string;
     status: string;
-    applicationId: string;
 };
 
 export type ApiResponseUploadResponse = {
@@ -52,33 +52,33 @@ export type ApiResponseUploadResponse = {
 };
 
 export type UploadResponse = {
-    s3Url: string;
+    s3_url: string;
 };
 
 export type CreateReportRequest = {
+    product_id?: string | null;
+    accident_type: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other';
+    accident_date: string;
     diagnosis?: Array<string> | null;
+    offered_amount?: number | null;
     hospitalizations?: Array<Hospitalization> | null;
     description?: string | null;
+    additional_information?: string | null;
     documents?: Array<Document> | null;
     question?: string | null;
-    productId?: string | null;
-    accidentType: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other';
-    accidentDate: string;
-    offeredAmount?: number | null;
-    additionalInformation?: string | null;
 };
 
 export type Document = {
+    s3_url?: string | null;
     name?: string | null;
-    s3Url?: string | null;
-    reportType?: string | null;
-    fileType?: string | null;
+    report_type?: string | null;
+    file_type?: string | null;
 };
 
 export type Hospitalization = {
-    hospitalStart?: string;
-    hospitalEnd?: string;
-    hospitalReason?: string;
+    hospital_start?: string;
+    hospital_end?: string;
+    hospital_reason?: string;
 };
 
 export type ApiResponseCreateReportResponse = {
@@ -88,8 +88,8 @@ export type ApiResponseCreateReportResponse = {
 };
 
 export type CreateReportResponse = {
+    report_id: string;
     status: string;
-    reportId: string;
 };
 
 export type HoldReportRequest = {
@@ -97,7 +97,7 @@ export type HoldReportRequest = {
     /**
      * reason이 OTHER면 필수
      */
-    reasonDetail?: string | null;
+    reason_detail?: string | null;
 };
 
 export type ApiResponseHoldResponse = {
@@ -107,10 +107,10 @@ export type ApiResponseHoldResponse = {
 };
 
 export type HoldResponse = {
+    report_id: string;
     held?: boolean;
     reason: string;
-    reportId: string;
-    reasonDetail?: string | null;
+    reason_detail?: string | null;
 };
 
 export type ChatReportRequest = {
@@ -121,7 +121,7 @@ export type ChatReportRequest = {
     /**
      * reason이 OTHER면 필수(공백만이면 누락 취급), 최대 500자
      */
-    reasonDetail?: string | null;
+    reason_detail?: string | null;
 };
 
 export type ApiResponseChatReportResponse = {
@@ -131,10 +131,10 @@ export type ApiResponseChatReportResponse = {
 };
 
 export type ChatReportResponse = {
+    chat_report_id: string;
+    chat_room_id: string;
     reason: 'SPAM' | 'ABUSE' | 'FRAUD' | 'PRIVACY_VIOLATION' | 'OTHER';
-    chatReportId: string;
-    chatRoomId: string;
-    createdAt: string;
+    created_at: string;
 };
 
 export type ApiResponseReadResponse = {
@@ -144,15 +144,15 @@ export type ApiResponseReadResponse = {
 };
 
 export type ReadResponse = {
-    chatRoomId: string;
-    readAt: string;
+    chat_room_id: string;
+    read_at: string;
 };
 
 export type Attachment = {
+    attachment_key: string;
     name: string;
+    content_type: string;
     size?: number | null;
-    attachmentKey: string;
-    contentType: string;
 };
 
 export type SendMessageRequest = {
@@ -173,6 +173,13 @@ export type ApiResponseChatMessageResponse = {
 };
 
 export type ChatMessageResponse = {
+    message_id: string;
+    chat_room_id: string;
+    /**
+     * SYSTEM 메시지는 발신자가 없어 null
+     */
+    sender_id?: string | null;
+    message_type: 'TEXT' | 'IMAGE' | 'FILE' | 'SYSTEM';
     /**
      * 첨부 메시지(IMAGE/FILE)에 캡션이 없으면 null
      */
@@ -181,15 +188,8 @@ export type ChatMessageResponse = {
      * 첨부가 없는 메시지는 null
      */
     attachment?: Attachment;
-    messageId: string;
-    chatRoomId: string;
-    /**
-     * SYSTEM 메시지는 발신자가 없어 null
-     */
-    senderId?: string | null;
-    messageType: 'TEXT' | 'IMAGE' | 'FILE' | 'SYSTEM';
-    isMine: boolean;
-    createdAt: string;
+    is_mine: boolean;
+    created_at: string;
 };
 
 export type ApiResponseUploadAttachmentResponse = {
@@ -199,13 +199,13 @@ export type ApiResponseUploadAttachmentResponse = {
 };
 
 export type UploadAttachmentResponse = {
+    attachment_key: string;
     /**
      * 업로드 클라이언트가 원본 파일명을 보내지 않으면 null일 수 있다
      */
     name?: string | null;
+    content_type: string;
     size: number;
-    attachmentKey: string;
-    contentType: string;
 };
 
 export type ApiResponseVoid = {
@@ -216,13 +216,13 @@ export type ApiResponseVoid = {
 
 export type RegisterRequest = {
     provider: string;
+    social_token: string;
     name: string;
+    birth_date: string;
+    phone_number: string;
     gender: string;
     region?: string | null;
-    socialToken: string;
-    birthDate: string;
-    phoneNumber: string;
-    userType: string;
+    user_type: string;
 };
 
 export type ApiResponseRegisterResponse = {
@@ -232,9 +232,9 @@ export type ApiResponseRegisterResponse = {
 };
 
 export type RegisterResponse = {
+    user_id: string;
     nickname: string;
     role: string;
-    userId: string;
 };
 
 export type CreateAdjusterReviewRequest = {
@@ -249,19 +249,19 @@ export type ApiResponseCreateAdjusterReviewResponse = {
 };
 
 export type CreateAdjusterReviewResponse = {
+    review_id: string;
+    adjuster_id: string;
     score?: number;
-    reviewId: string;
-    adjusterId: string;
-    createdAt: string;
+    created_at: string;
 };
 
 export type UserUpdateRequest = {
-    region?: Array<string> | null;
     /**
      * 세 필드 중 최소 하나는 있어야 한다
      */
-    phoneNumber?: string | null;
-    avatarUrl?: string | null;
+    phone_number?: string | null;
+    region?: Array<string> | null;
+    avatar_url?: string | null;
 };
 
 export type ApiResponseUserMeResponse = {
@@ -271,28 +271,28 @@ export type ApiResponseUserMeResponse = {
 };
 
 export type UserMeResponse = {
+    user_id: string;
     nickname: string;
+    phone_number?: string | null;
     role: string;
     gender?: string | null;
     region?: Array<string> | null;
-    userId: string;
-    phoneNumber?: string | null;
-    avatarUrl?: string | null;
-    socialProvider?: string | null;
-    createdAt: string;
+    avatar_url?: string | null;
+    social_provider?: string | null;
+    created_at: string;
 };
 
 export type NotificationSettingUpdateRequest = {
+    new_review_request?: boolean | null;
+    consult_message?: boolean | null;
+    settlement_notice?: boolean | null;
+    review_deadline_soon?: boolean | null;
+    review_complete?: boolean | null;
+    received_proposal?: boolean | null;
+    consult_accepted?: boolean | null;
+    analysis_complete?: boolean | null;
+    identity_verified?: boolean | null;
     marketing?: boolean | null;
-    newReviewRequest?: boolean | null;
-    consultMessage?: boolean | null;
-    settlementNotice?: boolean | null;
-    reviewDeadlineSoon?: boolean | null;
-    reviewComplete?: boolean | null;
-    receivedProposal?: boolean | null;
-    consultAccepted?: boolean | null;
-    analysisComplete?: boolean | null;
-    identityVerified?: boolean | null;
 };
 
 export type ApiResponseNotificationSettingResponse = {
@@ -302,23 +302,31 @@ export type ApiResponseNotificationSettingResponse = {
 };
 
 export type NotificationSettingResponse = {
+    new_review_request: boolean;
+    consult_message: boolean;
+    settlement_notice: boolean;
+    review_deadline_soon: boolean;
+    review_complete: boolean;
+    received_proposal: boolean;
+    consult_accepted: boolean;
+    analysis_complete: boolean;
+    identity_verified: boolean;
     marketing: boolean;
-    newReviewRequest: boolean;
-    consultMessage: boolean;
-    settlementNotice: boolean;
-    reviewDeadlineSoon: boolean;
-    reviewComplete: boolean;
-    receivedProposal: boolean;
-    consultAccepted: boolean;
-    analysisComplete: boolean;
-    identityVerified: boolean;
 };
 
 export type IssueReview = {
     /**
+     * report_issues_reviews.id. 있으면 그 행을 갱신
+     */
+    review_issue_id?: string | null;
+    /**
      * AI 쟁점(report_issues.id). ADDED(신규 쟁점)면 null, ACCEPTED·MODIFIED·EXCLUDED면 필수
      */
     issueId?: string | null;
+    /**
+     * ACCEPTED | MODIFIED | EXCLUDED | ADDED
+     */
+    review_status: string;
     /**
      * reviewStatus=ADDED면 필수
      */
@@ -327,34 +335,26 @@ export type IssueReview = {
      * reviewStatus=ADDED면 필수
      */
     description?: string | null;
-    /**
-     * report_issues_reviews.id. 있으면 그 행을 갱신
-     */
-    reviewIssueId?: string | null;
-    /**
-     * ACCEPTED | MODIFIED | EXCLUDED | ADDED
-     */
-    reviewStatus: string;
-    impactAmount?: number | null;
-    adjusterOpinion?: string | null;
+    impact_amount?: number | null;
+    adjuster_opinion?: string | null;
     /**
      * reviewStatus=MODIFIED면 필수
      */
-    modifiedReason?: string | null;
+    modified_reason?: string | null;
     /**
      * reviewStatus=EXCLUDED면 필수
      */
-    excludedReason?: string | null;
+    excluded_reason?: string | null;
 };
 
 export type ReviewReportRequest = {
+    estimate_min_amount?: number | null;
+    estimate_max_amount?: number | null;
+    applicable_guarantees?: Array<string> | null;
+    omitted_special_contract?: Array<string> | null;
+    basis_terms_precedents?: Array<string> | null;
     issues?: Array<IssueReview> | null;
     review?: string | null;
-    estimateMinAmount?: number | null;
-    estimateMaxAmount?: number | null;
-    applicableGuarantees?: Array<string> | null;
-    omittedSpecialContract?: Array<string> | null;
-    basisTermsPrecedents?: Array<string> | null;
 };
 
 export type ApiResponseReviewReportResponse = {
@@ -364,11 +364,11 @@ export type ApiResponseReviewReportResponse = {
 };
 
 export type ReviewReportResponse = {
+    report_id: string;
     status: string;
-    reportId: string;
-    reportReviewId: string;
-    reviewStatus: string;
-    sentAt: string;
+    report_review_id: string;
+    review_status: string;
+    sent_at: string;
 };
 
 export type ProposalDecisionRequest = {
@@ -385,11 +385,11 @@ export type ApiResponseProposalDecisionResponse = {
 };
 
 export type ProposalDecisionResponse = {
-    reportId: string;
-    proposalId: string;
-    adjusterId: string;
-    reportStatus: 'AWAITING_INSPECTION' | 'AWAITING_ADOPTION' | 'COUNSELING' | 'CLOSED' | 'NOT_SELECTED' | 'BLOCKED';
-    reviewStatus: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
+    report_id: string;
+    proposal_id: string;
+    adjuster_id: string;
+    report_status: 'AWAITING_INSPECTION' | 'AWAITING_ADOPTION' | 'COUNSELING' | 'CLOSED' | 'NOT_SELECTED' | 'BLOCKED';
+    review_status: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
 };
 
 export type ApiResponseConsultationDecisionResponse = {
@@ -399,11 +399,11 @@ export type ApiResponseConsultationDecisionResponse = {
 };
 
 export type ConsultationDecisionResponse = {
-    chatRoomId: string;
-    chatRoomStatus: 'ACTIVE' | 'CLOSED';
-    reviewStatus: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
-    reportId: string;
-    reportStatus: 'AWAITING_INSPECTION' | 'AWAITING_ADOPTION' | 'COUNSELING' | 'CLOSED' | 'NOT_SELECTED' | 'BLOCKED';
+    chat_room_id: string;
+    chat_room_status: 'ACTIVE' | 'CLOSED';
+    review_status: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
+    report_id: string;
+    report_status: 'AWAITING_INSPECTION' | 'AWAITING_ADOPTION' | 'COUNSELING' | 'CLOSED' | 'NOT_SELECTED' | 'BLOCKED';
 };
 
 export type CareerItem = {
@@ -415,29 +415,29 @@ export type UpdateAdjusterProfileRequest = {
     headline?: string | null;
     introduction?: string | null;
     career?: number | null;
+    activity_region?: string | null;
+    avatar_url?: string | null;
     specialties?: Array<string> | null;
     careers?: Array<CareerItem> | null;
-    activityRegion?: string | null;
-    avatarUrl?: string | null;
 };
 
 export type AdjusterProfileResponse = {
+    adjuster_id: string;
     nickname: string;
     headline: string;
+    avatar_url?: string | null;
+    activity_region: string;
     introduction: string;
     specialties: Array<string>;
     careers: Array<CareerItem>;
     career: number;
-    adjusterId: string;
-    avatarUrl?: string | null;
-    activityRegion: string;
-    averageRating?: number;
-    reviewCount?: number;
-    recentReviews: Array<RecentReview>;
-    completedConsultCount?: number;
-    handledCaseCount?: number;
-    pendingReviewCount?: number;
-    updatedAt: string;
+    average_rating?: number;
+    review_count?: number;
+    recent_reviews: Array<RecentReview>;
+    completed_consult_count?: number;
+    handled_case_count?: number;
+    pending_review_count?: number;
+    updated_at: string;
 };
 
 export type ApiResponseAdjusterProfileResponse = {
@@ -450,8 +450,8 @@ export type RecentReview = {
     nickname: string;
     score?: number;
     item?: string | null;
+    reviewed_at: string;
     content?: string | null;
-    reviewedAt: string;
 };
 
 export type ApiResponseNotificationListResponse = {
@@ -465,17 +465,17 @@ export type Item = {
     type: string;
     title: string;
     body?: string | null;
-    isRead: boolean;
-    createdAt: string;
+    is_read: boolean;
+    created_at: string;
 };
 
 export type NotificationListResponse = {
     items: Array<Item>;
+    unread_count: number;
     page: number;
     size: number;
-    unreadCount: number;
-    totalElements: number;
-    totalPages: number;
+    total_elements: number;
+    total_pages: number;
 };
 
 export type ApiResponseUserInsuranceListResponse = {
@@ -489,13 +489,13 @@ export type UserInsuranceListResponse = {
 };
 
 export type ActiveReport = {
+    report_id: string;
     title: string;
+    accident_type?: string | null;
     status: string;
-    reportId: string;
-    accidentType?: string | null;
-    createdAt: string;
-    firstReviewedAt?: string | null;
-    proposalCount?: number;
+    created_at: string;
+    first_reviewed_at?: string | null;
+    proposal_count?: number;
 };
 
 export type ApiResponseUserDashboardResponse = {
@@ -506,16 +506,16 @@ export type ApiResponseUserDashboardResponse = {
 
 export type ProposalSummary = {
     count?: number;
+    min_amount?: number | null;
+    max_amount?: number | null;
+    avg_amount?: number | null;
     items: Array<Item>;
-    minAmount?: number | null;
-    maxAmount?: number | null;
-    avgAmount?: number | null;
 };
 
 export type UserDashboardResponse = {
-    reportCount?: number;
-    activeReport?: ActiveReport;
-    proposalSummary?: ProposalSummary;
+    report_count?: number;
+    active_report?: ActiveReport;
+    proposal_summary?: ProposalSummary;
 };
 
 export type ApiResponseUserActivitySummaryResponse = {
@@ -525,24 +525,24 @@ export type ApiResponseUserActivitySummaryResponse = {
 };
 
 export type UserActivitySummaryResponse = {
-    reportCount?: number;
-    proposalCount?: number;
-    consultCount?: number;
-    closedCount?: number;
+    report_count?: number;
+    proposal_count?: number;
+    consult_count?: number;
+    closed_count?: number;
 };
 
 export type AdjusterApplicationResponse = {
+    application_id: string;
     status: string;
+    submitted_at: string;
     name: string;
     phone?: string | null;
     specialties?: Array<string> | null;
     speciality: string;
+    license_no?: string | null;
     documents: Array<Document>;
-    applicationId: string;
-    submittedAt: string;
-    licenseNo?: string | null;
-    rejectedAt?: string | null;
-    rejectReason?: string | null;
+    rejected_at?: string | null;
+    reject_reason?: string | null;
 };
 
 export type ApiResponseAdjusterApplicationResponse = {
@@ -558,39 +558,39 @@ export type ApiResponseReportCardListResponse = {
 };
 
 export type Card = {
+    report_id: string;
     status: string;
+    accident_type: string;
     title: string;
+    created_at: string;
+    report_no: string;
+    claimed_min_amount?: number | null;
+    claimed_max_amount?: number | null;
+    proposal_count: number;
+    reviewed_at?: string | null;
+    adjuster_nickname?: string | null;
+    offered_amount?: number | null;
     treatment?: string | null;
-    reportId: string;
-    accidentType: string;
-    createdAt: string;
-    reportNo: string;
-    claimedMinAmount?: number | null;
-    claimedMaxAmount?: number | null;
-    proposalCount: number;
-    reviewedAt?: string | null;
-    adjusterNickname?: string | null;
-    offeredAmount?: number | null;
     /**
      * 분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단)
      */
-    analysisState: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED';
+    analysis_state: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED';
     /**
      * analysis_state가 FAILED일 때만 non-null(BLOCKED은 null)
      */
-    analysisFailureReason?: string | null;
+    analysis_failure_reason?: string | null;
     /**
      * analysis_state가 FAILED 또는 BLOCKED일 때만 non-null. 사용자 노출 문구
      */
-    analysisFailureMessage?: string | null;
+    analysis_failure_message?: string | null;
 };
 
 export type Pagination = {
     page?: number;
     size?: number;
-    totalElements?: number;
-    totalPages?: number;
-    hasNext?: boolean;
+    total_elements?: number;
+    total_pages?: number;
+    has_next?: boolean;
 };
 
 export type ReportCardListResponse = {
@@ -610,45 +610,45 @@ export type ApiResponseCustomerReportDetailResponse = {
 };
 
 export type CustomerReportDetailResponse = {
+    report_id: string;
     status: string;
+    accident_type: string;
     treatment: string;
+    claimed_min_amount?: number | null;
+    claimed_max_amount?: number | null;
+    offered_amount?: number | null;
+    applicable_guarantees: Array<string>;
+    omitted_special_contract: Array<string>;
+    basis_terms_precedents: Array<string>;
     issue: Array<IssueItem>;
     question?: string | null;
+    adjuster_id?: string | null;
+    confidence_level?: string | null;
+    report_no: string;
+    /**
+     * 채택된 제안이 없으면 null
+     */
+    review_comment?: string | null;
+    /**
+     * 채택된 제안이 없으면 null
+     */
+    reviewed_at?: string | null;
     /**
      * 담당 사정사(adjusterId)가 없으면 null
      */
     adjuster?: Adjuster;
-    reportId: string;
-    accidentType: string;
-    claimedMinAmount?: number | null;
-    claimedMaxAmount?: number | null;
-    offeredAmount?: number | null;
-    applicableGuarantees: Array<string>;
-    omittedSpecialContract: Array<string>;
-    basisTermsPrecedents: Array<string>;
-    adjusterId?: string | null;
-    confidenceLevel?: string | null;
-    reportNo: string;
-    /**
-     * 채택된 제안이 없으면 null
-     */
-    reviewComment?: string | null;
-    /**
-     * 채택된 제안이 없으면 null
-     */
-    reviewedAt?: string | null;
     /**
      * 분석(OCR·AI) 처리 상태. REPORTS.status와 다른 축이다. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단)
      */
-    analysisState: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED';
+    analysis_state: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED';
     /**
      * analysis_state가 FAILED일 때만 non-null(BLOCKED은 null)
      */
-    analysisFailureReason?: string | null;
+    analysis_failure_reason?: string | null;
     /**
      * analysis_state가 FAILED 또는 BLOCKED일 때만 non-null. 사용자 노출 문구
      */
-    analysisFailureMessage?: string | null;
+    analysis_failure_message?: string | null;
 };
 
 export type IssueItem = {
@@ -656,7 +656,7 @@ export type IssueItem = {
     opinion?: string | null;
     status?: string | null;
     tags: Array<string>;
-    impactAmount?: number | null;
+    impact_amount?: number | null;
 };
 
 export type ApiResponseReviewWorkspaceResponse = {
@@ -666,8 +666,15 @@ export type ApiResponseReviewWorkspaceResponse = {
 };
 
 export type AttachmentItem = {
+    attachment_id: string;
     name?: string | null;
+    mime_type?: string | null;
     url?: string | null;
+    report_type?: string | null;
+    /**
+     * OCR 처리 전이면 null
+     */
+    page_count?: number | null;
     /**
      * OCR 처리 전이면 null
      */
@@ -676,36 +683,29 @@ export type AttachmentItem = {
      * OCR 처리 전이면 null
      */
     issuedAt?: string | null;
-    attachmentId: string;
-    mimeType?: string | null;
-    reportType?: string | null;
     /**
      * OCR 처리 전이면 null
      */
-    pageCount?: number | null;
-    /**
-     * OCR 처리 전이면 null
-     */
-    aiSummary?: string | null;
+    ai_summary?: string | null;
 };
 
 export type ClaimContext = {
+    accident_type?: string | null;
+    accident_date?: string | null;
     diagnosis: string;
     hospitalization: string;
     description?: string | null;
-    accidentType?: string | null;
-    accidentDate?: string | null;
-    additionalInformation?: string | null;
-    productName?: string | null;
-    insurerName?: string | null;
+    additional_information?: string | null;
+    product_name?: string | null;
+    insurer_name?: string | null;
 };
 
 export type Client = {
     nickname: string;
     gender: string;
+    birth_date: string;
     region: string;
-    birthDate: string;
-    joinedAt: string;
+    joined_at: string;
 };
 
 export type Estimate = {
@@ -721,40 +721,40 @@ export type Progress = {
 };
 
 export type ReviewWorkspaceResponse = {
+    report_id: string;
+    case_no: string;
     /**
      * AI 초안이 생성 전이면 null
      */
     title?: string | null;
+    accident_type: string;
     region: string;
     status: string;
+    confidence_level?: string | null;
+    is_masked?: boolean;
+    offered_amount?: number | null;
     client?: Client;
     claim?: ClaimContext;
     attachments: Array<AttachmentItem>;
+    ai_estimate: Estimate;
+    /**
+     * 사정사 작업본(started=false)이 없으면 null
+     */
+    adjuster_estimate?: Estimate;
+    applicable_guarantees: Array<string>;
+    omitted_special_contract: Array<string>;
+    basis_terms_precedents: Array<string>;
     issues: Array<IssueItem>;
     /**
      * 사정사 작업본(started=false)이 없으면 null
      */
     review?: string | null;
+    /**
+     * 사정사 작업본(started=false)이 없으면 null
+     */
+    review_status?: string | null;
     started?: boolean;
     progress: Progress;
-    reportId: string;
-    caseNo: string;
-    accidentType: string;
-    confidenceLevel?: string | null;
-    isMasked?: boolean;
-    offeredAmount?: number | null;
-    aiEstimate: Estimate;
-    /**
-     * 사정사 작업본(started=false)이 없으면 null
-     */
-    adjusterEstimate?: Estimate;
-    applicableGuarantees: Array<string>;
-    omittedSpecialContract: Array<string>;
-    basisTermsPrecedents: Array<string>;
-    /**
-     * 사정사 작업본(started=false)이 없으면 null
-     */
-    reviewStatus?: string | null;
 };
 
 export type ApiResponseProposalListResponse = {
@@ -764,13 +764,13 @@ export type ApiResponseProposalListResponse = {
 };
 
 export type Proposal = {
+    proposal_id: string;
+    adjuster_id: string;
     nickname: string;
     rating?: number | null;
+    proposal_summary?: string | null;
     status: string;
-    proposalId: string;
-    adjusterId: string;
-    proposalSummary?: string | null;
-    submittedAt: string;
+    submitted_at: string;
 };
 
 export type ProposalListResponse = {
@@ -786,45 +786,45 @@ export type ApiResponseReportAnalysisStatusResponse = {
 
 export type FailedDocument = {
     /**
+     * 저널에 attachment_id가 없으면 null
+     */
+    attachment_id?: string | null;
+    /**
      * 첨부 행을 찾지 못하면 null
      */
     name?: string | null;
     /**
-     * 저널에 attachment_id가 없으면 null
-     */
-    attachmentId?: string | null;
-    /**
      * 문서별 실패 사유
      */
-    failureReason: string;
+    failure_reason: string;
 };
 
 export type ReportAnalysisStatusResponse = {
-    reportId: string;
+    report_id: string;
     /**
      * 분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(BLOCKED는 AI 입력 가드레일 차단 — OCR·AI 파이프라인이 시작되지 않는다)
      */
-    analysisState: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED';
+    analysis_state: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED';
     /**
      * 대표 실패 사유. analysis_state가 FAILED일 때만 non-null(BLOCKED은 저널 기반 사유가 없어 null). MASKING_RESIDUAL | SCHEMA_INVALID | OCR_ERROR | UNKNOWN | UNREADABLE_FILE
      */
-    failureReason?: string | null;
+    failure_reason?: string | null;
     /**
      * 사용자 노출 문구. analysis_state가 FAILED 또는 BLOCKED일 때만 non-null
      */
-    failureMessage?: string | null;
+    failure_message?: string | null;
     /**
      * 재업로드 안내. analysis_state가 FAILED 또는 BLOCKED일 때만 non-null(BLOCKED은 항상 NOT_SUPPORTED — 문서 문제가 아니라 재업로드가 무의미하다). RECOMMENDED(재업로드로 해결 가능) | NOT_SUPPORTED(재업로드해도 동일) | HOLD(확인 중)
      */
-    reuploadGuidance?: string | null;
+    reupload_guidance?: string | null;
     /**
      * 대표 실패 시각(최초 실패 기준). analysis_state가 FAILED일 때만 non-null. BLOCKED은 저널 기반 시각이 없어 null
      */
-    failedAt?: string | null;
+    failed_at?: string | null;
     /**
      * 실패 문서 목록. FAILED가 아니면 빈 배열(null 아님)
      */
-    failedDocuments: Array<FailedDocument>;
+    failed_documents: Array<FailedDocument>;
 };
 
 export type ApiResponsePendingReviewListResponse = {
@@ -845,10 +845,10 @@ export type ApiResponsePendingReviewSummaryResponse = {
 };
 
 export type PendingReviewSummaryResponse = {
-    pendingCount?: number;
-    dueSoonCount?: number;
-    inProgressCount?: number;
-    specialtyMatchCount?: number;
+    pending_count?: number;
+    due_soon_count?: number;
+    in_progress_count?: number;
+    specialty_match_count?: number;
 };
 
 export type ApiResponseChatRoomListResponse = {
@@ -862,47 +862,47 @@ export type ChatRoomListResponse = {
 };
 
 export type ChatRoomSummaryResponse = {
-    counterpart: Counterpart;
-    chatRoomId: string;
+    chat_room_id: string;
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
-    reportId?: string | null;
+    report_id?: string | null;
     /**
      * 검색으로 개설된 방은 연결된 제안이 없어 null
      */
-    proposalId?: string | null;
-    roomStatus: 'ACTIVE' | 'CLOSED';
+    proposal_id?: string | null;
+    room_status: 'ACTIVE' | 'CLOSED';
     /**
      * 검색으로 개설된 방은 제안이 없어 null
      */
-    matchStatus?: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
+    match_status?: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
-    caseNo?: string | null;
+    case_no?: string | null;
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
-    reportTypeLabel?: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other';
+    report_type_label?: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other';
+    counterpart: Counterpart;
     /**
      * 아직 메시지가 없으면 null
      */
-    lastMessage?: string | null;
+    last_message?: string | null;
     /**
      * 아직 메시지가 없으면 null
      */
-    lastMessageAt?: string | null;
-    unreadCount: number;
+    last_message_at?: string | null;
+    unread_count: number;
 };
 
 export type Counterpart = {
+    user_id: string;
     name: string;
-    userId: string;
     /**
      * 상대 계정에 프로필 이미지가 없으면 null
      */
-    avatarUrl?: string | null;
+    avatar_url?: string | null;
 };
 
 export type ApiResponseChatRoomDetailResponse = {
@@ -912,39 +912,39 @@ export type ApiResponseChatRoomDetailResponse = {
 };
 
 export type ChatRoomDetailResponse = {
-    counterpart: Counterpart;
-    chatRoomId: string;
+    chat_room_id: string;
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
-    reportId?: string | null;
+    report_id?: string | null;
     /**
      * 검색으로 개설된 방은 연결된 제안이 없어 null
      */
-    proposalId?: string | null;
-    roomStatus: 'ACTIVE' | 'CLOSED';
+    proposal_id?: string | null;
+    room_status: 'ACTIVE' | 'CLOSED';
     /**
      * 검색으로 개설된 방은 제안이 없어 null
      */
-    matchStatus?: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
+    match_status?: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
-    caseNo?: string | null;
+    case_no?: string | null;
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
-    reportTypeLabel?: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other';
+    report_type_label?: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other';
+    counterpart: Counterpart;
     /**
      * 아직 메시지가 없으면 null
      */
-    lastMessage?: string | null;
+    last_message?: string | null;
     /**
      * 아직 메시지가 없으면 null
      */
-    lastMessageAt?: string | null;
-    unreadCount: number;
-    createdAt: string;
+    last_message_at?: string | null;
+    unread_count: number;
+    created_at: string;
 };
 
 export type ApiResponseSharedReportResponse = {
@@ -958,35 +958,35 @@ export type Issue = {
      * 사정사 신규(ADDED) 쟁점은 AI 원본이 없어 null
      */
     issueId?: string | null;
+    review_issue_id: string;
     title?: string | null;
+    adjuster_opinion?: string | null;
     description?: string | null;
+    impact_amount?: number | null;
+    review_status: string;
     tags: Array<string>;
-    reviewIssueId: string;
-    adjusterOpinion?: string | null;
-    impactAmount?: number | null;
-    reviewStatus: string;
 };
 
 export type SharedReportResponse = {
+    chat_room_id: string;
+    report_id: string;
+    proposal_id: string;
+    case_no: string;
+    accident_type?: string | null;
     title?: string | null;
+    report_status?: string | null;
+    review_status?: string | null;
+    report_updated_at: string;
+    submitted_at: string;
     summary?: string | null;
     adjuster: Adjuster;
     estimate: Estimate;
+    offered_amount?: number | null;
     issues: Array<Issue>;
     issueCount: number;
-    chatRoomId: string;
-    reportId: string;
-    proposalId: string;
-    caseNo: string;
-    accidentType?: string | null;
-    reportStatus?: string | null;
-    reviewStatus?: string | null;
-    reportUpdatedAt: string;
-    submittedAt: string;
-    offeredAmount?: number | null;
-    applicableGuarantees?: Array<string> | null;
-    omittedSpecialContract?: Array<string> | null;
-    basisTermsPrecedents?: Array<string> | null;
+    applicable_guarantees?: Array<string> | null;
+    omitted_special_contract?: Array<string> | null;
+    basis_terms_precedents?: Array<string> | null;
 };
 
 export type ApiResponseChatMessageListResponse = {
@@ -997,8 +997,8 @@ export type ApiResponseChatMessageListResponse = {
 
 export type ChatMessageListResponse = {
     messages: Array<ChatMessageResponse>;
-    nextCursor?: string | null;
-    hasNext: boolean;
+    next_cursor?: string | null;
+    has_next: boolean;
 };
 
 export type ApiResponseOAuthCallbackResponse = {
@@ -1011,12 +1011,12 @@ export type OAuthCallbackResponse = {
     /**
      * isNewUser=false일 때만 채워진다
      */
-    userId?: string | null;
-    isNewUser?: boolean;
+    user_id?: string | null;
+    is_new_user?: boolean;
     /**
      * isNewUser=true일 때만 채워진다
      */
-    signupTicket?: string | null;
+    signup_ticket?: string | null;
 };
 
 export type AdjusterListResponse = {
@@ -1032,30 +1032,30 @@ export type ApiResponseAdjusterListResponse = {
 };
 
 export type Meta = {
-    totalAdjusterCount?: number;
-    averageRating?: number;
-    totalConsultCount?: number;
-    averageCareer?: number;
+    total_adjuster_count?: number;
+    average_rating?: number;
+    total_consult_count?: number;
+    average_career?: number;
 };
 
 export type AdjusterDetailResponse = {
+    adjuster_id: string;
     nickname: string;
+    avatar_url?: string | null;
     headline: string;
+    activity_region: string;
     introduction: string;
     specialties: Array<string>;
     careers: Array<CareerItem>;
     career?: number;
+    average_rating?: number;
+    review_count?: number;
+    recent_reviews: Array<RecentReview>;
+    completed_consult_count?: number;
+    handled_case_count?: number;
     verified?: boolean;
+    consult_guide: ConsultGuide;
     certification: Certification;
-    adjusterId: string;
-    avatarUrl?: string | null;
-    activityRegion: string;
-    averageRating?: number;
-    reviewCount?: number;
-    recentReviews: Array<RecentReview>;
-    completedConsultCount?: number;
-    handledCaseCount?: number;
-    consultGuide: ConsultGuide;
 };
 
 export type ApiResponseAdjusterDetailResponse = {
@@ -1065,14 +1065,14 @@ export type ApiResponseAdjusterDetailResponse = {
 };
 
 export type Certification = {
-    registrationNo: string;
-    verifiedAt?: string | null;
+    registration_no: string;
+    verified_at?: string | null;
 };
 
 export type ConsultGuide = {
     method: string;
-    initialConsult: string;
-    feeBasis: string;
+    initial_consult: string;
+    fee_basis: string;
 };
 
 export type AdjusterReviewListResponse = {
@@ -1087,18 +1087,18 @@ export type ApiResponseAdjusterReviewListResponse = {
 };
 
 export type Stats = {
-    monthlyReviewCount?: number;
-    previousMonthReviewCount?: number;
-    consultationConvertedCount?: number;
-    consultationConversionRate?: number;
-    totalCount?: number;
+    monthly_review_count?: number;
+    previous_month_review_count?: number;
+    consultation_converted_count?: number;
+    consultation_conversion_rate?: number;
+    total_count?: number;
 };
 
 export type AdjusterMyPageResponse = {
     profile: Profile;
     stats: Stats;
+    monthly_activity: MonthlyActivity;
     certification: Certification;
-    monthlyActivity: MonthlyActivity;
 };
 
 export type ApiResponseAdjusterMyPageResponse = {
@@ -1108,26 +1108,26 @@ export type ApiResponseAdjusterMyPageResponse = {
 };
 
 export type MonthlyActivity = {
-    completedCount?: number;
-    consultationConvertedCount?: number;
-    averageRating?: number;
+    completed_count?: number;
+    consultation_converted_count?: number;
+    average_rating?: number;
 };
 
 export type Profile = {
     nickname: string;
     email?: string | null;
+    avatar_url?: string | null;
     headline?: string | null;
     specialties: Array<string>;
     career?: number | null;
+    activity_region: string;
     role: string;
-    avatarUrl?: string | null;
-    activityRegion: string;
 };
 
 export type AdjusterHomeResponse = {
     adjuster: Adjuster;
     summary: Summary;
-    inProgressCases: InProgressCases;
+    in_progress_cases: InProgressCases;
 };
 
 export type ApiResponseAdjusterHomeResponse = {
@@ -1143,17 +1143,17 @@ export type InProgressCases = {
 
 export type Rating = {
     average?: number;
-    reviewCount?: number;
+    review_count?: number;
 };
 
 export type Summary = {
+    pending_count?: number;
+    pending_new_count?: number;
+    in_progress_count?: number;
+    monthly_completed_count?: number;
+    total_completed_count?: number;
+    consultation_converted_count?: number;
     rating: Rating;
-    pendingCount?: number;
-    pendingNewCount?: number;
-    inProgressCount?: number;
-    monthlyCompletedCount?: number;
-    totalCompletedCount?: number;
-    consultationConvertedCount?: number;
 };
 
 export type DeleteDeviceTokenRequest = {

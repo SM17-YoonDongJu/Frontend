@@ -13,15 +13,15 @@ export async function submitReview(
     body: {
       ...body,
       issues: body.issues?.map((issue) => ({
-        ...issue,
-        reviewIssueId: issue.reviewIssueId ?? undefined,
-        issueId: issue.issueId ?? undefined,
+        review_status: issue.reviewStatus,
+        review_issue_id: issue.reviewIssueId ?? undefined,
+        issue_id: issue.issueId ?? undefined,
         title: issue.title ?? undefined,
         description: issue.description ?? undefined,
-        impactAmount: issue.impactAmount ?? undefined,
-        modifiedReason: issue.modifiedReason ?? undefined,
-        excludedReason: issue.excludedReason ?? undefined,
-        adjusterOpinion: issue.adjusterOpinion ?? undefined,
+        impact_amount: issue.impactAmount ?? undefined,
+        modified_reason: issue.modifiedReason ?? undefined,
+        excluded_reason: issue.excludedReason ?? undefined,
+        adjuster_opinion: issue.adjusterOpinion ?? undefined,
       })),
     },
   });

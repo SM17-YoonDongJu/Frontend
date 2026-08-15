@@ -1,11 +1,8 @@
 import { z } from "zod";
-import {
-  CreateAdjusterApplicationRequestSchema,
-  CreateAdjusterApplicationResponseSchema,
-} from "@/shared/api/generated/zod.gen";
+import { CreateAdjusterApplicationResponseSchema } from "@/shared/api/generated/zod.gen";
 import type {
   AdjusterApplicationResponse as GenAdjusterApplicationStatus,
-  CreateAdjusterApplicationResponse as GenCreateAdjusterApplicationResponse,
+  CreateAdjusterApplicationRequest,
 } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
@@ -31,14 +28,25 @@ export const applicationStatusSchema = z.enum(["PENDING", "APPROVED", "REJECTED"
 // ── 신청 body ──
 // 생성 스키마 베이스 + 우리 제약(licenseImageUrl/registrationImageUrl url() 형식, affiliation enum,
 // career nonnegative) override. phone은 CONTRACT였으나 2026-08-05 실측 명세에 이미 필수로 포함됨.
-export const adjusterApplicationBodySchema = CreateAdjusterApplicationRequestSchema.extend({
+export const adjusterApplicationBodySchema = z.object({
+  name: z.string(),
+  phone: z.string(),
+  specialties: z.array(z.string()),
+  region: z.string(),
+  affiliation: affiliationSchema,
+  registrationImageUrl: z.string().url(),
   licenseNo: z.string().nullish(),
   licenseImageUrl: z.string().url().nullish(),
   career: z.number().int().nonnegative().nullish(),
   introduction: z.string().nullish(),
-  affiliation: affiliationSchema,
-  registrationImageUrl: z.string().url(),
 });
+
+type _AdjusterApplicationBodyDriftCheck = ExpectDriftCheck<
+  AssertFieldsExistInSpec<
+    z.infer<typeof adjusterApplicationBodySchema>,
+    CreateAdjusterApplicationRequest
+  >
+>;
 
 // 자격증 번호와 사본 중 최소 하나 필수(명세 명시) → MISSING_REQUIRED_FIELD 대응.
 const licenseEitherRequired = (
@@ -83,6 +91,4 @@ export type AdjusterApplicationStatus = z.infer<
 type _AdjusterApplicationStatusDriftCheck = ExpectDriftCheck<
   AssertFieldsExistInSpec<Omit<AdjusterApplicationStatus, "documents">, GenAdjusterApplicationStatus>
 >;
-type _AdjusterApplicationResponseDriftCheck = ExpectDriftCheck<
-  AssertFieldsExistInSpec<AdjusterApplicationResponse, GenCreateAdjusterApplicationResponse>
->;
+// 신청 응답은 생성 스키마를 그대로 쓰므로 대조할 대상이 자기 자신이다 — 별도 가드를 두지 않는다.

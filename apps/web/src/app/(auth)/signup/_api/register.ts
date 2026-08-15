@@ -10,7 +10,16 @@ import {
 export async function register(body: RegisterBody): Promise<RegisterResponse> {
   const { data } = await registerRequest({
     throwOnError: true,
-    body,
+    body: {
+      provider: body.provider,
+      social_token: body.socialToken,
+      name: body.name,
+      user_type: body.userType,
+      gender: body.gender,
+      birth_date: body.birthDate,
+      phone_number: body.phoneNumber,
+      region: body.region,
+    },
   });
   return registerResponseSchema.parse(data);
 }

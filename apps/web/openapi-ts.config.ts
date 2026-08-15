@@ -10,30 +10,32 @@ const toCamel = (key: string): string =>
  * 그대로 두면 생성기가 예약어를 못 읽어 SDK 함수명이 경로 기반으로 폴백하고
  * 길이·개수 제약이 통째로 사라진다.
  *
- * 키를 전부 camel로 되돌린다 — DTO 필드명(snake)도 함께 camel이 되는데, 응답은
- * client.ts가 snakeToCamelDeep로 변환한 뒤 소비하므로 이게 FE 모델과 맞는 모양이다.
- * path·media type엔 언더스코어가 없어 영향받지 않는다. 이미 camel이면 no-op이라
- * 백엔드가 고친 뒤에도 그대로 둘 수 있다.
+ * 예약어만 camel로 되돌리고 DTO 필드명은 snake 그대로 둔다 — 와이어가 snake이므로
+ * 스펙이 말하는 필드명이 사실이고, 생성물이 그 사실을 그대로 반영해야 검증이 성립한다.
+ * properties의 직계 키와 required 값이 필드명이라 그 둘만 건너뛴다.
+ * 이미 camel이면 no-op이라 백엔드가 문서 직렬화를 고친 뒤에도 그대로 둘 수 있다.
  */
-function camelizeKeysDeep(node: unknown): void {
+function normalizeSpecKeywords(node: unknown): void {
   if (Array.isArray(node)) {
-    node.forEach(camelizeKeysDeep);
+    node.forEach(normalizeSpecKeywords);
     return;
   }
   if (node === null || typeof node !== "object") return;
 
   const obj = node as Record<string, unknown>;
   for (const key of Object.keys(obj)) {
-    camelizeKeysDeep(obj[key]);
+    const value = obj[key];
+    // properties의 직계 키는 DTO 필드명 — 이름은 두고 값(스키마)만 훑는다.
+    if (key === "properties" && value !== null && typeof value === "object") {
+      Object.values(value as Record<string, unknown>).forEach(normalizeSpecKeywords);
+      continue;
+    }
+    normalizeSpecKeywords(value);
     const camel = toCamel(key);
     if (camel !== key) {
-      obj[camel] = obj[key];
+      obj[camel] = value;
       delete obj[key];
     }
-  }
-  // required는 프로퍼티명을 값으로 담는다 — 키와 같이 바뀌어야 짝이 맞는다.
-  if (Array.isArray(obj.required)) {
-    obj.required = obj.required.map((name) => (typeof name === "string" ? toCamel(name) : name));
   }
 }
 
@@ -43,7 +45,7 @@ export default defineConfig({
   input: process.env.OPENAPI_SPEC_SOURCE ?? "./openapi/api-docs.json",
   output: "./src/shared/api/generated",
   parser: {
-    patch: { input: camelizeKeysDeep },
+    patch: { input: normalizeSpecKeywords },
     // 규격 위반 스펙이 조용히 통과해 생성물만 망가지는 일을 막는다.
     validate_EXPERIMENTAL: "warn",
   },
