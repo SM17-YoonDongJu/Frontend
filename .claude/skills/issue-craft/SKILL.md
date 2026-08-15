@@ -102,12 +102,12 @@ gh issue view <NN> --json title,labels,assignees,body -q '.body'
 | Tag | 라벨 |
 |-----|------|
 | `[Feature]` | `FE,Feature` |
-| `[Infra]` | `FE,Feature` (Infra 라벨 없음 → Feature) |
+| `[Infra]` / `[Settings]` | `FE,Infra` / `FE,Settings` |
 | `[Refactor]` | `FE,Refactor` |
 | `[Design]` | `FE,Design` |
 | `[Docs]` | `FE,Docs` |
 
-> 존재하는 라벨: `Epic · FE · Feature · Fix · Settings · Story · Design · Docs · Refactor`. 없는 라벨을 지어내지 말 것. 확신 없으면 `gh label list`로 확인.
+> 존재하는 라벨: `Epic · FE · Feature · Fix · Settings · Story · Design · Docs · Refactor · Infra`. 없는 라벨을 지어내지 말 것. 확신 없으면 `gh label list`로 확인.
 
 ## 4. 본문 작성 규칙
 
@@ -178,7 +178,7 @@ gh issue create \
 - 모바일 RN 웹뷰 기준 레이아웃이 깨지지 않는다
 ```
 
-### B. 인프라 (#58 트림) — 라벨 `FE,Feature` · 제목 `[Infra] …`(접미사 없음)
+### B. 인프라 (#58 트림) — 라벨 `FE,Infra` · 제목 `[Infra] …`(접미사 없음)
 ```markdown
 ## 배경
 ## 작업 항목
