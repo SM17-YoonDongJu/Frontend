@@ -23,8 +23,8 @@ export const REPORT_STATUS_META: Record<
   COUNSELING: { label: "상담 중", tone: "navy", showCheck: false, muted: false },
   MATCHED: { label: "종결", tone: "neutral", showCheck: true, muted: true },
   NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral", showCheck: false, muted: true },
-  // 명세에 없는 상태가 내려왔을 때의 폴백 — 단정하지 않고 진행 중으로 보여준다.
-  UNKNOWN: { label: "진행 중", tone: "neutral", showCheck: false, muted: false },
+  // 명세에 없는 상태 — 어떤 단계인지 단정하지 않는 중립 라벨로 보여준다.
+  UNKNOWN: { label: "확인 필요", tone: "neutral", showCheck: false, muted: false },
 };
 
 /** 상태 tone → 카드 좌측 스파인 배경 유틸. */

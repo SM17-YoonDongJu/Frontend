@@ -12,5 +12,11 @@ export const UNKNOWN_ENUM_VALUE = "UNKNOWN";
  * 요청 body·필터에는 쓰지 않는다 — 우리가 보내는 값은 오타가 컴파일에서 걸려야 한다.
  */
 export function enumWithFallback<const T extends readonly [string, ...string[]]>(values: T) {
-  return z.enum([...values, UNKNOWN_ENUM_VALUE] as unknown as [...T, "UNKNOWN"]).catch(UNKNOWN_ENUM_VALUE);
+  const known = new Set<string>(values);
+  // 모르는 "문자열"만 UNKNOWN으로 바꾼다. null·undefined·비문자열은 계속 실패해야
+  // 필수 필드 누락이나 타입 변경을 파싱 단계에서 잡을 수 있다(catch는 그것까지 삼킨다).
+  return z.preprocess(
+    (input) => (typeof input === "string" && !known.has(input) ? UNKNOWN_ENUM_VALUE : input),
+    z.enum([...values, UNKNOWN_ENUM_VALUE] as unknown as [...T, "UNKNOWN"]),
+  );
 }
