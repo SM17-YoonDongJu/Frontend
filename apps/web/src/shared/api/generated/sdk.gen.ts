@@ -3,6 +3,7 @@
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
 import type { AcceptData, AcceptResponses, ActivitySummaryData, ActivitySummaryResponses, AddHoldData, AddHoldResponses, AnalysisStatusData, AnalysisStatusResponses, ApplyData, ApplyResponses, CreateData, CreateResponses, CreateReviewData, CreateReviewResponses, DashboardData, DashboardResponses, DecideData, DecideResponses, DeregisterData, DeregisterResponses, DetailData, DetailResponses, GetAdjusterDetailData, GetAdjusterDetailResponses, GetAdjustersData, GetAdjustersResponses, GetMeData, GetMeResponses, GetMessagesData, GetMessagesResponses, GetMyApplicationData, GetMyApplicationResponses, GetMyInsurancesData, GetMyInsurancesResponses, GetMyNotificationsData, GetMyNotificationsResponses, GetMyPageData, GetMyPageResponses, GetMySettingsData, GetMySettingsResponses, GetProfileData, GetProfileResponses, GetReviewsData, GetReviewsResponses, GetRoomData, GetRoomResponses, GetSharedReportData, GetSharedReportResponses, HomeData, HomeResponses, ListData, ListMyRoomsData, ListMyRoomsResponses, ListResponses, LogoutData, LogoutResponses, OauthCallbackData, OauthCallbackResponses, PendingReviewData, PendingReviewResponses, ProposalsData, ProposalsResponses, Read1Data, Read1Responses, ReadAllData, ReadAllResponses, ReadData, ReadResponses, ReceivedProposalsData, ReceivedProposalsResponses, Register1Data, Register1Responses, RegisterData, RegisterResponses, ReissueData, ReissueResponses, RejectData, RejectResponses, ReportData, ReportResponses, ReviewedReportsData, ReviewedReportsResponses, ReviewReportData, ReviewReportResponses, ReviewWorkspaceData, ReviewWorkspaceResponses, SendData, SendResponses, SummaryData, SummaryResponses, UpdateMeData, UpdateMeResponses, UpdateMySettingsData, UpdateMySettingsResponses, UpdateProfileData, UpdateProfileResponses, UploadAttachmentData, UploadAttachmentResponses, UploadData, UploadResponses, WithdrawData, WithdrawResponses } from './types.gen';
+import { zAcceptResponse, zActivitySummaryResponse, zAddHoldResponse, zAnalysisStatusResponse, zApplyResponse, zCreateResponse, zCreateReviewResponse, zDashboardResponse, zDecideResponse, zDeregisterResponse, zDetailResponse, zGetAdjusterDetailResponse, zGetAdjustersResponse, zGetMeResponse, zGetMessagesResponse, zGetMyApplicationResponse, zGetMyInsurancesResponse, zGetMyNotificationsResponse, zGetMyPageResponse, zGetMySettingsResponse, zGetProfileResponse, zGetReviewsResponse, zGetRoomResponse, zGetSharedReportResponse, zHomeResponse, zListMyRoomsResponse, zListResponse, zLogoutResponse, zOauthCallbackResponse, zPendingReviewResponse, zProposalsResponse, zRead1Response, zReadAllResponse, zReadResponse, zReceivedProposalsResponse, zRegister1Response, zRegisterResponse, zReissueResponse, zRejectResponse, zReportResponse, zReviewReportResponse, zReviewWorkspaceResponse, zSendResponse, zSummaryResponse, zUpdateMeResponse, zUpdateMySettingsResponse, zUpdateProfileResponse, zUploadAttachmentResponse, zUploadResponse, zWithdrawResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -19,6 +20,7 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
 };
 
 export const deregister = <ThrowOnError extends boolean = false>(options: Options<DeregisterData, ThrowOnError>): RequestResult<DeregisterResponses, unknown, ThrowOnError> => (options.client ?? client).delete<DeregisterResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zDeregisterResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -33,6 +35,7 @@ export const deregister = <ThrowOnError extends boolean = false>(options: Option
 });
 
 export const register = <ThrowOnError extends boolean = false>(options: Options<RegisterData, ThrowOnError>): RequestResult<RegisterResponses, unknown, ThrowOnError> => (options.client ?? client).post<RegisterResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zRegisterResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -47,6 +50,7 @@ export const register = <ThrowOnError extends boolean = false>(options: Options<
 });
 
 export const apply = <ThrowOnError extends boolean = false>(options: Options<ApplyData, ThrowOnError>): RequestResult<ApplyResponses, unknown, ThrowOnError> => (options.client ?? client).post<ApplyResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zApplyResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -62,6 +66,7 @@ export const apply = <ThrowOnError extends boolean = false>(options: Options<App
 
 export const upload = <ThrowOnError extends boolean = false>(options: Options<UploadData, ThrowOnError>): RequestResult<UploadResponses, unknown, ThrowOnError> => (options.client ?? client).post<UploadResponses, unknown, ThrowOnError>({
     ...formDataBodySerializer,
+    responseValidator: async (data) => await zUploadResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -76,6 +81,7 @@ export const upload = <ThrowOnError extends boolean = false>(options: Options<Up
 });
 
 export const list = <ThrowOnError extends boolean = false>(options?: Options<ListData, ThrowOnError>): RequestResult<ListResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zListResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -86,6 +92,7 @@ export const list = <ThrowOnError extends boolean = false>(options?: Options<Lis
 });
 
 export const create = <ThrowOnError extends boolean = false>(options: Options<CreateData, ThrowOnError>): RequestResult<CreateResponses, unknown, ThrowOnError> => (options.client ?? client).post<CreateResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zCreateResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -100,6 +107,7 @@ export const create = <ThrowOnError extends boolean = false>(options: Options<Cr
 });
 
 export const addHold = <ThrowOnError extends boolean = false>(options: Options<AddHoldData, ThrowOnError>): RequestResult<AddHoldResponses, unknown, ThrowOnError> => (options.client ?? client).post<AddHoldResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zAddHoldResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -114,6 +122,7 @@ export const addHold = <ThrowOnError extends boolean = false>(options: Options<A
 });
 
 export const report = <ThrowOnError extends boolean = false>(options: Options<ReportData, ThrowOnError>): RequestResult<ReportResponses, unknown, ThrowOnError> => (options.client ?? client).post<ReportResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zReportResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -128,6 +137,7 @@ export const report = <ThrowOnError extends boolean = false>(options: Options<Re
 });
 
 export const read = <ThrowOnError extends boolean = false>(options: Options<ReadData, ThrowOnError>): RequestResult<ReadResponses, unknown, ThrowOnError> => (options.client ?? client).post<ReadResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zReadResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -138,6 +148,7 @@ export const read = <ThrowOnError extends boolean = false>(options: Options<Read
 });
 
 export const getMessages = <ThrowOnError extends boolean = false>(options: Options<GetMessagesData, ThrowOnError>): RequestResult<GetMessagesResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetMessagesResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetMessagesResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -148,6 +159,7 @@ export const getMessages = <ThrowOnError extends boolean = false>(options: Optio
 });
 
 export const send = <ThrowOnError extends boolean = false>(options: Options<SendData, ThrowOnError>): RequestResult<SendResponses, unknown, ThrowOnError> => (options.client ?? client).post<SendResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zSendResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -162,6 +174,7 @@ export const send = <ThrowOnError extends boolean = false>(options: Options<Send
 });
 
 export const uploadAttachment = <ThrowOnError extends boolean = false>(options: Options<UploadAttachmentData, ThrowOnError>): RequestResult<UploadAttachmentResponses, unknown, ThrowOnError> => (options.client ?? client).post<UploadAttachmentResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zUploadAttachmentResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -176,6 +189,7 @@ export const uploadAttachment = <ThrowOnError extends boolean = false>(options: 
 });
 
 export const reissue = <ThrowOnError extends boolean = false>(options?: Options<ReissueData, ThrowOnError>): RequestResult<ReissueResponses, unknown, ThrowOnError> => (options?.client ?? client).post<ReissueResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zReissueResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -186,6 +200,7 @@ export const reissue = <ThrowOnError extends boolean = false>(options?: Options<
 });
 
 export const register1 = <ThrowOnError extends boolean = false>(options: Options<Register1Data, ThrowOnError>): RequestResult<Register1Responses, unknown, ThrowOnError> => (options.client ?? client).post<Register1Responses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zRegister1Response.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -200,6 +215,7 @@ export const register1 = <ThrowOnError extends boolean = false>(options: Options
 });
 
 export const logout = <ThrowOnError extends boolean = false>(options?: Options<LogoutData, ThrowOnError>): RequestResult<LogoutResponses, unknown, ThrowOnError> => (options?.client ?? client).post<LogoutResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zLogoutResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -210,6 +226,7 @@ export const logout = <ThrowOnError extends boolean = false>(options?: Options<L
 });
 
 export const getReviews = <ThrowOnError extends boolean = false>(options: Options<GetReviewsData, ThrowOnError>): RequestResult<GetReviewsResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetReviewsResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetReviewsResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -220,6 +237,7 @@ export const getReviews = <ThrowOnError extends boolean = false>(options: Option
 });
 
 export const createReview = <ThrowOnError extends boolean = false>(options: Options<CreateReviewData, ThrowOnError>): RequestResult<CreateReviewResponses, unknown, ThrowOnError> => (options.client ?? client).post<CreateReviewResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zCreateReviewResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -234,6 +252,7 @@ export const createReview = <ThrowOnError extends boolean = false>(options: Opti
 });
 
 export const withdraw = <ThrowOnError extends boolean = false>(options?: Options<WithdrawData, ThrowOnError>): RequestResult<WithdrawResponses, unknown, ThrowOnError> => (options?.client ?? client).delete<WithdrawResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zWithdrawResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -244,6 +263,7 @@ export const withdraw = <ThrowOnError extends boolean = false>(options?: Options
 });
 
 export const getMe = <ThrowOnError extends boolean = false>(options?: Options<GetMeData, ThrowOnError>): RequestResult<GetMeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetMeResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetMeResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -254,6 +274,7 @@ export const getMe = <ThrowOnError extends boolean = false>(options?: Options<Ge
 });
 
 export const updateMe = <ThrowOnError extends boolean = false>(options: Options<UpdateMeData, ThrowOnError>): RequestResult<UpdateMeResponses, unknown, ThrowOnError> => (options.client ?? client).patch<UpdateMeResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zUpdateMeResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -268,6 +289,7 @@ export const updateMe = <ThrowOnError extends boolean = false>(options: Options<
 });
 
 export const read1 = <ThrowOnError extends boolean = false>(options: Options<Read1Data, ThrowOnError>): RequestResult<Read1Responses, unknown, ThrowOnError> => (options.client ?? client).patch<Read1Responses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zRead1Response.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -278,6 +300,7 @@ export const read1 = <ThrowOnError extends boolean = false>(options: Options<Rea
 });
 
 export const readAll = <ThrowOnError extends boolean = false>(options?: Options<ReadAllData, ThrowOnError>): RequestResult<ReadAllResponses, unknown, ThrowOnError> => (options?.client ?? client).patch<ReadAllResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zReadAllResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -288,6 +311,7 @@ export const readAll = <ThrowOnError extends boolean = false>(options?: Options<
 });
 
 export const getMySettings = <ThrowOnError extends boolean = false>(options?: Options<GetMySettingsData, ThrowOnError>): RequestResult<GetMySettingsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetMySettingsResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetMySettingsResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -298,6 +322,7 @@ export const getMySettings = <ThrowOnError extends boolean = false>(options?: Op
 });
 
 export const updateMySettings = <ThrowOnError extends boolean = false>(options: Options<UpdateMySettingsData, ThrowOnError>): RequestResult<UpdateMySettingsResponses, unknown, ThrowOnError> => (options.client ?? client).patch<UpdateMySettingsResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zUpdateMySettingsResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -312,6 +337,7 @@ export const updateMySettings = <ThrowOnError extends boolean = false>(options: 
 });
 
 export const detail = <ThrowOnError extends boolean = false>(options: Options<DetailData, ThrowOnError>): RequestResult<DetailResponses, unknown, ThrowOnError> => (options.client ?? client).get<DetailResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zDetailResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -322,6 +348,7 @@ export const detail = <ThrowOnError extends boolean = false>(options: Options<De
 });
 
 export const reviewReport = <ThrowOnError extends boolean = false>(options: Options<ReviewReportData, ThrowOnError>): RequestResult<ReviewReportResponses, unknown, ThrowOnError> => (options.client ?? client).patch<ReviewReportResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zReviewReportResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -336,6 +363,7 @@ export const reviewReport = <ThrowOnError extends boolean = false>(options: Opti
 });
 
 export const decide = <ThrowOnError extends boolean = false>(options: Options<DecideData, ThrowOnError>): RequestResult<DecideResponses, unknown, ThrowOnError> => (options.client ?? client).patch<DecideResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zDecideResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -350,6 +378,7 @@ export const decide = <ThrowOnError extends boolean = false>(options: Options<De
 });
 
 export const reject = <ThrowOnError extends boolean = false>(options: Options<RejectData, ThrowOnError>): RequestResult<RejectResponses, unknown, ThrowOnError> => (options.client ?? client).patch<RejectResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zRejectResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -360,6 +389,7 @@ export const reject = <ThrowOnError extends boolean = false>(options: Options<Re
 });
 
 export const accept = <ThrowOnError extends boolean = false>(options: Options<AcceptData, ThrowOnError>): RequestResult<AcceptResponses, unknown, ThrowOnError> => (options.client ?? client).patch<AcceptResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zAcceptResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -370,6 +400,7 @@ export const accept = <ThrowOnError extends boolean = false>(options: Options<Ac
 });
 
 export const getProfile = <ThrowOnError extends boolean = false>(options?: Options<GetProfileData, ThrowOnError>): RequestResult<GetProfileResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetProfileResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetProfileResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -380,6 +411,7 @@ export const getProfile = <ThrowOnError extends boolean = false>(options?: Optio
 });
 
 export const updateProfile = <ThrowOnError extends boolean = false>(options: Options<UpdateProfileData, ThrowOnError>): RequestResult<UpdateProfileResponses, unknown, ThrowOnError> => (options.client ?? client).patch<UpdateProfileResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zUpdateProfileResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -394,6 +426,7 @@ export const updateProfile = <ThrowOnError extends boolean = false>(options: Opt
 });
 
 export const getMyNotifications = <ThrowOnError extends boolean = false>(options?: Options<GetMyNotificationsData, ThrowOnError>): RequestResult<GetMyNotificationsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetMyNotificationsResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetMyNotificationsResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -404,6 +437,7 @@ export const getMyNotifications = <ThrowOnError extends boolean = false>(options
 });
 
 export const getMyInsurances = <ThrowOnError extends boolean = false>(options?: Options<GetMyInsurancesData, ThrowOnError>): RequestResult<GetMyInsurancesResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetMyInsurancesResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetMyInsurancesResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -414,6 +448,7 @@ export const getMyInsurances = <ThrowOnError extends boolean = false>(options?: 
 });
 
 export const dashboard = <ThrowOnError extends boolean = false>(options?: Options<DashboardData, ThrowOnError>): RequestResult<DashboardResponses, unknown, ThrowOnError> => (options?.client ?? client).get<DashboardResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zDashboardResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -424,6 +459,7 @@ export const dashboard = <ThrowOnError extends boolean = false>(options?: Option
 });
 
 export const activitySummary = <ThrowOnError extends boolean = false>(options?: Options<ActivitySummaryData, ThrowOnError>): RequestResult<ActivitySummaryResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ActivitySummaryResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zActivitySummaryResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -434,6 +470,7 @@ export const activitySummary = <ThrowOnError extends boolean = false>(options?: 
 });
 
 export const getMyApplication = <ThrowOnError extends boolean = false>(options?: Options<GetMyApplicationData, ThrowOnError>): RequestResult<GetMyApplicationResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetMyApplicationResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetMyApplicationResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -444,6 +481,7 @@ export const getMyApplication = <ThrowOnError extends boolean = false>(options?:
 });
 
 export const reviewWorkspace = <ThrowOnError extends boolean = false>(options: Options<ReviewWorkspaceData, ThrowOnError>): RequestResult<ReviewWorkspaceResponses, unknown, ThrowOnError> => (options.client ?? client).get<ReviewWorkspaceResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zReviewWorkspaceResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -454,6 +492,7 @@ export const reviewWorkspace = <ThrowOnError extends boolean = false>(options: O
 });
 
 export const proposals = <ThrowOnError extends boolean = false>(options: Options<ProposalsData, ThrowOnError>): RequestResult<ProposalsResponses, unknown, ThrowOnError> => (options.client ?? client).get<ProposalsResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zProposalsResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -464,6 +503,7 @@ export const proposals = <ThrowOnError extends boolean = false>(options: Options
 });
 
 export const analysisStatus = <ThrowOnError extends boolean = false>(options: Options<AnalysisStatusData, ThrowOnError>): RequestResult<AnalysisStatusResponses, unknown, ThrowOnError> => (options.client ?? client).get<AnalysisStatusResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zAnalysisStatusResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -474,6 +514,7 @@ export const analysisStatus = <ThrowOnError extends boolean = false>(options: Op
 });
 
 export const pendingReview = <ThrowOnError extends boolean = false>(options?: Options<PendingReviewData, ThrowOnError>): RequestResult<PendingReviewResponses, unknown, ThrowOnError> => (options?.client ?? client).get<PendingReviewResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zPendingReviewResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -484,6 +525,7 @@ export const pendingReview = <ThrowOnError extends boolean = false>(options?: Op
 });
 
 export const summary = <ThrowOnError extends boolean = false>(options?: Options<SummaryData, ThrowOnError>): RequestResult<SummaryResponses, unknown, ThrowOnError> => (options?.client ?? client).get<SummaryResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zSummaryResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -494,6 +536,7 @@ export const summary = <ThrowOnError extends boolean = false>(options?: Options<
 });
 
 export const receivedProposals = <ThrowOnError extends boolean = false>(options?: Options<ReceivedProposalsData, ThrowOnError>): RequestResult<ReceivedProposalsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ReceivedProposalsResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zReceivedProposalsResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -504,6 +547,7 @@ export const receivedProposals = <ThrowOnError extends boolean = false>(options?
 });
 
 export const listMyRooms = <ThrowOnError extends boolean = false>(options?: Options<ListMyRoomsData, ThrowOnError>): RequestResult<ListMyRoomsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<ListMyRoomsResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zListMyRoomsResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -514,6 +558,7 @@ export const listMyRooms = <ThrowOnError extends boolean = false>(options?: Opti
 });
 
 export const getRoom = <ThrowOnError extends boolean = false>(options: Options<GetRoomData, ThrowOnError>): RequestResult<GetRoomResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetRoomResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetRoomResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -524,6 +569,7 @@ export const getRoom = <ThrowOnError extends boolean = false>(options: Options<G
 });
 
 export const getSharedReport = <ThrowOnError extends boolean = false>(options: Options<GetSharedReportData, ThrowOnError>): RequestResult<GetSharedReportResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetSharedReportResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetSharedReportResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -534,6 +580,7 @@ export const getSharedReport = <ThrowOnError extends boolean = false>(options: O
 });
 
 export const oauthCallback = <ThrowOnError extends boolean = false>(options: Options<OauthCallbackData, ThrowOnError>): RequestResult<OauthCallbackResponses, unknown, ThrowOnError> => (options.client ?? client).get<OauthCallbackResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zOauthCallbackResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -544,6 +591,7 @@ export const oauthCallback = <ThrowOnError extends boolean = false>(options: Opt
 });
 
 export const getAdjusters = <ThrowOnError extends boolean = false>(options?: Options<GetAdjustersData, ThrowOnError>): RequestResult<GetAdjustersResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetAdjustersResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetAdjustersResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -554,6 +602,7 @@ export const getAdjusters = <ThrowOnError extends boolean = false>(options?: Opt
 });
 
 export const getAdjusterDetail = <ThrowOnError extends boolean = false>(options: Options<GetAdjusterDetailData, ThrowOnError>): RequestResult<GetAdjusterDetailResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetAdjusterDetailResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetAdjusterDetailResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -574,6 +623,7 @@ export const reviewedReports = <ThrowOnError extends boolean = false>(options?: 
 });
 
 export const getMyPage = <ThrowOnError extends boolean = false>(options?: Options<GetMyPageData, ThrowOnError>): RequestResult<GetMyPageResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetMyPageResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zGetMyPageResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',
@@ -584,6 +634,7 @@ export const getMyPage = <ThrowOnError extends boolean = false>(options?: Option
 });
 
 export const home = <ThrowOnError extends boolean = false>(options?: Options<HomeData, ThrowOnError>): RequestResult<HomeResponses, unknown, ThrowOnError> => (options?.client ?? client).get<HomeResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zHomeResponse.parseAsync(data),
     security: [{
             in: 'cookie',
             name: 'access_token',

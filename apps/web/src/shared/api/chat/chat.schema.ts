@@ -63,13 +63,15 @@ export const chatAttachmentSchema = z.object({
   size: z.number().int(),
 });
 
-// 메시지 응답의 첨부(BE ChatMessageResponse.Attachment) — 조회 시점 단기 presigned GET URL 포함, key는 없음.
-// 업로드 응답과 shape이 달라 별도 스키마로 분리한다.
+// 메시지 응답의 첨부(BE ChatMessageResponse.Attachment).
+// 명세는 key·이름·형식·크기만 선언하고 url이 없다. 이미지 미리보기·다운로드에 url이 필요하므로
+// 백엔드에 응답 추가를 요청 중이며, 그전까지 없으면 없는 대로 받는다(파일명 칩은 그대로 동작).
 export const chatMessageAttachmentSchema = z.object({
-  url: z.string(),
+  attachmentKey: z.string(),
   name: z.string(),
   contentType: z.string(),
-  size: z.number().int(),
+  size: z.number().int().nullable(),
+  url: z.string().nullish(),
 });
 
 export const messageTypeSchema = z.enum(["TEXT", "IMAGE", "FILE", "SYSTEM"]);

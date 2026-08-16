@@ -24,7 +24,7 @@ export function MypageView() {
     <div className="mt-5.5">
       <ProfileSummaryCard
         profile={data.profile}
-        licenseNo={data.certification.licenseNo ?? "미등록"}
+        registrationNo={data.certification.registrationNo}
       />
 
       <div className="mt-5.5 grid grid-cols-3 gap-2.5 md:gap-4">
@@ -56,7 +56,7 @@ export function MypageView() {
       />
       <CredentialProofModal
         open={credentialOpen}
-        licenseNo={data.certification.licenseNo ?? "미등록"}
+        registrationNo={data.certification.registrationNo}
         onClose={() => setCredentialOpen(false)}
       />
     </div>

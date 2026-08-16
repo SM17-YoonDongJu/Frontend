@@ -314,6 +314,8 @@ const HEAD_REPORTS = [
   {
     reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
     status: "MATCHED",
+    title: "무릎 십자인대 파열",
+    analysisState: "COMPLETED",
     accidentType: "교통사고",
     createdAt: "2026-05-20T09:00:00Z",
     reportNo: "20260520-017",
@@ -328,6 +330,8 @@ const HEAD_REPORTS = [
   {
     reportId: DASHBOARD_AWAITING_REPORT_ID,
     status: "AWAITING_INSPECTION",
+    title: "실손 의료비 청구",
+    analysisState: "PROCESSING",
     accidentType: "실손",
     createdAt: "2026-05-12T09:00:00Z",
     reportNo: "20260512-009",
@@ -347,6 +351,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "b2c9d0e1-3f4a-4b5c-8d6e-7f8a9b0c1d2e",
     status: "COUNSELING",
+    title: "골절 통원 치료",
+    analysisState: "COMPLETED",
     accidentType: "골절",
     createdAt: "2026-05-08T09:00:00Z",
     reportNo: "20260508-005",
@@ -361,6 +367,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "c3d0e1f2-4a5b-4c6d-9e7f-8a9b0c1d2e3f",
     status: "AWAITING_ADOPTION",
+    title: "교차로 추돌 사고",
+    analysisState: "COMPLETED",
     accidentType: "교통사고",
     createdAt: "2026-04-30T09:00:00Z",
     reportNo: "20260430-118",
@@ -375,6 +383,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "d4e1f2a3-5b6c-4d7e-8f9a-9b0c1d2e3f4a",
     status: "MATCHED",
+    title: "실손 도수치료 청구",
+    analysisState: "COMPLETED",
     accidentType: "실손",
     createdAt: "2026-04-22T09:00:00Z",
     reportNo: "20260422-077",
@@ -389,6 +399,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "e5f2a3b4-6c7d-4e8f-9a0b-0c1d2e3f4a5b",
     status: "AWAITING_INSPECTION",
+    title: "손목 골절 진단",
+    analysisState: "PROCESSING",
     accidentType: "골절",
     createdAt: "2026-04-15T09:00:00Z",
     reportNo: "20260415-031",
@@ -403,6 +415,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "f6a3b4c5-7d8e-4f9a-8b1c-1d2e3f4a5b6c",
     status: "MATCHED",
+    title: "차량 전복 사고 입원",
+    analysisState: "COMPLETED",
     accidentType: "교통사고",
     createdAt: "2026-04-03T09:00:00Z",
     reportNo: "20260403-208",
@@ -417,6 +431,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "a7b4c5d6-8e9f-4a0b-9c2d-2e3f4a5b6c7d",
     status: "NOT_SELECTED",
+    title: "어깨 회전근개 파열",
+    analysisState: "COMPLETED",
     accidentType: "실손",
     createdAt: "2026-03-26T09:00:00Z",
     reportNo: "20260326-142",
@@ -575,6 +591,8 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
   ],
   registrationNo: "제0000호",
   updatedAt: "2026-06-20T08:00:00Z",
+  // 스펙 필수 — 최근 후기. 상세 목록은 GET /adjusters/{id}/reviews가 따로 준다.
+  recentReviews: [],
   // 대시보드 헤더·인사말용 집계(읽기 전용)
   averageRating: 4.9,
   reviewCount: 86,
@@ -682,7 +700,9 @@ const ADJUSTER_MYPAGE = {
     averageRating: 4.9,
   },
   certification: {
-    licenseNo: "제2014-0087호",
+    registrationNo: "제2014-0087호",
+    verifiedAt: "2026-01-01T00:00:00Z",
+    // CONTRACT(명세없음): 화면이 쓰는 확장 — 활동 지역·등록 시각. 스펙 Certification엔 없다.
     activityRegion: "서울·경기",
     createdAt: "2026-01-01T00:00:00Z",
   },
@@ -700,6 +720,8 @@ type MockAdjusterApplication = {
   status: "PENDING" | "APPROVED" | "REJECTED";
   submittedAt: string;
   name: string;
+  /** 스펙 필수(단수 문자열) — 화면은 specialties를 쓴다. */
+  speciality: string;
   specialties: string[];
   licenseNo: string | null;
   documents: MockSubmittedDocument[];
@@ -718,6 +740,9 @@ function buildAdjusterApplication(
     status,
     submittedAt: "2026-07-05T09:00:00Z",
     name: "김상정",
+    // 스펙은 speciality(단수 문자열)를 필수로 두고, 화면은 specialties(배열)를 쓴다.
+    // 백엔드 확인 전까지 양쪽을 함께 내려 계약과 화면을 모두 만족시킨다.
+    speciality: "후유장해",
     specialties: ["후유장해", "교통사고"],
     licenseNo: "제2014-0087호",
     documents: [
@@ -793,6 +818,8 @@ interface MockMessageAttachment {
 function toMessageAttachmentDto(attachment?: MockMessageAttachment) {
   if (!attachment) return null;
   return {
+    attachmentKey: attachment.attachmentKey,
+    // 명세엔 없지만 이미지 미리보기·다운로드에 필요한 값 — 백엔드 응답 추가 요청 대상.
     url: `https://mock-s3.example.com/${attachment.attachmentKey}?X-Amz-Signature=mock`,
     name: attachment.name,
     contentType: attachment.contentType,
@@ -837,12 +864,15 @@ function toChatRoomDto(room: MockChatRoom) {
     unreadCount: room.unreadCount,
     caseNo: room.caseNo,
     reportTypeLabel: room.reportTypeLabel,
+    // 스펙 필수 — 방 개설 시각. 목은 마지막 갱신 시각을 그대로 쓴다.
+    createdAt: room.updatedAt,
   };
 }
 
 // MockChatMessage → GET/POST messages 응답 message(camel).
-function toChatMessageDto(message: MockChatMessage) {
+function toChatMessageDto(message: MockChatMessage, chatRoomId: string) {
   return {
+    chatRoomId,
     messageId: message.messageId,
     senderId: message.senderId,
     messageType: deriveMessageType(message.attachment),
@@ -1117,6 +1147,8 @@ export const handlers = [
       status: "PENDING",
       submittedAt: new Date().toISOString(),
       name: body.name,
+      // 스펙 필수 speciality(단수)와 화면이 쓰는 specialties(배열)를 함께 내려보낸다.
+      speciality: body.specialties?.[0] ?? "",
       specialties: body.specialties,
       licenseNo: body.license_no ?? null,
       // 실응답 documents는 서류 종류별 심사 상태(PENDING) — 자격증 사본은 제출 시에만 생성.
@@ -1269,7 +1301,7 @@ export const handlers = [
       status: "200",
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
-        messages: page.toReversed().map(toChatMessageDto),
+        messages: page.toReversed().map((m) => toChatMessageDto(m, chatRoomId)),
         nextCursor,
         hasNext,
       }),
@@ -3260,7 +3292,7 @@ export const handlers = [
           gender: "여",
           birthDate: "1991-04-12",
           region: "서울 강남",
-          joinedAt: "2024-03-01",
+          joinedAt: "2024-03-01T00:00:00Z",
         },
         claim: {
           accidentType: "후유장해",
@@ -3276,7 +3308,7 @@ export const handlers = [
         },
         attachments: [
           {
-            attachmentId: "att-1",
+            attachmentId: "a7700000-0000-4000-8000-000000000001",
             name: "진단서",
             mimeType: "application/pdf",
             url: "https://cdn.example.com/reports/att-1.pdf",
@@ -3288,7 +3320,7 @@ export const handlers = [
               "우측 슬관절 후방십자인대 완전 파열, 관절경적 재건술 시행. 향후 장해 잔존 가능성 명시.",
           },
           {
-            attachmentId: "att-2",
+            attachmentId: "a7700000-0000-4000-8000-000000000002",
             name: "MRI 영상 판독지",
             mimeType: "application/pdf",
             url: "https://cdn.example.com/reports/att-2.pdf",
@@ -3299,7 +3331,7 @@ export const handlers = [
             aiSummary: "후방십자인대 연속성 소실 확인, 동반 반월상연골 손상 의심.",
           },
           {
-            attachmentId: "att-3",
+            attachmentId: "a7700000-0000-4000-8000-000000000003",
             name: "입퇴원 확인서",
             mimeType: "image/jpeg",
             url: "https://cdn.example.com/reports/att-3.jpg",
@@ -3395,6 +3427,8 @@ export const handlers = [
         ],
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
+        // 스펙 필수 — 분석 처리 상태.
+        analysisState: "COMPLETED",
         reportNo: "20260520-017",
         adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : null,
         reviewComment: isCustomerSample
@@ -3439,6 +3473,7 @@ export const handlers = [
         status: "AWAITING_ADOPTION",
         reportReviewId: crypto.randomUUID(),
         reviewStatus: "SENT",
+        sentAt: new Date().toISOString(),
       }),
     });
   }),
