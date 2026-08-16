@@ -135,6 +135,93 @@ jobs:
             - < /tmp/audit/prompt.md
           test -s /tmp/audit/result.md
 
+      - name: 신규 항목 개별 이슈 생성
+        if: steps.gate.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          : > /tmp/audit/created-issues.md
+
+          # 보고서 말미의 기계 판독 블록에서 신규 항목만 추출
+          awk '/^<!-- NEW-ITEMS-JSON$/{flag=1;next} /^-->$/{flag=0} flag' \
+            /tmp/audit/result.md > /tmp/audit/new-items.json
+
+          if ! jq -e 'type == "array"' /tmp/audit/new-items.json >/dev/null 2>&1; then
+            echo "::warning::기계 판독 블록을 파싱하지 못했습니다. 이슈 생성을 건너뛰고 댓글만 등록합니다."
+            exit 0
+          fi
+
+          COUNT=$(jq 'length' /tmp/audit/new-items.json)
+          echo "신규 항목 ${COUNT}건"
+          [ "$COUNT" -eq 0 ] && exit 0
+
+          # 같은 항목 ID로 이미 만든 이슈가 있으면 건너뛴다(workflow_dispatch 재실행 대비)
+          gh issue list --state all --limit 500 --json number,body \
+            > /tmp/audit/existing-issues.json
+
+          jq -c '.[]' /tmp/audit/new-items.json | while read -r item; do
+            ID=$(jq -r '.id' <<<"$item")
+            TITLE=$(jq -r '.title' <<<"$item")
+            TAG=$(jq -r '.tag' <<<"$item")
+            CONDITION=$(jq -r '.condition' <<<"$item")
+            EVIDENCE=$(jq -r '.evidence' <<<"$item")
+            DETAIL=$(jq -r '.detail' <<<"$item")
+            MARKER="<!-- audit-item: ${ID} -->"
+
+            DUP=$(jq -r --arg m "$MARKER" \
+              '[.[] | select(.body != null and (.body | contains($m))) | .number] | first // empty' \
+              /tmp/audit/existing-issues.json)
+            if [ -n "$DUP" ]; then
+              echo "${ID}: 이미 #${DUP}로 생성됨, 건너뜀"
+              echo "- **${ID}** #${DUP} (기존)" >> /tmp/audit/created-issues.md
+              continue
+            fi
+
+            case "$TAG" in
+              Fix)      LABELS="FE,Fix" ;;
+              Refactor) LABELS="FE,Refactor" ;;
+              Feature)  LABELS="FE,Feature" ;;
+              Infra)    LABELS="FE,Infra" ;;
+              Docs)     LABELS="FE,Docs" ;;
+              *)        LABELS="FE" ;;
+            esac
+
+            {
+              echo "## 배경"
+              echo
+              echo "- 정기 코드 점검에서 신규 \`${ID}\`로 검출됐습니다."
+              echo "- ${DETAIL}"
+              echo "- 근거: \`${EVIDENCE}\`"
+              echo "- 착수 조건: \`[${CONDITION}]\`"
+              echo
+              echo "## 작업 항목"
+              echo
+              echo "- [ ] \`${EVIDENCE}\` — ${DETAIL}"
+              echo
+              echo "## 완료 조건"
+              echo
+              echo "- [ ] \`${EVIDENCE}\` 위치의 지적 사항이 해소된다"
+              echo "- [ ] \`pnpm typecheck\` · lint 통과"
+              echo
+              echo "---"
+              echo
+              echo "추적 이슈 #${TRACKING_ISSUE} · 자동 생성 ([워크플로 실행](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}))"
+              echo
+              echo "$MARKER"
+            } > /tmp/audit/issue-body.tmp.md
+
+            URL=$(gh issue create \
+              --title "[${TAG}] ${TITLE}" \
+              --body-file /tmp/audit/issue-body.tmp.md \
+              --label "$LABELS") || { echo "::warning::${ID} 이슈 생성 실패"; continue; }
+
+            NUM="${URL##*/}"
+            echo "${ID} → ${URL}"
+            gh issue edit "$NUM" --add-assignee JuJangGwon >/dev/null 2>&1 \
+              || echo "::warning::#${NUM} assignee 지정 실패(권한), 수동 지정 필요"
+            echo "- **${ID}** #${NUM} \`[${CONDITION}]\` ${TITLE}" >> /tmp/audit/created-issues.md
+          done
+
       - name: 점검 결과 이슈 댓글 등록
         if: steps.gate.outputs.run == 'true'
         env:
@@ -144,7 +231,15 @@ jobs:
           {
             echo "## 🤖 정기 코드 점검 — last-audit 이후 ${AUDIT_COUNT}커밋 (${GITHUB_SHA::7})"
             echo
-            cat /tmp/audit/result.md
+            # 기계 판독 블록은 이슈 생성에만 쓰이므로 댓글에서 걷어낸다
+            awk '/^<!-- NEW-ITEMS-JSON$/{flag=1} /^-->$/{if(flag){flag=0;next}} !flag' \
+              /tmp/audit/result.md
+            if [ -s /tmp/audit/created-issues.md ]; then
+              echo
+              echo "### 생성된 이슈"
+              echo
+              cat /tmp/audit/created-issues.md
+            fi
             echo
             echo "---"
             echo "_[워크플로 실행](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) · codex exec_"
