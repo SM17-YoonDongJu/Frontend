@@ -149,7 +149,7 @@ test.describe("모바일 내 정보 허브", () => {
     await page.goto(PATH);
 
     await expect(
-      page.getByRole("heading", { name: "내 정보" }).filter({ visible: true }),
+      page.getByRole("heading", { level: 1, name: "내 정보" }).filter({ visible: true }),
     ).toBeVisible();
     await expect(
       page.getByText("일반 회원").filter({ visible: true }),
@@ -189,7 +189,7 @@ test.describe("모바일 파트너 전환 role 조건부", () => {
 
     // 허브가 렌더된 뒤(설정 리스트 노출) 파트너 전환 부재를 단언
     await expect(
-      page.getByRole("heading", { name: "내 정보" }).filter({ visible: true }),
+      page.getByRole("heading", { level: 1, name: "내 정보" }).filter({ visible: true }),
     ).toBeVisible();
     await expect(page.getByText("파트너 모드로 전환")).toHaveCount(0);
   });

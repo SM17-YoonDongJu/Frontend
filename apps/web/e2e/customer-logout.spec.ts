@@ -65,7 +65,7 @@ test.describe("모바일", () => {
   test("하단 로그아웃을 누르면 로그인 화면으로 이동한다", async ({ page }) => {
     await page.goto(MYPAGE_PATH);
     await expect(
-      page.getByRole("heading", { name: "내 정보" }).filter({ visible: true }),
+      page.getByRole("heading", { level: 1, name: "내 정보" }).filter({ visible: true }),
     ).toBeVisible();
 
     await clickLogout(page);
@@ -81,7 +81,7 @@ test.describe("모바일", () => {
 
     await page.goto(MYPAGE_PATH);
     await expect(
-      page.getByRole("heading", { name: "내 정보" }).filter({ visible: true }),
+      page.getByRole("heading", { level: 1, name: "내 정보" }).filter({ visible: true }),
     ).toBeVisible();
 
     await clickLogout(page);
