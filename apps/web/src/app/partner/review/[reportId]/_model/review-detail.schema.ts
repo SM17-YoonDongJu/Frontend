@@ -9,9 +9,10 @@ import type {
   ReviewWorkspaceResponse,
 } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
+import { enumWithFallback } from "@/shared/lib/enum-with-fallback";
 
 /** 리포트 생명주기 상태 (ERD REPORTS.status 5상태). */
-export const reviewReportStatusSchema = z.enum([
+export const reviewReportStatusSchema = enumWithFallback([
   "AWAITING_INSPECTION",
   "AWAITING_ADOPTION",
   "COUNSELING",
@@ -20,7 +21,7 @@ export const reviewReportStatusSchema = z.enum([
 ]);
 
 /** 검수 방향(작업본 상태). */
-export const reviewDirectionStatusSchema = z.enum([
+export const reviewDirectionStatusSchema = enumWithFallback([
   "SENT",
   "COUNSELING",
   "REJECTED",
