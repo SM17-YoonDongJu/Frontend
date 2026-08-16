@@ -25,9 +25,14 @@ function toWireResponse<Args extends unknown[]>(
     if (body === null || typeof body !== "object" || !("data" in body)) return result;
 
     const envelope = body as Record<string, unknown>;
+    // 원본 Content-Length는 변환 전 본문 기준이라 그대로 넘기면 새 본문과 어긋난다.
+    // HttpResponse.json은 넘겨받은 값이 있으면 다시 계산하지 않으므로 지워서 넘긴다.
+    const headers = new Headers(result.headers);
+    headers.delete("content-length");
+
     return HttpResponse.json(
       { ...envelope, data: camelToSnakeDeep(envelope.data) },
-      { status: result.status, headers: result.headers },
+      { status: result.status, headers },
     );
   };
 }
