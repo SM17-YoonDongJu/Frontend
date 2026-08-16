@@ -8,12 +8,12 @@ import { CredentialInfoRow } from "./CredentialInfoRow";
 
 interface CredentialProofModalProps {
   open: boolean;
-  licenseNo: string;
+  registrationNo: string;
   onClose: () => void;
 }
 
 /** 인증·자격 증빙 모달(Figma 146-4831) — 정적 표시 전용. */
-export function CredentialProofModal({ open, licenseNo, onClose }: CredentialProofModalProps) {
+export function CredentialProofModal({ open, registrationNo, onClose }: CredentialProofModalProps) {
   return (
     <Modal open={open} kicker="내 정보" title="인증 · 자격 증빙" onClose={onClose}>
       <div className="flex items-start gap-2.5 rounded-card bg-green-soft px-3.5 py-3">
@@ -27,7 +27,7 @@ export function CredentialProofModal({ open, licenseNo, onClose }: CredentialPro
       </div>
 
       <dl className="mt-4 divide-y divide-line-2">
-        <CredentialInfoRow label="등록번호" value={licenseNo} />
+        <CredentialInfoRow label="등록번호" value={registrationNo} />
         <CredentialInfoRow label="자격 구분" value={CREDENTIAL_PROOF.speciality} />
         {CREDENTIAL_PROOF.documents.map((doc) => (
           <CredentialInfoRow

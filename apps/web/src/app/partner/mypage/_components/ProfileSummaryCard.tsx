@@ -6,10 +6,10 @@ import type { MypageProfile } from "../_model/types";
 
 interface ProfileSummaryCardProps {
   profile: MypageProfile;
-  licenseNo: string;
+  registrationNo: string;
 }
 
-export function ProfileSummaryCard({ profile, licenseNo }: ProfileSummaryCardProps) {
+export function ProfileSummaryCard({ profile, registrationNo }: ProfileSummaryCardProps) {
   const certificated = profile.role === "CERTIFICATED_ADJUSTER";
 
   return (
@@ -40,7 +40,7 @@ export function ProfileSummaryCard({ profile, licenseNo }: ProfileSummaryCardPro
         <p className="mt-1 truncate text-[0.8125rem] text-white/65 md:mt-1.5">
           경력 {profile.career}년 ·{" "}
           <span className="hidden md:inline">{profile.specialties.join(" · ")} 전문 · </span>
-          등록번호 {licenseNo}
+          등록번호 {registrationNo}
         </p>
         <p className="mt-1 hidden truncate text-[0.8125rem] text-white/50 md:block">
           {profile.activityRegion}

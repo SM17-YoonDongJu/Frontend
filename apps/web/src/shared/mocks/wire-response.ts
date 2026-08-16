@@ -10,6 +10,29 @@ import { camelToSnakeDeep } from "@/shared/api/case-convert";
  *
  * 응답 래퍼의 data만 바꾼다 — status·message·code는 서버도 그대로 내려준다.
  */
+/**
+ * 스펙이 camelCase로 선언한 필드 — 백엔드가 이 자리에만 이름을 명시한 것으로 보인다.
+ * 전역 snake 변환이 이들까지 바꾸면 실서버와 다른 모양이 되므로 되돌린다.
+ */
+const SPEC_CAMEL_KEYS: Record<string, string> = {
+  issue_id: "issueId",
+  issue_count: "issueCount",
+  issued_by: "issuedBy",
+  issued_at: "issuedAt",
+};
+
+function restoreSpecCamelKeys(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(restoreSpecCamelKeys);
+  if (value === null || typeof value !== "object") return value;
+
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>).map(([key, child]) => [
+      SPEC_CAMEL_KEYS[key] ?? key,
+      restoreSpecCamelKeys(child),
+    ]),
+  );
+}
+
 function toWireResponse<Args extends unknown[]>(
   resolver: (...args: Args) => unknown,
 ): (...args: Args) => Promise<unknown> {
@@ -31,7 +54,7 @@ function toWireResponse<Args extends unknown[]>(
     headers.delete("content-length");
 
     return HttpResponse.json(
-      { ...envelope, data: camelToSnakeDeep(envelope.data) },
+      { ...envelope, data: restoreSpecCamelKeys(camelToSnakeDeep(envelope.data)) },
       { status: result.status, headers },
     );
   };

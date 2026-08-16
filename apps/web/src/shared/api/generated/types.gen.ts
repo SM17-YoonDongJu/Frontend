@@ -187,7 +187,7 @@ export type ChatMessageResponse = {
     /**
      * 첨부가 없는 메시지는 null
      */
-    attachment?: Attachment;
+    attachment?: Attachment | null;
     is_mine: boolean;
     created_at: string;
 };
@@ -485,7 +485,9 @@ export type ApiResponseUserInsuranceListResponse = {
 };
 
 export type UserInsuranceListResponse = {
-    list: Array<Item>;
+    list: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 export type ActiveReport = {
@@ -509,13 +511,15 @@ export type ProposalSummary = {
     min_amount?: number | null;
     max_amount?: number | null;
     avg_amount?: number | null;
-    items: Array<Item>;
+    items: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 export type UserDashboardResponse = {
     report_count?: number;
-    active_report?: ActiveReport;
-    proposal_summary?: ProposalSummary;
+    active_report?: ActiveReport | null;
+    proposal_summary?: ProposalSummary | null;
 };
 
 export type ApiResponseUserActivitySummaryResponse = {
@@ -636,7 +640,7 @@ export type CustomerReportDetailResponse = {
     /**
      * 담당 사정사(adjusterId)가 없으면 null
      */
-    adjuster?: Adjuster;
+    adjuster?: Adjuster | null;
     /**
      * 분석(OCR·AI) 처리 상태. REPORTS.status와 다른 축이다. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단)
      */
@@ -733,14 +737,14 @@ export type ReviewWorkspaceResponse = {
     confidence_level?: string | null;
     is_masked?: boolean;
     offered_amount?: number | null;
-    client?: Client;
-    claim?: ClaimContext;
+    client?: Client | null;
+    claim?: ClaimContext | null;
     attachments: Array<AttachmentItem>;
     ai_estimate: Estimate;
     /**
      * 사정사 작업본(started=false)이 없으면 null
      */
-    adjuster_estimate?: Estimate;
+    adjuster_estimate?: Estimate | null;
     applicable_guarantees: Array<string>;
     omitted_special_contract: Array<string>;
     basis_terms_precedents: Array<string>;
@@ -834,7 +838,9 @@ export type ApiResponsePendingReviewListResponse = {
 };
 
 export type PendingReviewListResponse = {
-    list: Array<Item>;
+    list: Array<{
+        [key: string]: unknown;
+    }>;
     pagination: Pagination;
 };
 
@@ -1020,7 +1026,9 @@ export type OAuthCallbackResponse = {
 };
 
 export type AdjusterListResponse = {
-    list: Array<Item>;
+    list: Array<{
+        [key: string]: unknown;
+    }>;
     pagination: Pagination;
     meta: Meta;
 };
@@ -1076,7 +1084,9 @@ export type ConsultGuide = {
 };
 
 export type AdjusterReviewListResponse = {
-    list: Array<Item>;
+    list: Array<{
+        [key: string]: unknown;
+    }>;
     pagination: Pagination;
 };
 
@@ -1138,7 +1148,9 @@ export type ApiResponseAdjusterHomeResponse = {
 
 export type InProgressCases = {
     total?: number;
-    items: Array<Item>;
+    items: Array<{
+        [key: string]: unknown;
+    }>;
 };
 
 export type Rating = {
