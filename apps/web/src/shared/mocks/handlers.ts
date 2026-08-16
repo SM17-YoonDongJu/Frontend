@@ -3473,6 +3473,7 @@ export const handlers = [
         status: "AWAITING_ADOPTION",
         reportReviewId: crypto.randomUUID(),
         reviewStatus: "SENT",
+        sentAt: new Date().toISOString(),
       }),
     });
   }),
