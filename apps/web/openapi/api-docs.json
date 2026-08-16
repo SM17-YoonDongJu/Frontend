@@ -22,8 +22,8 @@
         "tags": [
           "device-token-controller"
         ],
-        "operationId": "register",
-        "requestBody": {
+        "operation_id": "register",
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -50,8 +50,8 @@
         "tags": [
           "device-token-controller"
         ],
-        "operationId": "deregister",
-        "requestBody": {
+        "operation_id": "deregister",
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -80,8 +80,8 @@
         "tags": [
           "adjuster-application-controller"
         ],
-        "operationId": "apply",
-        "requestBody": {
+        "operation_id": "apply",
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -110,7 +110,7 @@
         "tags": [
           "upload-controller"
         ],
-        "operationId": "upload",
+        "operation_id": "upload",
         "parameters": [
           {
             "name": "purpose",
@@ -121,7 +121,7 @@
             }
           }
         ],
-        "requestBody": {
+        "request_body": {
           "content": {
             "multipart/form-data": {
               "schema": {
@@ -158,7 +158,7 @@
         "tags": [
           "report-controller"
         ],
-        "operationId": "list",
+        "operation_id": "list",
         "parameters": [
           {
             "name": "status",
@@ -206,8 +206,8 @@
         "tags": [
           "report-controller"
         ],
-        "operationId": "create",
-        "requestBody": {
+        "operation_id": "create",
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -236,7 +236,7 @@
         "tags": [
           "pending-review-controller"
         ],
-        "operationId": "addHold",
+        "operation_id": "addHold",
         "parameters": [
           {
             "name": "reportId",
@@ -248,7 +248,7 @@
             }
           }
         ],
-        "requestBody": {
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -277,7 +277,7 @@
         "tags": [
           "chat-report-controller"
         ],
-        "operationId": "report",
+        "operation_id": "report",
         "parameters": [
           {
             "name": "chatRoomId",
@@ -289,7 +289,7 @@
             }
           }
         ],
-        "requestBody": {
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -318,7 +318,7 @@
         "tags": [
           "chat-room-controller"
         ],
-        "operationId": "read",
+        "operation_id": "read",
         "parameters": [
           {
             "name": "chatRoomId",
@@ -349,7 +349,7 @@
         "tags": [
           "chat-message-controller"
         ],
-        "operationId": "getMessages",
+        "operation_id": "getMessages",
         "parameters": [
           {
             "name": "chatRoomId",
@@ -396,7 +396,7 @@
         "tags": [
           "chat-message-controller"
         ],
-        "operationId": "send",
+        "operation_id": "send",
         "parameters": [
           {
             "name": "chatRoomId",
@@ -408,7 +408,7 @@
             }
           }
         ],
-        "requestBody": {
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -437,7 +437,7 @@
         "tags": [
           "chat-message-controller"
         ],
-        "operationId": "uploadAttachment",
+        "operation_id": "uploadAttachment",
         "parameters": [
           {
             "name": "chatRoomId",
@@ -449,7 +449,7 @@
             }
           }
         ],
-        "requestBody": {
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -486,7 +486,7 @@
         "tags": [
           "auth-controller"
         ],
-        "operationId": "reissue",
+        "operation_id": "reissue",
         "responses": {
           "200": {
             "description": "OK",
@@ -506,8 +506,8 @@
         "tags": [
           "auth-controller"
         ],
-        "operationId": "register_1",
-        "requestBody": {
+        "operation_id": "register_1",
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -536,7 +536,7 @@
         "tags": [
           "auth-controller"
         ],
-        "operationId": "logout",
+        "operation_id": "logout",
         "responses": {
           "200": {
             "description": "OK",
@@ -556,7 +556,7 @@
         "tags": [
           "adjuster-review-controller"
         ],
-        "operationId": "getReviews",
+        "operation_id": "getReviews",
         "parameters": [
           {
             "name": "adjusterId",
@@ -605,7 +605,7 @@
         "tags": [
           "adjuster-review-controller"
         ],
-        "operationId": "createReview",
+        "operation_id": "createReview",
         "parameters": [
           {
             "name": "adjusterId",
@@ -617,7 +617,7 @@
             }
           }
         ],
-        "requestBody": {
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -646,7 +646,7 @@
         "tags": [
           "user-controller"
         ],
-        "operationId": "getMe",
+        "operation_id": "getMe",
         "responses": {
           "200": {
             "description": "OK",
@@ -664,7 +664,7 @@
         "tags": [
           "user-controller"
         ],
-        "operationId": "withdraw",
+        "operation_id": "withdraw",
         "responses": {
           "200": {
             "description": "OK",
@@ -682,8 +682,8 @@
         "tags": [
           "user-controller"
         ],
-        "operationId": "updateMe",
-        "requestBody": {
+        "operation_id": "updateMe",
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -712,7 +712,7 @@
         "tags": [
           "notification-controller"
         ],
-        "operationId": "read_1",
+        "operation_id": "read_1",
         "parameters": [
           {
             "name": "notificationId",
@@ -743,7 +743,7 @@
         "tags": [
           "notification-controller"
         ],
-        "operationId": "readAll",
+        "operation_id": "readAll",
         "responses": {
           "200": {
             "description": "OK",
@@ -763,7 +763,7 @@
         "tags": [
           "notification-setting-controller"
         ],
-        "operationId": "getMySettings",
+        "operation_id": "getMySettings",
         "responses": {
           "200": {
             "description": "OK",
@@ -781,8 +781,8 @@
         "tags": [
           "notification-setting-controller"
         ],
-        "operationId": "updateMySettings",
-        "requestBody": {
+        "operation_id": "updateMySettings",
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -811,7 +811,7 @@
         "tags": [
           "report-controller"
         ],
-        "operationId": "detail",
+        "operation_id": "detail",
         "parameters": [
           {
             "name": "reportId",
@@ -840,7 +840,7 @@
         "tags": [
           "pending-review-controller"
         ],
-        "operationId": "reviewReport",
+        "operation_id": "reviewReport",
         "parameters": [
           {
             "name": "reportId",
@@ -852,7 +852,7 @@
             }
           }
         ],
-        "requestBody": {
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -881,7 +881,7 @@
         "tags": [
           "report-controller"
         ],
-        "operationId": "decide",
+        "operation_id": "decide",
         "parameters": [
           {
             "name": "reportId",
@@ -902,7 +902,7 @@
             }
           }
         ],
-        "requestBody": {
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -931,7 +931,7 @@
         "tags": [
           "chat-room-controller"
         ],
-        "operationId": "reject",
+        "operation_id": "reject",
         "parameters": [
           {
             "name": "chatRoomId",
@@ -962,7 +962,7 @@
         "tags": [
           "chat-room-controller"
         ],
-        "operationId": "accept",
+        "operation_id": "accept",
         "parameters": [
           {
             "name": "chatRoomId",
@@ -993,7 +993,7 @@
         "tags": [
           "adjuster-profile-controller"
         ],
-        "operationId": "getProfile",
+        "operation_id": "getProfile",
         "responses": {
           "200": {
             "description": "OK",
@@ -1011,8 +1011,8 @@
         "tags": [
           "adjuster-profile-controller"
         ],
-        "operationId": "updateProfile",
-        "requestBody": {
+        "operation_id": "updateProfile",
+        "request_body": {
           "content": {
             "application/json": {
               "schema": {
@@ -1041,7 +1041,7 @@
         "tags": [
           "notification-controller"
         ],
-        "operationId": "getMyNotifications",
+        "operation_id": "getMyNotifications",
         "parameters": [
           {
             "name": "page",
@@ -1083,7 +1083,7 @@
         "tags": [
           "user-insurance-controller"
         ],
-        "operationId": "getMyInsurances",
+        "operation_id": "getMyInsurances",
         "responses": {
           "200": {
             "description": "OK",
@@ -1103,7 +1103,7 @@
         "tags": [
           "user-dashboard-controller"
         ],
-        "operationId": "dashboard",
+        "operation_id": "dashboard",
         "responses": {
           "200": {
             "description": "OK",
@@ -1123,7 +1123,7 @@
         "tags": [
           "user-activity-summary-controller"
         ],
-        "operationId": "activitySummary",
+        "operation_id": "activitySummary",
         "responses": {
           "200": {
             "description": "OK",
@@ -1143,7 +1143,7 @@
         "tags": [
           "adjuster-application-controller"
         ],
-        "operationId": "getMyApplication",
+        "operation_id": "getMyApplication",
         "responses": {
           "200": {
             "description": "OK",
@@ -1163,7 +1163,7 @@
         "tags": [
           "pending-review-controller"
         ],
-        "operationId": "reviewWorkspace",
+        "operation_id": "reviewWorkspace",
         "parameters": [
           {
             "name": "reportId",
@@ -1194,7 +1194,7 @@
         "tags": [
           "report-controller"
         ],
-        "operationId": "proposals",
+        "operation_id": "proposals",
         "parameters": [
           {
             "name": "reportId",
@@ -1240,12 +1240,43 @@
         }
       }
     },
+    "/reports/{reportId}/analysis-status": {
+      "get": {
+        "tags": [
+          "report-controller"
+        ],
+        "operation_id": "analysisStatus",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportAnalysisStatusResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/reports/pending-review": {
       "get": {
         "tags": [
           "pending-review-controller"
         ],
-        "operationId": "pendingReview",
+        "operation_id": "pendingReview",
         "parameters": [
           {
             "name": "status",
@@ -1311,7 +1342,7 @@
         "tags": [
           "pending-review-controller"
         ],
-        "operationId": "summary",
+        "operation_id": "summary",
         "responses": {
           "200": {
             "description": "OK",
@@ -1331,7 +1362,7 @@
         "tags": [
           "report-controller"
         ],
-        "operationId": "receivedProposals",
+        "operation_id": "receivedProposals",
         "parameters": [
           {
             "name": "page",
@@ -1373,7 +1404,7 @@
         "tags": [
           "chat-room-controller"
         ],
-        "operationId": "listMyRooms",
+        "operation_id": "listMyRooms",
         "responses": {
           "200": {
             "description": "OK",
@@ -1393,7 +1424,7 @@
         "tags": [
           "chat-room-controller"
         ],
-        "operationId": "getRoom",
+        "operation_id": "getRoom",
         "parameters": [
           {
             "name": "chatRoomId",
@@ -1424,7 +1455,7 @@
         "tags": [
           "chat-room-controller"
         ],
-        "operationId": "getSharedReport",
+        "operation_id": "getSharedReport",
         "parameters": [
           {
             "name": "chatRoomId",
@@ -1455,7 +1486,7 @@
         "tags": [
           "auth-controller"
         ],
-        "operationId": "oauthCallback",
+        "operation_id": "oauthCallback",
         "parameters": [
           {
             "name": "provider",
@@ -1509,7 +1540,7 @@
         "tags": [
           "adjuster-controller"
         ],
-        "operationId": "getAdjusters",
+        "operation_id": "getAdjusters",
         "parameters": [
           {
             "name": "keyword",
@@ -1583,7 +1614,7 @@
         "tags": [
           "adjuster-controller"
         ],
-        "operationId": "getAdjusterDetail",
+        "operation_id": "getAdjusterDetail",
         "parameters": [
           {
             "name": "adjusterId",
@@ -1614,7 +1645,7 @@
         "tags": [
           "reviewed-report-controller"
         ],
-        "operationId": "reviewedReports",
+        "operation_id": "reviewedReports",
         "parameters": [
           {
             "name": "status",
@@ -1657,13 +1688,7 @@
         "responses": {
           "200": {
             "description": "OK",
-            "content": {
-              "*/*": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseReviewedReportListResponse"
-                }
-              }
-            }
+            "content": {}
           }
         }
       }
@@ -1673,7 +1698,7 @@
         "tags": [
           "adjuster-profile-controller"
         ],
-        "operationId": "getMyPage",
+        "operation_id": "getMyPage",
         "responses": {
           "200": {
             "description": "OK",
@@ -1693,7 +1718,7 @@
         "tags": [
           "adjuster-home-controller"
         ],
-        "operationId": "home",
+        "operation_id": "home",
         "parameters": [
           {
             "name": "in_progress_limit",
@@ -1728,8 +1753,8 @@
         "properties": {
           "token": {
             "type": "string",
-            "maxLength": 500,
-            "minLength": 0
+            "max_length": 500,
+            "min_length": 0
           },
           "platform": {
             "type": "string",
@@ -1769,64 +1794,81 @@
           "platform": {
             "type": "string"
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "created_at",
+          "id",
+          "platform"
+        ]
       },
       "CreateAdjusterApplicationRequest": {
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
-            "maxLength": 100,
-            "minLength": 0
+            "max_length": 100,
+            "min_length": 0
           },
           "phone": {
             "type": "string",
-            "maxLength": 20,
-            "minLength": 0
+            "max_length": 20,
+            "min_length": 0
           },
           "specialties": {
             "type": "array",
             "items": {
               "type": "string",
-              "maxLength": 30,
-              "minLength": 0
+              "max_length": 30,
+              "min_length": 0
             },
-            "minItems": 1
+            "min_items": 1
           },
-          "licenseNo": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 0
+          "license_no": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "max_length": 100,
+            "min_length": 0
           },
-          "licenseImageUrl": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 0
+          "license_image_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "max_length": 500,
+            "min_length": 0
           },
           "career": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int32"
           },
           "introduction": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "affiliation": {
             "type": "string",
-            "minLength": 1
+            "min_length": 1
           },
           "region": {
             "type": "string",
-            "maxLength": 100,
-            "minLength": 0
+            "max_length": 100,
+            "min_length": 0
           },
-          "registrationImageUrl": {
+          "registration_image_url": {
             "type": "string",
-            "maxLength": 500,
-            "minLength": 0
+            "max_length": 500,
+            "min_length": 0
           }
         },
         "required": [
@@ -1834,7 +1876,7 @@
           "name",
           "phone",
           "region",
-          "registrationImageUrl",
+          "registration_image_url",
           "specialties"
         ]
       },
@@ -1855,14 +1897,18 @@
       "CreateAdjusterApplicationResponse": {
         "type": "object",
         "properties": {
-          "applicationId": {
+          "application_id": {
             "type": "string",
             "format": "uuid"
           },
           "status": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "application_id",
+          "status"
+        ]
       },
       "ApiResponseUploadResponse": {
         "type": "object",
@@ -1881,19 +1927,25 @@
       "UploadResponse": {
         "type": "object",
         "properties": {
-          "s3Url": {
+          "s3_url": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "s3_url"
+        ]
       },
       "CreateReportRequest": {
         "type": "object",
         "properties": {
-          "productId": {
-            "type": "string",
+          "product_id": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           },
-          "accidentType": {
+          "accident_type": {
             "type": "string",
             "enum": [
               "medical_indemnity",
@@ -1905,72 +1957,109 @@
               "other"
             ]
           },
-          "accidentDate": {
+          "accident_date": {
             "type": "string",
             "format": "date"
           },
           "diagnosis": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
-          "offeredAmount": {
-            "type": "integer",
-            "format": "int64"
+          "offered_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
           "hospitalizations": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "$ref": "#/components/schemas/Hospitalization"
             }
           },
           "description": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "additionalInformation": {
-            "type": "string"
+          "additional_information": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "documents": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "$ref": "#/components/schemas/Document"
             }
           },
           "question": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           }
-        }
+        },
+        "required": [
+          "accident_date",
+          "accident_type"
+        ]
       },
       "Document": {
         "type": "object",
         "properties": {
-          "s3Url": {
-            "type": "string"
+          "s3_url": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "name": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "reportType": {
-            "type": "string"
+          "report_type": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "fileType": {
-            "type": "string"
+          "file_type": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
       "Hospitalization": {
         "type": "object",
         "properties": {
-          "hospitalStart": {
+          "hospital_start": {
             "type": "string",
             "format": "date"
           },
-          "hospitalEnd": {
+          "hospital_end": {
             "type": "string",
             "format": "date"
           },
-          "hospitalReason": {
+          "hospital_reason": {
             "type": "string"
           }
         }
@@ -1992,21 +2081,18 @@
       "CreateReportResponse": {
         "type": "object",
         "properties": {
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "AWAITING_INSPECTION",
-              "AWAITING_ADOPTION",
-              "COUNSELING",
-              "CLOSED",
-              "NOT_SELECTED"
-            ]
+            "type": "string"
           }
-        }
+        },
+        "required": [
+          "report_id",
+          "status"
+        ]
       },
       "HoldReportRequest": {
         "type": "object",
@@ -2014,10 +2100,17 @@
           "reason": {
             "type": "string"
           },
-          "reasonDetail": {
-            "type": "string"
+          "reason_detail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "reason이 OTHER면 필수"
           }
-        }
+        },
+        "required": [
+          "reason"
+        ]
       },
       "ApiResponseHoldResponse": {
         "type": "object",
@@ -2036,7 +2129,7 @@
       "HoldResponse": {
         "type": "object",
         "properties": {
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -2046,21 +2139,36 @@
           "reason": {
             "type": "string"
           },
-          "reasonDetail": {
-            "type": "string"
+          "reason_detail": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
-        }
+        },
+        "required": [
+          "reason",
+          "report_id"
+        ]
       },
       "ChatReportRequest": {
         "type": "object",
         "properties": {
           "reason": {
-            "type": "string"
+            "type": "string",
+            "description": "ChatReportReason enum 이름"
           },
-          "reasonDetail": {
-            "type": "string"
+          "reason_detail": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "reason이 OTHER면 필수(공백만이면 누락 취급), 최대 500자"
           }
-        }
+        },
+        "required": [
+          "reason"
+        ]
       },
       "ApiResponseChatReportResponse": {
         "type": "object",
@@ -2079,11 +2187,11 @@
       "ChatReportResponse": {
         "type": "object",
         "properties": {
-          "chatReportId": {
+          "chat_report_id": {
             "type": "string",
             "format": "uuid"
           },
-          "chatRoomId": {
+          "chat_room_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -2097,11 +2205,17 @@
               "OTHER"
             ]
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "chat_report_id",
+          "chat_room_id",
+          "created_at",
+          "reason"
+        ]
       },
       "ApiResponseReadResponse": {
         "type": "object",
@@ -2120,42 +2234,62 @@
       "ReadResponse": {
         "type": "object",
         "properties": {
-          "chatRoomId": {
+          "chat_room_id": {
             "type": "string",
             "format": "uuid"
           },
-          "readAt": {
+          "read_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "chat_room_id",
+          "read_at"
+        ]
       },
       "Attachment": {
         "type": "object",
         "properties": {
-          "attachmentKey": {
+          "attachment_key": {
             "type": "string"
           },
           "name": {
             "type": "string"
           },
-          "contentType": {
+          "content_type": {
             "type": "string"
           },
           "size": {
-            "type": "integer",
-            "format": "int64"
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           }
-        }
+        },
+        "required": [
+          "attachment_key",
+          "content_type",
+          "name"
+        ]
       },
       "SendMessageRequest": {
         "type": "object",
         "properties": {
           "content": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "텍스트 또는 첨부 캡션. attachments가 없으면 사실상 필수(둘 중 하나는 있어야 함)"
           },
           "attachments": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
+            "description": "⑦ 업로드 응답 메타 목록. content가 없으면 사실상 필수(둘 중 하나는 있어야 함)",
             "items": {
               "$ref": "#/components/schemas/Attachment"
             }
@@ -2179,19 +2313,23 @@
       "ChatMessageResponse": {
         "type": "object",
         "properties": {
-          "messageId": {
+          "message_id": {
             "type": "string",
             "format": "uuid"
           },
-          "chatRoomId": {
+          "chat_room_id": {
             "type": "string",
             "format": "uuid"
           },
-          "senderId": {
-            "type": "string",
-            "format": "uuid"
+          "sender_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "SYSTEM 메시지는 발신자가 없어 null"
           },
-          "messageType": {
+          "message_type": {
             "type": "string",
             "enum": [
               "TEXT",
@@ -2201,19 +2339,32 @@
             ]
           },
           "content": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "첨부 메시지(IMAGE/FILE)에 캡션이 없으면 null"
           },
           "attachment": {
-            "$ref": "#/components/schemas/Attachment"
+            "type": "null",
+            "$ref": "#/components/schemas/Attachment",
+            "description": "첨부가 없는 메시지는 null"
           },
-          "isMine": {
+          "is_mine": {
             "type": "boolean"
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "chat_room_id",
+          "created_at",
+          "is_mine",
+          "message_id",
+          "message_type"
+        ]
       },
       "ApiResponseUploadAttachmentResponse": {
         "type": "object",
@@ -2232,20 +2383,29 @@
       "UploadAttachmentResponse": {
         "type": "object",
         "properties": {
-          "attachmentKey": {
+          "attachment_key": {
             "type": "string"
           },
           "name": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "업로드 클라이언트가 원본 파일명을 보내지 않으면 null일 수 있다"
           },
-          "contentType": {
+          "content_type": {
             "type": "string"
           },
           "size": {
             "type": "integer",
             "format": "int64"
           }
-        }
+        },
+        "required": [
+          "attachment_key",
+          "content_type",
+          "size"
+        ]
       },
       "ApiResponseVoid": {
         "type": "object",
@@ -2264,49 +2424,52 @@
         "properties": {
           "provider": {
             "type": "string",
-            "minLength": 1
+            "min_length": 1
           },
-          "socialToken": {
+          "social_token": {
             "type": "string",
-            "minLength": 1
+            "min_length": 1
           },
           "name": {
             "type": "string",
-            "maxLength": 30,
-            "minLength": 1
+            "max_length": 30,
+            "min_length": 1
           },
-          "birthDate": {
+          "birth_date": {
             "type": "string",
             "format": "date"
           },
-          "phoneNumber": {
+          "phone_number": {
             "type": "string",
-            "minLength": 1,
+            "min_length": 1,
             "pattern": "^01[0-9]-?\\d{3,4}-?\\d{4}$"
           },
           "gender": {
             "type": "string",
-            "maxLength": 10,
-            "minLength": 0
+            "max_length": 10,
+            "min_length": 0
           },
           "region": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 0
+            "type": [
+              "string",
+              "null"
+            ],
+            "max_length": 100,
+            "min_length": 0
           },
-          "userType": {
+          "user_type": {
             "type": "string",
-            "minLength": 1
+            "min_length": 1
           }
         },
         "required": [
-          "birthDate",
+          "birth_date",
           "gender",
           "name",
-          "phoneNumber",
+          "phone_number",
           "provider",
-          "socialToken",
-          "userType"
+          "social_token",
+          "user_type"
         ]
       },
       "ApiResponseRegisterResponse": {
@@ -2326,7 +2489,7 @@
       "RegisterResponse": {
         "type": "object",
         "properties": {
-          "userId": {
+          "user_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -2336,7 +2499,12 @@
           "role": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "nickname",
+          "role",
+          "user_id"
+        ]
       },
       "CreateAdjusterReviewRequest": {
         "type": "object",
@@ -2348,9 +2516,12 @@
             "minimum": 1
           },
           "content": {
-            "type": "string",
-            "maxLength": 1000,
-            "minLength": 0
+            "type": [
+              "string",
+              "null"
+            ],
+            "max_length": 1000,
+            "min_length": 0
           }
         },
         "required": [
@@ -2374,11 +2545,11 @@
       "CreateAdjusterReviewResponse": {
         "type": "object",
         "properties": {
-          "reviewId": {
+          "review_id": {
             "type": "string",
             "format": "uuid"
           },
-          "adjusterId": {
+          "adjuster_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -2386,33 +2557,48 @@
             "type": "integer",
             "format": "int32"
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "adjuster_id",
+          "created_at",
+          "review_id"
+        ]
       },
       "UserUpdateRequest": {
         "type": "object",
         "properties": {
-          "phoneNumber": {
-            "type": "string",
+          "phone_number": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "세 필드 중 최소 하나는 있어야 한다",
             "pattern": "^01[0-9]-?\\d{3,4}-?\\d{4}$"
           },
           "region": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string",
-              "maxLength": 100,
-              "minLength": 0
+              "max_length": 100,
+              "min_length": 0
             },
-            "maxItems": 10,
-            "minItems": 0
+            "max_items": 10,
+            "min_items": 0
           },
-          "avatarUrl": {
-            "type": "string",
-            "maxLength": 500,
-            "minLength": 0
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "max_length": 500,
+            "min_length": 0
           }
         }
       },
@@ -2433,72 +2619,123 @@
       "UserMeResponse": {
         "type": "object",
         "properties": {
-          "userId": {
+          "user_id": {
             "type": "string",
             "format": "uuid"
           },
           "nickname": {
             "type": "string"
           },
-          "phoneNumber": {
-            "type": "string"
+          "phone_number": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "role": {
             "type": "string"
           },
           "gender": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "region": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
-          "avatarUrl": {
-            "type": "string"
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "socialProvider": {
-            "type": "string"
+          "social_provider": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "created_at",
+          "nickname",
+          "role",
+          "user_id"
+        ]
       },
       "NotificationSettingUpdateRequest": {
         "type": "object",
         "properties": {
-          "newReviewRequest": {
-            "type": "boolean"
+          "new_review_request": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
-          "consultMessage": {
-            "type": "boolean"
+          "consult_message": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
-          "settlementNotice": {
-            "type": "boolean"
+          "settlement_notice": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
-          "reviewDeadlineSoon": {
-            "type": "boolean"
+          "review_deadline_soon": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
-          "reviewComplete": {
-            "type": "boolean"
+          "review_complete": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
-          "receivedProposal": {
-            "type": "boolean"
+          "received_proposal": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
-          "consultAccepted": {
-            "type": "boolean"
+          "consult_accepted": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
-          "analysisComplete": {
-            "type": "boolean"
+          "analysis_complete": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
-          "identityVerified": {
-            "type": "boolean"
+          "identity_verified": {
+            "type": [
+              "boolean",
+              "null"
+            ]
           },
           "marketing": {
-            "type": "boolean"
+            "type": [
+              "boolean",
+              "null"
+            ]
           }
         }
       },
@@ -2519,110 +2756,177 @@
       "NotificationSettingResponse": {
         "type": "object",
         "properties": {
-          "newReviewRequest": {
+          "new_review_request": {
             "type": "boolean"
           },
-          "consultMessage": {
+          "consult_message": {
             "type": "boolean"
           },
-          "settlementNotice": {
+          "settlement_notice": {
             "type": "boolean"
           },
-          "reviewDeadlineSoon": {
+          "review_deadline_soon": {
             "type": "boolean"
           },
-          "reviewComplete": {
+          "review_complete": {
             "type": "boolean"
           },
-          "receivedProposal": {
+          "received_proposal": {
             "type": "boolean"
           },
-          "consultAccepted": {
+          "consult_accepted": {
             "type": "boolean"
           },
-          "analysisComplete": {
+          "analysis_complete": {
             "type": "boolean"
           },
-          "identityVerified": {
+          "identity_verified": {
             "type": "boolean"
           },
           "marketing": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "analysis_complete",
+          "consult_accepted",
+          "consult_message",
+          "identity_verified",
+          "marketing",
+          "new_review_request",
+          "received_proposal",
+          "review_complete",
+          "review_deadline_soon",
+          "settlement_notice"
+        ]
       },
       "IssueReview": {
         "type": "object",
         "properties": {
-          "reviewIssueId": {
-            "type": "string",
-            "format": "uuid"
+          "review_issue_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "report_issues_reviews.id. 있으면 그 행을 갱신"
           },
           "issueId": {
-            "type": "string",
-            "format": "uuid"
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "AI 쟁점(report_issues.id). ADDED(신규 쟁점)면 null, ACCEPTED·MODIFIED·EXCLUDED면 필수"
           },
-          "reviewStatus": {
-            "type": "string"
+          "review_status": {
+            "type": "string",
+            "description": "ACCEPTED | MODIFIED | EXCLUDED | ADDED"
           },
           "title": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "reviewStatus=ADDED면 필수"
           },
           "description": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "reviewStatus=ADDED면 필수"
           },
-          "impactAmount": {
-            "type": "integer",
-            "format": "int64"
+          "impact_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "adjusterOpinion": {
-            "type": "string"
+          "adjuster_opinion": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "modifiedReason": {
-            "type": "string"
+          "modified_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "reviewStatus=MODIFIED면 필수"
           },
-          "excludedReason": {
-            "type": "string"
+          "excluded_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "reviewStatus=EXCLUDED면 필수"
           }
-        }
+        },
+        "required": [
+          "review_status"
+        ]
       },
       "ReviewReportRequest": {
         "type": "object",
         "properties": {
-          "estimateMinAmount": {
-            "type": "integer",
-            "format": "int64"
+          "estimate_min_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "estimateMaxAmount": {
-            "type": "integer",
-            "format": "int64"
+          "estimate_max_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "applicableGuarantees": {
-            "type": "array",
+          "applicable_guarantees": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
-          "omittedSpecialContract": {
-            "type": "array",
+          "omitted_special_contract": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
-          "basisTermsPrecedents": {
-            "type": "array",
+          "basis_terms_precedents": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
           "issues": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "$ref": "#/components/schemas/IssueReview"
             }
           },
           "review": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -2643,33 +2947,44 @@
       "ReviewReportResponse": {
         "type": "object",
         "properties": {
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
           "status": {
             "type": "string"
           },
-          "reportReviewId": {
+          "report_review_id": {
             "type": "string",
             "format": "uuid"
           },
-          "reviewStatus": {
+          "review_status": {
             "type": "string"
           },
-          "sentAt": {
+          "sent_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "report_id",
+          "report_review_id",
+          "review_status",
+          "sent_at",
+          "status"
+        ]
       },
       "ProposalDecisionRequest": {
         "type": "object",
         "properties": {
           "status": {
-            "type": "string"
+            "type": "string",
+            "description": "ACCEPTED 또는 REJECTED만 허용"
           }
-        }
+        },
+        "required": [
+          "status"
+        ]
       },
       "ApiResponseProposalDecisionResponse": {
         "type": "object",
@@ -2688,29 +3003,30 @@
       "ProposalDecisionResponse": {
         "type": "object",
         "properties": {
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
-          "proposalId": {
+          "proposal_id": {
             "type": "string",
             "format": "uuid"
           },
-          "adjusterId": {
+          "adjuster_id": {
             "type": "string",
             "format": "uuid"
           },
-          "reportStatus": {
+          "report_status": {
             "type": "string",
             "enum": [
               "AWAITING_INSPECTION",
               "AWAITING_ADOPTION",
               "COUNSELING",
               "CLOSED",
-              "NOT_SELECTED"
+              "NOT_SELECTED",
+              "BLOCKED"
             ]
           },
-          "reviewStatus": {
+          "review_status": {
             "type": "string",
             "enum": [
               "SENT",
@@ -2719,7 +3035,14 @@
               "ACCEPTED"
             ]
           }
-        }
+        },
+        "required": [
+          "adjuster_id",
+          "proposal_id",
+          "report_id",
+          "report_status",
+          "review_status"
+        ]
       },
       "ApiResponseConsultationDecisionResponse": {
         "type": "object",
@@ -2738,18 +3061,18 @@
       "ConsultationDecisionResponse": {
         "type": "object",
         "properties": {
-          "chatRoomId": {
+          "chat_room_id": {
             "type": "string",
             "format": "uuid"
           },
-          "chatRoomStatus": {
+          "chat_room_status": {
             "type": "string",
             "enum": [
               "ACTIVE",
               "CLOSED"
             ]
           },
-          "reviewStatus": {
+          "review_status": {
             "type": "string",
             "enum": [
               "SENT",
@@ -2758,34 +3081,42 @@
               "ACCEPTED"
             ]
           },
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
-          "reportStatus": {
+          "report_status": {
             "type": "string",
             "enum": [
               "AWAITING_INSPECTION",
               "AWAITING_ADOPTION",
               "COUNSELING",
               "CLOSED",
-              "NOT_SELECTED"
+              "NOT_SELECTED",
+              "BLOCKED"
             ]
           }
-        }
+        },
+        "required": [
+          "chat_room_id",
+          "chat_room_status",
+          "report_id",
+          "report_status",
+          "review_status"
+        ]
       },
       "CareerItem": {
         "type": "object",
         "properties": {
           "period": {
             "type": "string",
-            "maxLength": 100,
-            "minLength": 0
+            "max_length": 100,
+            "min_length": 0
           },
           "company": {
             "type": "string",
-            "maxLength": 100,
-            "minLength": 0
+            "max_length": 100,
+            "min_length": 0
           }
         },
         "required": [
@@ -2797,39 +3128,60 @@
         "type": "object",
         "properties": {
           "headline": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 0
+            "type": [
+              "string",
+              "null"
+            ],
+            "max_length": 100,
+            "min_length": 0
           },
           "introduction": {
-            "type": "string",
-            "maxLength": 300,
-            "minLength": 0
+            "type": [
+              "string",
+              "null"
+            ],
+            "max_length": 300,
+            "min_length": 0
           },
           "career": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int32"
           },
-          "activityRegion": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 0
+          "activity_region": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "max_length": 100,
+            "min_length": 0
           },
-          "avatarUrl": {
-            "type": "string"
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "specialties": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string",
-              "maxLength": 30,
-              "minLength": 0
+              "max_length": 30,
+              "min_length": 0
             },
-            "maxItems": 3,
-            "minItems": 0
+            "max_items": 3,
+            "min_items": 0
           },
           "careers": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "$ref": "#/components/schemas/CareerItem"
             }
@@ -2839,7 +3191,7 @@
       "AdjusterProfileResponse": {
         "type": "object",
         "properties": {
-          "adjusterId": {
+          "adjuster_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -2849,10 +3201,13 @@
           "headline": {
             "type": "string"
           },
-          "avatarUrl": {
-            "type": "string"
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "activityRegion": {
+          "activity_region": {
             "type": "string"
           },
           "introduction": {
@@ -2874,37 +3229,49 @@
             "type": "integer",
             "format": "int32"
           },
-          "averageRating": {
+          "average_rating": {
             "type": "number",
             "format": "double"
           },
-          "reviewCount": {
+          "review_count": {
             "type": "integer",
             "format": "int32"
           },
-          "recentReviews": {
+          "recent_reviews": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RecentReview"
             }
           },
-          "completedConsultCount": {
+          "completed_consult_count": {
             "type": "integer",
             "format": "int32"
           },
-          "handledCaseCount": {
+          "handled_case_count": {
             "type": "integer",
             "format": "int64"
           },
-          "pendingReviewCount": {
+          "pending_review_count": {
             "type": "integer",
             "format": "int32"
           },
-          "updatedAt": {
+          "updated_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "activity_region",
+          "adjuster_id",
+          "career",
+          "careers",
+          "headline",
+          "introduction",
+          "nickname",
+          "recent_reviews",
+          "specialties",
+          "updated_at"
+        ]
       },
       "ApiResponseAdjusterProfileResponse": {
         "type": "object",
@@ -2931,16 +3298,26 @@
             "format": "int32"
           },
           "item": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "reviewedAt": {
+          "reviewed_at": {
             "type": "string",
             "format": "date-time"
           },
           "content": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           }
-        }
+        },
+        "required": [
+          "nickname",
+          "reviewed_at"
+        ]
       },
       "ApiResponseNotificationListResponse": {
         "type": "object",
@@ -2970,16 +3347,26 @@
             "type": "string"
           },
           "body": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "isRead": {
+          "is_read": {
             "type": "boolean"
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "created_at",
+          "id",
+          "is_read",
+          "title",
+          "type"
+        ]
       },
       "NotificationListResponse": {
         "type": "object",
@@ -2990,7 +3377,7 @@
               "$ref": "#/components/schemas/Item"
             }
           },
-          "unreadCount": {
+          "unread_count": {
             "type": "integer",
             "format": "int64"
           },
@@ -3002,15 +3389,23 @@
             "type": "integer",
             "format": "int32"
           },
-          "totalElements": {
+          "total_elements": {
             "type": "integer",
             "format": "int64"
           },
-          "totalPages": {
+          "total_pages": {
             "type": "integer",
             "format": "int32"
           }
-        }
+        },
+        "required": [
+          "items",
+          "page",
+          "size",
+          "total_elements",
+          "total_pages",
+          "unread_count"
+        ]
       },
       "ApiResponseUserInsuranceListResponse": {
         "type": "object",
@@ -3035,37 +3430,52 @@
               "$ref": "#/components/schemas/Item"
             }
           }
-        }
+        },
+        "required": [
+          "list"
+        ]
       },
       "ActiveReport": {
         "type": "object",
         "properties": {
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
           "title": {
             "type": "string"
           },
-          "accidentType": {
-            "type": "string"
+          "accident_type": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "status": {
             "type": "string"
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
           },
-          "firstReviewedAt": {
-            "type": "string",
+          "first_reviewed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time"
           },
-          "proposalCount": {
+          "proposal_count": {
             "type": "integer",
             "format": "int64"
           }
-        }
+        },
+        "required": [
+          "created_at",
+          "report_id",
+          "status",
+          "title"
+        ]
       },
       "ApiResponseUserDashboardResponse": {
         "type": "object",
@@ -3088,17 +3498,26 @@
             "type": "integer",
             "format": "int32"
           },
-          "minAmount": {
-            "type": "integer",
-            "format": "int64"
+          "min_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "maxAmount": {
-            "type": "integer",
-            "format": "int64"
+          "max_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "avgAmount": {
-            "type": "integer",
-            "format": "int64"
+          "avg_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
           "items": {
             "type": "array",
@@ -3106,19 +3525,24 @@
               "$ref": "#/components/schemas/Item"
             }
           }
-        }
+        },
+        "required": [
+          "items"
+        ]
       },
       "UserDashboardResponse": {
         "type": "object",
         "properties": {
-          "reportCount": {
+          "report_count": {
             "type": "integer",
             "format": "int64"
           },
-          "activeReport": {
+          "active_report": {
+            "type": "null",
             "$ref": "#/components/schemas/ActiveReport"
           },
-          "proposalSummary": {
+          "proposal_summary": {
+            "type": "null",
             "$ref": "#/components/schemas/ProposalSummary"
           }
         }
@@ -3140,19 +3564,19 @@
       "UserActivitySummaryResponse": {
         "type": "object",
         "properties": {
-          "reportCount": {
+          "report_count": {
             "type": "integer",
             "format": "int64"
           },
-          "proposalCount": {
+          "proposal_count": {
             "type": "integer",
             "format": "int64"
           },
-          "consultCount": {
+          "consult_count": {
             "type": "integer",
             "format": "int64"
           },
-          "closedCount": {
+          "closed_count": {
             "type": "integer",
             "format": "int64"
           }
@@ -3161,14 +3585,14 @@
       "AdjusterApplicationResponse": {
         "type": "object",
         "properties": {
-          "applicationId": {
+          "application_id": {
             "type": "string",
             "format": "uuid"
           },
           "status": {
             "type": "string"
           },
-          "submittedAt": {
+          "submitted_at": {
             "type": "string",
             "format": "date-time"
           },
@@ -3176,10 +3600,16 @@
             "type": "string"
           },
           "phone": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "specialties": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
@@ -3187,8 +3617,11 @@
           "speciality": {
             "type": "string"
           },
-          "licenseNo": {
-            "type": "string"
+          "license_no": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "documents": {
             "type": "array",
@@ -3196,14 +3629,28 @@
               "$ref": "#/components/schemas/Document"
             }
           },
-          "rejectedAt": {
-            "type": "string",
+          "rejected_at": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time"
           },
-          "rejectReason": {
-            "type": "string"
+          "reject_reason": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
-        }
+        },
+        "required": [
+          "application_id",
+          "documents",
+          "name",
+          "speciality",
+          "status",
+          "submitted_at"
+        ]
       },
       "ApiResponseAdjusterApplicationResponse": {
         "type": "object",
@@ -3236,53 +3683,105 @@
       "Card": {
         "type": "object",
         "properties": {
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
           "status": {
             "type": "string"
           },
-          "accidentType": {
+          "accident_type": {
             "type": "string"
           },
           "title": {
             "type": "string"
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
           },
-          "reportNo": {
+          "report_no": {
             "type": "string"
           },
-          "claimedMinAmount": {
-            "type": "integer",
-            "format": "int64"
+          "claimed_min_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "claimedMaxAmount": {
-            "type": "integer",
-            "format": "int64"
+          "claimed_max_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "proposalCount": {
+          "proposal_count": {
             "type": "integer",
-            "format": "int64"
+            "format": "int32"
           },
-          "reviewedAt": {
-            "type": "string",
+          "reviewed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time"
           },
-          "adjusterNickname": {
-            "type": "string"
+          "adjuster_nickname": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "offeredAmount": {
-            "type": "integer",
-            "format": "int64"
+          "offered_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
           "treatment": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "analysis_state": {
+            "type": "string",
+            "description": "분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단)",
+            "enum": [
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED",
+              "BLOCKED"
+            ]
+          },
+          "analysis_failure_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "analysis_state가 FAILED일 때만 non-null(BLOCKED은 null)"
+          },
+          "analysis_failure_message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "analysis_state가 FAILED 또는 BLOCKED일 때만 non-null. 사용자 노출 문구"
           }
-        }
+        },
+        "required": [
+          "accident_type",
+          "analysis_state",
+          "created_at",
+          "proposal_count",
+          "report_id",
+          "report_no",
+          "status",
+          "title"
+        ]
       },
       "Pagination": {
         "type": "object",
@@ -3295,15 +3794,15 @@
             "type": "integer",
             "format": "int32"
           },
-          "totalElements": {
+          "total_elements": {
             "type": "integer",
             "format": "int64"
           },
-          "totalPages": {
+          "total_pages": {
             "type": "integer",
             "format": "int32"
           },
-          "hasNext": {
+          "has_next": {
             "type": "boolean"
           }
         }
@@ -3320,16 +3819,26 @@
           "pagination": {
             "$ref": "#/components/schemas/Pagination"
           }
-        }
+        },
+        "required": [
+          "list",
+          "pagination"
+        ]
       },
       "Adjuster": {
         "type": "object",
         "properties": {
           "nickname": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "career": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int32"
           }
         }
@@ -3351,44 +3860,53 @@
       "CustomerReportDetailResponse": {
         "type": "object",
         "properties": {
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
           "status": {
             "type": "string"
           },
-          "accidentType": {
+          "accident_type": {
             "type": "string"
           },
           "treatment": {
             "type": "string"
           },
-          "claimedMinAmount": {
-            "type": "integer",
-            "format": "int64"
+          "claimed_min_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "claimedMaxAmount": {
-            "type": "integer",
-            "format": "int64"
+          "claimed_max_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "offeredAmount": {
-            "type": "integer",
-            "format": "int64"
+          "offered_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "applicableGuarantees": {
+          "applicable_guarantees": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "omittedSpecialContract": {
+          "omitted_special_contract": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "basisTermsPrecedents": {
+          "basis_terms_precedents": {
             "type": "array",
             "items": {
               "type": "string"
@@ -3401,41 +3919,105 @@
             }
           },
           "question": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "adjusterId": {
-            "type": "string",
+          "adjuster_id": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "uuid"
           },
-          "confidenceLevel": {
+          "confidence_level": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "report_no": {
             "type": "string"
           },
-          "reportNo": {
-            "type": "string"
+          "review_comment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "채택된 제안이 없으면 null"
           },
-          "reviewComment": {
-            "type": "string"
-          },
-          "reviewedAt": {
-            "type": "string",
-            "format": "date-time"
+          "reviewed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "채택된 제안이 없으면 null"
           },
           "adjuster": {
-            "$ref": "#/components/schemas/Adjuster"
+            "type": "null",
+            "$ref": "#/components/schemas/Adjuster",
+            "description": "담당 사정사(adjusterId)가 없으면 null"
+          },
+          "analysis_state": {
+            "type": "string",
+            "description": "분석(OCR·AI) 처리 상태. REPORTS.status와 다른 축이다. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단)",
+            "enum": [
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED",
+              "BLOCKED"
+            ]
+          },
+          "analysis_failure_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "analysis_state가 FAILED일 때만 non-null(BLOCKED은 null)"
+          },
+          "analysis_failure_message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "analysis_state가 FAILED 또는 BLOCKED일 때만 non-null. 사용자 노출 문구"
           }
-        }
+        },
+        "required": [
+          "accident_type",
+          "analysis_state",
+          "applicable_guarantees",
+          "basis_terms_precedents",
+          "issue",
+          "omitted_special_contract",
+          "report_id",
+          "report_no",
+          "status",
+          "treatment"
+        ]
       },
       "IssueItem": {
         "type": "object",
         "properties": {
           "title": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "opinion": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "status": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "tags": {
             "type": "array",
@@ -3443,11 +4025,17 @@
               "type": "string"
             }
           },
-          "impactAmount": {
-            "type": "integer",
-            "format": "int64"
+          "impact_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           }
-        }
+        },
+        "required": [
+          "tags"
+        ]
       },
       "ApiResponseReviewWorkspaceResponse": {
         "type": "object",
@@ -3466,46 +4054,83 @@
       "AttachmentItem": {
         "type": "object",
         "properties": {
-          "attachmentId": {
+          "attachment_id": {
             "type": "string",
             "format": "uuid"
           },
           "name": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "mimeType": {
-            "type": "string"
+          "mime_type": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "url": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "reportType": {
-            "type": "string"
+          "report_type": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "pageCount": {
-            "type": "integer",
-            "format": "int32"
+          "page_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "OCR 처리 전이면 null"
           },
           "issuedBy": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "OCR 처리 전이면 null"
           },
           "issuedAt": {
-            "type": "string",
-            "format": "date"
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date",
+            "description": "OCR 처리 전이면 null"
           },
-          "aiSummary": {
-            "type": "string"
+          "ai_summary": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "OCR 처리 전이면 null"
           }
-        }
+        },
+        "required": [
+          "attachment_id"
+        ]
       },
       "ClaimContext": {
         "type": "object",
         "properties": {
-          "accidentType": {
-            "type": "string"
+          "accident_type": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "accidentDate": {
-            "type": "string",
+          "accident_date": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date"
           },
           "diagnosis": {
@@ -3515,18 +4140,34 @@
             "type": "string"
           },
           "description": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "additionalInformation": {
-            "type": "string"
+          "additional_information": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "productName": {
-            "type": "string"
+          "product_name": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "insurerName": {
-            "type": "string"
+          "insurer_name": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
-        }
+        },
+        "required": [
+          "diagnosis",
+          "hospitalization"
+        ]
       },
       "Client": {
         "type": "object",
@@ -3537,29 +4178,42 @@
           "gender": {
             "type": "string"
           },
-          "birthDate": {
+          "birth_date": {
             "type": "string",
             "format": "date"
           },
           "region": {
             "type": "string"
           },
-          "joinedAt": {
+          "joined_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "birth_date",
+          "gender",
+          "joined_at",
+          "nickname",
+          "region"
+        ]
       },
       "Estimate": {
         "type": "object",
         "properties": {
           "min": {
-            "type": "integer",
-            "format": "int64"
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
           "max": {
-            "type": "integer",
-            "format": "int64"
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -3587,17 +4241,21 @@
       "ReviewWorkspaceResponse": {
         "type": "object",
         "properties": {
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
-          "caseNo": {
+          "case_no": {
             "type": "string"
           },
           "title": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "AI 초안이 생성 전이면 null"
           },
-          "accidentType": {
+          "accident_type": {
             "type": "string"
           },
           "region": {
@@ -3606,20 +4264,28 @@
           "status": {
             "type": "string"
           },
-          "confidenceLevel": {
-            "type": "string"
+          "confidence_level": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "isMasked": {
+          "is_masked": {
             "type": "boolean"
           },
-          "offeredAmount": {
-            "type": "integer",
-            "format": "int64"
+          "offered_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
           "client": {
+            "type": "null",
             "$ref": "#/components/schemas/Client"
           },
           "claim": {
+            "type": "null",
             "$ref": "#/components/schemas/ClaimContext"
           },
           "attachments": {
@@ -3628,25 +4294,27 @@
               "$ref": "#/components/schemas/AttachmentItem"
             }
           },
-          "aiEstimate": {
+          "ai_estimate": {
             "$ref": "#/components/schemas/Estimate"
           },
-          "adjusterEstimate": {
-            "$ref": "#/components/schemas/Estimate"
+          "adjuster_estimate": {
+            "type": "null",
+            "$ref": "#/components/schemas/Estimate",
+            "description": "사정사 작업본(started=false)이 없으면 null"
           },
-          "applicableGuarantees": {
+          "applicable_guarantees": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "omittedSpecialContract": {
+          "omitted_special_contract": {
             "type": "array",
             "items": {
               "type": "string"
             }
           },
-          "basisTermsPrecedents": {
+          "basis_terms_precedents": {
             "type": "array",
             "items": {
               "type": "string"
@@ -3659,10 +4327,18 @@
             }
           },
           "review": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "사정사 작업본(started=false)이 없으면 null"
           },
-          "reviewStatus": {
-            "type": "string"
+          "review_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "사정사 작업본(started=false)이 없으면 null"
           },
           "started": {
             "type": "boolean"
@@ -3670,7 +4346,21 @@
           "progress": {
             "$ref": "#/components/schemas/Progress"
           }
-        }
+        },
+        "required": [
+          "accident_type",
+          "ai_estimate",
+          "applicable_guarantees",
+          "attachments",
+          "basis_terms_precedents",
+          "case_no",
+          "issues",
+          "omitted_special_contract",
+          "progress",
+          "region",
+          "report_id",
+          "status"
+        ]
       },
       "ApiResponseProposalListResponse": {
         "type": "object",
@@ -3689,11 +4379,11 @@
       "Proposal": {
         "type": "object",
         "properties": {
-          "proposalId": {
+          "proposal_id": {
             "type": "string",
             "format": "uuid"
           },
-          "adjusterId": {
+          "adjuster_id": {
             "type": "string",
             "format": "uuid"
           },
@@ -3701,20 +4391,33 @@
             "type": "string"
           },
           "rating": {
-            "type": "number",
+            "type": [
+              "number",
+              "null"
+            ],
             "format": "double"
           },
-          "proposalSummary": {
-            "type": "string"
+          "proposal_summary": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "status": {
             "type": "string"
           },
-          "submittedAt": {
+          "submitted_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "adjuster_id",
+          "nickname",
+          "proposal_id",
+          "status",
+          "submitted_at"
+        ]
       },
       "ProposalListResponse": {
         "type": "object",
@@ -3728,7 +4431,112 @@
           "pagination": {
             "$ref": "#/components/schemas/Pagination"
           }
+        },
+        "required": [
+          "list",
+          "pagination"
+        ]
+      },
+      "ApiResponseReportAnalysisStatusResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReportAnalysisStatusResponse"
+          }
         }
+      },
+      "FailedDocument": {
+        "type": "object",
+        "properties": {
+          "attachment_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "저널에 attachment_id가 없으면 null"
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "첨부 행을 찾지 못하면 null"
+          },
+          "failure_reason": {
+            "type": "string",
+            "description": "문서별 실패 사유"
+          }
+        },
+        "required": [
+          "failure_reason"
+        ]
+      },
+      "ReportAnalysisStatusResponse": {
+        "type": "object",
+        "properties": {
+          "report_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "analysis_state": {
+            "type": "string",
+            "description": "분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(BLOCKED는 AI 입력 가드레일 차단 — OCR·AI 파이프라인이 시작되지 않는다)",
+            "enum": [
+              "PROCESSING",
+              "COMPLETED",
+              "FAILED",
+              "BLOCKED"
+            ]
+          },
+          "failure_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "대표 실패 사유. analysis_state가 FAILED일 때만 non-null(BLOCKED은 저널 기반 사유가 없어 null). MASKING_RESIDUAL | SCHEMA_INVALID | OCR_ERROR | UNKNOWN | UNREADABLE_FILE"
+          },
+          "failure_message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "사용자 노출 문구. analysis_state가 FAILED 또는 BLOCKED일 때만 non-null"
+          },
+          "reupload_guidance": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "재업로드 안내. analysis_state가 FAILED 또는 BLOCKED일 때만 non-null(BLOCKED은 항상 NOT_SUPPORTED — 문서 문제가 아니라 재업로드가 무의미하다). RECOMMENDED(재업로드로 해결 가능) | NOT_SUPPORTED(재업로드해도 동일) | HOLD(확인 중)"
+          },
+          "failed_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "대표 실패 시각(최초 실패 기준). analysis_state가 FAILED일 때만 non-null. BLOCKED은 저널 기반 시각이 없어 null"
+          },
+          "failed_documents": {
+            "type": "array",
+            "description": "실패 문서 목록. FAILED가 아니면 빈 배열(null 아님)",
+            "items": {
+              "$ref": "#/components/schemas/FailedDocument"
+            }
+          }
+        },
+        "required": [
+          "analysis_state",
+          "failed_documents",
+          "report_id"
+        ]
       },
       "ApiResponsePendingReviewListResponse": {
         "type": "object",
@@ -3756,7 +4564,11 @@
           "pagination": {
             "$ref": "#/components/schemas/Pagination"
           }
-        }
+        },
+        "required": [
+          "list",
+          "pagination"
+        ]
       },
       "ApiResponsePendingReviewSummaryResponse": {
         "type": "object",
@@ -3775,19 +4587,19 @@
       "PendingReviewSummaryResponse": {
         "type": "object",
         "properties": {
-          "pendingCount": {
+          "pending_count": {
             "type": "integer",
             "format": "int64"
           },
-          "dueSoonCount": {
+          "due_soon_count": {
             "type": "integer",
             "format": "int64"
           },
-          "inProgressCount": {
+          "in_progress_count": {
             "type": "integer",
             "format": "int64"
           },
-          "specialtyMatchCount": {
+          "specialty_match_count": {
             "type": "integer",
             "format": "int64"
           }
@@ -3816,32 +4628,47 @@
               "$ref": "#/components/schemas/ChatRoomSummaryResponse"
             }
           }
-        }
+        },
+        "required": [
+          "rooms"
+        ]
       },
       "ChatRoomSummaryResponse": {
         "type": "object",
         "properties": {
-          "chatRoomId": {
+          "chat_room_id": {
             "type": "string",
             "format": "uuid"
           },
-          "reportId": {
-            "type": "string",
-            "format": "uuid"
+          "report_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "검색으로 개설된 방은 연결된 리포트가 없어 null"
           },
-          "proposalId": {
-            "type": "string",
-            "format": "uuid"
+          "proposal_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "검색으로 개설된 방은 연결된 제안이 없어 null"
           },
-          "roomStatus": {
+          "room_status": {
             "type": "string",
             "enum": [
               "ACTIVE",
               "CLOSED"
             ]
           },
-          "matchStatus": {
-            "type": "string",
+          "match_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "검색으로 개설된 방은 제안이 없어 null",
             "enum": [
               "SENT",
               "COUNSELING",
@@ -3849,11 +4676,19 @@
               "ACCEPTED"
             ]
           },
-          "caseNo": {
-            "type": "string"
+          "case_no": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "검색으로 개설된 방은 연결된 리포트가 없어 null"
           },
-          "reportTypeLabel": {
-            "type": "string",
+          "report_type_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "검색으로 개설된 방은 연결된 리포트가 없어 null",
             "enum": [
               "medical_indemnity",
               "traffic",
@@ -3867,33 +4702,55 @@
           "counterpart": {
             "$ref": "#/components/schemas/Counterpart"
           },
-          "lastMessage": {
-            "type": "string"
+          "last_message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "아직 메시지가 없으면 null"
           },
-          "lastMessageAt": {
-            "type": "string",
-            "format": "date-time"
+          "last_message_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "아직 메시지가 없으면 null"
           },
-          "unreadCount": {
+          "unread_count": {
             "type": "integer",
             "format": "int64"
           }
-        }
+        },
+        "required": [
+          "chat_room_id",
+          "counterpart",
+          "room_status",
+          "unread_count"
+        ]
       },
       "Counterpart": {
         "type": "object",
         "properties": {
-          "userId": {
+          "user_id": {
             "type": "string",
             "format": "uuid"
           },
           "name": {
             "type": "string"
           },
-          "avatarUrl": {
-            "type": "string"
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "상대 계정에 프로필 이미지가 없으면 null"
           }
-        }
+        },
+        "required": [
+          "name",
+          "user_id"
+        ]
       },
       "ApiResponseChatRoomDetailResponse": {
         "type": "object",
@@ -3912,27 +4769,39 @@
       "ChatRoomDetailResponse": {
         "type": "object",
         "properties": {
-          "chatRoomId": {
+          "chat_room_id": {
             "type": "string",
             "format": "uuid"
           },
-          "reportId": {
-            "type": "string",
-            "format": "uuid"
+          "report_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "검색으로 개설된 방은 연결된 리포트가 없어 null"
           },
-          "proposalId": {
-            "type": "string",
-            "format": "uuid"
+          "proposal_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "검색으로 개설된 방은 연결된 제안이 없어 null"
           },
-          "roomStatus": {
+          "room_status": {
             "type": "string",
             "enum": [
               "ACTIVE",
               "CLOSED"
             ]
           },
-          "matchStatus": {
-            "type": "string",
+          "match_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "검색으로 개설된 방은 제안이 없어 null",
             "enum": [
               "SENT",
               "COUNSELING",
@@ -3940,11 +4809,19 @@
               "ACCEPTED"
             ]
           },
-          "caseNo": {
-            "type": "string"
+          "case_no": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "검색으로 개설된 방은 연결된 리포트가 없어 null"
           },
-          "reportTypeLabel": {
-            "type": "string",
+          "report_type_label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "검색으로 개설된 방은 연결된 리포트가 없어 null",
             "enum": [
               "medical_indemnity",
               "traffic",
@@ -3958,22 +4835,37 @@
           "counterpart": {
             "$ref": "#/components/schemas/Counterpart"
           },
-          "lastMessage": {
-            "type": "string"
+          "last_message": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "아직 메시지가 없으면 null"
           },
-          "lastMessageAt": {
-            "type": "string",
-            "format": "date-time"
+          "last_message_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "아직 메시지가 없으면 null"
           },
-          "unreadCount": {
+          "unread_count": {
             "type": "integer",
             "format": "int64"
           },
-          "createdAt": {
+          "created_at": {
             "type": "string",
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "chat_room_id",
+          "counterpart",
+          "created_at",
+          "room_status",
+          "unread_count"
+        ]
       },
       "ApiResponseSharedReportResponse": {
         "type": "object",
@@ -3993,27 +4885,43 @@
         "type": "object",
         "properties": {
           "issueId": {
-            "type": "string",
-            "format": "uuid"
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "사정사 신규(ADDED) 쟁점은 AI 원본이 없어 null"
           },
-          "reviewIssueId": {
+          "review_issue_id": {
             "type": "string",
             "format": "uuid"
           },
           "title": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "adjusterOpinion": {
-            "type": "string"
+          "adjuster_opinion": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "description": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "impactAmount": {
-            "type": "integer",
-            "format": "int64"
+          "impact_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
-          "reviewStatus": {
+          "review_status": {
             "type": "string"
           },
           "tags": {
@@ -4022,48 +4930,68 @@
               "type": "string"
             }
           }
-        }
+        },
+        "required": [
+          "review_issue_id",
+          "review_status",
+          "tags"
+        ]
       },
       "SharedReportResponse": {
         "type": "object",
         "properties": {
-          "chatRoomId": {
+          "chat_room_id": {
             "type": "string",
             "format": "uuid"
           },
-          "reportId": {
+          "report_id": {
             "type": "string",
             "format": "uuid"
           },
-          "proposalId": {
+          "proposal_id": {
             "type": "string",
             "format": "uuid"
           },
-          "caseNo": {
+          "case_no": {
             "type": "string"
           },
-          "accidentType": {
-            "type": "string"
+          "accident_type": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "title": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "reportStatus": {
-            "type": "string"
+          "report_status": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "reviewStatus": {
-            "type": "string"
+          "review_status": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "reportUpdatedAt": {
+          "report_updated_at": {
             "type": "string",
             "format": "date-time"
           },
-          "submittedAt": {
+          "submitted_at": {
             "type": "string",
             "format": "date-time"
           },
           "summary": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "adjuster": {
             "$ref": "#/components/schemas/Adjuster"
@@ -4071,9 +4999,12 @@
           "estimate": {
             "$ref": "#/components/schemas/Estimate"
           },
-          "offeredAmount": {
-            "type": "integer",
-            "format": "int64"
+          "offered_amount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32"
           },
           "issues": {
             "type": "array",
@@ -4085,25 +5016,46 @@
             "type": "integer",
             "format": "int32"
           },
-          "applicableGuarantees": {
-            "type": "array",
+          "applicable_guarantees": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
-          "omittedSpecialContract": {
-            "type": "array",
+          "omitted_special_contract": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           },
-          "basisTermsPrecedents": {
-            "type": "array",
+          "basis_terms_precedents": {
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
             }
           }
-        }
+        },
+        "required": [
+          "adjuster",
+          "case_no",
+          "chat_room_id",
+          "estimate",
+          "issueCount",
+          "issues",
+          "proposal_id",
+          "report_id",
+          "report_updated_at",
+          "submitted_at"
+        ]
       },
       "ApiResponseChatMessageListResponse": {
         "type": "object",
@@ -4128,13 +5080,20 @@
               "$ref": "#/components/schemas/ChatMessageResponse"
             }
           },
-          "nextCursor": {
-            "type": "string"
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "hasNext": {
+          "has_next": {
             "type": "boolean"
           }
-        }
+        },
+        "required": [
+          "has_next",
+          "messages"
+        ]
       },
       "ApiResponseOAuthCallbackResponse": {
         "type": "object",
@@ -4153,15 +5112,23 @@
       "OAuthCallbackResponse": {
         "type": "object",
         "properties": {
-          "userId": {
-            "type": "string",
-            "format": "uuid"
+          "user_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "isNewUser=false일 때만 채워진다"
           },
-          "isNewUser": {
+          "is_new_user": {
             "type": "boolean"
           },
-          "signupTicket": {
-            "type": "string"
+          "signup_ticket": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "isNewUser=true일 때만 채워진다"
           }
         }
       },
@@ -4180,7 +5147,12 @@
           "meta": {
             "$ref": "#/components/schemas/Meta"
           }
-        }
+        },
+        "required": [
+          "list",
+          "meta",
+          "pagination"
+        ]
       },
       "ApiResponseAdjusterListResponse": {
         "type": "object",
@@ -4199,19 +5171,19 @@
       "Meta": {
         "type": "object",
         "properties": {
-          "totalAdjusterCount": {
+          "total_adjuster_count": {
             "type": "integer",
             "format": "int64"
           },
-          "averageRating": {
+          "average_rating": {
             "type": "number",
             "format": "double"
           },
-          "totalConsultCount": {
+          "total_consult_count": {
             "type": "integer",
             "format": "int64"
           },
-          "averageCareer": {
+          "average_career": {
             "type": "integer",
             "format": "int32"
           }
@@ -4220,20 +5192,23 @@
       "AdjusterDetailResponse": {
         "type": "object",
         "properties": {
-          "adjusterId": {
+          "adjuster_id": {
             "type": "string",
             "format": "uuid"
           },
           "nickname": {
             "type": "string"
           },
-          "avatarUrl": {
-            "type": "string"
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "headline": {
             "type": "string"
           },
-          "activityRegion": {
+          "activity_region": {
             "type": "string"
           },
           "introduction": {
@@ -4255,38 +5230,50 @@
             "type": "integer",
             "format": "int32"
           },
-          "averageRating": {
+          "average_rating": {
             "type": "number",
             "format": "double"
           },
-          "reviewCount": {
+          "review_count": {
             "type": "integer",
             "format": "int32"
           },
-          "recentReviews": {
+          "recent_reviews": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RecentReview"
             }
           },
-          "completedConsultCount": {
+          "completed_consult_count": {
             "type": "integer",
             "format": "int32"
           },
-          "handledCaseCount": {
+          "handled_case_count": {
             "type": "integer",
             "format": "int64"
           },
           "verified": {
             "type": "boolean"
           },
-          "consultGuide": {
+          "consult_guide": {
             "$ref": "#/components/schemas/ConsultGuide"
           },
           "certification": {
             "$ref": "#/components/schemas/Certification"
           }
-        }
+        },
+        "required": [
+          "activity_region",
+          "adjuster_id",
+          "careers",
+          "certification",
+          "consult_guide",
+          "headline",
+          "introduction",
+          "nickname",
+          "recent_reviews",
+          "specialties"
+        ]
       },
       "ApiResponseAdjusterDetailResponse": {
         "type": "object",
@@ -4305,14 +5292,20 @@
       "Certification": {
         "type": "object",
         "properties": {
-          "registrationNo": {
+          "registration_no": {
             "type": "string"
           },
-          "verifiedAt": {
-            "type": "string",
+          "verified_at": {
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time"
           }
-        }
+        },
+        "required": [
+          "registration_no"
+        ]
       },
       "ConsultGuide": {
         "type": "object",
@@ -4320,13 +5313,18 @@
           "method": {
             "type": "string"
           },
-          "initialConsult": {
+          "initial_consult": {
             "type": "string"
           },
-          "feeBasis": {
+          "fee_basis": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "fee_basis",
+          "initial_consult",
+          "method"
+        ]
       },
       "AdjusterReviewListResponse": {
         "type": "object",
@@ -4340,7 +5338,11 @@
           "pagination": {
             "$ref": "#/components/schemas/Pagination"
           }
-        }
+        },
+        "required": [
+          "list",
+          "pagination"
+        ]
       },
       "ApiResponseAdjusterReviewListResponse": {
         "type": "object",
@@ -4356,77 +5358,26 @@
           }
         }
       },
-      "ApiResponseReviewedReportListResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "data": {
-            "$ref": "#/components/schemas/ReviewedReportListResponse"
-          }
-        }
-      },
-      "ReviewedReportListResponse": {
-        "type": "object",
-        "properties": {
-          "stats": {
-            "$ref": "#/components/schemas/Stats"
-          },
-          "statusCounts": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer",
-              "format": "int64"
-            }
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Item"
-            }
-          },
-          "page": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "size": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "totalElements": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalPages": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
       "Stats": {
         "type": "object",
         "properties": {
-          "monthlyReviewCount": {
+          "monthly_review_count": {
             "type": "integer",
             "format": "int64"
           },
-          "previousMonthReviewCount": {
+          "previous_month_review_count": {
             "type": "integer",
             "format": "int64"
           },
-          "consultationConvertedCount": {
+          "consultation_converted_count": {
             "type": "integer",
             "format": "int64"
           },
-          "consultationConversionRate": {
+          "consultation_conversion_rate": {
             "type": "number",
             "format": "double"
           },
-          "totalCount": {
+          "total_count": {
             "type": "integer",
             "format": "int64"
           }
@@ -4441,13 +5392,19 @@
           "stats": {
             "$ref": "#/components/schemas/Stats"
           },
-          "monthlyActivity": {
+          "monthly_activity": {
             "$ref": "#/components/schemas/MonthlyActivity"
           },
           "certification": {
             "$ref": "#/components/schemas/Certification"
           }
-        }
+        },
+        "required": [
+          "certification",
+          "monthly_activity",
+          "profile",
+          "stats"
+        ]
       },
       "ApiResponseAdjusterMyPageResponse": {
         "type": "object",
@@ -4466,15 +5423,15 @@
       "MonthlyActivity": {
         "type": "object",
         "properties": {
-          "completedCount": {
+          "completed_count": {
             "type": "integer",
             "format": "int64"
           },
-          "consultationConvertedCount": {
+          "consultation_converted_count": {
             "type": "integer",
             "format": "int64"
           },
-          "averageRating": {
+          "average_rating": {
             "type": "number",
             "format": "double"
           }
@@ -4487,13 +5444,22 @@
             "type": "string"
           },
           "email": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
-          "avatarUrl": {
-            "type": "string"
+          "avatar_url": {
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "headline": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "specialties": {
             "type": "array",
@@ -4502,16 +5468,25 @@
             }
           },
           "career": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int32"
           },
-          "activityRegion": {
+          "activity_region": {
             "type": "string"
           },
           "role": {
             "type": "string"
           }
-        }
+        },
+        "required": [
+          "activity_region",
+          "nickname",
+          "role",
+          "specialties"
+        ]
       },
       "AdjusterHomeResponse": {
         "type": "object",
@@ -4522,10 +5497,15 @@
           "summary": {
             "$ref": "#/components/schemas/Summary"
           },
-          "inProgressCases": {
+          "in_progress_cases": {
             "$ref": "#/components/schemas/InProgressCases"
           }
-        }
+        },
+        "required": [
+          "adjuster",
+          "in_progress_cases",
+          "summary"
+        ]
       },
       "ApiResponseAdjusterHomeResponse": {
         "type": "object",
@@ -4554,7 +5534,10 @@
               "$ref": "#/components/schemas/Item"
             }
           }
-        }
+        },
+        "required": [
+          "items"
+        ]
       },
       "Rating": {
         "type": "object",
@@ -4563,7 +5546,7 @@
             "type": "number",
             "format": "double"
           },
-          "reviewCount": {
+          "review_count": {
             "type": "integer",
             "format": "int64"
           }
@@ -4572,42 +5555,45 @@
       "Summary": {
         "type": "object",
         "properties": {
-          "pendingCount": {
+          "pending_count": {
             "type": "integer",
             "format": "int64"
           },
-          "pendingNewCount": {
+          "pending_new_count": {
             "type": "integer",
             "format": "int64"
           },
-          "inProgressCount": {
+          "in_progress_count": {
             "type": "integer",
             "format": "int64"
           },
-          "monthlyCompletedCount": {
+          "monthly_completed_count": {
             "type": "integer",
             "format": "int64"
           },
-          "totalCompletedCount": {
+          "total_completed_count": {
             "type": "integer",
             "format": "int64"
           },
-          "consultationConvertedCount": {
+          "consultation_converted_count": {
             "type": "integer",
             "format": "int64"
           },
           "rating": {
             "$ref": "#/components/schemas/Rating"
           }
-        }
+        },
+        "required": [
+          "rating"
+        ]
       },
       "DeleteDeviceTokenRequest": {
         "type": "object",
         "properties": {
           "token": {
             "type": "string",
-            "maxLength": 500,
-            "minLength": 0
+            "max_length": 500,
+            "min_length": 0
           }
         },
         "required": [
@@ -4615,7 +5601,7 @@
         ]
       }
     },
-    "securitySchemes": {
+    "security_schemes": {
       "cookieAuth": {
         "type": "apiKey",
         "description": "로그인 시 서버가 Set-Cookie로 발급하는 HttpOnly access_token 쿠키로 인증한다",

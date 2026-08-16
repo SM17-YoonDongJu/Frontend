@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { accidentTypeSchema } from "@/shared/model/accident-type";
-import type { ReviewedReportListResponse, Stats } from "@/shared/api/generated/types.gen";
+import type { Stats } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
 /**
@@ -45,10 +45,8 @@ export const reviewedReportsSchema = z.object({
   totalPages: z.number().int(),
 });
 
-// items 배열 원소는 명세가 범용 Item 스키마로 나와 있어 항목별 대조는 생략.
-type _ReviewedReportsDriftCheck = ExpectDriftCheck<
-  AssertFieldsExistInSpec<Omit<z.infer<typeof reviewedReportsSchema>, "items">, ReviewedReportListResponse>
->;
+// 페이로드 전체 대조는 보류 — 백엔드 스펙에서 GET /adjusters/me/reviewed-reports의 200 응답이
+// 스키마 없이(content: {}) 나오기 시작해 대조 대상 타입이 사라졌다. 응답 타입이 복구되면 되살린다.
 type _ReviewStatsDriftCheck = ExpectDriftCheck<
   AssertFieldsExistInSpec<z.infer<typeof reviewStatsSchema>, Stats>
 >;

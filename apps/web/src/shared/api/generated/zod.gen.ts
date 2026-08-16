@@ -12,9 +12,9 @@ export const RegisterDeviceTokenRequestSchema = z.object({
 });
 
 export const DeviceTokenResponseSchema = z.object({
-    id: z.uuid().optional(),
-    platform: z.string().optional(),
-    createdAt: z.iso.datetime().optional()
+    id: z.uuid(),
+    platform: z.string(),
+    created_at: z.iso.datetime()
 });
 
 export const ApiResponseDeviceTokenResponseSchema = z.object({
@@ -27,18 +27,18 @@ export const CreateAdjusterApplicationRequestSchema = z.object({
     name: z.string().min(0).max(100),
     phone: z.string().min(0).max(20),
     specialties: z.array(z.string().min(0).max(30)).min(1),
-    licenseNo: z.string().min(0).max(100).optional(),
-    licenseImageUrl: z.string().min(0).max(500).optional(),
-    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    introduction: z.string().optional(),
+    license_no: z.string().min(0).max(100).nullish(),
+    license_image_url: z.string().min(0).max(500).nullish(),
+    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    introduction: z.string().nullish(),
     affiliation: z.string().min(1),
     region: z.string().min(0).max(100),
-    registrationImageUrl: z.string().min(0).max(500)
+    registration_image_url: z.string().min(0).max(500)
 });
 
 export const CreateAdjusterApplicationResponseSchema = z.object({
-    applicationId: z.uuid().optional(),
-    status: z.string().optional()
+    application_id: z.uuid(),
+    status: z.string()
 });
 
 export const ApiResponseCreateAdjusterApplicationResponseSchema = z.object({
@@ -48,7 +48,7 @@ export const ApiResponseCreateAdjusterApplicationResponseSchema = z.object({
 });
 
 export const UploadResponseSchema = z.object({
-    s3Url: z.string().optional()
+    s3_url: z.string()
 });
 
 export const ApiResponseUploadResponseSchema = z.object({
@@ -58,21 +58,21 @@ export const ApiResponseUploadResponseSchema = z.object({
 });
 
 export const DocumentSchema = z.object({
-    s3Url: z.string().optional(),
-    name: z.string().optional(),
-    reportType: z.string().optional(),
-    fileType: z.string().optional()
+    s3_url: z.string().nullish(),
+    name: z.string().nullish(),
+    report_type: z.string().nullish(),
+    file_type: z.string().nullish()
 });
 
 export const HospitalizationSchema = z.object({
-    hospitalStart: z.iso.date().optional(),
-    hospitalEnd: z.iso.date().optional(),
-    hospitalReason: z.string().optional()
+    hospital_start: z.iso.date().optional(),
+    hospital_end: z.iso.date().optional(),
+    hospital_reason: z.string().optional()
 });
 
 export const CreateReportRequestSchema = z.object({
-    productId: z.uuid().optional(),
-    accidentType: z.enum([
+    product_id: z.uuid().nullish(),
+    accident_type: z.enum([
         'medical_indemnity',
         'traffic',
         'disability',
@@ -80,26 +80,20 @@ export const CreateReportRequestSchema = z.object({
         'fire',
         'liability',
         'other'
-    ]).optional(),
-    accidentDate: z.iso.date().optional(),
-    diagnosis: z.array(z.string()).optional(),
-    offeredAmount: z.number().int().optional(),
-    hospitalizations: z.array(HospitalizationSchema).optional(),
-    description: z.string().optional(),
-    additionalInformation: z.string().optional(),
-    documents: z.array(DocumentSchema).optional(),
-    question: z.string().optional()
+    ]),
+    accident_date: z.iso.date(),
+    diagnosis: z.array(z.string()).nullish(),
+    offered_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    hospitalizations: z.array(HospitalizationSchema).nullish(),
+    description: z.string().nullish(),
+    additional_information: z.string().nullish(),
+    documents: z.array(DocumentSchema).nullish(),
+    question: z.string().nullish()
 });
 
 export const CreateReportResponseSchema = z.object({
-    reportId: z.uuid().optional(),
-    status: z.enum([
-        'AWAITING_INSPECTION',
-        'AWAITING_ADOPTION',
-        'COUNSELING',
-        'CLOSED',
-        'NOT_SELECTED'
-    ]).optional()
+    report_id: z.uuid(),
+    status: z.string()
 });
 
 export const ApiResponseCreateReportResponseSchema = z.object({
@@ -109,15 +103,15 @@ export const ApiResponseCreateReportResponseSchema = z.object({
 });
 
 export const HoldReportRequestSchema = z.object({
-    reason: z.string().optional(),
-    reasonDetail: z.string().optional()
+    reason: z.string(),
+    reason_detail: z.string().nullish()
 });
 
 export const HoldResponseSchema = z.object({
-    reportId: z.uuid().optional(),
+    report_id: z.uuid(),
     held: z.boolean().optional(),
-    reason: z.string().optional(),
-    reasonDetail: z.string().optional()
+    reason: z.string(),
+    reason_detail: z.string().nullish()
 });
 
 export const ApiResponseHoldResponseSchema = z.object({
@@ -127,21 +121,21 @@ export const ApiResponseHoldResponseSchema = z.object({
 });
 
 export const ChatReportRequestSchema = z.object({
-    reason: z.string().optional(),
-    reasonDetail: z.string().optional()
+    reason: z.string(),
+    reason_detail: z.string().nullish()
 });
 
 export const ChatReportResponseSchema = z.object({
-    chatReportId: z.uuid().optional(),
-    chatRoomId: z.uuid().optional(),
+    chat_report_id: z.uuid(),
+    chat_room_id: z.uuid(),
     reason: z.enum([
         'SPAM',
         'ABUSE',
         'FRAUD',
         'PRIVACY_VIOLATION',
         'OTHER'
-    ]).optional(),
-    createdAt: z.iso.datetime().optional()
+    ]),
+    created_at: z.iso.datetime()
 });
 
 export const ApiResponseChatReportResponseSchema = z.object({
@@ -151,8 +145,8 @@ export const ApiResponseChatReportResponseSchema = z.object({
 });
 
 export const ReadResponseSchema = z.object({
-    chatRoomId: z.uuid().optional(),
-    readAt: z.iso.datetime().optional()
+    chat_room_id: z.uuid(),
+    read_at: z.iso.datetime()
 });
 
 export const ApiResponseReadResponseSchema = z.object({
@@ -162,31 +156,31 @@ export const ApiResponseReadResponseSchema = z.object({
 });
 
 export const AttachmentSchema = z.object({
-    attachmentKey: z.string().optional(),
-    name: z.string().optional(),
-    contentType: z.string().optional(),
-    size: z.number().int().optional()
+    attachment_key: z.string(),
+    name: z.string(),
+    content_type: z.string(),
+    size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish()
 });
 
 export const SendMessageRequestSchema = z.object({
-    content: z.string().optional(),
-    attachments: z.array(AttachmentSchema).optional()
+    content: z.string().nullish(),
+    attachments: z.array(AttachmentSchema).nullish()
 });
 
 export const ChatMessageResponseSchema = z.object({
-    messageId: z.uuid().optional(),
-    chatRoomId: z.uuid().optional(),
-    senderId: z.uuid().optional(),
-    messageType: z.enum([
+    message_id: z.uuid(),
+    chat_room_id: z.uuid(),
+    sender_id: z.uuid().nullish(),
+    message_type: z.enum([
         'TEXT',
         'IMAGE',
         'FILE',
         'SYSTEM'
-    ]).optional(),
-    content: z.string().optional(),
+    ]),
+    content: z.string().nullish(),
     attachment: AttachmentSchema.optional(),
-    isMine: z.boolean().optional(),
-    createdAt: z.iso.datetime().optional()
+    is_mine: z.boolean(),
+    created_at: z.iso.datetime()
 });
 
 export const ApiResponseChatMessageResponseSchema = z.object({
@@ -196,10 +190,10 @@ export const ApiResponseChatMessageResponseSchema = z.object({
 });
 
 export const UploadAttachmentResponseSchema = z.object({
-    attachmentKey: z.string().optional(),
-    name: z.string().optional(),
-    contentType: z.string().optional(),
-    size: z.number().int().optional()
+    attachment_key: z.string(),
+    name: z.string().nullish(),
+    content_type: z.string(),
+    size: z.number().int()
 });
 
 export const ApiResponseUploadAttachmentResponseSchema = z.object({
@@ -216,19 +210,19 @@ export const ApiResponseVoidSchema = z.object({
 
 export const RegisterRequestSchema = z.object({
     provider: z.string().min(1),
-    socialToken: z.string().min(1),
+    social_token: z.string().min(1),
     name: z.string().min(1).max(30),
-    birthDate: z.iso.date(),
-    phoneNumber: z.string().min(1).regex(/^01[0-9]-?\d{3,4}-?\d{4}$/),
+    birth_date: z.iso.date(),
+    phone_number: z.string().min(1).regex(/^01[0-9]-?\d{3,4}-?\d{4}$/),
     gender: z.string().min(0).max(10),
-    region: z.string().min(0).max(100).optional(),
-    userType: z.string().min(1)
+    region: z.string().min(0).max(100).nullish(),
+    user_type: z.string().min(1)
 });
 
 export const RegisterResponseSchema = z.object({
-    userId: z.uuid().optional(),
-    nickname: z.string().optional(),
-    role: z.string().optional()
+    user_id: z.uuid(),
+    nickname: z.string(),
+    role: z.string()
 });
 
 export const ApiResponseRegisterResponseSchema = z.object({
@@ -239,14 +233,14 @@ export const ApiResponseRegisterResponseSchema = z.object({
 
 export const CreateAdjusterReviewRequestSchema = z.object({
     score: z.int().gte(1).lte(5),
-    content: z.string().min(0).max(1000).optional()
+    content: z.string().min(0).max(1000).nullish()
 });
 
 export const CreateAdjusterReviewResponseSchema = z.object({
-    reviewId: z.uuid().optional(),
-    adjusterId: z.uuid().optional(),
+    review_id: z.uuid(),
+    adjuster_id: z.uuid(),
     score: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    createdAt: z.iso.datetime().optional()
+    created_at: z.iso.datetime()
 });
 
 export const ApiResponseCreateAdjusterReviewResponseSchema = z.object({
@@ -256,21 +250,21 @@ export const ApiResponseCreateAdjusterReviewResponseSchema = z.object({
 });
 
 export const UserUpdateRequestSchema = z.object({
-    phoneNumber: z.string().regex(/^01[0-9]-?\d{3,4}-?\d{4}$/).optional(),
-    region: z.array(z.string().min(0).max(100)).min(0).max(10).optional(),
-    avatarUrl: z.string().min(0).max(500).optional()
+    phone_number: z.string().regex(/^01[0-9]-?\d{3,4}-?\d{4}$/).nullish(),
+    region: z.array(z.string().min(0).max(100)).min(0).max(10).nullish(),
+    avatar_url: z.string().min(0).max(500).nullish()
 });
 
 export const UserMeResponseSchema = z.object({
-    userId: z.uuid().optional(),
-    nickname: z.string().optional(),
-    phoneNumber: z.string().optional(),
-    role: z.string().optional(),
-    gender: z.string().optional(),
-    region: z.array(z.string()).optional(),
-    avatarUrl: z.string().optional(),
-    socialProvider: z.string().optional(),
-    createdAt: z.iso.datetime().optional()
+    user_id: z.uuid(),
+    nickname: z.string(),
+    phone_number: z.string().nullish(),
+    role: z.string(),
+    gender: z.string().nullish(),
+    region: z.array(z.string()).nullish(),
+    avatar_url: z.string().nullish(),
+    social_provider: z.string().nullish(),
+    created_at: z.iso.datetime()
 });
 
 export const ApiResponseUserMeResponseSchema = z.object({
@@ -280,29 +274,29 @@ export const ApiResponseUserMeResponseSchema = z.object({
 });
 
 export const NotificationSettingUpdateRequestSchema = z.object({
-    newReviewRequest: z.boolean().optional(),
-    consultMessage: z.boolean().optional(),
-    settlementNotice: z.boolean().optional(),
-    reviewDeadlineSoon: z.boolean().optional(),
-    reviewComplete: z.boolean().optional(),
-    receivedProposal: z.boolean().optional(),
-    consultAccepted: z.boolean().optional(),
-    analysisComplete: z.boolean().optional(),
-    identityVerified: z.boolean().optional(),
-    marketing: z.boolean().optional()
+    new_review_request: z.boolean().nullish(),
+    consult_message: z.boolean().nullish(),
+    settlement_notice: z.boolean().nullish(),
+    review_deadline_soon: z.boolean().nullish(),
+    review_complete: z.boolean().nullish(),
+    received_proposal: z.boolean().nullish(),
+    consult_accepted: z.boolean().nullish(),
+    analysis_complete: z.boolean().nullish(),
+    identity_verified: z.boolean().nullish(),
+    marketing: z.boolean().nullish()
 });
 
 export const NotificationSettingResponseSchema = z.object({
-    newReviewRequest: z.boolean().optional(),
-    consultMessage: z.boolean().optional(),
-    settlementNotice: z.boolean().optional(),
-    reviewDeadlineSoon: z.boolean().optional(),
-    reviewComplete: z.boolean().optional(),
-    receivedProposal: z.boolean().optional(),
-    consultAccepted: z.boolean().optional(),
-    analysisComplete: z.boolean().optional(),
-    identityVerified: z.boolean().optional(),
-    marketing: z.boolean().optional()
+    new_review_request: z.boolean(),
+    consult_message: z.boolean(),
+    settlement_notice: z.boolean(),
+    review_deadline_soon: z.boolean(),
+    review_complete: z.boolean(),
+    received_proposal: z.boolean(),
+    consult_accepted: z.boolean(),
+    analysis_complete: z.boolean(),
+    identity_verified: z.boolean(),
+    marketing: z.boolean()
 });
 
 export const ApiResponseNotificationSettingResponseSchema = z.object({
@@ -312,33 +306,33 @@ export const ApiResponseNotificationSettingResponseSchema = z.object({
 });
 
 export const IssueReviewSchema = z.object({
-    reviewIssueId: z.uuid().optional(),
-    issueId: z.uuid().optional(),
-    reviewStatus: z.string().optional(),
-    title: z.string().optional(),
-    description: z.string().optional(),
-    impactAmount: z.number().int().optional(),
-    adjusterOpinion: z.string().optional(),
-    modifiedReason: z.string().optional(),
-    excludedReason: z.string().optional()
+    review_issue_id: z.uuid().nullish(),
+    issueId: z.uuid().nullish(),
+    review_status: z.string(),
+    title: z.string().nullish(),
+    description: z.string().nullish(),
+    impact_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    adjuster_opinion: z.string().nullish(),
+    modified_reason: z.string().nullish(),
+    excluded_reason: z.string().nullish()
 });
 
 export const ReviewReportRequestSchema = z.object({
-    estimateMinAmount: z.number().int().optional(),
-    estimateMaxAmount: z.number().int().optional(),
-    applicableGuarantees: z.array(z.string()).optional(),
-    omittedSpecialContract: z.array(z.string()).optional(),
-    basisTermsPrecedents: z.array(z.string()).optional(),
-    issues: z.array(IssueReviewSchema).optional(),
-    review: z.string().optional()
+    estimate_min_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    estimate_max_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    applicable_guarantees: z.array(z.string()).nullish(),
+    omitted_special_contract: z.array(z.string()).nullish(),
+    basis_terms_precedents: z.array(z.string()).nullish(),
+    issues: z.array(IssueReviewSchema).nullish(),
+    review: z.string().nullish()
 });
 
 export const ReviewReportResponseSchema = z.object({
-    reportId: z.uuid().optional(),
-    status: z.string().optional(),
-    reportReviewId: z.uuid().optional(),
-    reviewStatus: z.string().optional(),
-    sentAt: z.iso.datetime().optional()
+    report_id: z.uuid(),
+    status: z.string(),
+    report_review_id: z.uuid(),
+    review_status: z.string(),
+    sent_at: z.iso.datetime()
 });
 
 export const ApiResponseReviewReportResponseSchema = z.object({
@@ -348,26 +342,27 @@ export const ApiResponseReviewReportResponseSchema = z.object({
 });
 
 export const ProposalDecisionRequestSchema = z.object({
-    status: z.string().optional()
+    status: z.string()
 });
 
 export const ProposalDecisionResponseSchema = z.object({
-    reportId: z.uuid().optional(),
-    proposalId: z.uuid().optional(),
-    adjusterId: z.uuid().optional(),
-    reportStatus: z.enum([
+    report_id: z.uuid(),
+    proposal_id: z.uuid(),
+    adjuster_id: z.uuid(),
+    report_status: z.enum([
         'AWAITING_INSPECTION',
         'AWAITING_ADOPTION',
         'COUNSELING',
         'CLOSED',
-        'NOT_SELECTED'
-    ]).optional(),
-    reviewStatus: z.enum([
+        'NOT_SELECTED',
+        'BLOCKED'
+    ]),
+    review_status: z.enum([
         'SENT',
         'COUNSELING',
         'REJECTED',
         'ACCEPTED'
-    ]).optional()
+    ])
 });
 
 export const ApiResponseProposalDecisionResponseSchema = z.object({
@@ -377,22 +372,23 @@ export const ApiResponseProposalDecisionResponseSchema = z.object({
 });
 
 export const ConsultationDecisionResponseSchema = z.object({
-    chatRoomId: z.uuid().optional(),
-    chatRoomStatus: z.enum(['ACTIVE', 'CLOSED']).optional(),
-    reviewStatus: z.enum([
+    chat_room_id: z.uuid(),
+    chat_room_status: z.enum(['ACTIVE', 'CLOSED']),
+    review_status: z.enum([
         'SENT',
         'COUNSELING',
         'REJECTED',
         'ACCEPTED'
-    ]).optional(),
-    reportId: z.uuid().optional(),
-    reportStatus: z.enum([
+    ]),
+    report_id: z.uuid(),
+    report_status: z.enum([
         'AWAITING_INSPECTION',
         'AWAITING_ADOPTION',
         'COUNSELING',
         'CLOSED',
-        'NOT_SELECTED'
-    ]).optional()
+        'NOT_SELECTED',
+        'BLOCKED'
+    ])
 });
 
 export const ApiResponseConsultationDecisionResponseSchema = z.object({
@@ -407,40 +403,40 @@ export const CareerItemSchema = z.object({
 });
 
 export const UpdateAdjusterProfileRequestSchema = z.object({
-    headline: z.string().min(0).max(100).optional(),
-    introduction: z.string().min(0).max(300).optional(),
-    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    activityRegion: z.string().min(0).max(100).optional(),
-    avatarUrl: z.string().optional(),
-    specialties: z.array(z.string().min(0).max(30)).min(0).max(3).optional(),
-    careers: z.array(CareerItemSchema).optional()
+    headline: z.string().min(0).max(100).nullish(),
+    introduction: z.string().min(0).max(300).nullish(),
+    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    activity_region: z.string().min(0).max(100).nullish(),
+    avatar_url: z.string().nullish(),
+    specialties: z.array(z.string().min(0).max(30)).min(0).max(3).nullish(),
+    careers: z.array(CareerItemSchema).nullish()
 });
 
 export const RecentReviewSchema = z.object({
-    nickname: z.string().optional(),
+    nickname: z.string(),
     score: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    item: z.string().optional(),
-    reviewedAt: z.iso.datetime().optional(),
-    content: z.string().optional()
+    item: z.string().nullish(),
+    reviewed_at: z.iso.datetime(),
+    content: z.string().nullish()
 });
 
 export const AdjusterProfileResponseSchema = z.object({
-    adjusterId: z.uuid().optional(),
-    nickname: z.string().optional(),
-    headline: z.string().optional(),
-    avatarUrl: z.string().optional(),
-    activityRegion: z.string().optional(),
-    introduction: z.string().optional(),
-    specialties: z.array(z.string()).optional(),
-    careers: z.array(CareerItemSchema).optional(),
-    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    averageRating: z.number().optional(),
-    reviewCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    recentReviews: z.array(RecentReviewSchema).optional(),
-    completedConsultCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    handledCaseCount: z.number().int().optional(),
-    pendingReviewCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    updatedAt: z.iso.datetime().optional()
+    adjuster_id: z.uuid(),
+    nickname: z.string(),
+    headline: z.string(),
+    avatar_url: z.string().nullish(),
+    activity_region: z.string(),
+    introduction: z.string(),
+    specialties: z.array(z.string()),
+    careers: z.array(CareerItemSchema),
+    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
+    average_rating: z.number().optional(),
+    review_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    recent_reviews: z.array(RecentReviewSchema),
+    completed_consult_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    handled_case_count: z.number().int().optional(),
+    pending_review_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    updated_at: z.iso.datetime()
 });
 
 export const ApiResponseAdjusterProfileResponseSchema = z.object({
@@ -450,21 +446,21 @@ export const ApiResponseAdjusterProfileResponseSchema = z.object({
 });
 
 export const ItemSchema = z.object({
-    id: z.uuid().optional(),
-    type: z.string().optional(),
-    title: z.string().optional(),
-    body: z.string().optional(),
-    isRead: z.boolean().optional(),
-    createdAt: z.iso.datetime().optional()
+    id: z.uuid(),
+    type: z.string(),
+    title: z.string(),
+    body: z.string().nullish(),
+    is_read: z.boolean(),
+    created_at: z.iso.datetime()
 });
 
 export const NotificationListResponseSchema = z.object({
-    items: z.array(ItemSchema).optional(),
-    unreadCount: z.number().int().optional(),
-    page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    totalElements: z.number().int().optional(),
-    totalPages: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
+    items: z.array(ItemSchema),
+    unread_count: z.number().int(),
+    page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
+    size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
+    total_elements: z.number().int(),
+    total_pages: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })
 });
 
 export const ApiResponseNotificationListResponseSchema = z.object({
@@ -474,7 +470,7 @@ export const ApiResponseNotificationListResponseSchema = z.object({
 });
 
 export const UserInsuranceListResponseSchema = z.object({
-    list: z.array(ItemSchema).optional()
+    list: z.array(ItemSchema)
 });
 
 export const ApiResponseUserInsuranceListResponseSchema = z.object({
@@ -484,27 +480,27 @@ export const ApiResponseUserInsuranceListResponseSchema = z.object({
 });
 
 export const ActiveReportSchema = z.object({
-    reportId: z.uuid().optional(),
-    title: z.string().optional(),
-    accidentType: z.string().optional(),
-    status: z.string().optional(),
-    createdAt: z.iso.datetime().optional(),
-    firstReviewedAt: z.iso.datetime().optional(),
-    proposalCount: z.number().int().optional()
+    report_id: z.uuid(),
+    title: z.string(),
+    accident_type: z.string().nullish(),
+    status: z.string(),
+    created_at: z.iso.datetime(),
+    first_reviewed_at: z.iso.datetime().nullish(),
+    proposal_count: z.number().int().optional()
 });
 
 export const ProposalSummarySchema = z.object({
     count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    minAmount: z.number().int().optional(),
-    maxAmount: z.number().int().optional(),
-    avgAmount: z.number().int().optional(),
-    items: z.array(ItemSchema).optional()
+    min_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    max_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    avg_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    items: z.array(ItemSchema)
 });
 
 export const UserDashboardResponseSchema = z.object({
-    reportCount: z.number().int().optional(),
-    activeReport: ActiveReportSchema.optional(),
-    proposalSummary: ProposalSummarySchema.optional()
+    report_count: z.number().int().optional(),
+    active_report: ActiveReportSchema.optional(),
+    proposal_summary: ProposalSummarySchema.optional()
 });
 
 export const ApiResponseUserDashboardResponseSchema = z.object({
@@ -514,10 +510,10 @@ export const ApiResponseUserDashboardResponseSchema = z.object({
 });
 
 export const UserActivitySummaryResponseSchema = z.object({
-    reportCount: z.number().int().optional(),
-    proposalCount: z.number().int().optional(),
-    consultCount: z.number().int().optional(),
-    closedCount: z.number().int().optional()
+    report_count: z.number().int().optional(),
+    proposal_count: z.number().int().optional(),
+    consult_count: z.number().int().optional(),
+    closed_count: z.number().int().optional()
 });
 
 export const ApiResponseUserActivitySummaryResponseSchema = z.object({
@@ -527,17 +523,17 @@ export const ApiResponseUserActivitySummaryResponseSchema = z.object({
 });
 
 export const AdjusterApplicationResponseSchema = z.object({
-    applicationId: z.uuid().optional(),
-    status: z.string().optional(),
-    submittedAt: z.iso.datetime().optional(),
-    name: z.string().optional(),
-    phone: z.string().optional(),
-    specialties: z.array(z.string()).optional(),
-    speciality: z.string().optional(),
-    licenseNo: z.string().optional(),
-    documents: z.array(DocumentSchema).optional(),
-    rejectedAt: z.iso.datetime().optional(),
-    rejectReason: z.string().optional()
+    application_id: z.uuid(),
+    status: z.string(),
+    submitted_at: z.iso.datetime(),
+    name: z.string(),
+    phone: z.string().nullish(),
+    specialties: z.array(z.string()).nullish(),
+    speciality: z.string(),
+    license_no: z.string().nullish(),
+    documents: z.array(DocumentSchema),
+    rejected_at: z.iso.datetime().nullish(),
+    reject_reason: z.string().nullish()
 });
 
 export const ApiResponseAdjusterApplicationResponseSchema = z.object({
@@ -547,32 +543,40 @@ export const ApiResponseAdjusterApplicationResponseSchema = z.object({
 });
 
 export const CardSchema = z.object({
-    reportId: z.uuid().optional(),
-    status: z.string().optional(),
-    accidentType: z.string().optional(),
-    title: z.string().optional(),
-    createdAt: z.iso.datetime().optional(),
-    reportNo: z.string().optional(),
-    claimedMinAmount: z.number().int().optional(),
-    claimedMaxAmount: z.number().int().optional(),
-    proposalCount: z.number().int().optional(),
-    reviewedAt: z.iso.datetime().optional(),
-    adjusterNickname: z.string().optional(),
-    offeredAmount: z.number().int().optional(),
-    treatment: z.string().optional()
+    report_id: z.uuid(),
+    status: z.string(),
+    accident_type: z.string(),
+    title: z.string(),
+    created_at: z.iso.datetime(),
+    report_no: z.string(),
+    claimed_min_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    claimed_max_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    proposal_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
+    reviewed_at: z.iso.datetime().nullish(),
+    adjuster_nickname: z.string().nullish(),
+    offered_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    treatment: z.string().nullish(),
+    analysis_state: z.enum([
+        'PROCESSING',
+        'COMPLETED',
+        'FAILED',
+        'BLOCKED'
+    ]),
+    analysis_failure_reason: z.string().nullish(),
+    analysis_failure_message: z.string().nullish()
 });
 
 export const PaginationSchema = z.object({
     page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    totalElements: z.number().int().optional(),
-    totalPages: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    hasNext: z.boolean().optional()
+    total_elements: z.number().int().optional(),
+    total_pages: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    has_next: z.boolean().optional()
 });
 
 export const ReportCardListResponseSchema = z.object({
-    list: z.array(CardSchema).optional(),
-    pagination: PaginationSchema.optional()
+    list: z.array(CardSchema),
+    pagination: PaginationSchema
 });
 
 export const ApiResponseReportCardListResponseSchema = z.object({
@@ -582,37 +586,45 @@ export const ApiResponseReportCardListResponseSchema = z.object({
 });
 
 export const AdjusterSchema = z.object({
-    nickname: z.string().optional(),
-    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
+    nickname: z.string().nullish(),
+    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish()
 });
 
 export const IssueItemSchema = z.object({
-    title: z.string().optional(),
-    opinion: z.string().optional(),
-    status: z.string().optional(),
-    tags: z.array(z.string()).optional(),
-    impactAmount: z.number().int().optional()
+    title: z.string().nullish(),
+    opinion: z.string().nullish(),
+    status: z.string().nullish(),
+    tags: z.array(z.string()),
+    impact_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish()
 });
 
 export const CustomerReportDetailResponseSchema = z.object({
-    reportId: z.uuid().optional(),
-    status: z.string().optional(),
-    accidentType: z.string().optional(),
-    treatment: z.string().optional(),
-    claimedMinAmount: z.number().int().optional(),
-    claimedMaxAmount: z.number().int().optional(),
-    offeredAmount: z.number().int().optional(),
-    applicableGuarantees: z.array(z.string()).optional(),
-    omittedSpecialContract: z.array(z.string()).optional(),
-    basisTermsPrecedents: z.array(z.string()).optional(),
-    issue: z.array(IssueItemSchema).optional(),
-    question: z.string().optional(),
-    adjusterId: z.uuid().optional(),
-    confidenceLevel: z.string().optional(),
-    reportNo: z.string().optional(),
-    reviewComment: z.string().optional(),
-    reviewedAt: z.iso.datetime().optional(),
-    adjuster: AdjusterSchema.optional()
+    report_id: z.uuid(),
+    status: z.string(),
+    accident_type: z.string(),
+    treatment: z.string(),
+    claimed_min_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    claimed_max_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    offered_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    applicable_guarantees: z.array(z.string()),
+    omitted_special_contract: z.array(z.string()),
+    basis_terms_precedents: z.array(z.string()),
+    issue: z.array(IssueItemSchema),
+    question: z.string().nullish(),
+    adjuster_id: z.uuid().nullish(),
+    confidence_level: z.string().nullish(),
+    report_no: z.string(),
+    review_comment: z.string().nullish(),
+    reviewed_at: z.iso.datetime().nullish(),
+    adjuster: AdjusterSchema.optional(),
+    analysis_state: z.enum([
+        'PROCESSING',
+        'COMPLETED',
+        'FAILED',
+        'BLOCKED'
+    ]),
+    analysis_failure_reason: z.string().nullish(),
+    analysis_failure_message: z.string().nullish()
 });
 
 export const ApiResponseCustomerReportDetailResponseSchema = z.object({
@@ -622,39 +634,39 @@ export const ApiResponseCustomerReportDetailResponseSchema = z.object({
 });
 
 export const AttachmentItemSchema = z.object({
-    attachmentId: z.uuid().optional(),
-    name: z.string().optional(),
-    mimeType: z.string().optional(),
-    url: z.string().optional(),
-    reportType: z.string().optional(),
-    pageCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    issuedBy: z.string().optional(),
-    issuedAt: z.iso.date().optional(),
-    aiSummary: z.string().optional()
+    attachment_id: z.uuid(),
+    name: z.string().nullish(),
+    mime_type: z.string().nullish(),
+    url: z.string().nullish(),
+    report_type: z.string().nullish(),
+    page_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    issuedBy: z.string().nullish(),
+    issuedAt: z.iso.date().nullish(),
+    ai_summary: z.string().nullish()
 });
 
 export const ClaimContextSchema = z.object({
-    accidentType: z.string().optional(),
-    accidentDate: z.iso.date().optional(),
-    diagnosis: z.string().optional(),
-    hospitalization: z.string().optional(),
-    description: z.string().optional(),
-    additionalInformation: z.string().optional(),
-    productName: z.string().optional(),
-    insurerName: z.string().optional()
+    accident_type: z.string().nullish(),
+    accident_date: z.iso.date().nullish(),
+    diagnosis: z.string(),
+    hospitalization: z.string(),
+    description: z.string().nullish(),
+    additional_information: z.string().nullish(),
+    product_name: z.string().nullish(),
+    insurer_name: z.string().nullish()
 });
 
 export const ClientSchema = z.object({
-    nickname: z.string().optional(),
-    gender: z.string().optional(),
-    birthDate: z.iso.date().optional(),
-    region: z.string().optional(),
-    joinedAt: z.iso.datetime().optional()
+    nickname: z.string(),
+    gender: z.string(),
+    birth_date: z.iso.date(),
+    region: z.string(),
+    joined_at: z.iso.datetime()
 });
 
 export const EstimateSchema = z.object({
-    min: z.number().int().optional(),
-    max: z.number().int().optional()
+    min: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    max: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish()
 });
 
 export const ProgressSchema = z.object({
@@ -665,28 +677,28 @@ export const ProgressSchema = z.object({
 });
 
 export const ReviewWorkspaceResponseSchema = z.object({
-    reportId: z.uuid().optional(),
-    caseNo: z.string().optional(),
-    title: z.string().optional(),
-    accidentType: z.string().optional(),
-    region: z.string().optional(),
-    status: z.string().optional(),
-    confidenceLevel: z.string().optional(),
-    isMasked: z.boolean().optional(),
-    offeredAmount: z.number().int().optional(),
+    report_id: z.uuid(),
+    case_no: z.string(),
+    title: z.string().nullish(),
+    accident_type: z.string(),
+    region: z.string(),
+    status: z.string(),
+    confidence_level: z.string().nullish(),
+    is_masked: z.boolean().optional(),
+    offered_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
     client: ClientSchema.optional(),
     claim: ClaimContextSchema.optional(),
-    attachments: z.array(AttachmentItemSchema).optional(),
-    aiEstimate: EstimateSchema.optional(),
-    adjusterEstimate: EstimateSchema.optional(),
-    applicableGuarantees: z.array(z.string()).optional(),
-    omittedSpecialContract: z.array(z.string()).optional(),
-    basisTermsPrecedents: z.array(z.string()).optional(),
-    issues: z.array(IssueItemSchema).optional(),
-    review: z.string().optional(),
-    reviewStatus: z.string().optional(),
+    attachments: z.array(AttachmentItemSchema),
+    ai_estimate: EstimateSchema,
+    adjuster_estimate: EstimateSchema.optional(),
+    applicable_guarantees: z.array(z.string()),
+    omitted_special_contract: z.array(z.string()),
+    basis_terms_precedents: z.array(z.string()),
+    issues: z.array(IssueItemSchema),
+    review: z.string().nullish(),
+    review_status: z.string().nullish(),
     started: z.boolean().optional(),
-    progress: ProgressSchema.optional()
+    progress: ProgressSchema
 });
 
 export const ApiResponseReviewWorkspaceResponseSchema = z.object({
@@ -696,18 +708,18 @@ export const ApiResponseReviewWorkspaceResponseSchema = z.object({
 });
 
 export const ProposalSchema = z.object({
-    proposalId: z.uuid().optional(),
-    adjusterId: z.uuid().optional(),
-    nickname: z.string().optional(),
-    rating: z.number().optional(),
-    proposalSummary: z.string().optional(),
-    status: z.string().optional(),
-    submittedAt: z.iso.datetime().optional()
+    proposal_id: z.uuid(),
+    adjuster_id: z.uuid(),
+    nickname: z.string(),
+    rating: z.number().nullish(),
+    proposal_summary: z.string().nullish(),
+    status: z.string(),
+    submitted_at: z.iso.datetime()
 });
 
 export const ProposalListResponseSchema = z.object({
-    list: z.array(ProposalSchema).optional(),
-    pagination: PaginationSchema.optional()
+    list: z.array(ProposalSchema),
+    pagination: PaginationSchema
 });
 
 export const ApiResponseProposalListResponseSchema = z.object({
@@ -716,9 +728,36 @@ export const ApiResponseProposalListResponseSchema = z.object({
     data: ProposalListResponseSchema.optional()
 });
 
+export const FailedDocumentSchema = z.object({
+    attachment_id: z.uuid().nullish(),
+    name: z.string().nullish(),
+    failure_reason: z.string()
+});
+
+export const ReportAnalysisStatusResponseSchema = z.object({
+    report_id: z.uuid(),
+    analysis_state: z.enum([
+        'PROCESSING',
+        'COMPLETED',
+        'FAILED',
+        'BLOCKED'
+    ]),
+    failure_reason: z.string().nullish(),
+    failure_message: z.string().nullish(),
+    reupload_guidance: z.string().nullish(),
+    failed_at: z.iso.datetime().nullish(),
+    failed_documents: z.array(FailedDocumentSchema)
+});
+
+export const ApiResponseReportAnalysisStatusResponseSchema = z.object({
+    status: z.string().optional(),
+    message: z.string().optional(),
+    data: ReportAnalysisStatusResponseSchema.optional()
+});
+
 export const PendingReviewListResponseSchema = z.object({
-    list: z.array(ItemSchema).optional(),
-    pagination: PaginationSchema.optional()
+    list: z.array(ItemSchema),
+    pagination: PaginationSchema
 });
 
 export const ApiResponsePendingReviewListResponseSchema = z.object({
@@ -728,10 +767,10 @@ export const ApiResponsePendingReviewListResponseSchema = z.object({
 });
 
 export const PendingReviewSummaryResponseSchema = z.object({
-    pendingCount: z.number().int().optional(),
-    dueSoonCount: z.number().int().optional(),
-    inProgressCount: z.number().int().optional(),
-    specialtyMatchCount: z.number().int().optional()
+    pending_count: z.number().int().optional(),
+    due_soon_count: z.number().int().optional(),
+    in_progress_count: z.number().int().optional(),
+    specialty_match_count: z.number().int().optional()
 });
 
 export const ApiResponsePendingReviewSummaryResponseSchema = z.object({
@@ -741,24 +780,24 @@ export const ApiResponsePendingReviewSummaryResponseSchema = z.object({
 });
 
 export const CounterpartSchema = z.object({
-    userId: z.uuid().optional(),
-    name: z.string().optional(),
-    avatarUrl: z.string().optional()
+    user_id: z.uuid(),
+    name: z.string(),
+    avatar_url: z.string().nullish()
 });
 
 export const ChatRoomSummaryResponseSchema = z.object({
-    chatRoomId: z.uuid().optional(),
-    reportId: z.uuid().optional(),
-    proposalId: z.uuid().optional(),
-    roomStatus: z.enum(['ACTIVE', 'CLOSED']).optional(),
-    matchStatus: z.enum([
+    chat_room_id: z.uuid(),
+    report_id: z.uuid().nullish(),
+    proposal_id: z.uuid().nullish(),
+    room_status: z.enum(['ACTIVE', 'CLOSED']),
+    match_status: z.enum([
         'SENT',
         'COUNSELING',
         'REJECTED',
         'ACCEPTED'
     ]).optional(),
-    caseNo: z.string().optional(),
-    reportTypeLabel: z.enum([
+    case_no: z.string().nullish(),
+    report_type_label: z.enum([
         'medical_indemnity',
         'traffic',
         'disability',
@@ -767,14 +806,14 @@ export const ChatRoomSummaryResponseSchema = z.object({
         'liability',
         'other'
     ]).optional(),
-    counterpart: CounterpartSchema.optional(),
-    lastMessage: z.string().optional(),
-    lastMessageAt: z.iso.datetime().optional(),
-    unreadCount: z.number().int().optional()
+    counterpart: CounterpartSchema,
+    last_message: z.string().nullish(),
+    last_message_at: z.iso.datetime().nullish(),
+    unread_count: z.number().int()
 });
 
 export const ChatRoomListResponseSchema = z.object({
-    rooms: z.array(ChatRoomSummaryResponseSchema).optional()
+    rooms: z.array(ChatRoomSummaryResponseSchema)
 });
 
 export const ApiResponseChatRoomListResponseSchema = z.object({
@@ -784,18 +823,18 @@ export const ApiResponseChatRoomListResponseSchema = z.object({
 });
 
 export const ChatRoomDetailResponseSchema = z.object({
-    chatRoomId: z.uuid().optional(),
-    reportId: z.uuid().optional(),
-    proposalId: z.uuid().optional(),
-    roomStatus: z.enum(['ACTIVE', 'CLOSED']).optional(),
-    matchStatus: z.enum([
+    chat_room_id: z.uuid(),
+    report_id: z.uuid().nullish(),
+    proposal_id: z.uuid().nullish(),
+    room_status: z.enum(['ACTIVE', 'CLOSED']),
+    match_status: z.enum([
         'SENT',
         'COUNSELING',
         'REJECTED',
         'ACCEPTED'
     ]).optional(),
-    caseNo: z.string().optional(),
-    reportTypeLabel: z.enum([
+    case_no: z.string().nullish(),
+    report_type_label: z.enum([
         'medical_indemnity',
         'traffic',
         'disability',
@@ -804,11 +843,11 @@ export const ChatRoomDetailResponseSchema = z.object({
         'liability',
         'other'
     ]).optional(),
-    counterpart: CounterpartSchema.optional(),
-    lastMessage: z.string().optional(),
-    lastMessageAt: z.iso.datetime().optional(),
-    unreadCount: z.number().int().optional(),
-    createdAt: z.iso.datetime().optional()
+    counterpart: CounterpartSchema,
+    last_message: z.string().nullish(),
+    last_message_at: z.iso.datetime().nullish(),
+    unread_count: z.number().int(),
+    created_at: z.iso.datetime()
 });
 
 export const ApiResponseChatRoomDetailResponseSchema = z.object({
@@ -818,36 +857,36 @@ export const ApiResponseChatRoomDetailResponseSchema = z.object({
 });
 
 export const IssueSchema = z.object({
-    issueId: z.uuid().optional(),
-    reviewIssueId: z.uuid().optional(),
-    title: z.string().optional(),
-    adjusterOpinion: z.string().optional(),
-    description: z.string().optional(),
-    impactAmount: z.number().int().optional(),
-    reviewStatus: z.string().optional(),
-    tags: z.array(z.string()).optional()
+    issueId: z.uuid().nullish(),
+    review_issue_id: z.uuid(),
+    title: z.string().nullish(),
+    adjuster_opinion: z.string().nullish(),
+    description: z.string().nullish(),
+    impact_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    review_status: z.string(),
+    tags: z.array(z.string())
 });
 
 export const SharedReportResponseSchema = z.object({
-    chatRoomId: z.uuid().optional(),
-    reportId: z.uuid().optional(),
-    proposalId: z.uuid().optional(),
-    caseNo: z.string().optional(),
-    accidentType: z.string().optional(),
-    title: z.string().optional(),
-    reportStatus: z.string().optional(),
-    reviewStatus: z.string().optional(),
-    reportUpdatedAt: z.iso.datetime().optional(),
-    submittedAt: z.iso.datetime().optional(),
-    summary: z.string().optional(),
-    adjuster: AdjusterSchema.optional(),
-    estimate: EstimateSchema.optional(),
-    offeredAmount: z.number().int().optional(),
-    issues: z.array(IssueSchema).optional(),
-    issueCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    applicableGuarantees: z.array(z.string()).optional(),
-    omittedSpecialContract: z.array(z.string()).optional(),
-    basisTermsPrecedents: z.array(z.string()).optional()
+    chat_room_id: z.uuid(),
+    report_id: z.uuid(),
+    proposal_id: z.uuid(),
+    case_no: z.string(),
+    accident_type: z.string().nullish(),
+    title: z.string().nullish(),
+    report_status: z.string().nullish(),
+    review_status: z.string().nullish(),
+    report_updated_at: z.iso.datetime(),
+    submitted_at: z.iso.datetime(),
+    summary: z.string().nullish(),
+    adjuster: AdjusterSchema,
+    estimate: EstimateSchema,
+    offered_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    issues: z.array(IssueSchema),
+    issueCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
+    applicable_guarantees: z.array(z.string()).nullish(),
+    omitted_special_contract: z.array(z.string()).nullish(),
+    basis_terms_precedents: z.array(z.string()).nullish()
 });
 
 export const ApiResponseSharedReportResponseSchema = z.object({
@@ -857,9 +896,9 @@ export const ApiResponseSharedReportResponseSchema = z.object({
 });
 
 export const ChatMessageListResponseSchema = z.object({
-    messages: z.array(ChatMessageResponseSchema).optional(),
-    nextCursor: z.string().optional(),
-    hasNext: z.boolean().optional()
+    messages: z.array(ChatMessageResponseSchema),
+    next_cursor: z.string().nullish(),
+    has_next: z.boolean()
 });
 
 export const ApiResponseChatMessageListResponseSchema = z.object({
@@ -869,9 +908,9 @@ export const ApiResponseChatMessageListResponseSchema = z.object({
 });
 
 export const OAuthCallbackResponseSchema = z.object({
-    userId: z.uuid().optional(),
-    isNewUser: z.boolean().optional(),
-    signupTicket: z.string().optional()
+    user_id: z.uuid().nullish(),
+    is_new_user: z.boolean().optional(),
+    signup_ticket: z.string().nullish()
 });
 
 export const ApiResponseOAuthCallbackResponseSchema = z.object({
@@ -881,16 +920,16 @@ export const ApiResponseOAuthCallbackResponseSchema = z.object({
 });
 
 export const MetaSchema = z.object({
-    totalAdjusterCount: z.number().int().optional(),
-    averageRating: z.number().optional(),
-    totalConsultCount: z.number().int().optional(),
-    averageCareer: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
+    total_adjuster_count: z.number().int().optional(),
+    average_rating: z.number().optional(),
+    total_consult_count: z.number().int().optional(),
+    average_career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
 });
 
 export const AdjusterListResponseSchema = z.object({
-    list: z.array(ItemSchema).optional(),
-    pagination: PaginationSchema.optional(),
-    meta: MetaSchema.optional()
+    list: z.array(ItemSchema),
+    pagination: PaginationSchema,
+    meta: MetaSchema
 });
 
 export const ApiResponseAdjusterListResponseSchema = z.object({
@@ -900,34 +939,34 @@ export const ApiResponseAdjusterListResponseSchema = z.object({
 });
 
 export const CertificationSchema = z.object({
-    registrationNo: z.string().optional(),
-    verifiedAt: z.iso.datetime().optional()
+    registration_no: z.string(),
+    verified_at: z.iso.datetime().nullish()
 });
 
 export const ConsultGuideSchema = z.object({
-    method: z.string().optional(),
-    initialConsult: z.string().optional(),
-    feeBasis: z.string().optional()
+    method: z.string(),
+    initial_consult: z.string(),
+    fee_basis: z.string()
 });
 
 export const AdjusterDetailResponseSchema = z.object({
-    adjusterId: z.uuid().optional(),
-    nickname: z.string().optional(),
-    avatarUrl: z.string().optional(),
-    headline: z.string().optional(),
-    activityRegion: z.string().optional(),
-    introduction: z.string().optional(),
-    specialties: z.array(z.string()).optional(),
-    careers: z.array(CareerItemSchema).optional(),
+    adjuster_id: z.uuid(),
+    nickname: z.string(),
+    avatar_url: z.string().nullish(),
+    headline: z.string(),
+    activity_region: z.string(),
+    introduction: z.string(),
+    specialties: z.array(z.string()),
+    careers: z.array(CareerItemSchema),
     career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    averageRating: z.number().optional(),
-    reviewCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    recentReviews: z.array(RecentReviewSchema).optional(),
-    completedConsultCount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    handledCaseCount: z.number().int().optional(),
+    average_rating: z.number().optional(),
+    review_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    recent_reviews: z.array(RecentReviewSchema),
+    completed_consult_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
+    handled_case_count: z.number().int().optional(),
     verified: z.boolean().optional(),
-    consultGuide: ConsultGuideSchema.optional(),
-    certification: CertificationSchema.optional()
+    consult_guide: ConsultGuideSchema,
+    certification: CertificationSchema
 });
 
 export const ApiResponseAdjusterDetailResponseSchema = z.object({
@@ -937,8 +976,8 @@ export const ApiResponseAdjusterDetailResponseSchema = z.object({
 });
 
 export const AdjusterReviewListResponseSchema = z.object({
-    list: z.array(ItemSchema).optional(),
-    pagination: PaginationSchema.optional()
+    list: z.array(ItemSchema),
+    pagination: PaginationSchema
 });
 
 export const ApiResponseAdjusterReviewListResponseSchema = z.object({
@@ -948,51 +987,35 @@ export const ApiResponseAdjusterReviewListResponseSchema = z.object({
 });
 
 export const StatsSchema = z.object({
-    monthlyReviewCount: z.number().int().optional(),
-    previousMonthReviewCount: z.number().int().optional(),
-    consultationConvertedCount: z.number().int().optional(),
-    consultationConversionRate: z.number().optional(),
-    totalCount: z.number().int().optional()
-});
-
-export const ReviewedReportListResponseSchema = z.object({
-    stats: StatsSchema.optional(),
-    statusCounts: z.record(z.string(), z.number().int()).optional(),
-    items: z.array(ItemSchema).optional(),
-    page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    totalElements: z.number().int().optional(),
-    totalPages: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional()
-});
-
-export const ApiResponseReviewedReportListResponseSchema = z.object({
-    status: z.string().optional(),
-    message: z.string().optional(),
-    data: ReviewedReportListResponseSchema.optional()
+    monthly_review_count: z.number().int().optional(),
+    previous_month_review_count: z.number().int().optional(),
+    consultation_converted_count: z.number().int().optional(),
+    consultation_conversion_rate: z.number().optional(),
+    total_count: z.number().int().optional()
 });
 
 export const MonthlyActivitySchema = z.object({
-    completedCount: z.number().int().optional(),
-    consultationConvertedCount: z.number().int().optional(),
-    averageRating: z.number().optional()
+    completed_count: z.number().int().optional(),
+    consultation_converted_count: z.number().int().optional(),
+    average_rating: z.number().optional()
 });
 
 export const ProfileSchema = z.object({
-    nickname: z.string().optional(),
-    email: z.string().optional(),
-    avatarUrl: z.string().optional(),
-    headline: z.string().optional(),
-    specialties: z.array(z.string()).optional(),
-    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    activityRegion: z.string().optional(),
-    role: z.string().optional()
+    nickname: z.string(),
+    email: z.string().nullish(),
+    avatar_url: z.string().nullish(),
+    headline: z.string().nullish(),
+    specialties: z.array(z.string()),
+    career: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    activity_region: z.string(),
+    role: z.string()
 });
 
 export const AdjusterMyPageResponseSchema = z.object({
-    profile: ProfileSchema.optional(),
-    stats: StatsSchema.optional(),
-    monthlyActivity: MonthlyActivitySchema.optional(),
-    certification: CertificationSchema.optional()
+    profile: ProfileSchema,
+    stats: StatsSchema,
+    monthly_activity: MonthlyActivitySchema,
+    certification: CertificationSchema
 });
 
 export const ApiResponseAdjusterMyPageResponseSchema = z.object({
@@ -1003,28 +1026,28 @@ export const ApiResponseAdjusterMyPageResponseSchema = z.object({
 
 export const InProgressCasesSchema = z.object({
     total: z.number().int().optional(),
-    items: z.array(ItemSchema).optional()
+    items: z.array(ItemSchema)
 });
 
 export const RatingSchema = z.object({
     average: z.number().optional(),
-    reviewCount: z.number().int().optional()
+    review_count: z.number().int().optional()
 });
 
 export const SummarySchema = z.object({
-    pendingCount: z.number().int().optional(),
-    pendingNewCount: z.number().int().optional(),
-    inProgressCount: z.number().int().optional(),
-    monthlyCompletedCount: z.number().int().optional(),
-    totalCompletedCount: z.number().int().optional(),
-    consultationConvertedCount: z.number().int().optional(),
-    rating: RatingSchema.optional()
+    pending_count: z.number().int().optional(),
+    pending_new_count: z.number().int().optional(),
+    in_progress_count: z.number().int().optional(),
+    monthly_completed_count: z.number().int().optional(),
+    total_completed_count: z.number().int().optional(),
+    consultation_converted_count: z.number().int().optional(),
+    rating: RatingSchema
 });
 
 export const AdjusterHomeResponseSchema = z.object({
-    adjuster: AdjusterSchema.optional(),
-    summary: SummarySchema.optional(),
-    inProgressCases: InProgressCasesSchema.optional()
+    adjuster: AdjusterSchema,
+    summary: SummarySchema,
+    in_progress_cases: InProgressCasesSchema
 });
 
 export const ApiResponseAdjusterHomeResponseSchema = z.object({
@@ -1358,6 +1381,15 @@ export const zProposalsQuery = z.object({
  */
 export const zProposalsResponse = ApiResponseProposalListResponseSchema;
 
+export const zAnalysisStatusPath = z.object({
+    reportId: z.uuid()
+});
+
+/**
+ * OK
+ */
+export const zAnalysisStatusResponse = ApiResponseReportAnalysisStatusResponseSchema;
+
 export const zPendingReviewQuery = z.object({
     status: z.string().optional(),
     accidentType: z.string().optional(),
@@ -1453,11 +1485,6 @@ export const zReviewedReportsQuery = z.object({
     page: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional().default(0),
     size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional().default(20)
 });
-
-/**
- * OK
- */
-export const zReviewedReportsResponse = ApiResponseReviewedReportListResponseSchema;
 
 /**
  * OK

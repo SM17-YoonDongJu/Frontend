@@ -11,7 +11,7 @@ export async function reportChat(
   const { data } = await reportChatRequest({
     throwOnError: true,
     path: { chatRoomId },
-    body: { reason: body.reason, reasonDetail: body.reasonDetail ?? undefined },
+    body: { reason: body.reason, reason_detail: body.reasonDetail ?? undefined },
   });
   return reportChatResponseSchema.parse(data);
 }

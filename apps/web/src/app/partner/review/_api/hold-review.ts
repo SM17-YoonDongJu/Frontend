@@ -18,7 +18,7 @@ export async function holdReview({
   const { data } = await addHold({
     throwOnError: true,
     path: { reportId },
-    body: { reason, reasonDetail: reasonDetail ?? undefined },
+    body: { reason, reason_detail: reasonDetail ?? undefined },
   });
   return holdReviewSchema.parse(data);
 }
