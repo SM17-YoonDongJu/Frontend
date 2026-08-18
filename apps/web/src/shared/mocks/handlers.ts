@@ -1733,6 +1733,13 @@ export const handlers = [
     const code = url.searchParams.get("code");
     const failure = request.headers.get("x-mock-failure");
 
+    // E2E 관측 채널: 인가코드는 1회용 — 같은 code로 중복 호출되는지 카운트(#reissueCount와 동일 패턴).
+    if (typeof localStorage !== "undefined" && code) {
+      const key = `mock:oauthCallbackCallCount:${provider}:${code}`;
+      const prevCount = Number(localStorage.getItem(key) ?? "0");
+      localStorage.setItem(key, String(prevCount + 1));
+    }
+
     if (provider !== "kakao" && provider !== "naver" && provider !== "apple") {
       return HttpResponse.json(
         { status: "400", code: "UNSUPPORTED_PROVIDER", message: "지원하지 않는 소셜 로그인입니다." },
