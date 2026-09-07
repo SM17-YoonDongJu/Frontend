@@ -14,6 +14,8 @@ const ISSUE_REVIEW_STATUS_META: Record<
   ACCEPTED: { label: "인정", tone: "green" },
   MODIFIED: { label: "수정", tone: "gold" },
   ADDED: { label: "사정사 추가", tone: "navy" },
+  // 명세에 없는 판정 — 단정하지 않고 중립 배지로 보여준다.
+  UNKNOWN: { label: "확인 필요", tone: "neutral" },
 };
 
 function formatImpact(won: number | null): string | null {

@@ -10,7 +10,15 @@ export async function sendChatMessage(
   const { data } = await sendChatMessageRequest({
     throwOnError: true,
     path: { chatRoomId },
-    body,
+    body: {
+      content: body.content,
+      attachments: body.attachments?.map((attachment) => ({
+        attachment_key: attachment.attachmentKey,
+        name: attachment.name,
+        content_type: attachment.contentType,
+        size: attachment.size,
+      })),
+    },
   });
   return sendChatMessageResponseSchema.parse(data);
 }

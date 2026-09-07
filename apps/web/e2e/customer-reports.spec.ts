@@ -39,8 +39,8 @@ test.describe("내 리포트 목록", () => {
     // 맨 앞 종결 교통사고 카드(reportNo 20260520-017, 제안 3건).
     const firstCard = cards(page).filter({ hasText: "No.20260520-017" });
     await expect(firstCard).toBeVisible();
-    // 목록 응답에 title이 없으면 accidentType·treatment로 제목을 파생한다.
-    await expect(firstCard.getByText("교통사고 · 후유장해 분석 요청")).toBeVisible();
+    // 목록 응답의 title을 그대로 보여준다(스펙 필수 필드).
+    await expect(firstCard.getByText("무릎 십자인대 파열")).toBeVisible();
     await expect(firstCard.getByText("종결", { exact: true })).toBeVisible();
     await expect(firstCard.getByText("상담 종결 · 김도현 사정사")).toBeVisible();
     await expect(firstCard.getByText("제안 3 건")).toBeVisible();

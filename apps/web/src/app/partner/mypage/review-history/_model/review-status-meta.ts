@@ -15,6 +15,8 @@ const REVIEW_STATUS_META: Record<ReviewStatus, ReviewStatusMeta> = {
   COUNSELING: { label: "상담 전환", tone: "gold", hasCheck: false },
   REJECTED: { label: "반려", tone: "neutral", hasCheck: false },
   ACCEPTED: { label: "채택", tone: "green", hasCheck: true },
+  // 명세에 없는 상태 — 단정하지 않고 중립 배지로 보여준다.
+  UNKNOWN: { label: "확인 필요", tone: "neutral", hasCheck: false },
 };
 
 const FALLBACK_META: ReviewStatusMeta = { label: "", tone: "neutral", hasCheck: false };

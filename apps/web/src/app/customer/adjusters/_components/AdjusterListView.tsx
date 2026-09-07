@@ -76,16 +76,20 @@ export function AdjusterListView() {
         <SearchBar keyword={filter.keyword ?? ""} onSearch={handleSearch} />
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 hidden md:block">
         <RegionSelect mode="multiple" value={regions} onChange={setRegions} />
       </div>
 
-      <div className="mt-3 md:hidden">
+      <div className="-mx-4 mt-3 flex items-center gap-2 overflow-x-auto px-4 md:hidden">
+        <RegionSelect
+          mode="multiple"
+          value={regions}
+          onChange={setRegions}
+          className="shrink-0"
+        />
         <FilterChips
           specialty={activeSpecialty}
-          sort={activeSort}
           onSpecialtyToggle={handleSpecialtyChange}
-          onSortToggle={handleSortChange}
         />
       </div>
 

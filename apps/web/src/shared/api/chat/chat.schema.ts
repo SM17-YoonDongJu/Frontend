@@ -9,11 +9,12 @@ import type {
   ReadResponse,
 } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
+import { enumWithFallback } from "@/shared/lib/enum-with-fallback";
 
 // 채팅 도메인 계약(응답 래퍼 내부 data만 — client가 래퍼 해제·snake→camel 변환).
 // mine/theirs 판별은 서버 isMine(GET/POST messages)로 정합 — senderId 문자열 비교 제거.
 
-export const roomStatusSchema = z.enum(["ACTIVE", "CLOSED"]);
+export const roomStatusSchema = enumWithFallback(["ACTIVE", "CLOSED"]);
 
 // match_status — 파이프라인(사정사 검수) 방만. 사정사 검색으로 만든 방은 null.
 export const matchStatusSchema = z.enum([
@@ -62,13 +63,15 @@ export const chatAttachmentSchema = z.object({
   size: z.number().int(),
 });
 
-// 메시지 응답의 첨부(BE ChatMessageResponse.Attachment) — 조회 시점 단기 presigned GET URL 포함, key는 없음.
-// 업로드 응답과 shape이 달라 별도 스키마로 분리한다.
+// 메시지 응답의 첨부(BE ChatMessageResponse.Attachment).
+// 명세는 key·이름·형식·크기만 선언하고 url이 없다. 이미지 미리보기·다운로드에 url이 필요하므로
+// 백엔드에 응답 추가를 요청 중이며, 그전까지 없으면 없는 대로 받는다(파일명 칩은 그대로 동작).
 export const chatMessageAttachmentSchema = z.object({
-  url: z.string(),
+  attachmentKey: z.string(),
   name: z.string(),
   contentType: z.string(),
-  size: z.number().int(),
+  size: z.number().int().nullable(),
+  url: z.string().nullish(),
 });
 
 export const messageTypeSchema = z.enum(["TEXT", "IMAGE", "FILE", "SYSTEM"]);

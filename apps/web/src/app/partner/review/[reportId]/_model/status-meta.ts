@@ -10,6 +10,8 @@ export const REPORT_STATUS_META: Record<ReviewReportStatus, { label: string; ton
   COUNSELING: { label: "상담 중", tone: "green" },
   CLOSED: { label: "종결", tone: "neutral" },
   NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral" },
+  // 명세에 없는 상태 — 단정하지 않고 중립 배지로 보여준다.
+  UNKNOWN: { label: "확인 필요", tone: "neutral" },
 };
 
 /** 인정/수정/제외 토글 옵션 (ADDED는 신규추가 폼 전용, 미검수는 null). */

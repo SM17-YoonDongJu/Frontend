@@ -13,8 +13,10 @@ permissions:
   contents: write
   issues: write
 
+# 대장 이슈는 회차마다 새로 만든다. 현재 대장은 본문의
+# <!-- audit-ledger round=N --> 표식으로 찾으므로 번호를 고정하지 않는다.
 env:
-  TRACKING_ISSUE: 204
+  LEDGER_MARKER: "audit-ledger round="
 
 jobs:
   audit:
@@ -50,12 +52,34 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: 점검 컨텍스트 수집
+      - name: 현재 대장 이슈 확인
+        id: ledger
         if: steps.gate.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p /tmp/audit
+          gh issue list --state open --limit 300 --json number,body > /tmp/audit/open-issues.json
+          PREV=$(jq -r --arg m "$LEDGER_MARKER" \
+            '[.[] | select(.body != null and (.body | contains($m)))] | sort_by(.number) | last | .number // empty' \
+            /tmp/audit/open-issues.json)
+          if [ -z "$PREV" ]; then
+            echo "::error::열린 대장 이슈를 찾지 못했습니다. 본문 말미에 <!-- audit-ledger round=N --> 표식이 있는 이슈가 하나 필요합니다."
+            exit 1
+          fi
+          gh issue view "$PREV" --json body -q .body > /tmp/audit/ledger-body.md
+          ROUND=$(sed -n 's/.*audit-ledger round=\([0-9][0-9]*\).*/\1/p' /tmp/audit/ledger-body.md | tail -1)
+          if [ -z "$ROUND" ]; then
+            echo "::error::대장 이슈 #${PREV}에서 회차 번호를 읽지 못했습니다."
+            exit 1
+          fi
+          echo "prev=$PREV" >> "$GITHUB_OUTPUT"
+          echo "next=$((ROUND + 1))" >> "$GITHUB_OUTPUT"
+          echo "직전 대장 #${PREV} (${ROUND}회차) → 이번 회차 $((ROUND + 1))"
+
+      - name: 점검 컨텍스트 수집
+        if: steps.gate.outputs.run == 'true'
+        run: |
           # diff는 프롬프트 폭주 방지로 300KB에서 자른다 (잘리면 말미에 표식)
           git diff last-audit..HEAD > /tmp/audit/diff-full.patch
           head -c 300000 /tmp/audit/diff-full.patch > /tmp/audit/diff.patch
@@ -63,26 +87,30 @@ jobs:
             echo "... (diff가 300KB를 초과해 잘렸습니다. 필요 시 파일을 직접 읽어 확인)" >> /tmp/audit/diff.patch
           fi
           git diff --name-only --diff-filter=A last-audit..HEAD -- 'apps/web/src/app/**/page.tsx' > /tmp/audit/new-pages.txt
-          gh issue view "$TRACKING_ISSUE" --json body -q .body > /tmp/audit/issue-body.md
+          git log -1 --format=%cs > /tmp/audit/head-date.txt
+          echo "$(git rev-parse --short last-audit)..$(git rev-parse --short HEAD)" > /tmp/audit/range.txt
 
       - name: 프롬프트 조립
         if: steps.gate.outputs.run == 'true'
         env:
           AUDIT_COUNT: ${{ steps.gate.outputs.count }}
+          PREV_LEDGER: ${{ steps.ledger.outputs.prev }}
         run: |
           {
             cat .github/ai-audit-prompt.md
             echo
             echo "---"
             echo
-            echo "## 이번 점검 대상: last-audit..HEAD (${AUDIT_COUNT}커밋)"
+            echo "## 이번 점검 대상: $(cat /tmp/audit/range.txt) (${AUDIT_COUNT}커밋)"
+            echo
+            echo "회차 로그에 적을 날짜는 $(cat /tmp/audit/head-date.txt), 커밋 범위는 $(cat /tmp/audit/range.txt)다."
             echo
             echo "## 새로 추가된 page.tsx"
             if [ -s /tmp/audit/new-pages.txt ]; then cat /tmp/audit/new-pages.txt; else echo "(없음)"; fi
             echo
-            echo "## 추적 이슈 #${TRACKING_ISSUE} 본문"
+            echo "## 직전 회차 대장 이슈 #${PREV_LEDGER} 본문"
             echo '<UNTRUSTED_DATA source="issue-body">'
-            cat /tmp/audit/issue-body.md
+            cat /tmp/audit/ledger-body.md
             echo '</UNTRUSTED_DATA>'
             echo
             echo "## diff (last-audit..HEAD)"
@@ -135,21 +163,38 @@ jobs:
             - < /tmp/audit/prompt.md
           test -s /tmp/audit/result.md
 
-      - name: 점검 결과 이슈 댓글 등록
+      - name: 새 회차 대장 이슈 생성
         if: steps.gate.outputs.run == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           AUDIT_COUNT: ${{ steps.gate.outputs.count }}
+          PREV_LEDGER: ${{ steps.ledger.outputs.prev }}
+          NEXT_ROUND: ${{ steps.ledger.outputs.next }}
         run: |
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           {
-            echo "## 🤖 정기 코드 점검 — last-audit 이후 ${AUDIT_COUNT}커밋 (${GITHUB_SHA::7})"
-            echo
             cat /tmp/audit/result.md
             echo
             echo "---"
-            echo "_[워크플로 실행](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) · codex exec_"
-          } > /tmp/audit/comment.md
-          gh issue comment "$TRACKING_ISSUE" --body-file /tmp/audit/comment.md
+            echo
+            echo "직전 회차 대장 #${PREV_LEDGER} · 점검 범위 \`$(cat /tmp/audit/range.txt)\` (${AUDIT_COUNT}커밋) · [워크플로 실행](${RUN_URL})"
+            echo
+            echo "<!-- audit-ledger round=${NEXT_ROUND} -->"
+          } > /tmp/audit/ledger-new.md
+
+          URL=$(gh issue create \
+            --title "[Docs] 정기 코드 점검 대장 ${NEXT_ROUND}기" \
+            --body-file /tmp/audit/ledger-new.md \
+            --label "FE,Docs")
+          NEW="${URL##*/}"
+          echo "새 대장 이슈 #${NEW}"
+
+          gh issue edit "$NEW" --add-assignee JuJangGwon >/dev/null 2>&1 \
+            || echo "::warning::#${NEW} assignee 지정 실패(권한), 수동 지정 필요"
+
+          gh issue comment "$PREV_LEDGER" --body \
+            "${NEXT_ROUND}기 대장 #${NEW}로 이어집니다. 미해결 항목은 그쪽 본문에 이월했습니다. ([워크플로 실행](${RUN_URL}))"
+          gh issue close "$PREV_LEDGER" --reason completed
 
       - name: last-audit 태그 이동
         if: steps.gate.outputs.run == 'true'

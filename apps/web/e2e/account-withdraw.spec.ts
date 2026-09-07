@@ -94,7 +94,7 @@ test.describe("모바일", () => {
   test("설정 목록의 회원 탈퇴를 누르면 탈퇴 안내가 보인다", async ({ page }) => {
     await page.goto(CUSTOMER_MYPAGE_PATH);
     await expect(
-      page.getByRole("heading", { name: "내 정보" }).filter({ visible: true }),
+      page.getByRole("heading", { level: 1, name: "내 정보" }).filter({ visible: true }),
     ).toBeVisible({ timeout: 15000 });
 
     await clickWithdrawEntry(page);

@@ -18,13 +18,12 @@ export const SORT_OPTIONS: ReadonlyArray<{ label: string; value: SortKey }> = [
   { label: "상담많은순", value: "consultCount" },
 ];
 
-/** 모바일 필터 칩. label=Figma 모바일 문구(축약 "실손"), value는 위 옵션 값과 동일 어휘. */
-export const MOBILE_FILTER_CHIPS: ReadonlyArray<
-  { kind: "specialty"; label: string; value: (typeof SPECIALTY_OPTIONS)[number] }
-  | { kind: "sort"; label: string; value: SortKey }
-> = [
-  { kind: "specialty", label: "후유장해", value: "후유장해" },
-  { kind: "specialty", label: "교통사고", value: "교통사고" },
-  { kind: "specialty", label: "실손", value: "실손 의료비" },
-  { kind: "sort", label: "평점순", value: "rating" },
+/** 모바일 전문분야 필터 칩. label=Figma 모바일 문구(축약 "실손"), value는 위 옵션 값과 동일 어휘. */
+export const MOBILE_FILTER_CHIPS: ReadonlyArray<{
+  label: string;
+  value: (typeof SPECIALTY_OPTIONS)[number];
+}> = [
+  { label: "후유장해", value: "후유장해" },
+  { label: "교통사고", value: "교통사고" },
+  { label: "실손", value: "실손 의료비" },
 ];

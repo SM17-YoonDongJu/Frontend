@@ -1,8 +1,9 @@
-import { delay, http, HttpResponse } from "msw";
+import { delay, HttpResponse } from "msw";
 import { z } from "zod";
 import { camelToSnakeDeep, toSnakeKey } from "@/shared/api/case-convert";
 import { chatReportReasonSchema } from "@/shared/api/chat/chat.schema";
 import { API_BASE_URL } from "@/shared/api/config";
+import { wire } from "@/shared/mocks/wire-response";
 import {
   consumeReissue,
   isAccessTokenExpired,
@@ -313,6 +314,8 @@ const HEAD_REPORTS = [
   {
     reportId: DASHBOARD_PROPOSABLE_REPORT_ID,
     status: "MATCHED",
+    title: "무릎 십자인대 파열",
+    analysisState: "COMPLETED",
     accidentType: "교통사고",
     createdAt: "2026-05-20T09:00:00Z",
     reportNo: "20260520-017",
@@ -327,6 +330,8 @@ const HEAD_REPORTS = [
   {
     reportId: DASHBOARD_AWAITING_REPORT_ID,
     status: "AWAITING_INSPECTION",
+    title: "실손 의료비 청구",
+    analysisState: "PROCESSING",
     accidentType: "실손",
     createdAt: "2026-05-12T09:00:00Z",
     reportNo: "20260512-009",
@@ -346,6 +351,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "b2c9d0e1-3f4a-4b5c-8d6e-7f8a9b0c1d2e",
     status: "COUNSELING",
+    title: "골절 통원 치료",
+    analysisState: "COMPLETED",
     accidentType: "골절",
     createdAt: "2026-05-08T09:00:00Z",
     reportNo: "20260508-005",
@@ -360,6 +367,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "c3d0e1f2-4a5b-4c6d-9e7f-8a9b0c1d2e3f",
     status: "AWAITING_ADOPTION",
+    title: "교차로 추돌 사고",
+    analysisState: "COMPLETED",
     accidentType: "교통사고",
     createdAt: "2026-04-30T09:00:00Z",
     reportNo: "20260430-118",
@@ -374,6 +383,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "d4e1f2a3-5b6c-4d7e-8f9a-9b0c1d2e3f4a",
     status: "MATCHED",
+    title: "실손 도수치료 청구",
+    analysisState: "COMPLETED",
     accidentType: "실손",
     createdAt: "2026-04-22T09:00:00Z",
     reportNo: "20260422-077",
@@ -388,6 +399,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "e5f2a3b4-6c7d-4e8f-9a0b-0c1d2e3f4a5b",
     status: "AWAITING_INSPECTION",
+    title: "손목 골절 진단",
+    analysisState: "PROCESSING",
     accidentType: "골절",
     createdAt: "2026-04-15T09:00:00Z",
     reportNo: "20260415-031",
@@ -402,6 +415,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "f6a3b4c5-7d8e-4f9a-8b1c-1d2e3f4a5b6c",
     status: "MATCHED",
+    title: "차량 전복 사고 입원",
+    analysisState: "COMPLETED",
     accidentType: "교통사고",
     createdAt: "2026-04-03T09:00:00Z",
     reportNo: "20260403-208",
@@ -416,6 +431,8 @@ const REPORT_LIST_SOURCE = [
   {
     reportId: "a7b4c5d6-8e9f-4a0b-9c2d-2e3f4a5b6c7d",
     status: "NOT_SELECTED",
+    title: "어깨 회전근개 파열",
+    analysisState: "COMPLETED",
     accidentType: "실손",
     createdAt: "2026-03-26T09:00:00Z",
     reportNo: "20260326-142",
@@ -574,6 +591,8 @@ const ADJUSTER_PROFILE: Record<string, unknown> = {
   ],
   registrationNo: "제0000호",
   updatedAt: "2026-06-20T08:00:00Z",
+  // 스펙 필수 — 최근 후기. 상세 목록은 GET /adjusters/{id}/reviews가 따로 준다.
+  recentReviews: [],
   // 대시보드 헤더·인사말용 집계(읽기 전용)
   averageRating: 4.9,
   reviewCount: 86,
@@ -681,7 +700,9 @@ const ADJUSTER_MYPAGE = {
     averageRating: 4.9,
   },
   certification: {
-    licenseNo: "제2014-0087호",
+    registrationNo: "제2014-0087호",
+    verifiedAt: "2026-01-01T00:00:00Z",
+    // CONTRACT(명세없음): 화면이 쓰는 확장 — 활동 지역·등록 시각. 스펙 Certification엔 없다.
     activityRegion: "서울·경기",
     createdAt: "2026-01-01T00:00:00Z",
   },
@@ -699,6 +720,8 @@ type MockAdjusterApplication = {
   status: "PENDING" | "APPROVED" | "REJECTED";
   submittedAt: string;
   name: string;
+  /** 스펙 필수(단수 문자열) — 화면은 specialties를 쓴다. */
+  speciality: string;
   specialties: string[];
   licenseNo: string | null;
   documents: MockSubmittedDocument[];
@@ -717,6 +740,9 @@ function buildAdjusterApplication(
     status,
     submittedAt: "2026-07-05T09:00:00Z",
     name: "김상정",
+    // 스펙은 speciality(단수 문자열)를 필수로 두고, 화면은 specialties(배열)를 쓴다.
+    // 백엔드 확인 전까지 양쪽을 함께 내려 계약과 화면을 모두 만족시킨다.
+    speciality: "후유장해",
     specialties: ["후유장해", "교통사고"],
     licenseNo: "제2014-0087호",
     documents: [
@@ -792,6 +818,8 @@ interface MockMessageAttachment {
 function toMessageAttachmentDto(attachment?: MockMessageAttachment) {
   if (!attachment) return null;
   return {
+    attachmentKey: attachment.attachmentKey,
+    // 명세엔 없지만 이미지 미리보기·다운로드에 필요한 값 — 백엔드 응답 추가 요청 대상.
     url: `https://mock-s3.example.com/${attachment.attachmentKey}?X-Amz-Signature=mock`,
     name: attachment.name,
     contentType: attachment.contentType,
@@ -836,12 +864,15 @@ function toChatRoomDto(room: MockChatRoom) {
     unreadCount: room.unreadCount,
     caseNo: room.caseNo,
     reportTypeLabel: room.reportTypeLabel,
+    // 스펙 필수 — 방 개설 시각. 목은 마지막 갱신 시각을 그대로 쓴다.
+    createdAt: room.updatedAt,
   };
 }
 
 // MockChatMessage → GET/POST messages 응답 message(camel).
-function toChatMessageDto(message: MockChatMessage) {
+function toChatMessageDto(message: MockChatMessage, chatRoomId: string) {
   return {
+    chatRoomId,
     messageId: message.messageId,
     senderId: message.senderId,
     messageType: deriveMessageType(message.attachment),
@@ -1027,7 +1058,7 @@ export const handlers = [
   // 문의 폼 제출 (#220) — 백엔드 확정 전 임시 목(요청: Notion "POST /contact-inquiries").
   //   성공 200 + { received: true }. 이메일 형식 오류·문의 내용 길이 미달 등은 400 VALIDATION_ERROR.
   //   프론트 zod 스키마(contact-inquiry.schema.ts)와 동일 계약을 여기서 거울 검증한다.
-  http.post(`${API_BASE_URL}/contact-inquiries`, async ({ request }) => {
+  wire.post(`${API_BASE_URL}/contact-inquiries`, async ({ request }) => {
     await delay(500);
 
     const json: unknown = await request.json().catch(() => null);
@@ -1053,7 +1084,7 @@ export const handlers = [
   //   진행중/승인 상태에서 재-POST→409 DUPLICATE_RESOURCE, REJECTED에서 재-POST→201 재허용(재제출).
   //   x-mock-failure:apply→500 INTERNAL_SERVER_ERROR.
   //   x-mock-scenario:application-duplicate→409 강제(E2E "이미 신청" 재현용, 상태 무관).
-  http.post(`${API_BASE_URL}/users/adjuster-applications`, async ({ request }) => {
+  wire.post(`${API_BASE_URL}/users/adjuster-applications`, async ({ request }) => {
     await delay(600);
 
     if (request.headers.get("x-mock-failure") === "apply") {
@@ -1116,6 +1147,8 @@ export const handlers = [
       status: "PENDING",
       submittedAt: new Date().toISOString(),
       name: body.name,
+      // 스펙 필수 speciality(단수)와 화면이 쓰는 specialties(배열)를 함께 내려보낸다.
+      speciality: body.specialties?.[0] ?? "",
       specialties: body.specialties,
       licenseNo: body.license_no ?? null,
       // 실응답 documents는 서류 종류별 심사 상태(PENDING) — 자격증 사본은 제출 시에만 생성.
@@ -1142,7 +1175,7 @@ export const handlers = [
   // 본인 자격 신청 상태 조회 (#44) — 미신청 404 POST_NOT_FOUND, 그 외 PENDING/APPROVED/REJECTED.
   //   시나리오 override: x-mock-scenario=application-(not-applied|pending|approved|rejected).
   //   x-mock-failure=application-unauthorized→401 LOGIN_REQUIRED / application-status→500.
-  http.get(`${API_BASE_URL}/users/adjuster-applications/me`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/users/adjuster-applications/me`, async ({ request }) => {
     await delay(400);
 
     const failure = request.headers.get("x-mock-failure");
@@ -1199,7 +1232,7 @@ export const handlers = [
   }),
 
   // 채팅방 목록 (이슈 #48) — 정확 경로. :param 라우트보다 먼저 등록.
-  http.get(`${API_BASE_URL}/chats`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/chats`, async ({ request }) => {
     await delay(400);
 
     if (request.headers.get("x-mock-failure") === "chat-list") {
@@ -1221,7 +1254,7 @@ export const handlers = [
   }),
 
   // 채팅방 단건 조회 (이슈 #161) — 딥링크 진입용. 목록 응답 없이도 방 헤더 렌더.
-  http.get(`${API_BASE_URL}/chats/:chatRoomId`, async ({ params }) => {
+  wire.get(`${API_BASE_URL}/chats/:chatRoomId`, async ({ params }) => {
     await delay(300);
 
     const room = chatRooms.find(
@@ -1243,7 +1276,7 @@ export const handlers = [
 
   // 메시지 히스토리 (이슈 #48) — 커서 페이지네이션(?cursor&size, 기본 30).
   // 페이지 내부는 최신순으로 반환, cursor는 "이 메시지보다 오래된 것" 기준. CLOSED 방도 조회 가능.
-  http.get(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ request, params }) => {
+  wire.get(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ request, params }) => {
     await delay(400);
 
     const chatRoomId = String(params.chatRoomId);
@@ -1268,7 +1301,7 @@ export const handlers = [
       status: "200",
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
-        messages: page.toReversed().map(toChatMessageDto),
+        messages: page.toReversed().map((m) => toChatMessageDto(m, chatRoomId)),
         nextCursor,
         hasNext,
       }),
@@ -1276,7 +1309,7 @@ export const handlers = [
   }),
 
   // 메시지 전송 (이슈 #48) — CLOSED 방은 409, 그 외 상태 배열 append + 방 갱신.
-  http.post(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ request, params }) => {
+  wire.post(`${API_BASE_URL}/chats/:chatRoomId/messages`, async ({ request, params }) => {
     await delay(300);
 
     const chatRoomId = String(params.chatRoomId);
@@ -1370,7 +1403,7 @@ export const handlers = [
   }),
 
   // 첨부 업로드 (POST /chats/{id}/attachments) — multipart file → key 메타 발급(private S3 가정).
-  http.post(`${API_BASE_URL}/chats/:chatRoomId/attachments`, async ({ request, params }) => {
+  wire.post(`${API_BASE_URL}/chats/:chatRoomId/attachments`, async ({ request, params }) => {
     await delay(500);
 
     const chatRoomId = String(params.chatRoomId);
@@ -1422,7 +1455,7 @@ export const handlers = [
   }),
 
   // 상담 수락 (PATCH /chats/{id}/accept) — 내 제안 ACCEPTED·방 CLOSED·형제 방 REJECTED+CLOSED·리포트 CLOSED.
-  http.patch(`${API_BASE_URL}/chats/:chatRoomId/accept`, async ({ params }) => {
+  wire.patch(`${API_BASE_URL}/chats/:chatRoomId/accept`, async ({ params }) => {
     await delay(300);
 
     const chatRoomId = String(params.chatRoomId);
@@ -1465,7 +1498,7 @@ export const handlers = [
   }),
 
   // 상담 거절 (PATCH /chats/{id}/reject) — 내 제안 REJECTED·방 CLOSED·리포트 AWAITING_ADOPTION. 형제 유지.
-  http.patch(`${API_BASE_URL}/chats/:chatRoomId/reject`, async ({ params }) => {
+  wire.patch(`${API_BASE_URL}/chats/:chatRoomId/reject`, async ({ params }) => {
     await delay(300);
 
     const chatRoomId = String(params.chatRoomId);
@@ -1500,7 +1533,7 @@ export const handlers = [
   }),
 
   // 읽음 처리 (POST /chats/{id}/read) — unread_count 0으로 리셋.
-  http.post(`${API_BASE_URL}/chats/:chatRoomId/read`, async ({ params }) => {
+  wire.post(`${API_BASE_URL}/chats/:chatRoomId/read`, async ({ params }) => {
     await delay(150);
 
     const chatRoomId = String(params.chatRoomId);
@@ -1523,7 +1556,7 @@ export const handlers = [
 
   // 채팅 상대 신고 (POST /chats/{id}/report, 이슈 #244) — 매 요청 새 접수(중복 제한 없음, 방 상태 불변).
   //  - x-mock-failure: chat-report → 500 INTERNAL_SERVER_ERROR(E2E 실패·재제출 시나리오)
-  http.post(`${API_BASE_URL}/chats/:chatRoomId/report`, async ({ params, request }) => {
+  wire.post(`${API_BASE_URL}/chats/:chatRoomId/report`, async ({ params, request }) => {
     await delay(300);
 
     if (request.headers.get("x-mock-failure") === "chat-report") {
@@ -1575,7 +1608,7 @@ export const handlers = [
   //  - x-mock-failure: shared-report-missing   → 404 REPORT_NOT_FOUND(검수 리포트 미등록)
   //  - x-mock-failure: shared-report-proposal  → 404 PROPOSAL_NOT_FOUND(제안 없는 사정사 검색 방)
   //  - 없는 방                                  → 404 CHAT_ROOM_NOT_FOUND
-  http.get(`${API_BASE_URL}/chats/:chatRoomId/shared-report`, async ({ request, params }) => {
+  wire.get(`${API_BASE_URL}/chats/:chatRoomId/shared-report`, async ({ request, params }) => {
     await delay(400);
 
     const chatRoomId = String(params.chatRoomId);
@@ -1692,13 +1725,20 @@ export const handlers = [
   //  - code=fail-external  → 500 EXTERNAL_API_ERROR   (브라우저 URL 주입 — E2E)
   //  - x-mock-failure 헤더 → invalid / unsupported / 그 외: 위와 동일(서버측 주입, 유지)
   //  콜백 페이지가 URL 쿼리 code를 그대로 전달하므로 E2E는 URL만으로 실패 결정 주입 가능.
-  http.get(`${API_BASE_URL}/auth/oauth2/:provider/callback`, async ({ request, params }) => {
+  wire.get(`${API_BASE_URL}/auth/oauth2/:provider/callback`, async ({ request, params }) => {
     await delay(600);
 
     const provider = String(params.provider);
     const url = new URL(request.url, "http://localhost");
     const code = url.searchParams.get("code");
     const failure = request.headers.get("x-mock-failure");
+
+    // E2E 관측 채널: 인가코드는 1회용 — 같은 code로 중복 호출되는지 카운트(#reissueCount와 동일 패턴).
+    if (typeof localStorage !== "undefined" && code) {
+      const key = `mock:oauthCallbackCallCount:${provider}:${code}`;
+      const prevCount = Number(localStorage.getItem(key) ?? "0");
+      localStorage.setItem(key, String(prevCount + 1));
+    }
 
     if (provider !== "kakao" && provider !== "naver" && provider !== "apple") {
       return HttpResponse.json(
@@ -1745,7 +1785,7 @@ export const handlers = [
   }),
 
   // 알림 모두 읽음 처리 (#49) — ⚠️ 명세없음-초안. 구체 경로를 목록 GET보다 먼저 등록.
-  http.patch(`${API_BASE_URL}/users/me/notifications/read-all`, async ({ request }) => {
+  wire.patch(`${API_BASE_URL}/users/me/notifications/read-all`, async ({ request }) => {
     await delay(400);
 
     if (request.headers.get("x-mock-failure") === "read-all") {
@@ -1765,7 +1805,7 @@ export const handlers = [
   }),
 
   // 알림 개별 읽음 처리 (#162, 스웨거 확정) — 대상 isRead 갱신, 없는 id는 404 봉투.
-  http.patch(
+  wire.patch(
     `${API_BASE_URL}/users/me/notifications/:notificationId/read`,
     async ({ request, params }) => {
       await delay(400);
@@ -1796,7 +1836,7 @@ export const handlers = [
   ),
 
   // 내 알림 목록 (#49, 명세 Done) — items+unread_count+페이지네이션. read-all 반영된 isRead 상태 그대로 반환.
-  http.get(`${API_BASE_URL}/users/me/notifications`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/users/me/notifications`, async ({ request }) => {
     await delay(400);
 
     if (request.headers.get("x-mock-failure") === "notifications") {
@@ -1828,7 +1868,7 @@ export const handlers = [
   //   provider/socialToken/userType 누락→400 MISSING_REQUIRED_FIELD,
   //   gender/birth_date/phone_number 누락→400 VALIDATION_ERROR("<필드>: must not be null"),
   //   x-mock-failure:social→500 EXTERNAL_API_ERROR.
-  http.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {
+  wire.post(`${API_BASE_URL}/auth/register`, async ({ request }) => {
     await delay(600);
 
     const body = (await request.json().catch(() => ({}))) as {
@@ -1898,7 +1938,7 @@ export const handlers = [
   }),
 
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
-  http.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
     await delay(500);
 
     if (request.headers.get("x-mock-failure") === "profile") {
@@ -1917,7 +1957,7 @@ export const handlers = [
 
   // 손해사정사 홈 대시보드 집계 (BFF, #30/#130) — GET /adjusters/me/home.
   // 기존 /dashboard·/in-progress·/profile-summary 3분할을 1콜로 통합. in_progress_limit(기본 5, 최대 20) 잘라 반환.
-  http.get(`${API_BASE_URL}/adjusters/me/home`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/adjusters/me/home`, async ({ request }) => {
     await delay(500);
 
     if (request.headers.get("x-mock-failure") === "home") {
@@ -1983,7 +2023,7 @@ export const handlers = [
   }),
 
   // 손해사정사 마이페이지 집계 (이슈 #46)
-  http.get(`${API_BASE_URL}/adjusters/me/mypage`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/adjusters/me/mypage`, async ({ request }) => {
     await delay(500);
 
     if (isLoggedOut()) {
@@ -2008,7 +2048,7 @@ export const handlers = [
   }),
 
   // 알림 설정 조회 (이슈 #46)
-  http.get(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
     await delay(300);
 
     if (request.headers.get("x-mock-failure") === "notification-settings") {
@@ -2026,7 +2066,7 @@ export const handlers = [
   }),
 
   // 알림 설정 저장 (이슈 #46) — 수정한 항목만 머지, 전체 설정 반환
-  http.patch(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
+  wire.patch(`${API_BASE_URL}/users/me/notification-settings`, async ({ request }) => {
     await delay(500);
 
     if (request.headers.get("x-mock-failure") === "notification-settings") {
@@ -2061,7 +2101,7 @@ export const handlers = [
   }),
 
   // 디바이스 토큰 등록 (이슈 #178)
-  http.post(`${API_BASE_URL}/users/me/device-tokens`, async ({ request }) => {
+  wire.post(`${API_BASE_URL}/users/me/device-tokens`, async ({ request }) => {
     await delay(300);
 
     if (request.headers.get("x-mock-failure") === "device-token") {
@@ -2101,7 +2141,7 @@ export const handlers = [
   }),
 
   // 디바이스 토큰 해제 (이슈 #178)
-  http.delete(`${API_BASE_URL}/users/me/device-tokens`, async ({ request }) => {
+  wire.delete(`${API_BASE_URL}/users/me/device-tokens`, async ({ request }) => {
     await delay(300);
 
     if (request.headers.get("x-mock-failure") === "device-token") {
@@ -2119,7 +2159,7 @@ export const handlers = [
   }),
 
   // 활동 카운트 (이슈 #105) — CONTRACT(명세없음-임시): GET /users/me/activity-summary
-  http.get(`${API_BASE_URL}/users/me/activity-summary`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/users/me/activity-summary`, async ({ request }) => {
     await delay(300);
 
     if (request.headers.get("x-mock-failure") === "activity-summary") {
@@ -2138,7 +2178,7 @@ export const handlers = [
 
   // 내 보험 목록 (이슈 #105) — GET /users/me/insurances (확정 스펙)
   // x-mock-scenario=insurances-empty → 0건 빈 상태 검증.
-  http.get(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/users/me/insurances`, async ({ request }) => {
     await delay(300);
 
     if (request.headers.get("x-mock-failure") === "insurances") {
@@ -2165,7 +2205,7 @@ export const handlers = [
   // 액세스 토큰 재발급 (#109) — refresh_token HttpOnly 쿠키만 사용(바디·Authorization 없음), data는 null.
   // E2E 주입: localStorage["mock:tokenExpired"]="once"(재발급 성공) | "refresh-expired"(재발급 실패).
   // 실제 호출 횟수는 localStorage["mock:reissueCount"]에 누적 — 동시 401 다발 시 단일-flight 검증용.
-  http.post(`${API_BASE_URL}/auth/reissue`, async () => {
+  wire.post(`${API_BASE_URL}/auth/reissue`, async () => {
     // 대시보드 동시 만료 E2E(#224): useMe·useReportList 둘 다 401을 받은 뒤에 재발급을 끝내
     // 늦게 나간 요청이 401 없이 200을 받는 타이밍 편차를 없앤다(상한 2초).
     await waitForExpiredResponses(2, 2000);
@@ -2197,7 +2237,7 @@ export const handlers = [
   // 로그아웃 (#155) — refresh_token HttpOnly 쿠키 무효화. 바디 없음, data는 null.
   // 성공 시 로그아웃 상태를 기록해 이후 보호 엔드포인트가 401 LOGIN_REQUIRED를 돌려준다.
   // E2E 실패 주입: x-mock-failure=logout → 500(서버 실패에도 클라이언트 정리·이동 검증용, 세션은 유지).
-  http.post(`${API_BASE_URL}/auth/logout`, async ({ request }) => {
+  wire.post(`${API_BASE_URL}/auth/logout`, async ({ request }) => {
     await delay(200);
 
     if (request.headers.get("x-mock-failure") === "logout") {
@@ -2217,7 +2257,7 @@ export const handlers = [
 
   // 본인 정보 조회 (고객 대시보드 인사말)
   // E2E 역할 게이팅 검증용: localStorage["mock:userType"]="adjuster"면 사정사로 응답(기본 insured_person).
-  http.get(`${API_BASE_URL}/users/me`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/users/me`, async ({ request }) => {
     await delay(300);
     // 비로그인 시나리오 주입 — E2E 랜딩(온보딩) 검증용. 기본은 로그인 유저(변경 없음).
     if (request.headers.get("x-mock-scenario") === "unauthenticated" || isLoggedOut()) {
@@ -2251,7 +2291,7 @@ export const handlers = [
 
   // 본인 정보 수정 — PATCH /users/me (확정 스펙 2026-07-14). body(하나 이상): phone_number·region[]·avatar_url.
   // 응답은 명세대로 me 전체 객체(snake). FE는 응답을 폐기하고 GET 재조회로 갱신한다.
-  http.patch(`${API_BASE_URL}/users/me`, async ({ request }) => {
+  wire.patch(`${API_BASE_URL}/users/me`, async ({ request }) => {
     await delay(500);
 
     if (request.headers.get("x-mock-failure") === "update-me") {
@@ -2286,7 +2326,7 @@ export const handlers = [
   // 회원 탈퇴 (#179) — DELETE /users/me. 요청 바디 없음, data는 null.
   // 성공 시 로그아웃 상태를 기록해 이후 보호 엔드포인트가 401 LOGIN_REQUIRED를 돌려준다.
   // E2E 실패 주입: x-mock-failure=withdraw → 500(정리·이동 없이 에러 안내·재시도 검증용, 세션 유지).
-  http.delete(`${API_BASE_URL}/users/me`, async ({ request }) => {
+  wire.delete(`${API_BASE_URL}/users/me`, async ({ request }) => {
     await delay(200);
 
     if (request.headers.get("x-mock-failure") === "withdraw") {
@@ -2309,7 +2349,7 @@ export const handlers = [
   //   x-mock-scenario=dashboard-onboarding → report_count 0(온보딩 분기), 나머지 null.
   //   x-mock-scenario=dashboard-inspecting → 검수 중(제안 0건): activeReport AWAITING_INSPECTION·firstReviewedAt null, proposalSummary null(제안 비교 숨김).
   //   x-mock-scenario=dashboard-closed → 전부 종료: activeReport·proposalSummary null(타임라인·제안 비교 숨김). reportCount>0라 온보딩 아님.
-  http.get(`${API_BASE_URL}/users/me/dashboard`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/users/me/dashboard`, async ({ request }) => {
     await delay(400);
 
     if (request.headers.get("x-mock-scenario") === "unauthenticated" || isLoggedOut()) {
@@ -2372,7 +2412,7 @@ export const handlers = [
 
   // 고객 리포트 목록 (대시보드 + 내 리포트 목록) — :reportId·pending-review와 충돌 없게 정확 경로.
   // §9 드리프트 필드 선반영(reportNo·claimedMin/Max·proposalCount·reviewedAt·adjusterNickname).
-  http.get(`${API_BASE_URL}/reports`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(400);
 
     const url = new URL(request.url, "http://localhost");
@@ -2445,7 +2485,7 @@ export const handlers = [
   }),
 
   // 본인 프로필 수정 — 수정 가능 필드만 머지 후 전체 프로필 반환
-  http.patch(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
+  wire.patch(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
     await delay(700);
 
     let body: Record<string, unknown>;
@@ -2483,7 +2523,7 @@ export const handlers = [
 
   // 서버 프록시 업로드 — multipart(file·purpose) 수신 → { s3_url } 응답.
   // 기본 성공(결정적), x-mock-failure 헤더로 서버 오류 주입(재시도 검증용).
-  http.post(`${API_BASE_URL}/uploads`, async ({ request }) => {
+  wire.post(`${API_BASE_URL}/uploads`, async ({ request }) => {
     await delay(300);
 
     if (request.headers.get("x-mock-failure") === "upload") {
@@ -2549,7 +2589,7 @@ export const handlers = [
   }),
 
   // 분석 신청 생성 — 실손(medical_indemnity)만 허용, 그 외 UNSUPPORTED_OPERATION
-  http.post(`${API_BASE_URL}/reports`, async ({ request }) => {
+  wire.post(`${API_BASE_URL}/reports`, async ({ request }) => {
     await delay(600);
     // 요청 body는 client가 camel→snake 변환해 보냄 — 명세 필드명 그대로 읽는다.
     const body = (await request.json()) as {
@@ -2591,7 +2631,7 @@ export const handlers = [
   }),
 
   // 검수 대기 목록 (활성 손해사정사 전용) — :reportId 라우트보다 먼저 등록
-  http.get(`${API_BASE_URL}/reports/pending-review`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/reports/pending-review`, async ({ request }) => {
     await delay(400);
 
     const url = new URL(request.url, "http://localhost");
@@ -2627,7 +2667,7 @@ export const handlers = [
   }),
 
   // 검수 현황 요약 (하단 탭바 뱃지 + PC 요약 카드용)
-  http.get(`${API_BASE_URL}/reports/pending-review/summary`, async () => {
+  wire.get(`${API_BASE_URL}/reports/pending-review/summary`, async () => {
     await delay(300);
 
     const pendingCount = PENDING_REVIEWS.filter(
@@ -2642,7 +2682,7 @@ export const handlers = [
   }),
 
   // 검수 보류 (PC 프리뷰 패널) — POST + reason 필수(멱등). OTHER면 reason_detail 필수.
-  http.post(`${API_BASE_URL}/reports/:reportId/hold`, async ({ request, params }) => {
+  wire.post(`${API_BASE_URL}/reports/:reportId/hold`, async ({ request, params }) => {
     await delay(300);
 
     const reportId = typeof params.reportId === "string" ? params.reportId : "";
@@ -2693,7 +2733,7 @@ export const handlers = [
 
   // 사정사 검수 내역 조회 (이슈 #59) — 명세 봉투 거울. status 서버 필터 + page 페이지네이션.
   // 실패/빈 시나리오는 x-mock-* 헤더로 주입(E2E override용).
-  http.get(`${API_BASE_URL}/adjusters/me/reviewed-reports`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/adjusters/me/reviewed-reports`, async ({ request }) => {
     await delay(400);
 
     const failure = request.headers.get("x-mock-failure");
@@ -2754,7 +2794,7 @@ export const handlers = [
   //   같은 proposalId·status를 노출해 채팅↔proposals 정합 유지.
   //   그 외 리포트는 proposal_count와 맞춘 고정 제안 목(EXTRA_PROPOSALS)에서 반환 (이슈 #153).
   //   REJECTED 제안은 목록에서 제외(받은제안 카드 UX: 거절 시 제거. ⚠️ 노출 정책 백엔드 확인 중 — TEMP §5-3).
-  http.get(`${API_BASE_URL}/reports/:reportId/proposals`, async ({ params }) => {
+  wire.get(`${API_BASE_URL}/reports/:reportId/proposals`, async ({ params }) => {
     await delay(500);
 
     const reportId = typeof params.reportId === "string" ? params.reportId : "";
@@ -2806,7 +2846,7 @@ export const handlers = [
   //   ACCEPTED: 대상 방 매칭완료 + 형제(같은 reportId) 방 자동종료(REJECTED·CLOSED) 캐스케이드.
   //   REJECTED: 대상 방만 종료. 이미 확정된 방 재PATCH → 409.
   //   x-mock-failure:match-proposal → 500 INTERNAL_SERVER_ERROR (실패 토스트 E2E용).
-  http.patch(
+  wire.patch(
     `${API_BASE_URL}/reports/:reportId/proposals/:proposalId`,
     async ({ request, params }) => {
       await delay(400);
@@ -2966,7 +3006,7 @@ export const handlers = [
   // 손해사정사 목록 조회 (이슈 #47) — 반드시 :adjusterId 핸들러보다 앞에 등록
   //   x-mock-adjusters=empty → 0건 빈 상태 검증(이슈 #239). 대시보드 상태(x-mock-scenario)와
   //   조합해야 하므로 x-mock-failure처럼 별도 축 헤더로 둔다.
-  http.get(`${API_BASE_URL}/adjusters`, async ({ request }) => {
+  wire.get(`${API_BASE_URL}/adjusters`, async ({ request }) => {
     await delay(400);
 
     const url = new URL(request.url, "http://localhost");
@@ -3081,7 +3121,7 @@ export const handlers = [
 
   // 사정사 후기 등록 (이슈 #76) — 성공 201, 같은 adjusterId 재등록 시 409 DUPLICATE_RESOURCE.
   // 등록분은 buildAdjusterProfile.recentReviews에 합류(score→score, createdAt→reviewedAt) + 집계 재계산.
-  http.post(`${API_BASE_URL}/adjusters/:adjusterId/reviews`, async ({ request, params }) => {
+  wire.post(`${API_BASE_URL}/adjusters/:adjusterId/reviews`, async ({ request, params }) => {
     await delay(500);
 
     const rawAdjusterId = typeof params.adjusterId === "string" ? params.adjusterId : "";
@@ -3135,7 +3175,7 @@ export const handlers = [
   }),
 
   // 손해사정사 공개 프로필 조회 (이슈 #32)
-  http.get(`${API_BASE_URL}/adjusters/:adjusterId`, async ({ params }) => {
+  wire.get(`${API_BASE_URL}/adjusters/:adjusterId`, async ({ params }) => {
     await delay(500);
 
     const adjusterId =
@@ -3166,7 +3206,7 @@ export const handlers = [
   // 검수 화면 조회 (손해사정사) — GET /reports/{reportId}/review. :reportId GET보다 먼저 등록.
   // started=false면 adjuster_estimate·review·review_status는 null(작업본 미생성).
   // x-mock-scenario: review-started(작업본 있음) / review-not-found(404).
-  http.get(`${API_BASE_URL}/reports/:reportId/review`, async ({ request, params }) => {
+  wire.get(`${API_BASE_URL}/reports/:reportId/review`, async ({ request, params }) => {
     await delay(500);
 
     if (request.headers.get("x-mock-failure") === "review-detail") {
@@ -3259,7 +3299,7 @@ export const handlers = [
           gender: "여",
           birthDate: "1991-04-12",
           region: "서울 강남",
-          joinedAt: "2024-03-01",
+          joinedAt: "2024-03-01T00:00:00Z",
         },
         claim: {
           accidentType: "후유장해",
@@ -3275,7 +3315,7 @@ export const handlers = [
         },
         attachments: [
           {
-            attachmentId: "att-1",
+            attachmentId: "a7700000-0000-4000-8000-000000000001",
             name: "진단서",
             mimeType: "application/pdf",
             url: "https://cdn.example.com/reports/att-1.pdf",
@@ -3287,7 +3327,7 @@ export const handlers = [
               "우측 슬관절 후방십자인대 완전 파열, 관절경적 재건술 시행. 향후 장해 잔존 가능성 명시.",
           },
           {
-            attachmentId: "att-2",
+            attachmentId: "a7700000-0000-4000-8000-000000000002",
             name: "MRI 영상 판독지",
             mimeType: "application/pdf",
             url: "https://cdn.example.com/reports/att-2.pdf",
@@ -3298,7 +3338,7 @@ export const handlers = [
             aiSummary: "후방십자인대 연속성 소실 확인, 동반 반월상연골 손상 의심.",
           },
           {
-            attachmentId: "att-3",
+            attachmentId: "a7700000-0000-4000-8000-000000000003",
             name: "입퇴원 확인서",
             mimeType: "image/jpeg",
             url: "https://cdn.example.com/reports/att-3.jpg",
@@ -3333,7 +3373,7 @@ export const handlers = [
   }),
 
   // 리포트 상세 조회 (고객측 — issue: CONFIRMED/TRUSTED/INFO). 파트너 검수는 /review로 분리(#130).
-  http.get(`${API_BASE_URL}/reports/:reportId`, async ({ params }) => {
+  wire.get(`${API_BASE_URL}/reports/:reportId`, async ({ params }) => {
     await delay(500);
 
     const reportId =
@@ -3394,6 +3434,8 @@ export const handlers = [
         ],
         question: "보험금이 적게 나온 것 같아요",
         confidenceLevel: "HIGH",
+        // 스펙 필수 — 분석 처리 상태.
+        analysisState: "COMPLETED",
         reportNo: "20260520-017",
         adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : null,
         reviewComment: isCustomerSample
@@ -3407,7 +3449,7 @@ export const handlers = [
   }),
 
   // 검수 반영 제출 (사정사) — body echo, 검수완료 시 AWAITING_ADOPTION
-  http.patch(`${API_BASE_URL}/reports/:reportId`, async ({ request, params }) => {
+  wire.patch(`${API_BASE_URL}/reports/:reportId`, async ({ request, params }) => {
     await delay(600);
 
     if (request.headers.get("x-mock-failure") === "submit-review") {
@@ -3438,6 +3480,7 @@ export const handlers = [
         status: "AWAITING_ADOPTION",
         reportReviewId: crypto.randomUUID(),
         reviewStatus: "SENT",
+        sentAt: new Date().toISOString(),
       }),
     });
   }),

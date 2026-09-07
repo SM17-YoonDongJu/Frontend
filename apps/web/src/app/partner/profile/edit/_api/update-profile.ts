@@ -7,7 +7,14 @@ import type { UpdateProfileBody } from "../_model/types";
 export async function updateProfile(body: UpdateProfileBody): Promise<AdjusterProfile> {
   const { data } = await updateProfileRequest({
     throwOnError: true,
-    body: { ...body, avatarUrl: body.avatarUrl ?? undefined },
+    body: {
+      introduction: body.introduction,
+      career: body.career,
+      activity_region: body.activityRegion,
+      avatar_url: body.avatarUrl ?? undefined,
+      specialties: body.specialties,
+      careers: body.careers,
+    },
   });
   return adjusterProfileSchema.parse(data);
 }

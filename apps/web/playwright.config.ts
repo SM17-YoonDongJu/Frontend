@@ -11,7 +11,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: IS_CI,
   retries: IS_CI ? 2 : 0,
-  reporter: IS_CI ? [["list"], ["html", { open: "never" }]] : "list",
+  // CI는 샤드별 blob 리포트만 남기고, 실패 시 e2e-report 잡이 HTML로 병합한다.
+  reporter: IS_CI ? [["list"], ["blob"]] : "list",
   use: {
     baseURL: BASE_URL,
     trace: "on-first-retry",

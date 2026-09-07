@@ -3,7 +3,7 @@ import {
   accidentTypeSchema,
   SUPPORTED_ACCIDENT_TYPE,
 } from "@/shared/model/accident-type";
-import { documentSlotsSchema, flattenDocuments } from "./document-slots";
+import { documentSlotsSchema, flattenDocuments, REQUIRED_DOCUMENT_SLOTS } from "./document-slots";
 import type { CreateReportRequest, CreateReportResponse as GenCreateReportResponse } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 
@@ -85,13 +85,22 @@ export const step5QuestionSchema = z.object({
     .nullish(), // 손해사정사에게 전할 말, 선택
 });
 
-export const step6DocumentSchema = z.object({
-  documentUrls: z
-    .array(z.url("파일 업로드 상태를 다시 확인해 주세요."), {
-      message: "파일 업로드 상태를 다시 확인해 주세요.",
-    })
-    .nullish(), // 업로드된 증빙 url, 선택
-});
+const REQUIRED_DOCUMENT_LABELS = REQUIRED_DOCUMENT_SLOTS.map((d) => d.label).join("·");
+
+export const step6DocumentSchema = z
+  .object({
+    documentUrls: z
+      .array(z.url("파일 업로드 상태를 다시 확인해 주세요."), {
+        message: "파일 업로드 상태를 다시 확인해 주세요.",
+      })
+      .nullish(), // 슬롯 + 기타 서류 url 평면화 결과
+    documentSlots: documentSlotsSchema.optional(),
+  })
+  // 필수 서류 없이는 OCR 분석이 시작되지 않는다. 안내는 폼에 표시 가능한 documentUrls 경로로 붙인다.
+  .refine((v) => REQUIRED_DOCUMENT_SLOTS.every((d) => v.documentSlots?.[d.key]?.url), {
+    path: ["documentUrls"],
+    message: `${REQUIRED_DOCUMENT_LABELS} 첨부 후 진행할 수 있어요.`,
+  });
 
 export const step7ConsentSchema = z.object({
   agreedToPrivacy: z.literal(true, { message: "민감정보 처리에 동의해 주세요." }),

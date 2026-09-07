@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { setAuthCookie } from "./_auth-cookie-helpers";
+import { attachRequiredDocuments } from "./_adjust-request-helpers";
 
 /**
  * 손해사정 요청 퍼널 모바일 뷰포트(375) happy-path E2E (이슈 #55).
@@ -69,8 +70,9 @@ test("모바일 폭에서 진단명 여러 개와 가입보험을 입력해 끝�
     .fill("무릎 수술을 두 번 받았는데 두 번 다 보상되는지 궁금해요");
   await page.getByRole("button", { name: /다음/ }).click();
 
-  // step6 서류 업로드 — 선택 단계, 생략
+  // step6 서류 업로드 — 필수 서류 첨부 후 진행(이슈 #271)
   await expect(page.getByRole("heading", { name: "관련 서류를 올려주세요" })).toBeVisible();
+  await attachRequiredDocuments(page);
   await page.getByRole("button", { name: /다음/ }).click();
 
   // step7 확인 — 복수 진단명·이동한 가입보험·전할 말이 요약에 반영됨

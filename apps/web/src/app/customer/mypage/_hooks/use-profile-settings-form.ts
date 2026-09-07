@@ -72,10 +72,10 @@ export function useProfileSettingsForm({
   const save = () => {
     updateMe(
       {
-        phoneNumber: phone,
+        phone_number: phone,
         region: region ? [region] : [],
         ...(avatarUrl && avatarUrl !== profile.avatarUrl
-          ? { avatarUrl }
+          ? { avatar_url: avatarUrl }
           : {}),
       },
       {

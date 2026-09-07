@@ -34,7 +34,8 @@ export const mypageMonthlyActivitySchema = z.object({
 });
 
 export const mypageCertificationSchema = z.object({
-  licenseNo: z.string().nullable(),
+  registrationNo: z.string(),
+  verifiedAt: z.string().nullable(),
   activityRegion: z.string(),
   createdAt: z.string(),
 });

@@ -14,9 +14,14 @@ export async function applyAdjuster(
   const { data } = await applyRequest({
     throwOnError: true,
     body: {
-      ...body,
-      licenseNo: body.licenseNo ?? undefined,
-      licenseImageUrl: body.licenseImageUrl ?? undefined,
+      name: body.name,
+      phone: body.phone,
+      specialties: body.specialties,
+      region: body.region,
+      affiliation: body.affiliation,
+      registration_image_url: body.registrationImageUrl,
+      license_no: body.licenseNo ?? undefined,
+      license_image_url: body.licenseImageUrl ?? undefined,
       career: body.career ?? undefined,
       introduction: body.introduction ?? undefined,
     },
