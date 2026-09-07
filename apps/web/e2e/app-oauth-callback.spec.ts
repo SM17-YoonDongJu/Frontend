@@ -40,6 +40,52 @@ test.describe("외부 브라우저 복귀", () => {
   });
 });
 
+test.describe("콜백 code 중복 요청 방지 (#306)", () => {
+  const CALL_COUNT_KEY = "mock:oauthCallbackCallCount:kakao:valid";
+
+  test("성공 후 콜백 페이지가 같은 code로 리마운트돼도 API가 한 번만 호출된다", async ({
+    page,
+  }) => {
+    // 테스트마다 새 브라우저 컨텍스트라 localStorage는 비어 있음(addInitScript는 매 네비게이션마다
+    // 재실행돼 첫 호출 카운트까지 지워버리므로 별도 초기화 불필요).
+    // 콜백 응답만으론 미들웨어 보호 라우트 진입이 안 되므로(SW는 실제 쿠키를 못 심음) 직접 주입.
+    await setAuthCookie(page, "USER");
+
+    await page.goto("/login/oauth2/code/kakao?code=valid&state=s1");
+    await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 15000 });
+
+    // gcTime 만료 후 리마운트를 흉내: 같은 code로 콜백 페이지를 다시 연다.
+    await page.goto("/login/oauth2/code/kakao?code=valid&state=s1");
+    await page.waitForTimeout(1000);
+
+    const callCount = await page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      CALL_COUNT_KEY,
+    );
+    expect(callCount).toBe("1");
+  });
+
+  test("다른 code로 로그인한 뒤에도 앞선 code의 소모 기록이 유지된다", async ({ page }) => {
+    await setAuthCookie(page, "USER");
+
+    await page.goto("/login/oauth2/code/kakao?code=valid&state=s1");
+    await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 15000 });
+
+    // 같은 세션에서 두 번째 로그인 — 소모 기록이 code별로 분리돼 있어야 한다.
+    await page.goto("/login/oauth2/code/kakao?code=valid-2&state=s2");
+    await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 15000 });
+
+    await page.goto("/login/oauth2/code/kakao?code=valid&state=s1");
+    await page.waitForTimeout(1000);
+
+    const callCount = await page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      CALL_COUNT_KEY,
+    );
+    expect(callCount).toBe("1");
+  });
+});
+
 test.describe("앱 웹뷰 내 콜백", () => {
   // 앱 웹뷰 판별은 UA 토큰(BareunApp) 기준 — 웹뷰 안에서는 접두어가 있어도 정상 교환.
   test.use({
