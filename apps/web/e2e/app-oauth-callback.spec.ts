@@ -64,6 +64,26 @@ test.describe("콜백 code 중복 요청 방지 (#306)", () => {
     );
     expect(callCount).toBe("1");
   });
+
+  test("다른 code로 로그인한 뒤에도 앞선 code의 소모 기록이 유지된다", async ({ page }) => {
+    await setAuthCookie(page, "USER");
+
+    await page.goto("/login/oauth2/code/kakao?code=valid&state=s1");
+    await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 15000 });
+
+    // 같은 세션에서 두 번째 로그인 — 소모 기록이 code별로 분리돼 있어야 한다.
+    await page.goto("/login/oauth2/code/kakao?code=valid-2&state=s2");
+    await expect(page).toHaveURL(/\/customer\/dashboard/, { timeout: 15000 });
+
+    await page.goto("/login/oauth2/code/kakao?code=valid&state=s1");
+    await page.waitForTimeout(1000);
+
+    const callCount = await page.evaluate(
+      (key) => window.localStorage.getItem(key),
+      CALL_COUNT_KEY,
+    );
+    expect(callCount).toBe("1");
+  });
 });
 
 test.describe("앱 웹뷰 내 콜백", () => {

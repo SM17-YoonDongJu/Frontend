@@ -1,7 +1,11 @@
-const CONSUMED_CODE_KEY = "bb.oauthConsumedCode";
+const CONSUMED_CODE_KEY_PREFIX = "bb.oauthConsumedCode";
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";
+}
+
+function consumedCodeKey(provider: string, code: string): string {
+  return `${CONSUMED_CODE_KEY_PREFIX}:${provider}:${code}`;
 }
 
 /**
@@ -11,7 +15,7 @@ function isBrowser(): boolean {
 export function isCodeConsumed(provider: string, code: string): boolean {
   if (!isBrowser()) return false;
   try {
-    return window.sessionStorage.getItem(CONSUMED_CODE_KEY) === `${provider}:${code}`;
+    return window.sessionStorage.getItem(consumedCodeKey(provider, code)) !== null;
   } catch {
     return false;
   }
@@ -20,6 +24,6 @@ export function isCodeConsumed(provider: string, code: string): boolean {
 export function markCodeConsumed(provider: string, code: string): void {
   if (!isBrowser()) return;
   try {
-    window.sessionStorage.setItem(CONSUMED_CODE_KEY, `${provider}:${code}`);
+    window.sessionStorage.setItem(consumedCodeKey(provider, code), "1");
   } catch {}
 }
