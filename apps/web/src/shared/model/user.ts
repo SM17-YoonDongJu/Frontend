@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { userRoleSchema } from "./user-role";
+import { enumWithFallback } from "@/shared/lib/enum-with-fallback";
 import { UserUpdateRequestSchema } from "@/shared/api/generated/zod.gen";
 import type { UserMeResponse } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
@@ -26,12 +27,13 @@ export const meSchema = z
     createdAt: z.string(),
     role: userRoleSchema,
     phoneNumber: z.string().nullish(),
-    gender: genderSchema.nullish(),
+    // 명세상 문자열 — 모르는 값이 와도 인증 판정(getMe)이 실패하지 않도록 UNKNOWN으로 받는다(#314).
+    gender: enumWithFallback(["M", "F"]).nullish(),
     region: z.array(z.string()).nullish(), // 활동/거주 지역(복수) — 명세 배열.
     avatarUrl: z.string().nullish(),
     userType: userTypeSchema.optional(),
     email: z.string().nullish(),
-    socialProvider: socialProviderSchema.nullish(),
+    socialProvider: enumWithFallback(["kakao", "naver", "apple"]).nullish(),
   })
   .transform((me) => ({
     ...me,

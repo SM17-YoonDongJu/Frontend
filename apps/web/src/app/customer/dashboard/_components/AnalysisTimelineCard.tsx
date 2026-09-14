@@ -7,6 +7,7 @@ import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { useDashboard } from "../_api/use-dashboard";
 import type { DashboardActiveReport } from "../_model/dashboard.schema";
 import type { ReportStatus } from "@/app/customer/_shared/model/report-list.schema";
+import { reportDisplayTitle } from "@/app/customer/_shared/model/report-title";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
 import { TimelineConnector } from "./TimelineConnector";
 
@@ -112,8 +113,8 @@ export function AnalysisTimelineCard() {
 
       <div className="mt-4 flex items-center gap-2.5">
         <span className="text-[0.9375rem] font-semibold text-ink">
-          {report.title ?? accidentTypeLabel(report.accidentType)}
-          {report.title && (
+          {reportDisplayTitle(report)}
+          {report.title?.trim() && report.accidentType && (
             <span className="hidden md:inline"> · {accidentTypeLabel(report.accidentType)}</span>
           )}
         </span>

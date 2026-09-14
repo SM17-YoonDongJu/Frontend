@@ -1,4 +1,5 @@
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
+import { reportDisplayTitle } from "@/app/customer/_shared/model/report-title";
 import { FileText } from "@/shared/ui/icons/FileText";
 import { MessageSquare } from "@/shared/ui/icons/MessageSquare";
 
@@ -18,10 +19,11 @@ export function CaseRow({ report }: { report: ReportListItem }) {
       </span>
       <div className="min-w-0 flex-1">
         <p className="truncate text-[0.9375rem] font-bold text-ink">
-          {report.accidentType ?? ""}
+          {reportDisplayTitle(report)}
         </p>
         <p className="mt-0.5 truncate text-[0.75rem] text-ink-3">
-          No.{report.reportNo} · {formatDate(report.createdAt)}
+          {report.reportNo ? `No.${report.reportNo} · ` : ""}
+          {formatDate(report.createdAt)}
         </p>
       </div>
       {report.proposalCount > 0 && (

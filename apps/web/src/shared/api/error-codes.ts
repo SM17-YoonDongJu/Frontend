@@ -1,3 +1,5 @@
+import { ZodError } from "zod";
+
 export const ERROR_CODES = {
   INVALID_REQUEST: "INVALID_REQUEST",
   VALIDATION_ERROR: "VALIDATION_ERROR",
@@ -48,4 +50,22 @@ export function isAuthRedirectError(error: unknown): boolean {
 export function getErrorCode(error: unknown): string | null {
   if (!(error instanceof Error)) return null;
   return error.name === "Error" ? null : error.name;
+}
+
+/** 서버 상태가 바뀌면 풀릴 수 있는 일시 장애 — 다시 요청할 가치가 있다. */
+const RETRYABLE_SERVER_CODES: ReadonlySet<string> = new Set([
+  ERROR_CODES.INTERNAL_SERVER_ERROR,
+  ERROR_CODES.DATABASE_ERROR,
+  ERROR_CODES.EXTERNAL_API_ERROR,
+  ERROR_CODES.SERVICE_UNAVAILABLE,
+]);
+
+/**
+ * 쿼리 재시도 여부. 응답 검증 실패와 요청·권한 오류는 몇 번을 다시 보내도 결과가 같아서,
+ * 재시도하면 사용자만 빈 로딩을 몇 초 더 본다(#314). 네트워크 오류(코드 없음)와 서버 장애만 재시도한다.
+ */
+export function isRetryableError(error: unknown): boolean {
+  if (error instanceof ZodError) return false;
+  const code = getErrorCode(error);
+  return code === null || RETRYABLE_SERVER_CODES.has(code);
 }

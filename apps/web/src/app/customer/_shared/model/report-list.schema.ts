@@ -23,7 +23,8 @@ export const reportListItemSchema = z.object({
   // 백엔드 row.accidentType() null 가능(사고유형 미확정).
   accidentType: z.string().nullable(),
   createdAt: z.string(),
-  reportNo: z.string(),
+  // 사건번호 미발급 리포트는 null(#210 실측, 리포트 상세 스키마와 동일).
+  reportNo: z.string().nullable(),
   // 미검수(AWAITING_INSPECTION) 리포트는 청구액 미산정 — null 가능.
   claimedMinAmount: z.number().int().nonnegative().nullable(),
   claimedMaxAmount: z.number().int().nonnegative().nullable(),

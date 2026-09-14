@@ -121,6 +121,30 @@ test("검수 중: 제안이 없으면 제안 비교 카드가 없고 진행 중�
   ).toBeVisible();
 });
 
+test("분석 중: 제목이 아직 없는 리포트도 진행 중인 분석과 지금 할 일이 사고 유형 제목으로 보인다", async ({
+  page,
+}) => {
+  // 읽지 않은 채팅이 없어야 지금 할 일이 검수 진행 안내로 떨어진다.
+  await page.setExtraHTTPHeaders({
+    "x-mock-scenario": "dashboard-analyzing",
+    "x-mock-empty": "chat-list",
+  });
+  await page.goto(PATH);
+
+  // 제목 없는 활성 리포트가 응답 검증에서 거부되지 않고 타임라인이 뜬다(#314)
+  await expect(
+    page.getByRole("heading", { name: "진행 중인 분석" }).filter({ visible: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText("실손 의료비 분석 요청", { exact: true }).filter({ visible: true }).first(),
+  ).toBeVisible();
+
+  // 지금 할 일도 빈 제목 대신 사고 유형 제목으로 검수 진행을 안내한다
+  await expect(
+    page.getByText(/실손 의료비 분석 요청 검수를 진행하고 있어요/).filter({ visible: true }),
+  ).toBeVisible();
+});
+
 test("전부 종료: 진행 중 분석·제안이 없으면 타임라인·제안 비교가 없고 리포트 목록이 보인다", async ({
   page,
 }) => {

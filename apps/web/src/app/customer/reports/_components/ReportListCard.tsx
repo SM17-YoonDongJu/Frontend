@@ -5,7 +5,7 @@ import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
 import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
 import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
-import { deriveReportTitle } from "@/app/customer/_shared/model/report-title";
+import { reportDisplayTitle } from "@/app/customer/_shared/model/report-title";
 import { ReportStatusBadges } from "./ReportStatusBadges";
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -43,8 +43,7 @@ function bottomLeftText(item: ReportListItem): string {
 }
 
 export function ReportListCard({ item }: { item: ReportListItem }) {
-  // deriveReportTitle이 사고 유형 한글 라벨 변환을 포함한다(#261 정합).
-  const heading = item.title ?? deriveReportTitle(item);
+  const heading = reportDisplayTitle(item);
   const isArrived = item.status === "AWAITING_ADOPTION";
   const isPending = item.status === "AWAITING_INSPECTION";
   const { muted } = REPORT_STATUS_META[item.status];
@@ -71,7 +70,7 @@ export function ReportListCard({ item }: { item: ReportListItem }) {
       >
         {heading}
       </p>
-      <p className="mt-1.5 text-[0.71875rem] text-ink-3">No.{item.reportNo}</p>
+      {item.reportNo && <p className="mt-1.5 text-[0.71875rem] text-ink-3">No.{item.reportNo}</p>}
 
       <div className="mt-3 flex items-center justify-between border-t border-line-2 pt-2.5">
         <span

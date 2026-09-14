@@ -13,6 +13,7 @@ import type {
   DashboardProposalSummary,
 } from "../_model/dashboard.schema";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
+import { reportDisplayTitle } from "@/app/customer/_shared/model/report-title";
 import { formatManwon } from "@/shared/lib/format-amount";
 
 const MAX_SUB_TODOS = 2;
@@ -49,7 +50,7 @@ function buildTodos(
       description:
         activeReport && proposalSummary.maxAmount != null ? (
           <>
-            {activeReport.title} · 최고 제안가{" "}
+            {reportDisplayTitle(activeReport)} · 최고 제안가{" "}
             <span className="font-bold text-gold-2">{formatManwon(proposalSummary.maxAmount)}만원</span>{" "}
             — 제안을 비교하고 나에게 맞는 사정사를 선택해 보세요.
           </>
@@ -59,7 +60,7 @@ function buildTodos(
       ctaLabel: "제안 비교하기",
       subIcon: <FileText className="text-[1rem]" />,
       subTitle: `새 제안 ${count}건 도착`,
-      subDescription: activeReport?.title ?? "받은 제안 확인",
+      subDescription: activeReport ? reportDisplayTitle(activeReport) : "받은 제안 확인",
     });
   }
 
@@ -97,12 +98,12 @@ function buildInfoTodo(activeReport: DashboardActiveReport): ActionTodo {
     ),
     description: (
       <>
-        {activeReport.title ?? "리포트"} 검수를 진행하고 있어요. 결과가 준비되면 바로 알려드릴게요.
+        {reportDisplayTitle(activeReport)} 검수를 진행하고 있어요. 결과가 준비되면 바로 알려드릴게요.
       </>
     ),
     ctaLabel: "리포트 상세",
     subIcon: <FileText className="text-[1rem]" />,
-    subTitle: activeReport.title ?? "리포트 검수 진행 중",
+    subTitle: reportDisplayTitle(activeReport),
     subDescription: "검수 진행 중",
   };
 }
