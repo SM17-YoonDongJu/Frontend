@@ -7,7 +7,7 @@ import type {
 } from "@/app/customer/_shared/model/report-list.schema";
 import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
 import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
-import { deriveReportTitle } from "@/app/customer/_shared/model/report-title";
+import { reportDisplayTitle } from "@/app/customer/_shared/model/report-title";
 
 type PillTone = "gold" | "green" | "neutral";
 
@@ -54,7 +54,7 @@ function reportFooter(report: ReportListItem): { label: string; value: string } 
 export function ReportSummaryCard({ report }: { report: ReportListItem }) {
   const pill = STATUS_PILL[report.status];
   const footer = reportFooter(report);
-  const title = report.title ?? deriveReportTitle(report);
+  const title = reportDisplayTitle(report);
 
   return (
     <Link

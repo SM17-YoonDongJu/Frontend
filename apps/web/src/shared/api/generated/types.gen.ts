@@ -492,7 +492,7 @@ export type UserInsuranceListResponse = {
 
 export type ActiveReport = {
     report_id: string;
-    title: string;
+    title: string | null;
     accident_type?: string | null;
     status: string;
     created_at: string;
@@ -564,10 +564,10 @@ export type ApiResponseReportCardListResponse = {
 export type Card = {
     report_id: string;
     status: string;
-    accident_type: string;
-    title: string;
+    accident_type: string | null;
+    title: string | null;
     created_at: string;
-    report_no: string;
+    report_no: string | null;
     claimed_min_amount?: number | null;
     claimed_max_amount?: number | null;
     proposal_count: number;
@@ -881,7 +881,7 @@ export type ChatRoomSummaryResponse = {
     /**
      * 검색으로 개설된 방은 제안이 없어 null
      */
-    match_status?: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
+    match_status?: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED' | null;
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
@@ -889,7 +889,7 @@ export type ChatRoomSummaryResponse = {
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
-    report_type_label?: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other';
+    report_type_label?: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other' | null;
     counterpart: Counterpart;
     /**
      * 아직 메시지가 없으면 null
@@ -931,7 +931,7 @@ export type ChatRoomDetailResponse = {
     /**
      * 검색으로 개설된 방은 제안이 없어 null
      */
-    match_status?: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
+    match_status?: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED' | null;
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
@@ -939,7 +939,7 @@ export type ChatRoomDetailResponse = {
     /**
      * 검색으로 개설된 방은 연결된 리포트가 없어 null
      */
-    report_type_label?: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other';
+    report_type_label?: 'medical_indemnity' | 'traffic' | 'disability' | 'cancer_diagnosis' | 'fire' | 'liability' | 'other' | null;
     counterpart: Counterpart;
     /**
      * 아직 메시지가 없으면 null

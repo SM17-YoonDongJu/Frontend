@@ -1,3 +1,4 @@
+import { ZodError } from "zod";
 import { client } from "@/shared/api/generated/client.gen";
 import { API_BASE_URL } from "@/shared/api/config";
 import { camelToSnakeDeep, snakeToCamelDeep } from "@/shared/api/case-convert";
@@ -138,6 +139,8 @@ client.interceptors.request.use((request, options) => {
 });
 
 client.interceptors.error.use((rawError, _response, _request, options) => {
+  // 응답 검증 실패는 서버 실패 응답이 아니다 — 원인이 남아야 재시도 판단(isRetryableError)이 구분한다.
+  if (rawError instanceof ZodError) return rawError;
   const meta = (options as { meta?: RequestMeta }).meta;
   const code = isEnvelope(rawError) ? rawError.code : undefined;
   const message = isEnvelope(rawError) ? rawError.message : undefined;

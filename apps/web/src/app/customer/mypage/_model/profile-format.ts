@@ -1,4 +1,5 @@
-import type { SocialProvider } from "./types";
+import { UNKNOWN_ENUM_VALUE } from "@/shared/lib/enum-with-fallback";
+import type { Me, SocialProvider } from "./types";
 
 const SOCIAL_LABEL: Record<SocialProvider, string> = {
   kakao: "카카오",
@@ -7,14 +8,14 @@ const SOCIAL_LABEL: Record<SocialProvider, string> = {
 };
 
 /** 소셜 계정 표시 라벨(예: "카카오 계정"). provider 없으면 "소셜 계정". */
-export function socialAccountLabel(provider: SocialProvider | null): string {
-  if (!provider) return "소셜 계정";
+export function socialAccountLabel(provider: Me["socialProvider"]): string {
+  if (!provider || provider === UNKNOWN_ENUM_VALUE) return "소셜 계정";
   return `${SOCIAL_LABEL[provider]} 계정`;
 }
 
 /** 가입 경로 문구(예: "카카오 계정으로 가입 · 2026.05"). */
 export function joinInfoLabel(
-  provider: SocialProvider | null,
+  provider: Me["socialProvider"],
   createdAt: string,
 ): string {
   const date = new Date(createdAt);

@@ -2348,6 +2348,7 @@ export const handlers = [
   //   x-mock-scenario=unauthenticated → 401 LOGIN_REQUIRED.
   //   x-mock-scenario=dashboard-onboarding → report_count 0(온보딩 분기), 나머지 null.
   //   x-mock-scenario=dashboard-inspecting → 검수 중(제안 0건): activeReport AWAITING_INSPECTION·firstReviewedAt null, proposalSummary null(제안 비교 숨김).
+  //   x-mock-scenario=dashboard-analyzing → 분석 중(#314): 신청 직후라 activeReport title null·proposal_count 키 없음·타임존 없는 시각.
   //   x-mock-scenario=dashboard-closed → 전부 종료: activeReport·proposalSummary null(타임라인·제안 비교 숨김). reportCount>0라 온보딩 아님.
   wire.get(`${API_BASE_URL}/users/me/dashboard`, async ({ request }) => {
     await delay(400);
@@ -2385,6 +2386,25 @@ export const handlers = [
             createdAt: "2026-07-18T09:00:00Z",
             firstReviewedAt: null,
             proposalCount: 0,
+          },
+          proposalSummary: null,
+        }),
+      });
+    }
+
+    if (request.headers.get("x-mock-scenario") === "dashboard-analyzing") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: camelToSnakeDeep({
+          reportCount: 1,
+          activeReport: {
+            reportId: DASHBOARD_AWAITING_REPORT_ID,
+            title: null,
+            accidentType: "medical_indemnity",
+            status: "AWAITING_INSPECTION",
+            createdAt: "2026-09-14T17:30:00.123456",
+            firstReviewedAt: null,
           },
           proposalSummary: null,
         }),

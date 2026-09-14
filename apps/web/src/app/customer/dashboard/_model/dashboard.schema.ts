@@ -10,12 +10,16 @@ import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/dri
  */
 export const dashboardActiveReportSchema = z.object({
   reportId: z.uuid(),
+  // 분석이 끝나기 전 리포트는 제목이 없다(#314). 표시는 reportDisplayTitle이 파생한다.
   title: z.string().nullable(),
-  accidentType: z.string(),
+  // 명세상 null 가능(사고유형 미확정).
+  accidentType: z.string().nullable(),
   status: reportListStatusSchema,
   createdAt: z.string(),
-  firstReviewedAt: z.string().nullable(),
-  proposalCount: z.number().int().nonnegative(),
+  // 명세상 선택 필드 — 키가 빠지면 미검수(null)로 받는다.
+  firstReviewedAt: z.string().nullable().default(null),
+  // 명세상 선택 필드 — 제안 전 리포트는 키가 빠질 수 있어 0으로 받는다.
+  proposalCount: z.number().int().nonnegative().default(0),
 });
 
 export const dashboardProposalItemSchema = z.object({

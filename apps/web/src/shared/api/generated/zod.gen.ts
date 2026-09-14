@@ -481,7 +481,7 @@ export const ApiResponseUserInsuranceListResponseSchema = z.object({
 
 export const ActiveReportSchema = z.object({
     report_id: z.uuid(),
-    title: z.string(),
+    title: z.string().nullable(),
     accident_type: z.string().nullish(),
     status: z.string(),
     created_at: z.iso.datetime({ offset: true, local: true }),
@@ -545,10 +545,10 @@ export const ApiResponseAdjusterApplicationResponseSchema = z.object({
 export const CardSchema = z.object({
     report_id: z.uuid(),
     status: z.string(),
-    accident_type: z.string(),
-    title: z.string(),
+    accident_type: z.string().nullable(),
+    title: z.string().nullable(),
     created_at: z.iso.datetime({ offset: true, local: true }),
-    report_no: z.string(),
+    report_no: z.string().nullable(),
     claimed_min_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
     claimed_max_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
     proposal_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
@@ -795,7 +795,7 @@ export const ChatRoomSummaryResponseSchema = z.object({
         'COUNSELING',
         'REJECTED',
         'ACCEPTED'
-    ]).optional(),
+    ]).nullish(),
     case_no: z.string().nullish(),
     report_type_label: z.enum([
         'medical_indemnity',
@@ -805,7 +805,7 @@ export const ChatRoomSummaryResponseSchema = z.object({
         'fire',
         'liability',
         'other'
-    ]).optional(),
+    ]).nullish(),
     counterpart: CounterpartSchema,
     last_message: z.string().nullish(),
     last_message_at: z.iso.datetime({ offset: true, local: true }).nullish(),
@@ -832,7 +832,7 @@ export const ChatRoomDetailResponseSchema = z.object({
         'COUNSELING',
         'REJECTED',
         'ACCEPTED'
-    ]).optional(),
+    ]).nullish(),
     case_no: z.string().nullish(),
     report_type_label: z.enum([
         'medical_indemnity',
@@ -842,7 +842,7 @@ export const ChatRoomDetailResponseSchema = z.object({
         'fire',
         'liability',
         'other'
-    ]).optional(),
+    ]).nullish(),
     counterpart: CounterpartSchema,
     last_message: z.string().nullish(),
     last_message_at: z.iso.datetime({ offset: true, local: true }).nullish(),
