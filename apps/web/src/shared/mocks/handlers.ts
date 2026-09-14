@@ -627,7 +627,7 @@ const MOCK_ME: Record<string, unknown> = {
   gender: "F",
   region: ["서울 강남구"],
   avatar_url: null,
-  created_at: "2024-03-02T09:00:00Z",
+  created_at: "2024-03-02T09:00:00.12345",
   email: "yunseo@example.com",
   social_provider: "kakao",
 };
