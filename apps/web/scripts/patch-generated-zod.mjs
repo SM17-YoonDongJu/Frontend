@@ -20,14 +20,15 @@ const TARGET = resolve(process.cwd(), "src/shared/api/generated/zod.gen.ts");
 // z.coerce.bigint() 뒤에 붙는 int64 범위 체이닝(.min(BigInt('...'), { error: '...' }) 등)까지 통째로 걷어낸다.
 const BIGINT_CHAIN = /z\.coerce\.bigint\(\)(?:\.(?:min|max|gte|lte)\(BigInt\('-?\d+'\)(?:,\s*\{[^}]*\})?\))*/g;
 
-// z.iso.datetime()은 기본이 Z만 허용한다 — 백엔드는 +09:00 오프셋도 내려주므로 그대로 두면
-// 정상 응답이 검증에서 거부된다. 오프셋 허용으로 열어 준다.
+// z.iso.datetime()은 기본이 Z만 허용한다. 백엔드는 +09:00 오프셋도, LocalDateTime의 타임존 없는 값
+// (2026-08-03T20:12:32.23391)도 내려주므로 그대로 두면 정상 응답이 검증에서 거부된다.
+// /users/me가 거부되면 인증 판정이 비로그인으로 떨어져 로그인 후에도 랜딩에 머문다(#312). 둘 다 허용한다.
 const DATETIME = /z\.iso\.datetime\(\)/g;
 
 const before = readFileSync(TARGET, "utf8");
 const after = before
   .replace(BIGINT_CHAIN, "z.number().int()")
-  .replace(DATETIME, "z.iso.datetime({ offset: true })");
+  .replace(DATETIME, "z.iso.datetime({ offset: true, local: true })");
 const replaced = (before.match(BIGINT_CHAIN) ?? []).length;
 
 if (after.includes("BigInt(")) {
