@@ -13,10 +13,11 @@ export const adjusterListItemSchema = z.object({
   avatarUrl: z.string().nullable(),
   verified: z.boolean(),
   specialties: z.array(z.string()),
-  headline: z.string(),
+  // 프로필을 채우기 전 사정사는 한줄소개·경력이 null(#210 실측) — 한 건 때문에 목록이 비지 않게.
+  headline: z.string().nullable(),
   averageRating: z.number(),
   reviewCount: z.number().int(),
-  career: z.number().int(),
+  career: z.number().int().nullable(),
   completedConsultCount: z.number().int(),
   activityRegion: z.string(),
 });

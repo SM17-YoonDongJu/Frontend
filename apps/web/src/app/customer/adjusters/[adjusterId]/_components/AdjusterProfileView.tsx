@@ -43,7 +43,7 @@ export function AdjusterProfileView({ adjusterId }: { adjusterId: string }) {
 
       <div className="mx-auto grid w-full max-w-[68.75rem] items-start gap-5 px-5 pb-28 pt-5 lg:grid-cols-[1fr_21.25rem] lg:gap-6 lg:px-4 lg:py-9">
         <div className="space-y-5 lg:space-y-6">
-          <AdjusterIntro introduction={data.introduction} />
+          {data.introduction && <AdjusterIntro introduction={data.introduction} />}
           <AdjusterSpecialties specialties={data.specialties} />
           <AdjusterCareers careers={data.careers} />
           <div ref={reviewsRef} className="scroll-mt-14 lg:scroll-mt-6">

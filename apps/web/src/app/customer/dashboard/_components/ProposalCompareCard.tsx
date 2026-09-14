@@ -83,7 +83,9 @@ export function ProposalCompareCard() {
                   {item.nickname} 사정사
                 </p>
                 <p className="truncate text-[0.75rem] text-ink-3">
-                  경력 {item.career}년 · {item.speciality} 전문
+                  {[item.career !== null ? `경력 ${item.career}년` : null, item.speciality ? `${item.speciality} 전문` : null]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </p>
               </div>
             </Link>

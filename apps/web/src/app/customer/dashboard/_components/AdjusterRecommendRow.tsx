@@ -24,7 +24,7 @@ export function AdjusterRecommendRow({ adjuster }: { adjuster: AdjusterListItem 
             )}
           </div>
           <p className="mt-0.5 truncate text-xs text-ink-3">
-            경력 {adjuster.career}년 · 매칭 {adjuster.completedConsultCount}건
+            {adjuster.career !== null && `경력 ${adjuster.career}년 · `}매칭 {adjuster.completedConsultCount}건
           </p>
         </div>
         <span className="shrink-0 text-xs font-semibold text-ink-2">

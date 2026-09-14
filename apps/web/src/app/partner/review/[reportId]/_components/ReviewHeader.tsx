@@ -11,7 +11,7 @@ function accidentCategory(accidentType: string): string {
 }
 
 export interface ReviewHeaderProps {
-  caseNo: string;
+  caseNo: string | null;
   diagnosis: string;
   accidentType: string;
   region: string;
@@ -42,10 +42,10 @@ export function ReviewHeader({
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-serif text-[1.375rem] font-bold text-ink">{diagnosis} 검수</h1>
-            <StatusBadge tone="gold">{accidentCategory(accidentType)}</StatusBadge>
+            {accidentType && <StatusBadge tone="gold">{accidentCategory(accidentType)}</StatusBadge>}
           </div>
           <p className="mt-1 text-[0.8125rem] text-ink-3">
-            #{caseNo} · {region} · {clientName} 의뢰
+            {caseNo && `#${caseNo} · `}{region} · {clientName} 의뢰
           </p>
         </div>
       </div>

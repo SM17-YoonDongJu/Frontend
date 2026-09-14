@@ -8,7 +8,7 @@ import { REPORT_TITLE } from "../_model/report-meta";
 
 export interface ReportHeaderProps {
   accidentType: string;
-  treatment: string;
+  treatment: string | null;
   issueCount: number;
   /** 데스크톱 우측 액션 블록(PDF·공유) */
   actions?: ReactNode;
@@ -46,7 +46,7 @@ export function ReportHeader({
         <div>
           <div className="flex flex-wrap items-center gap-1.5 text-[0.78rem] text-ink-3">
             <span className="rounded-pill bg-paper-2 px-2.5 py-1">{accidentType}</span>
-            <span className="rounded-pill bg-paper-2 px-2.5 py-1">{treatment}</span>
+            {treatment && <span className="rounded-pill bg-paper-2 px-2.5 py-1">{treatment}</span>}
             <span className="flex items-center gap-1 rounded-pill bg-green-soft px-2.5 py-1 text-green">
               <Check className="text-[0.8125rem]" />
               쟁점 {issueCount}건

@@ -16,14 +16,16 @@ export function ReviewedCaseCard({ item }: { item: ReviewedReportItem }) {
   return (
     <article className="rounded-card border border-line bg-card p-[1.0625rem] shadow-[0_1px_1px_rgba(21,32,46,0.03)]">
       <div className="flex items-center gap-2">
-        <StatusBadge tone="gold" className="rounded-tag">
-          {accidentTypeLabel(item.accidentType)}
-        </StatusBadge>
-        <span className="text-[0.71875rem] text-ink-3">#{item.caseNo}</span>
+        {item.accidentType && (
+          <StatusBadge tone="gold" className="rounded-tag">
+            {accidentTypeLabel(item.accidentType)}
+          </StatusBadge>
+        )}
+        {item.caseNo && <span className="text-[0.71875rem] text-ink-3">#{item.caseNo}</span>}
         <span className="ml-auto text-[0.71875rem] text-ink-3">{toShortDate(item.reviewedAt)}</span>
       </div>
 
-      <p className="mt-2 text-[0.875rem] font-bold leading-[1.45] text-ink">{item.title}</p>
+      <p className="mt-2 text-[0.875rem] font-bold leading-[1.45] text-ink">{item.title ?? accidentTypeLabel(item.accidentType)}</p>
 
       <div className="mt-2 flex items-center justify-between border-t border-line-2 pt-[1.0625rem]">
         <span className="text-[0.71875rem] text-ink-3">{item.region}</span>

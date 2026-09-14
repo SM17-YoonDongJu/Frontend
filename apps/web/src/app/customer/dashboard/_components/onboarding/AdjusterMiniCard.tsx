@@ -30,7 +30,7 @@ export function AdjusterMiniCard({
             )}
           </div>
           <p className="mt-0.5 truncate text-xs text-ink-3">
-            경력 {adjuster.career}년 · 매칭 {adjuster.completedConsultCount}건 · ★{" "}
+            {adjuster.career !== null && `경력 ${adjuster.career}년 · `}매칭 {adjuster.completedConsultCount}건 · ★{" "}
             {adjuster.averageRating.toFixed(1)}
           </p>
         </div>

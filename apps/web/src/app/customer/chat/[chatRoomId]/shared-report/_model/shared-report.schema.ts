@@ -51,7 +51,8 @@ export const sharedReportSchema = z.object({
   chatRoomId: z.uuid(),
   reportId: z.uuid(),
   proposalId: z.uuid(),
-  caseNo: z.string(),
+  // 사건번호 미발급 리포트는 null(#210 실측).
+  caseNo: z.string().nullable(),
   accidentType: z.string().nullable(),
   title: z.string().nullable(),
   reportStatus: sharedReportStatusSchema,

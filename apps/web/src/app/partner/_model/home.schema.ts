@@ -28,9 +28,10 @@ export const homeSummarySchema = z.object({
 
 export const homeInProgressCaseSchema = z.object({
   reportId: z.uuid(),
-  caseNo: z.string(),
-  accidentType: z.string(),
-  title: z.string(),
+  // 사건번호·사고유형·제목은 리포트가 확정되기 전이면 null(#210 실측).
+  caseNo: z.string().nullable(),
+  accidentType: z.string().nullable(),
+  title: z.string().nullable(),
   reportStatus: z.string(),
   reviewStatus: z.string().nullable(),
   stageLabel: z.string(),
