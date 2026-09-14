@@ -67,8 +67,9 @@ export const chatAttachmentSchema = z.object({
 // 명세는 key·이름·형식·크기만 선언하고 url이 없다. 이미지 미리보기·다운로드에 url이 필요하므로
 // 백엔드에 응답 추가를 요청 중이며, 그전까지 없으면 없는 대로 받는다(파일명 칩은 그대로 동작).
 export const chatMessageAttachmentSchema = z.object({
-  attachmentKey: z.string(),
-  name: z.string(),
+  // 조회 시점 presigned 첨부는 key가 없고 파일명도 빠질 수 있다(#210 실측).
+  attachmentKey: z.string().nullish(),
+  name: z.string().nullable(),
   contentType: z.string(),
   size: z.number().int().nullable(),
   url: z.string().nullish(),

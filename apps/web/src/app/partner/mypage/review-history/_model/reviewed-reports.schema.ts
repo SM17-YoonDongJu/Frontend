@@ -19,9 +19,10 @@ export const reviewStatusSchema = enumWithFallback([
 
 export const reviewedReportItemSchema = z.object({
   reportId: z.uuid(),
-  caseNo: z.string(),
-  title: z.string(),
-  accidentType: accidentTypeSchema,
+  // 사건번호·제목·사고유형은 리포트가 확정되기 전이면 null(#210·#227 실측).
+  caseNo: z.string().nullable(),
+  title: z.string().nullable(),
+  accidentType: accidentTypeSchema.nullable(),
   region: z.string(),
   status: reviewStatusSchema,
   reviewedAt: z.string(),

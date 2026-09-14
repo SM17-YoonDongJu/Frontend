@@ -149,8 +149,8 @@ export type ReadResponse = {
 };
 
 export type Attachment = {
-    attachment_key: string;
-    name: string;
+    attachment_key?: string;
+    name: string | null;
     content_type: string;
     size?: number | null;
 };
@@ -407,8 +407,8 @@ export type ConsultationDecisionResponse = {
 };
 
 export type CareerItem = {
-    period: string;
-    company: string;
+    period: string | null;
+    company: string | null;
 };
 
 export type UpdateAdjusterProfileRequest = {
@@ -424,20 +424,20 @@ export type UpdateAdjusterProfileRequest = {
 export type AdjusterProfileResponse = {
     adjuster_id: string;
     nickname: string;
-    headline: string;
+    headline: string | null;
     avatar_url?: string | null;
     activity_region: string;
-    introduction: string;
+    introduction: string | null;
     specialties: Array<string>;
     careers: Array<CareerItem>;
-    career: number;
+    career: number | null;
     average_rating?: number;
     review_count?: number;
     recent_reviews: Array<RecentReview>;
     completed_consult_count?: number;
     handled_case_count?: number;
     pending_review_count?: number;
-    updated_at: string;
+    updated_at: string | null;
 };
 
 export type ApiResponseAdjusterProfileResponse = {
@@ -542,7 +542,7 @@ export type AdjusterApplicationResponse = {
     name: string;
     phone?: string | null;
     specialties?: Array<string> | null;
-    speciality: string;
+    speciality?: string;
     license_no?: string | null;
     documents: Array<Document>;
     rejected_at?: string | null;
@@ -616,8 +616,8 @@ export type ApiResponseCustomerReportDetailResponse = {
 export type CustomerReportDetailResponse = {
     report_id: string;
     status: string;
-    accident_type: string;
-    treatment: string;
+    accident_type: string | null;
+    treatment: string | null;
     claimed_min_amount?: number | null;
     claimed_max_amount?: number | null;
     offered_amount?: number | null;
@@ -628,7 +628,7 @@ export type CustomerReportDetailResponse = {
     question?: string | null;
     adjuster_id?: string | null;
     confidence_level?: string | null;
-    report_no: string;
+    report_no: string | null;
     /**
      * 채택된 제안이 없으면 null
      */
@@ -726,12 +726,12 @@ export type Progress = {
 
 export type ReviewWorkspaceResponse = {
     report_id: string;
-    case_no: string;
+    case_no: string | null;
     /**
      * AI 초안이 생성 전이면 null
      */
     title?: string | null;
-    accident_type: string;
+    accident_type: string | null;
     region: string;
     status: string;
     confidence_level?: string | null;
@@ -977,7 +977,7 @@ export type SharedReportResponse = {
     chat_room_id: string;
     report_id: string;
     proposal_id: string;
-    case_no: string;
+    case_no: string | null;
     accident_type?: string | null;
     title?: string | null;
     report_status?: string | null;
@@ -1050,12 +1050,12 @@ export type AdjusterDetailResponse = {
     adjuster_id: string;
     nickname: string;
     avatar_url?: string | null;
-    headline: string;
+    headline: string | null;
     activity_region: string;
-    introduction: string;
+    introduction: string | null;
     specialties: Array<string>;
     careers: Array<CareerItem>;
-    career?: number;
+    career?: number | null;
     average_rating?: number;
     review_count?: number;
     recent_reviews: Array<RecentReview>;
@@ -1073,7 +1073,7 @@ export type ApiResponseAdjusterDetailResponse = {
 };
 
 export type Certification = {
-    registration_no: string;
+    registration_no: string | null;
     verified_at?: string | null;
 };
 

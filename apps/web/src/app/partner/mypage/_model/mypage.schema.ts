@@ -34,7 +34,8 @@ export const mypageMonthlyActivitySchema = z.object({
 });
 
 export const mypageCertificationSchema = z.object({
-  registrationNo: z.string(),
+  // 자격번호를 입력하지 않은 사정사는 null(#210 실측).
+  registrationNo: z.string().nullable(),
   verifiedAt: z.string().nullable(),
   activityRegion: z.string(),
   createdAt: z.string(),

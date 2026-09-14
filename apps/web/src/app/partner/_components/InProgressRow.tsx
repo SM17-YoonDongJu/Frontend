@@ -16,15 +16,15 @@ export function InProgressRow({ item }: { item: HomeInProgressCase }) {
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-ink-3">#{item.caseNo}</span>
-          <span className="text-xs text-ink-3">{accidentTypeLabel(item.accidentType)}</span>
+          {item.caseNo && <span className="text-xs text-ink-3">#{item.caseNo}</span>}
+          {item.accidentType && <span className="text-xs text-ink-3">{accidentTypeLabel(item.accidentType)}</span>}
         </div>
         <StatusBadge tone={status.tone} className="shrink-0">
           {status.label}
         </StatusBadge>
       </div>
 
-      <p className="mt-2 text-[0.875rem] font-medium text-ink">{item.title}</p>
+      <p className="mt-2 text-[0.875rem] font-medium text-ink">{item.title ?? accidentTypeLabel(item.accidentType)}</p>
 
       <InProgressStageTracker currentIndex={stageIndex} />
     </Link>

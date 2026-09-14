@@ -8,7 +8,7 @@ import { CredentialInfoRow } from "./CredentialInfoRow";
 
 interface CredentialProofModalProps {
   open: boolean;
-  registrationNo: string;
+  registrationNo: string | null;
   onClose: () => void;
 }
 
@@ -27,7 +27,7 @@ export function CredentialProofModal({ open, registrationNo, onClose }: Credenti
       </div>
 
       <dl className="mt-4 divide-y divide-line-2">
-        <CredentialInfoRow label="등록번호" value={registrationNo} />
+        <CredentialInfoRow label="등록번호" value={registrationNo ?? "미등록"} />
         <CredentialInfoRow label="자격 구분" value={CREDENTIAL_PROOF.speciality} />
         {CREDENTIAL_PROOF.documents.map((doc) => (
           <CredentialInfoRow

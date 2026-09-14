@@ -52,12 +52,13 @@ export function AdjusterReviews({ reviews, averageRating, reviewCount }: Adjuste
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-ink">{review.nickname}</p>
                   <p className="mt-0.5 text-xs text-ink-3">
-                    {review.item} · {formatReviewedAt(review.reviewedAt)}
+                    {review.item ? `${review.item} · ` : ""}
+                    {formatReviewedAt(review.reviewedAt)}
                   </p>
                 </div>
                 <StarRating score={review.score} />
               </div>
-              <p className="mt-3 text-sm leading-relaxed text-ink-2">{review.content}</p>
+              {review.content && <p className="mt-3 text-sm leading-relaxed text-ink-2">{review.content}</p>}
             </li>
           ))}
         </ul>

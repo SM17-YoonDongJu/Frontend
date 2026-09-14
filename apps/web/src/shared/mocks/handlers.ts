@@ -1948,6 +1948,22 @@ export const handlers = [
       );
     }
 
+    // 프로필 미기입(#316): 신규 사정사는 한줄소개·소개·경력·경력 이력이 비어 있다.
+    if (request.headers.get("x-mock-scenario") === "profile-unfilled") {
+      return HttpResponse.json({
+        status: "200",
+        message: "조회 성공",
+        data: {
+          ...ADJUSTER_PROFILE,
+          headline: null,
+          introduction: null,
+          career: null,
+          updatedAt: null,
+          careers: [{ period: null, company: null }],
+        },
+      });
+    }
+
     return HttpResponse.json({
       status: "200",
       message: "조회 성공",
@@ -3248,6 +3264,8 @@ export const handlers = [
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawReportId);
     const reportId = isUuid ? rawReportId : crypto.randomUUID();
     const started = request.headers.get("x-mock-scenario") === "review-started";
+    // 확정 전 리포트(#316): 사고 유형·사건번호가 null.
+    const unconfirmed = request.headers.get("x-mock-scenario") === "review-unconfirmed";
 
     const issues = [
       {
@@ -3306,9 +3324,9 @@ export const handlers = [
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
         reportId,
-        caseNo: "20260520-017",
+        caseNo: unconfirmed ? null : "20260520-017",
         title: "후유장해 · 우측 슬관절 후방십자인대 파열 등급 재산정",
-        accidentType: "후유장해",
+        accidentType: unconfirmed ? null : "후유장해",
         region: "서울 강남",
         status: started ? "AWAITING_ADOPTION" : "AWAITING_INSPECTION",
         confidenceLevel: "HIGH",
@@ -3322,7 +3340,7 @@ export const handlers = [
           joinedAt: "2024-03-01T00:00:00Z",
         },
         claim: {
-          accidentType: "후유장해",
+          accidentType: unconfirmed ? null : "후유장해",
           diagnosis: "우측 슬관절 후방십자인대 파열",
           accidentDate: "2026-05-01",
           hospitalization:

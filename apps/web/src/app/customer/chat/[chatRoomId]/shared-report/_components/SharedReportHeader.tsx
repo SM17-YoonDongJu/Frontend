@@ -13,7 +13,7 @@ function formatDate(iso: string): string {
 
 export interface SharedReportHeaderProps {
   title: string | null;
-  caseNo: string;
+  caseNo: string | null;
   accidentType: string | null;
   submittedAt: string;
   backHref: string;
@@ -47,7 +47,7 @@ export function SharedReportHeader({
           <span className="rounded-pill bg-paper-2 px-2.5 py-1">
             {accidentTypeLabel(accidentType)}
           </span>
-          <span className="rounded-pill bg-paper-2 px-2.5 py-1">No.{caseNo}</span>
+          {caseNo && <span className="rounded-pill bg-paper-2 px-2.5 py-1">No.{caseNo}</span>}
           <StatusBadge tone="green" icon={<Check className="text-[0.8125rem]" />}>
             검수 완료
           </StatusBadge>

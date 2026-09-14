@@ -9,7 +9,7 @@ function toManwon(won: number | null): string {
 }
 
 export interface ClaimInfoSectionProps {
-  accidentType: string;
+  accidentType: string | null;
   diagnosis: string;
   accidentDate: string;
   hospitalization: string | null;
@@ -35,7 +35,7 @@ export function ClaimInfoSection({
     NOT_PROVIDED;
 
   const fields: { kicker: string; value: ReactNode }[] = [
-    { kicker: "사고 유형", value: accidentType },
+    { kicker: "사고 유형", value: accidentType ?? "-" },
     { kicker: "진단명", value: diagnosis },
     { kicker: "사고 발생일", value: accidentDate },
     { kicker: "입원 · 퇴원", value: hospitalization ?? NOT_PROVIDED },
