@@ -14,7 +14,7 @@ export const RegisterDeviceTokenRequestSchema = z.object({
 export const DeviceTokenResponseSchema = z.object({
     id: z.uuid(),
     platform: z.string(),
-    created_at: z.iso.datetime({ offset: true })
+    created_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ApiResponseDeviceTokenResponseSchema = z.object({
@@ -135,7 +135,7 @@ export const ChatReportResponseSchema = z.object({
         'PRIVACY_VIOLATION',
         'OTHER'
     ]),
-    created_at: z.iso.datetime({ offset: true })
+    created_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ApiResponseChatReportResponseSchema = z.object({
@@ -146,7 +146,7 @@ export const ApiResponseChatReportResponseSchema = z.object({
 
 export const ReadResponseSchema = z.object({
     chat_room_id: z.uuid(),
-    read_at: z.iso.datetime({ offset: true })
+    read_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ApiResponseReadResponseSchema = z.object({
@@ -180,7 +180,7 @@ export const ChatMessageResponseSchema = z.object({
     content: z.string().nullish(),
     attachment: AttachmentSchema.nullish(),
     is_mine: z.boolean(),
-    created_at: z.iso.datetime({ offset: true })
+    created_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ApiResponseChatMessageResponseSchema = z.object({
@@ -240,7 +240,7 @@ export const CreateAdjusterReviewResponseSchema = z.object({
     review_id: z.uuid(),
     adjuster_id: z.uuid(),
     score: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    created_at: z.iso.datetime({ offset: true })
+    created_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ApiResponseCreateAdjusterReviewResponseSchema = z.object({
@@ -264,7 +264,7 @@ export const UserMeResponseSchema = z.object({
     region: z.array(z.string()).nullish(),
     avatar_url: z.string().nullish(),
     social_provider: z.string().nullish(),
-    created_at: z.iso.datetime({ offset: true })
+    created_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ApiResponseUserMeResponseSchema = z.object({
@@ -332,7 +332,7 @@ export const ReviewReportResponseSchema = z.object({
     status: z.string(),
     report_review_id: z.uuid(),
     review_status: z.string(),
-    sent_at: z.iso.datetime({ offset: true })
+    sent_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ApiResponseReviewReportResponseSchema = z.object({
@@ -416,7 +416,7 @@ export const RecentReviewSchema = z.object({
     nickname: z.string(),
     score: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     item: z.string().nullish(),
-    reviewed_at: z.iso.datetime({ offset: true }),
+    reviewed_at: z.iso.datetime({ offset: true, local: true }),
     content: z.string().nullish()
 });
 
@@ -436,7 +436,7 @@ export const AdjusterProfileResponseSchema = z.object({
     completed_consult_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
     handled_case_count: z.number().int().optional(),
     pending_review_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional(),
-    updated_at: z.iso.datetime({ offset: true })
+    updated_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ApiResponseAdjusterProfileResponseSchema = z.object({
@@ -451,7 +451,7 @@ export const ItemSchema = z.object({
     title: z.string(),
     body: z.string().nullish(),
     is_read: z.boolean(),
-    created_at: z.iso.datetime({ offset: true })
+    created_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const NotificationListResponseSchema = z.object({
@@ -484,8 +484,8 @@ export const ActiveReportSchema = z.object({
     title: z.string(),
     accident_type: z.string().nullish(),
     status: z.string(),
-    created_at: z.iso.datetime({ offset: true }),
-    first_reviewed_at: z.iso.datetime({ offset: true }).nullish(),
+    created_at: z.iso.datetime({ offset: true, local: true }),
+    first_reviewed_at: z.iso.datetime({ offset: true, local: true }).nullish(),
     proposal_count: z.number().int().optional()
 });
 
@@ -525,14 +525,14 @@ export const ApiResponseUserActivitySummaryResponseSchema = z.object({
 export const AdjusterApplicationResponseSchema = z.object({
     application_id: z.uuid(),
     status: z.string(),
-    submitted_at: z.iso.datetime({ offset: true }),
+    submitted_at: z.iso.datetime({ offset: true, local: true }),
     name: z.string(),
     phone: z.string().nullish(),
     specialties: z.array(z.string()).nullish(),
     speciality: z.string(),
     license_no: z.string().nullish(),
     documents: z.array(DocumentSchema),
-    rejected_at: z.iso.datetime({ offset: true }).nullish(),
+    rejected_at: z.iso.datetime({ offset: true, local: true }).nullish(),
     reject_reason: z.string().nullish()
 });
 
@@ -547,12 +547,12 @@ export const CardSchema = z.object({
     status: z.string(),
     accident_type: z.string(),
     title: z.string(),
-    created_at: z.iso.datetime({ offset: true }),
+    created_at: z.iso.datetime({ offset: true, local: true }),
     report_no: z.string(),
     claimed_min_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
     claimed_max_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
     proposal_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }),
-    reviewed_at: z.iso.datetime({ offset: true }).nullish(),
+    reviewed_at: z.iso.datetime({ offset: true, local: true }).nullish(),
     adjuster_nickname: z.string().nullish(),
     offered_amount: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
     treatment: z.string().nullish(),
@@ -615,7 +615,7 @@ export const CustomerReportDetailResponseSchema = z.object({
     confidence_level: z.string().nullish(),
     report_no: z.string(),
     review_comment: z.string().nullish(),
-    reviewed_at: z.iso.datetime({ offset: true }).nullish(),
+    reviewed_at: z.iso.datetime({ offset: true, local: true }).nullish(),
     adjuster: AdjusterSchema.nullish(),
     analysis_state: z.enum([
         'PROCESSING',
@@ -661,7 +661,7 @@ export const ClientSchema = z.object({
     gender: z.string(),
     birth_date: z.iso.date(),
     region: z.string(),
-    joined_at: z.iso.datetime({ offset: true })
+    joined_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const EstimateSchema = z.object({
@@ -714,7 +714,7 @@ export const ProposalSchema = z.object({
     rating: z.number().nullish(),
     proposal_summary: z.string().nullish(),
     status: z.string(),
-    submitted_at: z.iso.datetime({ offset: true })
+    submitted_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ProposalListResponseSchema = z.object({
@@ -745,7 +745,7 @@ export const ReportAnalysisStatusResponseSchema = z.object({
     failure_reason: z.string().nullish(),
     failure_message: z.string().nullish(),
     reupload_guidance: z.string().nullish(),
-    failed_at: z.iso.datetime({ offset: true }).nullish(),
+    failed_at: z.iso.datetime({ offset: true, local: true }).nullish(),
     failed_documents: z.array(FailedDocumentSchema)
 });
 
@@ -808,7 +808,7 @@ export const ChatRoomSummaryResponseSchema = z.object({
     ]).optional(),
     counterpart: CounterpartSchema,
     last_message: z.string().nullish(),
-    last_message_at: z.iso.datetime({ offset: true }).nullish(),
+    last_message_at: z.iso.datetime({ offset: true, local: true }).nullish(),
     unread_count: z.number().int()
 });
 
@@ -845,9 +845,9 @@ export const ChatRoomDetailResponseSchema = z.object({
     ]).optional(),
     counterpart: CounterpartSchema,
     last_message: z.string().nullish(),
-    last_message_at: z.iso.datetime({ offset: true }).nullish(),
+    last_message_at: z.iso.datetime({ offset: true, local: true }).nullish(),
     unread_count: z.number().int(),
-    created_at: z.iso.datetime({ offset: true })
+    created_at: z.iso.datetime({ offset: true, local: true })
 });
 
 export const ApiResponseChatRoomDetailResponseSchema = z.object({
@@ -876,8 +876,8 @@ export const SharedReportResponseSchema = z.object({
     title: z.string().nullish(),
     report_status: z.string().nullish(),
     review_status: z.string().nullish(),
-    report_updated_at: z.iso.datetime({ offset: true }),
-    submitted_at: z.iso.datetime({ offset: true }),
+    report_updated_at: z.iso.datetime({ offset: true, local: true }),
+    submitted_at: z.iso.datetime({ offset: true, local: true }),
     summary: z.string().nullish(),
     adjuster: AdjusterSchema,
     estimate: EstimateSchema,
@@ -940,7 +940,7 @@ export const ApiResponseAdjusterListResponseSchema = z.object({
 
 export const CertificationSchema = z.object({
     registration_no: z.string(),
-    verified_at: z.iso.datetime({ offset: true }).nullish()
+    verified_at: z.iso.datetime({ offset: true, local: true }).nullish()
 });
 
 export const ConsultGuideSchema = z.object({
