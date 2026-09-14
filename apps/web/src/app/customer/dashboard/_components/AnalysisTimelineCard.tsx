@@ -114,7 +114,7 @@ export function AnalysisTimelineCard() {
       <div className="mt-4 flex items-center gap-2.5">
         <span className="text-[0.9375rem] font-semibold text-ink">
           {reportDisplayTitle(report)}
-          {report.title && report.accidentType && (
+          {report.title?.trim() && report.accidentType && (
             <span className="hidden md:inline"> · {accidentTypeLabel(report.accidentType)}</span>
           )}
         </span>
