@@ -109,6 +109,58 @@ function dropCollidedItemRefs(spec: unknown): void {
   }
 }
 
+/**
+ * 명세는 필수 문자열로 적었지만 실제 백엔드가 null을 내려주는 필드(#210에서 실측).
+ * 생성 검증이 그대로 거부하면 응답 전체가 실패한다. 분석이 끝나기 전 리포트는 제목이 없어
+ * 사용자 홈 대시보드가 통째로 비었다(#314). 명세가 nullable로 고쳐지면 이미 null을 포함해 no-op이 된다.
+ */
+const BACKEND_NULLABLE_FIELDS: Record<string, readonly string[]> = {
+  ActiveReport: ["title"],
+  Card: ["title", "accident_type", "report_no"],
+};
+
+function markBackendNullableFields(spec: unknown): void {
+  const schemas = (spec as { components?: { schemas?: Record<string, unknown> } })?.components
+    ?.schemas;
+  if (!schemas) return;
+
+  for (const [schemaName, fields] of Object.entries(BACKEND_NULLABLE_FIELDS)) {
+    const properties = (schemas[schemaName] as { properties?: Record<string, { type?: unknown }> })
+      ?.properties;
+    if (!properties) continue;
+    for (const field of fields) {
+      const property = properties[field];
+      if (!property || typeof property.type !== "string") continue;
+      property.type = [property.type, "null"];
+    }
+  }
+}
+
+/**
+ * `type: ["string", "null"]`에 `enum`이 붙은 필드는 생성기가 null 허용을 버리고 `.optional()`만 남긴다.
+ * 채팅방 match_status처럼 명세가 "검색으로 개설된 방은 null"이라고 적은 값이 검증에서 거부된다.
+ * null 가능성을 생성기가 읽는 anyOf 형태로 옮긴다.
+ */
+function expandNullableEnums(node: unknown): void {
+  if (Array.isArray(node)) {
+    node.forEach(expandNullableEnums);
+    return;
+  }
+  if (node === null || typeof node !== "object") return;
+
+  const obj = node as Record<string, unknown>;
+  if (Array.isArray(obj.type) && obj.type.includes("null") && Array.isArray(obj.enum)) {
+    const valueTypes = obj.type.filter((type) => type !== "null");
+    obj.anyOf = [
+      { type: valueTypes.length === 1 ? valueTypes[0] : valueTypes, enum: obj.enum },
+      { type: "null" },
+    ];
+    delete obj.type;
+    delete obj.enum;
+  }
+  Object.values(obj).forEach(expandNullableEnums);
+}
+
 export default defineConfig({
   // 커밋된 스냅샷을 입력으로 쓴다 — 원격 dev 서버 상태에 따라 생성물이 흔들리지 않게.
   // 스냅샷 갱신은 `pnpm spec:pull`, 원격과의 드리프트 감지는 api-spec-drift 워크플로가 담당.
@@ -120,6 +172,8 @@ export default defineConfig({
         normalizeSpecKeywords(spec);
         dropCollidedItemRefs(spec);
         expandNullableRefs(spec);
+        markBackendNullableFields(spec);
+        expandNullableEnums(spec);
       },
     },
     // 규격 위반 스펙이 조용히 통과해 생성물만 망가지는 일을 막는다.
