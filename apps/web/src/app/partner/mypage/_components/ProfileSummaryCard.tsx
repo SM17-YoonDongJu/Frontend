@@ -6,7 +6,7 @@ import type { MypageProfile } from "../_model/types";
 
 interface ProfileSummaryCardProps {
   profile: MypageProfile;
-  registrationNo: string;
+  registrationNo: string | null;
 }
 
 export function ProfileSummaryCard({ profile, registrationNo }: ProfileSummaryCardProps) {
@@ -38,9 +38,9 @@ export function ProfileSummaryCard({ profile, registrationNo }: ProfileSummaryCa
         </div>
 
         <p className="mt-1 truncate text-[0.8125rem] text-white/65 md:mt-1.5">
-          경력 {profile.career}년 ·{" "}
+          {profile.career !== null && <>경력 {profile.career}년 ·{" "}</>}
           <span className="hidden md:inline">{profile.specialties.join(" · ")} 전문 · </span>
-          등록번호 {registrationNo}
+          등록번호 {registrationNo ?? "미등록"}
         </p>
         <p className="mt-1 hidden truncate text-[0.8125rem] text-white/50 md:block">
           {profile.activityRegion}

@@ -50,7 +50,7 @@ export function AdjusterCard({ adjuster }: { adjuster: AdjusterListItem }) {
           </div>
 
           <p className="mt-1 truncate text-[0.8125rem] text-ink-3">
-            경력 {career}년
+            {career !== null ? `경력 ${career}년` : "경력 미등록"}
             {primarySpecialty && <span className="md:hidden"> · {primarySpecialty} 전문</span>}
             <span className="hidden md:inline"> · {activityRegion}</span>
           </p>
@@ -81,7 +81,7 @@ export function AdjusterCard({ adjuster }: { adjuster: AdjusterListItem }) {
 
       <dl className="mt-4 hidden grid-cols-2 gap-3 md:grid">
         <StatBox value={`${numberFormatter.format(completedConsultCount)}+`} label="누적 상담" />
-        <StatBox value={`${career}년`} label="경력" />
+        <StatBox value={career !== null ? `${career}년` : "-"} label="경력" />
       </dl>
 
       <div className="mt-4 flex items-center justify-between border-t border-line pt-4">

@@ -6,7 +6,7 @@ import { AdjusterStat } from "./AdjusterStat";
 interface AdjusterProfileHeaderProps {
   nickname: string;
   avatarUrl: string | null;
-  career: number;
+  career: number | null;
   specialties: string[];
   verified: boolean;
   averageRating: number;
@@ -28,7 +28,10 @@ export function AdjusterProfileHeader({
   completedConsultCount,
   handledCaseCount,
 }: AdjusterProfileHeaderProps) {
-  const subtitle = [`경력 ${career}년`, ...specialties.slice(0, 2)].join(" · ") + " 전문";
+  const subtitleParts = [career !== null ? `경력 ${career}년` : null, ...specialties.slice(0, 2)].filter(
+    (part) => part !== null,
+  );
+  const subtitle = subtitleParts.length > 0 ? `${subtitleParts.join(" · ")} 전문` : "";
 
   return (
     <header className="lg:border-b lg:border-line lg:bg-card">
@@ -65,7 +68,7 @@ export function AdjusterProfileHeader({
                 </StatusBadge>
               )}
             </div>
-            <p className="mt-2 text-sm text-ink-2">{subtitle}</p>
+            {subtitle && <p className="mt-2 text-sm text-ink-2">{subtitle}</p>}
             <ul className="mt-3 flex flex-wrap justify-center gap-2 lg:justify-start">
               {specialties.map((tag) => (
                 <li

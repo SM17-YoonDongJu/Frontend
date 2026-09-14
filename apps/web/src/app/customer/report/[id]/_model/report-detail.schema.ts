@@ -38,7 +38,7 @@ const rawReportDetailSchema = z.object({
   reportId: z.uuid(),
   status: reportStatusSchema,
   accidentType: z.string().nullable(),
-  treatment: z.string(),
+  treatment: z.string().nullable(),
   claimedMinAmount: z.number().int().nullable(),
   claimedMaxAmount: z.number().int().nullable(),
   offeredAmount: z.number().int().nullable(),

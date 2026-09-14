@@ -69,9 +69,8 @@ export function ReviewDetailView({ reportId }: { reportId: string }) {
       return;
     }
     clearReviewDraft(reportId);
-    router.push(
-      `/partner/review/${reportId}/complete?caseId=${encodeURIComponent(data.caseNo)}`,
-    );
+    const caseQuery = data.caseNo ? `?caseId=${encodeURIComponent(data.caseNo)}` : "";
+    router.push(`/partner/review/${reportId}/complete${caseQuery}`);
   }
 
   return (

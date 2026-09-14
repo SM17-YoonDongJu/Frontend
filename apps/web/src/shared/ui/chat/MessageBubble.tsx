@@ -33,7 +33,7 @@ export function MessageBubble({ content, createdAt, mine, attachment }: MessageB
               )}
             >
               <FileText className="shrink-0 text-[1rem]" />
-              <span className="truncate">{attachment.name}</span>
+              <span className="truncate">{attachment.name ?? "첨부 파일"}</span>
             </span>
           </div>
         )}

@@ -20,6 +20,15 @@ test.beforeEach(async ({ page }) => {
   await setAuthCookie(page, "CERTIFICATED_ADJUSTER");
 });
 
+test("사고 유형·사건번호가 없는 리포트도 검수 화면이 열린다", async ({ page }) => {
+  // 확정 전 리포트는 사고 유형·사건번호가 null로 온다(#316).
+  await page.setExtraHTTPHeaders({ "x-mock-scenario": "review-unconfirmed" });
+  await page.goto(DETAIL_PATH);
+
+  await expect(page.getByRole("heading", { name: /쟁점별 검수/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "후유장해 등급 재산정" })).toBeVisible();
+});
+
 test("대기 목록에서 검수를 시작하면 상세로 진입한다", async ({ page, isMobile }) => {
   await page.goto(LIST_PATH);
 

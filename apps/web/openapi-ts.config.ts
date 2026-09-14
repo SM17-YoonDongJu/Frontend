@@ -117,6 +117,17 @@ function dropCollidedItemRefs(spec: unknown): void {
 const BACKEND_NULLABLE_FIELDS: Record<string, readonly string[]> = {
   ActiveReport: ["title"],
   Card: ["title", "accident_type", "report_no"],
+  // 리포트 사고유형·사건번호는 미확정·미발급이면 null — 검수 작업·리포트 상세·공유 리포트(#316).
+  ReviewWorkspaceResponse: ["accident_type", "case_no"],
+  CustomerReportDetailResponse: ["accident_type", "report_no", "treatment"],
+  SharedReportResponse: ["case_no"],
+  // 사정사가 프로필·자격을 채우기 전에는 null — 프로필 편집·마이페이지·사정사 상세(#316).
+  AdjusterProfileResponse: ["headline", "introduction", "career", "updated_at"],
+  AdjusterDetailResponse: ["headline", "introduction", "career"],
+  CareerItem: ["period", "company"],
+  Certification: ["registration_no"],
+  // 조회 시점 presigned 첨부는 파일명이 없을 수 있다(#210).
+  Attachment: ["name"],
 };
 
 function markBackendNullableFields(spec: unknown): void {
@@ -133,6 +144,28 @@ function markBackendNullableFields(spec: unknown): void {
       if (!property || typeof property.type !== "string") continue;
       property.type = [property.type, "null"];
     }
+  }
+}
+
+/**
+ * 명세는 필수로 적었지만 실제 응답에서 키 자체가 빠지는 필드. null 허용으로는 못 받아 required에서 뺀다.
+ * - 채팅 메시지 첨부는 조회 시점 presigned URL 기반이라 attachment_key가 없다(#210 실측).
+ * - 자격 신청 전문분야는 명세에만 추가됐고 백엔드 응답 확인 전이다(#287 목 주석).
+ */
+const BACKEND_OPTIONAL_FIELDS: Record<string, readonly string[]> = {
+  Attachment: ["attachment_key"],
+  AdjusterApplicationResponse: ["speciality"],
+};
+
+function markBackendOptionalFields(spec: unknown): void {
+  const schemas = (spec as { components?: { schemas?: Record<string, unknown> } })?.components
+    ?.schemas;
+  if (!schemas) return;
+
+  for (const [schemaName, fields] of Object.entries(BACKEND_OPTIONAL_FIELDS)) {
+    const schema = schemas[schemaName] as { required?: unknown } | undefined;
+    if (!schema || !Array.isArray(schema.required)) continue;
+    schema.required = schema.required.filter((field) => !fields.includes(field));
   }
 }
 
@@ -173,6 +206,7 @@ export default defineConfig({
         dropCollidedItemRefs(spec);
         expandNullableRefs(spec);
         markBackendNullableFields(spec);
+        markBackendOptionalFields(spec);
         expandNullableEnums(spec);
       },
     },

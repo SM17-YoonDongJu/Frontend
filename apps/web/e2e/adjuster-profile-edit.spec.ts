@@ -27,6 +27,15 @@ test.use({ viewport: { width: 1280, height: 900 } });
 const HEADLINE_PLACEHOLDER = "예) 후유장해 재산정 전문 · 근거 중심 검토";
 const DEFAULT_SPECIALTIES = ["후유장해", "교통사고"]; // 초기 선택 2개
 
+test("프로필을 채우지 않은 사정사도 수정 화면이 열리고 한줄소개가 빈 칸으로 시작한다", async ({ page }) => {
+  // 신규 사정사는 한줄소개·소개·경력이 null로 온다(#316). 응답 검증에서 거부되면 화면이 열리지 않는다.
+  await page.setExtraHTTPHeaders({ "x-mock-scenario": "profile-unfilled" });
+  await page.goto(PATH);
+
+  await expect(page.getByRole("heading", { level: 1, name: "프로필 수정" })).toBeVisible();
+  await expect(page.getByPlaceholder(HEADLINE_PLACEHOLDER)).toHaveValue("");
+});
+
 test("진입하면 프로필 초기값이 모두 보인다", async ({ page }) => {
   await page.goto(PATH);
 

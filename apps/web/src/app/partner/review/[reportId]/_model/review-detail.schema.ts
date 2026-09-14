@@ -37,7 +37,8 @@ export const reviewClientSchema = z.object({
 });
 
 export const reviewClaimSchema = z.object({
-  accidentType: z.string(),
+  // 사고유형 미확정 리포트는 null(#210 실측).
+  accidentType: z.string().nullable(),
   diagnosis: z.string(),
   accidentDate: z.string(),
   hospitalization: z.string().nullable(),
@@ -74,7 +75,8 @@ export const reviewProgressSchema = z.object({
 
 export const reviewDetailSchema = z.object({
   reportId: z.uuid(),
-  caseNo: z.string(),
+  // 사건번호 미발급 리포트는 null(#210 실측).
+  caseNo: z.string().nullable(),
   // 제목 미배정 케이스는 null.
   title: z.string().nullable(),
   // 백엔드 report.getAccidentType() null 가능(사고유형 미확정).

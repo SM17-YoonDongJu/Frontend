@@ -27,7 +27,7 @@ export function CertificationCard({
     : "미인증";
 
   const rows = [
-    { label: "등록번호", value: certification.registrationNo },
+    { label: "등록번호", value: certification.registrationNo ?? "미등록" },
     { label: "자격 검증", value: verifiedLabel },
     { label: "활동 지역", value: activityRegion },
   ];
