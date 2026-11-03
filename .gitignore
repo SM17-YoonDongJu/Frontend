@@ -44,3 +44,6 @@ apps/web/scripts/*.png
 
 # paseo (local worktree tooling)
 paseo.json
+
+# Google Play service account key (never commit)
+apps/mobile/google-play-service-account.json
