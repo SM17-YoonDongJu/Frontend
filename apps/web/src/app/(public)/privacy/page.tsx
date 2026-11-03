@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { TERMS_CONTENT } from "@/shared/model/terms-content";
+
+export const metadata: Metadata = {
+  title: TERMS_CONTENT.privacy.title,
+  description: "바른보상이 수집하는 개인정보 항목과 이용·보관·파기 기준을 안내합니다."
+};
 
 export default function PrivacyPage() {
   const document = TERMS_CONTENT.privacy;

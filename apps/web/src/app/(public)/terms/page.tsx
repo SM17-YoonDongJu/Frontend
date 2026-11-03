@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { TERMS_CONTENT } from "@/shared/model/terms-content";
+
+export const metadata: Metadata = {
+  title: TERMS_CONTENT.service.title,
+  description: "바른보상 서비스 이용 조건과 회원·운영자의 권리와 의무를 안내합니다."
+};
 
 export default function TermsPage() {
   const document = TERMS_CONTENT.service;
