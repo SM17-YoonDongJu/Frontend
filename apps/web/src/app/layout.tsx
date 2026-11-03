@@ -6,13 +6,32 @@ import { DeviceTokenRegistrar } from "@/shared/lib/DeviceTokenRegistrar";
 import { Providers } from "@/shared/providers";
 import "./globals.css";
 
+const SITE_NAME = "바른보상";
+const SITE_URL = "https://www.brbosang.com";
+const SITE_TITLE = "바른보상 | 손해사정 매칭 플랫폼";
+const SITE_DESCRIPTION =
+  "받은 보험금이 적정한지 약관·특약·판례로 분석하고, 필요할 때 손해사정사와 연결해 드립니다.";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "바른보상 | 손해사정 매칭 플랫폼",
-    template: "%s | 바른보상"
+    default: SITE_TITLE,
+    template: `%s | ${SITE_NAME}`
   },
-  description:
-    "받은 보험금이 적정한지 약관·특약·판례로 분석하고, 필요할 때 손해사정사와 연결해 드립니다."
+  description: SITE_DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: SITE_NAME,
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION,
+    url: SITE_URL,
+    locale: "ko_KR"
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_TITLE,
+    description: SITE_DESCRIPTION
+  }
 };
 
 export const viewport: Viewport = {
