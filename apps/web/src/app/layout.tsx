@@ -8,10 +8,11 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "Insurance Platform",
+    default: "바른보상 | 손해사정 매칭 플랫폼",
     template: "%s | 바른보상"
   },
-  description: "보험 플랫폼 웹"
+  description:
+    "받은 보험금이 적정한지 약관·특약·판례로 분석하고, 필요할 때 손해사정사와 연결해 드립니다."
 };
 
 export const viewport: Viewport = {
