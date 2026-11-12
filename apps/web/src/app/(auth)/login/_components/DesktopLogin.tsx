@@ -3,6 +3,7 @@ import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { AuthHeader } from "../../_shared/ui/AuthHeader";
 import type { RecentLogin, SocialProvider } from "../../_shared/hooks/use-recent-login";
 import { LoginHero } from "./LoginHero";
+import { PasswordLoginForm } from "./PasswordLoginForm";
 import { RecentLoginCard } from "./RecentLoginCard";
 import { SocialLoginButtons } from "./SocialLoginButtons";
 import { TermsNotice } from "./TermsNotice";
@@ -57,6 +58,13 @@ export function DesktopLogin({
                 <RecentLoginCard recentLogin={recentLogin} onSelect={onRecentSelect} />
               </>
             )}
+
+            <div className="flex items-center gap-3">
+              <span className="h-[1px] flex-1 bg-line-2" />
+              <span className="text-[0.6875rem] tracking-[-0.01rem] text-ink-3">또는 아이디로 로그인</span>
+              <span className="h-[1px] flex-1 bg-line-2" />
+            </div>
+            <PasswordLoginForm />
 
             {mode === "first" && <TermsNotice />}
           </div>
