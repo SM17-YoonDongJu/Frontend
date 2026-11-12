@@ -231,6 +231,45 @@ export const ApiResponseRegisterResponseSchema = z.object({
     data: RegisterResponseSchema.optional()
 });
 
+export const PasswordSignupRequestSchema = z.object({
+    login_id: z.string().min(1).regex(/^[A-Za-z0-9_]{4,20}$/),
+    password: z.string().min(8).max(72),
+    name: z.string().min(1).max(30)
+});
+
+export const PasswordAuthResponseSchema = z.object({
+    user_id: z.uuid(),
+    nickname: z.string(),
+    role: z.string()
+});
+
+export const ApiResponsePasswordAuthResponseSchema = z.object({
+    status: z.string().optional(),
+    message: z.string().optional(),
+    data: PasswordAuthResponseSchema.optional()
+});
+
+export const PasswordLoginRequestSchema = z.object({
+    login_id: z.string().min(1),
+    password: z.string().min(1)
+});
+
+export const DevLoginRequestSchema = z.object({
+    nickname: z.string().nullish()
+});
+
+export const DevLoginResponseSchema = z.object({
+    user_id: z.uuid(),
+    nickname: z.string(),
+    role: z.string()
+});
+
+export const ApiResponseDevLoginResponseSchema = z.object({
+    status: z.string().optional(),
+    message: z.string().optional(),
+    data: DevLoginResponseSchema.optional()
+});
+
 export const CreateAdjusterReviewRequestSchema = z.object({
     score: z.int().gte(1).lte(5),
     content: z.string().min(0).max(1000).nullish()
@@ -355,14 +394,16 @@ export const ProposalDecisionResponseSchema = z.object({
         'COUNSELING',
         'CLOSED',
         'NOT_SELECTED',
-        'BLOCKED'
+        'BLOCKED',
+        'NEEDS_REUPLOAD'
     ]),
     review_status: z.enum([
         'SENT',
         'COUNSELING',
         'REJECTED',
         'ACCEPTED'
-    ])
+    ]),
+    chat_room_id: z.uuid().nullish()
 });
 
 export const ApiResponseProposalDecisionResponseSchema = z.object({
@@ -387,7 +428,8 @@ export const ConsultationDecisionResponseSchema = z.object({
         'COUNSELING',
         'CLOSED',
         'NOT_SELECTED',
-        'BLOCKED'
+        'BLOCKED',
+        'NEEDS_REUPLOAD'
     ])
 });
 
@@ -560,7 +602,8 @@ export const CardSchema = z.object({
         'PROCESSING',
         'COMPLETED',
         'FAILED',
-        'BLOCKED'
+        'BLOCKED',
+        'NEEDS_REUPLOAD'
     ]),
     analysis_failure_reason: z.string().nullish(),
     analysis_failure_message: z.string().nullish()
@@ -621,7 +664,8 @@ export const CustomerReportDetailResponseSchema = z.object({
         'PROCESSING',
         'COMPLETED',
         'FAILED',
-        'BLOCKED'
+        'BLOCKED',
+        'NEEDS_REUPLOAD'
     ]),
     analysis_failure_reason: z.string().nullish(),
     analysis_failure_message: z.string().nullish()
@@ -731,7 +775,7 @@ export const ApiResponseProposalListResponseSchema = z.object({
 export const FailedDocumentSchema = z.object({
     attachment_id: z.uuid().nullish(),
     name: z.string().nullish(),
-    failure_reason: z.string()
+    failure_reason: z.string().nullish()
 });
 
 export const ReportAnalysisStatusResponseSchema = z.object({
@@ -740,7 +784,8 @@ export const ReportAnalysisStatusResponseSchema = z.object({
         'PROCESSING',
         'COMPLETED',
         'FAILED',
-        'BLOCKED'
+        'BLOCKED',
+        'NEEDS_REUPLOAD'
     ]),
     failure_reason: z.string().nullish(),
     failure_message: z.string().nullish(),
@@ -813,7 +858,9 @@ export const ChatRoomSummaryResponseSchema = z.object({
 });
 
 export const ChatRoomListResponseSchema = z.object({
-    rooms: z.array(ChatRoomSummaryResponseSchema)
+    rooms: z.array(ChatRoomSummaryResponseSchema),
+    next_cursor: z.string().nullish(),
+    has_next: z.boolean()
 });
 
 export const ApiResponseChatRoomListResponseSchema = z.object({
@@ -1077,7 +1124,7 @@ export const zRegisterResponse = ApiResponseDeviceTokenResponseSchema;
 export const zApplyBody = CreateAdjusterApplicationRequestSchema;
 
 /**
- * OK
+ * Created
  */
 export const zApplyResponse = ApiResponseCreateAdjusterApplicationResponseSchema;
 
@@ -1108,7 +1155,7 @@ export const zListResponse = ApiResponseReportCardListResponseSchema;
 export const zCreateBody = CreateReportRequestSchema;
 
 /**
- * OK
+ * Accepted
  */
 export const zCreateResponse = ApiResponseCreateReportResponseSchema;
 
@@ -1130,7 +1177,7 @@ export const zReportPath = z.object({
 });
 
 /**
- * OK
+ * Created
  */
 export const zReportResponse = ApiResponseChatReportResponseSchema;
 
@@ -1164,7 +1211,7 @@ export const zSendPath = z.object({
 });
 
 /**
- * OK
+ * Created
  */
 export const zSendResponse = ApiResponseChatMessageResponseSchema;
 
@@ -1177,7 +1224,7 @@ export const zUploadAttachmentPath = z.object({
 });
 
 /**
- * OK
+ * Created
  */
 export const zUploadAttachmentResponse = ApiResponseUploadAttachmentResponseSchema;
 
@@ -1189,14 +1236,39 @@ export const zReissueResponse = ApiResponseVoidSchema;
 export const zRegister1Body = RegisterRequestSchema;
 
 /**
- * OK
+ * Created
  */
 export const zRegister1Response = ApiResponseRegisterResponseSchema;
+
+export const zSignupBody = PasswordSignupRequestSchema;
+
+/**
+ * Created
+ */
+export const zSignupResponse = ApiResponsePasswordAuthResponseSchema;
+
+export const zLoginBody = PasswordLoginRequestSchema;
+
+/**
+ * OK
+ */
+export const zLoginResponse = ApiResponsePasswordAuthResponseSchema;
 
 /**
  * OK
  */
 export const zLogoutResponse = ApiResponseVoidSchema;
+
+export const zLogin1Body = DevLoginRequestSchema;
+
+export const zLogin1Headers = z.object({
+    'X-Dev-Login-Key': z.string().optional()
+});
+
+/**
+ * OK
+ */
+export const zLogin1Response = ApiResponseDevLoginResponseSchema;
 
 export const zGetReviewsPath = z.object({
     adjusterId: z.uuid()
@@ -1219,7 +1291,7 @@ export const zCreateReviewPath = z.object({
 });
 
 /**
- * OK
+ * Created
  */
 export const zCreateReviewResponse = ApiResponseCreateAdjusterReviewResponseSchema;
 
@@ -1417,6 +1489,11 @@ export const zReceivedProposalsQuery = z.object({
  * OK
  */
 export const zReceivedProposalsResponse = ApiResponseReportCardListResponseSchema;
+
+export const zListMyRoomsQuery = z.object({
+    cursor: z.string().optional(),
+    size: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).optional().default(20)
+});
 
 /**
  * OK

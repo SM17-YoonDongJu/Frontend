@@ -3,14 +3,18 @@ import "@/shared/api/client";
 import { decide } from "@/shared/api/generated/sdk.gen";
 import { matchStatusSchema } from "@/shared/api/chat/chat.schema";
 
-// PATCH /reports/{reportId}/proposals/{proposalId} {status} — 채택·거절 통합.
-// 채택 시 형제 제안은 서버가 캐스케이드 종료 → 응답은 대상 제안 결과만.
+// PATCH /reports/{reportId}/proposals/{proposalId} {status} — 상담 수락·거절.
+// ACCEPTED는 상담 채팅방을 열고(이미 있으면 같은 방 재사용) 제안·리포트를 COUNSELING으로 바꾼다.
+// 최종 채택은 이 경로가 아니라 PATCH /chats/{chatRoomId}/accept다 — 이미 COUNSELING인 제안에
+// 다시 ACCEPTED를 보내면 아무것도 바뀌지 않고 200만 돌아온다(#325).
 const matchProposalResultSchema = z.object({
   reportId: z.uuid(),
   proposalId: z.uuid(),
   adjusterId: z.uuid(),
   reportStatus: z.string(), // ⚠️ 응답 enum 확정 전 string(CLOSED/AWAITING_ADOPTION 등)
   reviewStatus: matchStatusSchema,
+  // ACCEPTED 요청으로 열린 방 id. REJECTED 요청에서는 항상 null이다.
+  chatRoomId: z.uuid().nullish(),
 });
 
 export type MatchProposalResult = z.infer<typeof matchProposalResultSchema>;

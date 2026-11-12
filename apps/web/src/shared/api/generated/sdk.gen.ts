@@ -2,8 +2,8 @@
 
 import { type Client, type ClientMeta, formDataBodySerializer, type Options as Options2, type RequestResult, type TDataShape } from './client';
 import { client } from './client.gen';
-import type { AcceptData, AcceptResponses, ActivitySummaryData, ActivitySummaryResponses, AddHoldData, AddHoldResponses, AnalysisStatusData, AnalysisStatusResponses, ApplyData, ApplyResponses, CreateData, CreateResponses, CreateReviewData, CreateReviewResponses, DashboardData, DashboardResponses, DecideData, DecideResponses, DeregisterData, DeregisterResponses, DetailData, DetailResponses, GetAdjusterDetailData, GetAdjusterDetailResponses, GetAdjustersData, GetAdjustersResponses, GetMeData, GetMeResponses, GetMessagesData, GetMessagesResponses, GetMyApplicationData, GetMyApplicationResponses, GetMyInsurancesData, GetMyInsurancesResponses, GetMyNotificationsData, GetMyNotificationsResponses, GetMyPageData, GetMyPageResponses, GetMySettingsData, GetMySettingsResponses, GetProfileData, GetProfileResponses, GetReviewsData, GetReviewsResponses, GetRoomData, GetRoomResponses, GetSharedReportData, GetSharedReportResponses, HomeData, HomeResponses, ListData, ListMyRoomsData, ListMyRoomsResponses, ListResponses, LogoutData, LogoutResponses, OauthCallbackData, OauthCallbackResponses, PendingReviewData, PendingReviewResponses, ProposalsData, ProposalsResponses, Read1Data, Read1Responses, ReadAllData, ReadAllResponses, ReadData, ReadResponses, ReceivedProposalsData, ReceivedProposalsResponses, Register1Data, Register1Responses, RegisterData, RegisterResponses, ReissueData, ReissueResponses, RejectData, RejectResponses, ReportData, ReportResponses, ReviewedReportsData, ReviewedReportsResponses, ReviewReportData, ReviewReportResponses, ReviewWorkspaceData, ReviewWorkspaceResponses, SendData, SendResponses, SummaryData, SummaryResponses, UpdateMeData, UpdateMeResponses, UpdateMySettingsData, UpdateMySettingsResponses, UpdateProfileData, UpdateProfileResponses, UploadAttachmentData, UploadAttachmentResponses, UploadData, UploadResponses, WithdrawData, WithdrawResponses } from './types.gen';
-import { zAcceptResponse, zActivitySummaryResponse, zAddHoldResponse, zAnalysisStatusResponse, zApplyResponse, zCreateResponse, zCreateReviewResponse, zDashboardResponse, zDecideResponse, zDeregisterResponse, zDetailResponse, zGetAdjusterDetailResponse, zGetAdjustersResponse, zGetMeResponse, zGetMessagesResponse, zGetMyApplicationResponse, zGetMyInsurancesResponse, zGetMyNotificationsResponse, zGetMyPageResponse, zGetMySettingsResponse, zGetProfileResponse, zGetReviewsResponse, zGetRoomResponse, zGetSharedReportResponse, zHomeResponse, zListMyRoomsResponse, zListResponse, zLogoutResponse, zOauthCallbackResponse, zPendingReviewResponse, zProposalsResponse, zRead1Response, zReadAllResponse, zReadResponse, zReceivedProposalsResponse, zRegister1Response, zRegisterResponse, zReissueResponse, zRejectResponse, zReportResponse, zReviewReportResponse, zReviewWorkspaceResponse, zSendResponse, zSummaryResponse, zUpdateMeResponse, zUpdateMySettingsResponse, zUpdateProfileResponse, zUploadAttachmentResponse, zUploadResponse, zWithdrawResponse } from './zod.gen';
+import type { AcceptData, AcceptResponses, ActivitySummaryData, ActivitySummaryResponses, AddHoldData, AddHoldResponses, AnalysisStatusData, AnalysisStatusResponses, ApplyData, ApplyResponses, CreateData, CreateResponses, CreateReviewData, CreateReviewResponses, DashboardData, DashboardResponses, DecideData, DecideResponses, DeregisterData, DeregisterResponses, DetailData, DetailResponses, GetAdjusterDetailData, GetAdjusterDetailResponses, GetAdjustersData, GetAdjustersResponses, GetMeData, GetMeResponses, GetMessagesData, GetMessagesResponses, GetMyApplicationData, GetMyApplicationResponses, GetMyInsurancesData, GetMyInsurancesResponses, GetMyNotificationsData, GetMyNotificationsResponses, GetMyPageData, GetMyPageResponses, GetMySettingsData, GetMySettingsResponses, GetProfileData, GetProfileResponses, GetReviewsData, GetReviewsResponses, GetRoomData, GetRoomResponses, GetSharedReportData, GetSharedReportResponses, HomeData, HomeResponses, ListData, ListMyRoomsData, ListMyRoomsResponses, ListResponses, Login1Data, Login1Responses, LoginData, LoginResponses, LogoutData, LogoutResponses, OauthCallbackData, OauthCallbackResponses, PendingReviewData, PendingReviewResponses, ProposalsData, ProposalsResponses, Read1Data, Read1Responses, ReadAllData, ReadAllResponses, ReadData, ReadResponses, ReceivedProposalsData, ReceivedProposalsResponses, Register1Data, Register1Responses, RegisterData, RegisterResponses, ReissueData, ReissueResponses, RejectData, RejectResponses, ReportData, ReportResponses, ReviewedReportsData, ReviewedReportsResponses, ReviewReportData, ReviewReportResponses, ReviewWorkspaceData, ReviewWorkspaceResponses, SendData, SendResponses, SignupData, SignupResponses, SummaryData, SummaryResponses, UpdateMeData, UpdateMeResponses, UpdateMySettingsData, UpdateMySettingsResponses, UpdateProfileData, UpdateProfileResponses, UploadAttachmentData, UploadAttachmentResponses, UploadData, UploadResponses, WithdrawData, WithdrawResponses } from './types.gen';
+import { zAcceptResponse, zActivitySummaryResponse, zAddHoldResponse, zAnalysisStatusResponse, zApplyResponse, zCreateResponse, zCreateReviewResponse, zDashboardResponse, zDecideResponse, zDeregisterResponse, zDetailResponse, zGetAdjusterDetailResponse, zGetAdjustersResponse, zGetMeResponse, zGetMessagesResponse, zGetMyApplicationResponse, zGetMyInsurancesResponse, zGetMyNotificationsResponse, zGetMyPageResponse, zGetMySettingsResponse, zGetProfileResponse, zGetReviewsResponse, zGetRoomResponse, zGetSharedReportResponse, zHomeResponse, zListMyRoomsResponse, zListResponse, zLogin1Response, zLoginResponse, zLogoutResponse, zOauthCallbackResponse, zPendingReviewResponse, zProposalsResponse, zRead1Response, zReadAllResponse, zReadResponse, zReceivedProposalsResponse, zRegister1Response, zRegisterResponse, zReissueResponse, zRejectResponse, zReportResponse, zReviewReportResponse, zReviewWorkspaceResponse, zSendResponse, zSignupResponse, zSummaryResponse, zUpdateMeResponse, zUpdateMySettingsResponse, zUpdateProfileResponse, zUploadAttachmentResponse, zUploadResponse, zWithdrawResponse } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -214,6 +214,36 @@ export const register1 = <ThrowOnError extends boolean = false>(options: Options
     }
 });
 
+export const signup = <ThrowOnError extends boolean = false>(options: Options<SignupData, ThrowOnError>): RequestResult<SignupResponses, unknown, ThrowOnError> => (options.client ?? client).post<SignupResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zSignupResponse.parseAsync(data),
+    security: [{
+            in: 'cookie',
+            name: 'access_token',
+            type: 'apiKey'
+        }],
+    url: '/auth/password/signup',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+export const login = <ThrowOnError extends boolean = false>(options: Options<LoginData, ThrowOnError>): RequestResult<LoginResponses, unknown, ThrowOnError> => (options.client ?? client).post<LoginResponses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zLoginResponse.parseAsync(data),
+    security: [{
+            in: 'cookie',
+            name: 'access_token',
+            type: 'apiKey'
+        }],
+    url: '/auth/password/login',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
 export const logout = <ThrowOnError extends boolean = false>(options?: Options<LogoutData, ThrowOnError>): RequestResult<LogoutResponses, unknown, ThrowOnError> => (options?.client ?? client).post<LogoutResponses, unknown, ThrowOnError>({
     responseValidator: async (data) => await zLogoutResponse.parseAsync(data),
     security: [{
@@ -223,6 +253,21 @@ export const logout = <ThrowOnError extends boolean = false>(options?: Options<L
         }],
     url: '/auth/logout',
     ...options
+});
+
+export const login1 = <ThrowOnError extends boolean = false>(options?: Options<Login1Data, ThrowOnError>): RequestResult<Login1Responses, unknown, ThrowOnError> => (options?.client ?? client).post<Login1Responses, unknown, ThrowOnError>({
+    responseValidator: async (data) => await zLogin1Response.parseAsync(data),
+    security: [{
+            in: 'cookie',
+            name: 'access_token',
+            type: 'apiKey'
+        }],
+    url: '/auth/dev/login',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers
+    }
 });
 
 export const getReviews = <ThrowOnError extends boolean = false>(options: Options<GetReviewsData, ThrowOnError>): RequestResult<GetReviewsResponses, unknown, ThrowOnError> => (options.client ?? client).get<GetReviewsResponses, unknown, ThrowOnError>({

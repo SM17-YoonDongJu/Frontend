@@ -92,8 +92,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "content": {
               "*/*": {
                 "schema": {
@@ -218,8 +218,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK",
+          "202": {
+            "description": "Accepted",
             "content": {
               "*/*": {
                 "schema": {
@@ -300,8 +300,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "content": {
               "*/*": {
                 "schema": {
@@ -419,8 +419,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "content": {
               "*/*": {
                 "schema": {
@@ -468,8 +468,8 @@
           }
         },
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "content": {
               "*/*": {
                 "schema": {
@@ -518,12 +518,72 @@
           "required": true
         },
         "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseRegisterResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password/signup": {
+      "post": {
+        "tags": [
+          "password-auth-controller"
+        ],
+        "operation_id": "signup",
+        "request_body": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordSignupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Created",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponsePasswordAuthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/password/login": {
+      "post": {
+        "tags": [
+          "password-auth-controller"
+        ],
+        "operation_id": "login",
+        "request_body": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordLoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
           "200": {
             "description": "OK",
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ApiResponseRegisterResponse"
+                  "$ref": "#/components/schemas/ApiResponsePasswordAuthResponse"
                 }
               }
             }
@@ -544,6 +604,46 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseVoid"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/dev/login": {
+      "post": {
+        "tags": [
+          "dev-auth-controller"
+        ],
+        "operation_id": "login_1",
+        "parameters": [
+          {
+            "name": "X-Dev-Login-Key",
+            "in": "header",
+            "description": "dev 로그인 공유 시크릿. 서버에 app.dev-login.secret이 설정된 경우에만 필수이며, 누락·불일치 시 403을 반환한다. 설정되지 않은 환경(로컬)에서는 무시된다.",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "request_body": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DevLoginRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDevLoginResponse"
                 }
               }
             }
@@ -628,8 +728,8 @@
           "required": true
         },
         "responses": {
-          "200": {
-            "description": "OK",
+          "201": {
+            "description": "Created",
             "content": {
               "*/*": {
                 "schema": {
@@ -1405,6 +1505,26 @@
           "chat-room-controller"
         ],
         "operation_id": "listMyRooms",
+        "parameters": [
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 20
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2506,6 +2626,134 @@
           "user_id"
         ]
       },
+      "PasswordSignupRequest": {
+        "type": "object",
+        "properties": {
+          "login_id": {
+            "type": "string",
+            "description": "로그인 아이디(영문·숫자·밑줄 4~20자). 대소문자를 구분하지 않는다.",
+            "min_length": 1,
+            "pattern": "^[A-Za-z0-9_]{4,20}$"
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "description": "비밀번호(8~72자, UTF-8 기준 72바이트 이내 — 한글은 글자당 3바이트). 응답·로그에 다시 노출되지 않는다.",
+            "max_length": 72,
+            "min_length": 8
+          },
+          "name": {
+            "type": "string",
+            "description": "이름(실명, 1~30자)",
+            "max_length": 30,
+            "min_length": 1
+          }
+        },
+        "required": [
+          "login_id",
+          "name",
+          "password"
+        ]
+      },
+      "ApiResponsePasswordAuthResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/PasswordAuthResponse"
+          }
+        }
+      },
+      "PasswordAuthResponse": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname",
+          "role",
+          "user_id"
+        ]
+      },
+      "PasswordLoginRequest": {
+        "type": "object",
+        "properties": {
+          "login_id": {
+            "type": "string",
+            "description": "로그인 아이디(대소문자 무관)",
+            "min_length": 1
+          },
+          "password": {
+            "type": "string",
+            "format": "password",
+            "description": "비밀번호",
+            "min_length": 1
+          }
+        },
+        "required": [
+          "login_id",
+          "password"
+        ]
+      },
+      "DevLoginRequest": {
+        "type": "object",
+        "properties": {
+          "nickname": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "ApiResponseDevLoginResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/DevLoginResponse"
+          }
+        }
+      },
+      "DevLoginResponse": {
+        "type": "object",
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nickname": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "nickname",
+          "role",
+          "user_id"
+        ]
+      },
       "CreateAdjusterReviewRequest": {
         "type": "object",
         "properties": {
@@ -2979,7 +3227,7 @@
         "properties": {
           "status": {
             "type": "string",
-            "description": "ACCEPTED 또는 REJECTED만 허용"
+            "description": "ACCEPTED(상담 수락 — 채팅방 개설) 또는 REJECTED(현재 아무 동작 없음)만 허용. ACCEPTED 요청의 응답 review_status는 ACCEPTED가 아니라 COUNSELING이다(제안 최종 채택은 PATCH /chats/{chatRoomId}/accept 전용)"
           }
         },
         "required": [
@@ -3023,7 +3271,8 @@
               "COUNSELING",
               "CLOSED",
               "NOT_SELECTED",
-              "BLOCKED"
+              "BLOCKED",
+              "NEEDS_REUPLOAD"
             ]
           },
           "review_status": {
@@ -3034,6 +3283,14 @@
               "REJECTED",
               "ACCEPTED"
             ]
+          },
+          "chat_room_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid",
+            "description": "status=ACCEPTED 요청으로 개설(또는 재사용)된 상담 채팅방 id. REJECTED 요청에서는 항상 null이다."
           }
         },
         "required": [
@@ -3093,7 +3350,8 @@
               "COUNSELING",
               "CLOSED",
               "NOT_SELECTED",
-              "BLOCKED"
+              "BLOCKED",
+              "NEEDS_REUPLOAD"
             ]
           }
         },
@@ -3749,12 +4007,13 @@
           },
           "analysis_state": {
             "type": "string",
-            "description": "분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단)",
+            "description": "분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단·리포트 생성 LLM 거절) | NEEDS_REUPLOAD(OCR 품질 미달 — 문서를 다시 올려야 진행된다)",
             "enum": [
               "PROCESSING",
               "COMPLETED",
               "FAILED",
-              "BLOCKED"
+              "BLOCKED",
+              "NEEDS_REUPLOAD"
             ]
           },
           "analysis_failure_reason": {
@@ -3762,14 +4021,14 @@
               "string",
               "null"
             ],
-            "description": "analysis_state가 FAILED일 때만 non-null(BLOCKED은 null)"
+            "description": "analysis_state가 FAILED일 때만 non-null(BLOCKED·NEEDS_REUPLOAD는 null)"
           },
           "analysis_failure_message": {
             "type": [
               "string",
               "null"
             ],
-            "description": "analysis_state가 FAILED 또는 BLOCKED일 때만 non-null. 사용자 노출 문구"
+            "description": "analysis_state가 FAILED·BLOCKED·NEEDS_REUPLOAD일 때만 non-null. 사용자 노출 문구"
           }
         },
         "required": [
@@ -3962,12 +4221,13 @@
           },
           "analysis_state": {
             "type": "string",
-            "description": "분석(OCR·AI) 처리 상태. REPORTS.status와 다른 축이다. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단)",
+            "description": "분석(OCR·AI) 처리 상태. REPORTS.status와 다른 축이다. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단·리포트 생성 LLM 거절) | NEEDS_REUPLOAD(OCR 품질 미달 — 문서를 다시 올려야 진행된다)",
             "enum": [
               "PROCESSING",
               "COMPLETED",
               "FAILED",
-              "BLOCKED"
+              "BLOCKED",
+              "NEEDS_REUPLOAD"
             ]
           },
           "analysis_failure_reason": {
@@ -3975,14 +4235,14 @@
               "string",
               "null"
             ],
-            "description": "analysis_state가 FAILED일 때만 non-null(BLOCKED은 null)"
+            "description": "analysis_state가 FAILED일 때만 non-null(BLOCKED·NEEDS_REUPLOAD는 null)"
           },
           "analysis_failure_message": {
             "type": [
               "string",
               "null"
             ],
-            "description": "analysis_state가 FAILED 또는 BLOCKED일 때만 non-null. 사용자 노출 문구"
+            "description": "analysis_state가 FAILED·BLOCKED·NEEDS_REUPLOAD일 때만 non-null. 사용자 노출 문구"
           }
         },
         "required": [
@@ -4460,7 +4720,7 @@
               "null"
             ],
             "format": "uuid",
-            "description": "저널에 attachment_id가 없으면 null"
+            "description": "저널·품질 판정 어느 쪽에도 attachment_id가 없으면 null"
           },
           "name": {
             "type": [
@@ -4470,13 +4730,13 @@
             "description": "첨부 행을 찾지 못하면 null"
           },
           "failure_reason": {
-            "type": "string",
-            "description": "문서별 실패 사유"
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "문서별 실패 사유. ai.ocr_job_failures 기반(FAILED, 청구 fan-in NEEDS_REUPLOAD)만 채워진다 — ai.ocr_results 기반(개별 문서 품질 게이트 NEEDS_REUPLOAD)은 다른 계약이라 대응하는 사유가 없어 null이다. MASKING_RESIDUAL | SCHEMA_INVALID | OCR_ERROR | UNKNOWN | UNREADABLE_FILE"
           }
-        },
-        "required": [
-          "failure_reason"
-        ]
+        }
       },
       "ReportAnalysisStatusResponse": {
         "type": "object",
@@ -4487,12 +4747,13 @@
           },
           "analysis_state": {
             "type": "string",
-            "description": "분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(BLOCKED는 AI 입력 가드레일 차단 — OCR·AI 파이프라인이 시작되지 않는다)",
+            "description": "분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED | NEEDS_REUPLOAD(FAILED는 OCR 단계 또는 리포트 생성 단계의 확정 실패 — 워커가 회복하면 다른 상태로 바뀔 수 있다. BLOCKED는 AI 입력 가드레일 차단 또는 리포트 생성 LLM 거절. NEEDS_REUPLOAD는 OCR 품질 미달 — 문서를 다시 올려야 진행된다)",
             "enum": [
               "PROCESSING",
               "COMPLETED",
               "FAILED",
-              "BLOCKED"
+              "BLOCKED",
+              "NEEDS_REUPLOAD"
             ]
           },
           "failure_reason": {
@@ -4500,21 +4761,21 @@
               "string",
               "null"
             ],
-            "description": "대표 실패 사유. analysis_state가 FAILED일 때만 non-null(BLOCKED은 저널 기반 사유가 없어 null). MASKING_RESIDUAL | SCHEMA_INVALID | OCR_ERROR | UNKNOWN | UNREADABLE_FILE"
+            "description": "대표 실패 사유. analysis_state가 FAILED일 때만 non-null(BLOCKED·NEEDS_REUPLOAD는 저널 기반 사유가 없어 null). 리포트 생성 단계 실패는 UNKNOWN이다. MASKING_RESIDUAL | SCHEMA_INVALID | OCR_ERROR | UNKNOWN | UNREADABLE_FILE"
           },
           "failure_message": {
             "type": [
               "string",
               "null"
             ],
-            "description": "사용자 노출 문구. analysis_state가 FAILED 또는 BLOCKED일 때만 non-null"
+            "description": "사용자 노출 문구. analysis_state가 FAILED·BLOCKED·NEEDS_REUPLOAD일 때만 non-null"
           },
           "reupload_guidance": {
             "type": [
               "string",
               "null"
             ],
-            "description": "재업로드 안내. analysis_state가 FAILED 또는 BLOCKED일 때만 non-null(BLOCKED은 항상 NOT_SUPPORTED — 문서 문제가 아니라 재업로드가 무의미하다). RECOMMENDED(재업로드로 해결 가능) | NOT_SUPPORTED(재업로드해도 동일) | HOLD(확인 중)"
+            "description": "재업로드 안내. analysis_state가 FAILED·BLOCKED·NEEDS_REUPLOAD일 때만 non-null(BLOCKED은 항상 NOT_SUPPORTED — 문서 문제가 아니라 재업로드가 무의미하다. NEEDS_REUPLOAD는 항상 RECOMMENDED — 재업로드가 유일한 해결책이다). RECOMMENDED(재업로드로 해결 가능) | NOT_SUPPORTED(재업로드해도 동일) | HOLD(확인 중)"
           },
           "failed_at": {
             "type": [
@@ -4522,11 +4783,11 @@
               "null"
             ],
             "format": "date-time",
-            "description": "대표 실패 시각(최초 실패 기준). analysis_state가 FAILED일 때만 non-null. BLOCKED은 저널 기반 시각이 없어 null"
+            "description": "대표 실패 시각(최초 실패 기준). analysis_state가 FAILED일 때만 non-null. BLOCKED·NEEDS_REUPLOAD는 저널 기반 시각이 없어 null"
           },
           "failed_documents": {
             "type": "array",
-            "description": "실패 문서 목록. FAILED가 아니면 빈 배열(null 아님)",
+            "description": "실패·재업로드 필요 문서 목록. FAILED는 OCR 단계 실패(ai.ocr_job_failures)면 채워지고, 리포트 생성 단계 실패(ai.report_job_failures)는 특정 문서가 없어 빈 배열이다. NEEDS_REUPLOAD는 청구 fan-in으로 걸린 경우(ai.ocr_job_failures에 흔적 있음)와 개별 문서 품질 게이트로 걸린 경우(ai.ocr_results, GRANT 배포 후)에 채워지고, 어느 쪽에도 흔적이 없으면 빈 배열이다. 그 외 상태는 빈 배열(null 아님)",
             "items": {
               "$ref": "#/components/schemas/FailedDocument"
             }
@@ -4627,9 +4888,20 @@
             "items": {
               "$ref": "#/components/schemas/ChatRoomSummaryResponse"
             }
+          },
+          "next_cursor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "다음 페이지 조회용 opaque 커서. has_next=false면 null"
+          },
+          "has_next": {
+            "type": "boolean"
           }
         },
         "required": [
+          "has_next",
           "rooms"
         ]
       },

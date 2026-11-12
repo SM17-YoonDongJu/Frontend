@@ -237,6 +237,60 @@ export type RegisterResponse = {
     role: string;
 };
 
+export type PasswordSignupRequest = {
+    /**
+     * 로그인 아이디(영문·숫자·밑줄 4~20자). 대소문자를 구분하지 않는다.
+     */
+    login_id: string;
+    /**
+     * 비밀번호(8~72자, UTF-8 기준 72바이트 이내 — 한글은 글자당 3바이트). 응답·로그에 다시 노출되지 않는다.
+     */
+    password: string;
+    /**
+     * 이름(실명, 1~30자)
+     */
+    name: string;
+};
+
+export type ApiResponsePasswordAuthResponse = {
+    status?: string;
+    message?: string;
+    data?: PasswordAuthResponse;
+};
+
+export type PasswordAuthResponse = {
+    user_id: string;
+    nickname: string;
+    role: string;
+};
+
+export type PasswordLoginRequest = {
+    /**
+     * 로그인 아이디(대소문자 무관)
+     */
+    login_id: string;
+    /**
+     * 비밀번호
+     */
+    password: string;
+};
+
+export type DevLoginRequest = {
+    nickname?: string | null;
+};
+
+export type ApiResponseDevLoginResponse = {
+    status?: string;
+    message?: string;
+    data?: DevLoginResponse;
+};
+
+export type DevLoginResponse = {
+    user_id: string;
+    nickname: string;
+    role: string;
+};
+
 export type CreateAdjusterReviewRequest = {
     score: number;
     content?: string | null;
@@ -373,7 +427,7 @@ export type ReviewReportResponse = {
 
 export type ProposalDecisionRequest = {
     /**
-     * ACCEPTED 또는 REJECTED만 허용
+     * ACCEPTED(상담 수락 — 채팅방 개설) 또는 REJECTED(현재 아무 동작 없음)만 허용. ACCEPTED 요청의 응답 review_status는 ACCEPTED가 아니라 COUNSELING이다(제안 최종 채택은 PATCH /chats/{chatRoomId}/accept 전용)
      */
     status: string;
 };
@@ -388,8 +442,12 @@ export type ProposalDecisionResponse = {
     report_id: string;
     proposal_id: string;
     adjuster_id: string;
-    report_status: 'AWAITING_INSPECTION' | 'AWAITING_ADOPTION' | 'COUNSELING' | 'CLOSED' | 'NOT_SELECTED' | 'BLOCKED';
+    report_status: 'AWAITING_INSPECTION' | 'AWAITING_ADOPTION' | 'COUNSELING' | 'CLOSED' | 'NOT_SELECTED' | 'BLOCKED' | 'NEEDS_REUPLOAD';
     review_status: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
+    /**
+     * status=ACCEPTED 요청으로 개설(또는 재사용)된 상담 채팅방 id. REJECTED 요청에서는 항상 null이다.
+     */
+    chat_room_id?: string | null;
 };
 
 export type ApiResponseConsultationDecisionResponse = {
@@ -403,7 +461,7 @@ export type ConsultationDecisionResponse = {
     chat_room_status: 'ACTIVE' | 'CLOSED';
     review_status: 'SENT' | 'COUNSELING' | 'REJECTED' | 'ACCEPTED';
     report_id: string;
-    report_status: 'AWAITING_INSPECTION' | 'AWAITING_ADOPTION' | 'COUNSELING' | 'CLOSED' | 'NOT_SELECTED' | 'BLOCKED';
+    report_status: 'AWAITING_INSPECTION' | 'AWAITING_ADOPTION' | 'COUNSELING' | 'CLOSED' | 'NOT_SELECTED' | 'BLOCKED' | 'NEEDS_REUPLOAD';
 };
 
 export type CareerItem = {
@@ -576,15 +634,15 @@ export type Card = {
     offered_amount?: number | null;
     treatment?: string | null;
     /**
-     * 분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단)
+     * 분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단·리포트 생성 LLM 거절) | NEEDS_REUPLOAD(OCR 품질 미달 — 문서를 다시 올려야 진행된다)
      */
-    analysis_state: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED';
+    analysis_state: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED' | 'NEEDS_REUPLOAD';
     /**
-     * analysis_state가 FAILED일 때만 non-null(BLOCKED은 null)
+     * analysis_state가 FAILED일 때만 non-null(BLOCKED·NEEDS_REUPLOAD는 null)
      */
     analysis_failure_reason?: string | null;
     /**
-     * analysis_state가 FAILED 또는 BLOCKED일 때만 non-null. 사용자 노출 문구
+     * analysis_state가 FAILED·BLOCKED·NEEDS_REUPLOAD일 때만 non-null. 사용자 노출 문구
      */
     analysis_failure_message?: string | null;
 };
@@ -642,15 +700,15 @@ export type CustomerReportDetailResponse = {
      */
     adjuster?: Adjuster | null;
     /**
-     * 분석(OCR·AI) 처리 상태. REPORTS.status와 다른 축이다. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단)
+     * 분석(OCR·AI) 처리 상태. REPORTS.status와 다른 축이다. PROCESSING | COMPLETED | FAILED | BLOCKED(AI 입력 가드레일 차단·리포트 생성 LLM 거절) | NEEDS_REUPLOAD(OCR 품질 미달 — 문서를 다시 올려야 진행된다)
      */
-    analysis_state: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED';
+    analysis_state: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED' | 'NEEDS_REUPLOAD';
     /**
-     * analysis_state가 FAILED일 때만 non-null(BLOCKED은 null)
+     * analysis_state가 FAILED일 때만 non-null(BLOCKED·NEEDS_REUPLOAD는 null)
      */
     analysis_failure_reason?: string | null;
     /**
-     * analysis_state가 FAILED 또는 BLOCKED일 때만 non-null. 사용자 노출 문구
+     * analysis_state가 FAILED·BLOCKED·NEEDS_REUPLOAD일 때만 non-null. 사용자 노출 문구
      */
     analysis_failure_message?: string | null;
 };
@@ -790,7 +848,7 @@ export type ApiResponseReportAnalysisStatusResponse = {
 
 export type FailedDocument = {
     /**
-     * 저널에 attachment_id가 없으면 null
+     * 저널·품질 판정 어느 쪽에도 attachment_id가 없으면 null
      */
     attachment_id?: string | null;
     /**
@@ -798,35 +856,35 @@ export type FailedDocument = {
      */
     name?: string | null;
     /**
-     * 문서별 실패 사유
+     * 문서별 실패 사유. ai.ocr_job_failures 기반(FAILED, 청구 fan-in NEEDS_REUPLOAD)만 채워진다 — ai.ocr_results 기반(개별 문서 품질 게이트 NEEDS_REUPLOAD)은 다른 계약이라 대응하는 사유가 없어 null이다. MASKING_RESIDUAL | SCHEMA_INVALID | OCR_ERROR | UNKNOWN | UNREADABLE_FILE
      */
-    failure_reason: string;
+    failure_reason?: string | null;
 };
 
 export type ReportAnalysisStatusResponse = {
     report_id: string;
     /**
-     * 분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED(BLOCKED는 AI 입력 가드레일 차단 — OCR·AI 파이프라인이 시작되지 않는다)
+     * 분석 처리 상태. PROCESSING | COMPLETED | FAILED | BLOCKED | NEEDS_REUPLOAD(FAILED는 OCR 단계 또는 리포트 생성 단계의 확정 실패 — 워커가 회복하면 다른 상태로 바뀔 수 있다. BLOCKED는 AI 입력 가드레일 차단 또는 리포트 생성 LLM 거절. NEEDS_REUPLOAD는 OCR 품질 미달 — 문서를 다시 올려야 진행된다)
      */
-    analysis_state: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED';
+    analysis_state: 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'BLOCKED' | 'NEEDS_REUPLOAD';
     /**
-     * 대표 실패 사유. analysis_state가 FAILED일 때만 non-null(BLOCKED은 저널 기반 사유가 없어 null). MASKING_RESIDUAL | SCHEMA_INVALID | OCR_ERROR | UNKNOWN | UNREADABLE_FILE
+     * 대표 실패 사유. analysis_state가 FAILED일 때만 non-null(BLOCKED·NEEDS_REUPLOAD는 저널 기반 사유가 없어 null). 리포트 생성 단계 실패는 UNKNOWN이다. MASKING_RESIDUAL | SCHEMA_INVALID | OCR_ERROR | UNKNOWN | UNREADABLE_FILE
      */
     failure_reason?: string | null;
     /**
-     * 사용자 노출 문구. analysis_state가 FAILED 또는 BLOCKED일 때만 non-null
+     * 사용자 노출 문구. analysis_state가 FAILED·BLOCKED·NEEDS_REUPLOAD일 때만 non-null
      */
     failure_message?: string | null;
     /**
-     * 재업로드 안내. analysis_state가 FAILED 또는 BLOCKED일 때만 non-null(BLOCKED은 항상 NOT_SUPPORTED — 문서 문제가 아니라 재업로드가 무의미하다). RECOMMENDED(재업로드로 해결 가능) | NOT_SUPPORTED(재업로드해도 동일) | HOLD(확인 중)
+     * 재업로드 안내. analysis_state가 FAILED·BLOCKED·NEEDS_REUPLOAD일 때만 non-null(BLOCKED은 항상 NOT_SUPPORTED — 문서 문제가 아니라 재업로드가 무의미하다. NEEDS_REUPLOAD는 항상 RECOMMENDED — 재업로드가 유일한 해결책이다). RECOMMENDED(재업로드로 해결 가능) | NOT_SUPPORTED(재업로드해도 동일) | HOLD(확인 중)
      */
     reupload_guidance?: string | null;
     /**
-     * 대표 실패 시각(최초 실패 기준). analysis_state가 FAILED일 때만 non-null. BLOCKED은 저널 기반 시각이 없어 null
+     * 대표 실패 시각(최초 실패 기준). analysis_state가 FAILED일 때만 non-null. BLOCKED·NEEDS_REUPLOAD는 저널 기반 시각이 없어 null
      */
     failed_at?: string | null;
     /**
-     * 실패 문서 목록. FAILED가 아니면 빈 배열(null 아님)
+     * 실패·재업로드 필요 문서 목록. FAILED는 OCR 단계 실패(ai.ocr_job_failures)면 채워지고, 리포트 생성 단계 실패(ai.report_job_failures)는 특정 문서가 없어 빈 배열이다. NEEDS_REUPLOAD는 청구 fan-in으로 걸린 경우(ai.ocr_job_failures에 흔적 있음)와 개별 문서 품질 게이트로 걸린 경우(ai.ocr_results, GRANT 배포 후)에 채워지고, 어느 쪽에도 흔적이 없으면 빈 배열이다. 그 외 상태는 빈 배열(null 아님)
      */
     failed_documents: Array<FailedDocument>;
 };
@@ -865,6 +923,11 @@ export type ApiResponseChatRoomListResponse = {
 
 export type ChatRoomListResponse = {
     rooms: Array<ChatRoomSummaryResponse>;
+    /**
+     * 다음 페이지 조회용 opaque 커서. has_next=false면 null
+     */
+    next_cursor?: string | null;
+    has_next: boolean;
 };
 
 export type ChatRoomSummaryResponse = {
@@ -1213,9 +1276,9 @@ export type ApplyData = {
 
 export type ApplyResponses = {
     /**
-     * OK
+     * Created
      */
-    200: ApiResponseCreateAdjusterApplicationResponse;
+    201: ApiResponseCreateAdjusterApplicationResponse;
 };
 
 export type ApplyResponse = ApplyResponses[keyof ApplyResponses];
@@ -1269,9 +1332,9 @@ export type CreateData = {
 
 export type CreateResponses = {
     /**
-     * OK
+     * Accepted
      */
-    200: ApiResponseCreateReportResponse;
+    202: ApiResponseCreateReportResponse;
 };
 
 export type CreateResponse = CreateResponses[keyof CreateResponses];
@@ -1305,9 +1368,9 @@ export type ReportData = {
 
 export type ReportResponses = {
     /**
-     * OK
+     * Created
      */
-    200: ApiResponseChatReportResponse;
+    201: ApiResponseChatReportResponse;
 };
 
 export type ReportResponse = ReportResponses[keyof ReportResponses];
@@ -1362,9 +1425,9 @@ export type SendData = {
 
 export type SendResponses = {
     /**
-     * OK
+     * Created
      */
-    200: ApiResponseChatMessageResponse;
+    201: ApiResponseChatMessageResponse;
 };
 
 export type SendResponse = SendResponses[keyof SendResponses];
@@ -1382,9 +1445,9 @@ export type UploadAttachmentData = {
 
 export type UploadAttachmentResponses = {
     /**
-     * OK
+     * Created
      */
-    200: ApiResponseUploadAttachmentResponse;
+    201: ApiResponseUploadAttachmentResponse;
 };
 
 export type UploadAttachmentResponse2 = UploadAttachmentResponses[keyof UploadAttachmentResponses];
@@ -1414,12 +1477,44 @@ export type Register1Data = {
 
 export type Register1Responses = {
     /**
-     * OK
+     * Created
      */
-    200: ApiResponseRegisterResponse;
+    201: ApiResponseRegisterResponse;
 };
 
 export type Register1Response = Register1Responses[keyof Register1Responses];
+
+export type SignupData = {
+    body: PasswordSignupRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/password/signup';
+};
+
+export type SignupResponses = {
+    /**
+     * Created
+     */
+    201: ApiResponsePasswordAuthResponse;
+};
+
+export type SignupResponse = SignupResponses[keyof SignupResponses];
+
+export type LoginData = {
+    body: PasswordLoginRequest;
+    path?: never;
+    query?: never;
+    url: '/auth/password/login';
+};
+
+export type LoginResponses = {
+    /**
+     * OK
+     */
+    200: ApiResponsePasswordAuthResponse;
+};
+
+export type LoginResponse = LoginResponses[keyof LoginResponses];
 
 export type LogoutData = {
     body?: never;
@@ -1436,6 +1531,28 @@ export type LogoutResponses = {
 };
 
 export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
+
+export type Login1Data = {
+    body?: DevLoginRequest;
+    headers?: {
+        /**
+         * dev 로그인 공유 시크릿. 서버에 app.dev-login.secret이 설정된 경우에만 필수이며, 누락·불일치 시 403을 반환한다. 설정되지 않은 환경(로컬)에서는 무시된다.
+         */
+        'X-Dev-Login-Key'?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/auth/dev/login';
+};
+
+export type Login1Responses = {
+    /**
+     * OK
+     */
+    200: ApiResponseDevLoginResponse;
+};
+
+export type Login1Response = Login1Responses[keyof Login1Responses];
 
 export type GetReviewsData = {
     body?: never;
@@ -1469,9 +1586,9 @@ export type CreateReviewData = {
 
 export type CreateReviewResponses = {
     /**
-     * OK
+     * Created
      */
-    200: ApiResponseCreateAdjusterReviewResponse;
+    201: ApiResponseCreateAdjusterReviewResponse;
 };
 
 export type CreateReviewResponse = CreateReviewResponses[keyof CreateReviewResponses];
@@ -1913,7 +2030,10 @@ export type ReceivedProposalsResponse = ReceivedProposalsResponses[keyof Receive
 export type ListMyRoomsData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        cursor?: string;
+        size?: number;
+    };
     url: '/chats';
 };
 
