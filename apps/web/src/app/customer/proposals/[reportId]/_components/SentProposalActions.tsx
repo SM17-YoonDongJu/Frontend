@@ -1,31 +1,46 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Button } from "@/shared/ui/Button";
 import { ArrowRight } from "@/shared/ui/icons/ArrowRight";
 import { toast } from "@/shared/ui/toast";
-import { useConsultChatRoom } from "../_hooks/use-consult-chat-room";
+import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
 import { ACTION_BUTTON_CLASS } from "./consult-action-style";
 
 /**
- * 제안 도착(SENT) 카드 액션 — 상담 수락 시 선생성된 채팅방으로 즉시 이동(#231).
- * 방 미조회·조회 실패 시 토스트로 안내하고 카드는 유지(클릭 재시도 시 refetch).
+ * 제안 도착(SENT) 카드 액션 — 상담 수락으로 채팅방을 열고 그 방으로 이동한다(#325).
+ *
+ * 방은 제안 발송 시점에 만들어지지 않는다. 수락 요청을 받아야 백엔드가 방을 열고,
+ * 이미 열린 방이 있으면 같은 id를 돌려주므로 여러 번 눌러도 방이 중복으로 생기지 않는다.
+ * 실패하면 토스트만 띄우고 카드는 그대로 둬 다시 누를 수 있게 한다.
  */
 export function SentProposalActions({
+  reportId,
   proposalId,
   onOpenDetail,
 }: {
+  reportId: string;
   proposalId: string;
   onOpenDetail: () => void;
 }) {
-  const { chatRoomId, isPending, refetch, openConsultChat } = useConsultChatRoom(proposalId);
+  const router = useRouter();
+  const matchProposal = useMatchProposal(reportId);
 
   const acceptConsult = () => {
-    if (chatRoomId == null) {
-      toast.error("상담 채팅방으로 이동하지 못했어요. 잠시 후 다시 시도해 주세요.");
-      refetch();
-      return;
-    }
-    openConsultChat();
+    matchProposal.mutate(
+      { proposalId, status: "ACCEPTED" },
+      {
+        onSuccess: (result) => {
+          if (result.chatRoomId == null) {
+            toast.error("상담 채팅방으로 이동하지 못했어요. 잠시 후 다시 시도해 주세요.");
+            return;
+          }
+          router.push(`/customer/chat/${result.chatRoomId}`);
+        },
+        onError: () =>
+          toast.error("상담 수락에 실패했어요. 잠시 후 다시 시도해 주세요."),
+      },
+    );
   };
 
   return (
@@ -35,7 +50,7 @@ export function SentProposalActions({
       </Button>
       <Button
         size="sm"
-        loading={isPending}
+        loading={matchProposal.isPending}
         icon={<ArrowRight className="text-[0.9375rem]" />}
         className={ACTION_BUTTON_CLASS}
         onClick={acceptConsult}
