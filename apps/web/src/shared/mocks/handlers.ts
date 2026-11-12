@@ -636,6 +636,27 @@ const MOCK_ME: Record<string, unknown> = {
 };
 
 /**
+ * 아이디·비밀번호로 가입한 계정(#322)은 프로필이 비어 있다 — 전화번호·지역·아바타 null, 성별 빈 문자열, 소셜 연결 없음.
+ * 조회마다 덮어쓰면 PATCH /users/me로 채운 값이 사라지므로 가입 직후 한 번만 MOCK_ME에 적용하고,
+ * 이후 조회는 수정값을 그대로 돌려준다.
+ */
+let passwordProfileApplied = false;
+
+function applyPasswordAccountProfile(name: string): void {
+  if (passwordProfileApplied) return;
+  passwordProfileApplied = true;
+  Object.assign(MOCK_ME, {
+    nickname: name,
+    phone_number: null,
+    gender: "",
+    region: null,
+    avatar_url: null,
+    email: null,
+    social_provider: null,
+  });
+}
+
+/**
  * 목 role 결정 — 기본 USER(피보험자).
  * localStorage["mock:role"]=CERTIFICATED_ADJUSTER → 파트너 전환 섹션 노출(#105).
  * localStorage["mock:userType"]="adjuster" → 사정사 화면 검증용(응답에 userType이 없으므로 role로 매핑).
@@ -1993,6 +2014,7 @@ export const handlers = [
     clearLoggedOut();
     // 이후 GET /users/me가 프로필 빈 일반 가입 계정으로 응답하게 표시(새로고침 후에도 유지).
     setPasswordAccount(name);
+    passwordProfileApplied = false;
 
     return HttpResponse.json(
       {
@@ -2408,23 +2430,7 @@ export const handlers = [
     // 아이디·비밀번호 가입 계정(#322)은 프로필이 비어 있다 — 전화번호·지역·아바타 null,
     // 성별 빈 문자열, 소셜 연결 없음. 실서버 응답 모양을 그대로 거울(빈 문자열 포함).
     const passwordAccountName = readPasswordAccount();
-    if (passwordAccountName !== null) {
-      return HttpResponse.json({
-        status: "200",
-        message: "정상 처리되었습니다.",
-        data: {
-          ...MOCK_ME,
-          nickname: passwordAccountName,
-          phone_number: null,
-          gender: "",
-          region: null,
-          avatar_url: null,
-          email: null,
-          social_provider: null,
-          role: resolveMockRole(),
-        },
-      });
-    }
+    if (passwordAccountName !== null) applyPasswordAccountProfile(passwordAccountName);
 
     // 응답에 userType이 없다(FE가 role에서 파생). mock:userType override는 resolveMockRole이 role로 매핑한다.
     return HttpResponse.json({
