@@ -29,5 +29,10 @@ export async function matchProposal(
     path: { reportId, proposalId },
     body: { status },
   });
-  return matchProposalResultSchema.parse(data);
+  const result = matchProposalResultSchema.parse(data);
+  // 수락했는데 방 id가 없으면 성공으로 취급하지 않는다. 백엔드는 같은 요청에 같은 방을 돌려주므로 다시 누르면 받을 수 있다.
+  if (status === "ACCEPTED" && result.chatRoomId == null) {
+    throw new Error("상담 채팅방 정보를 받지 못했어요.");
+  }
+  return result;
 }
