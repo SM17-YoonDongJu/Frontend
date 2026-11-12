@@ -804,6 +804,11 @@ interface MockChatRoom {
   matchStatus: MockMatchStatus;
   reportTypeLabel: string; // accidentType 슬러그(traffic·disability…)
   unreadCount: number;
+  /**
+   * 방이 실제로 열렸는지. 제안이 발송돼도 방은 생기지 않고, 고객이 상담을 수락할 때 열린다(#325).
+   * 제안 목록은 이 레코드를 제안으로 읽고, 채팅 목록은 열린 방만 돌려준다.
+   */
+  roomOpened: boolean;
 }
 
 // 메시지 첨부(BE Attachment shape) — 업로드 발급 key·원본명·MIME·크기(내부 저장은 key 기준).
@@ -883,8 +888,8 @@ function toChatMessageDto(message: MockChatMessage, chatRoomId: string) {
   };
 }
 
-// 비교 그룹 검증: 3방 모두 동일 reportId·caseNo. 김도현·정우성 COUNSELING(상담 중),
-// 윤지후 SENT(제안 도착 — 방은 제안 발송 시 선생성, #231 상담 수락 즉시 이동 흐름 시드).
+// 비교 그룹 검증: 3건 모두 동일 reportId·caseNo. 김도현·정우성 COUNSELING(상담 중, 방 열림),
+// 윤지후 SENT(제안 도착 — 아직 수락 전이라 방이 없다, #325).
 const chatRooms: MockChatRoom[] = [
   {
     chatRoomId: CHAT_ROOM_1_ID,
@@ -901,6 +906,7 @@ const chatRooms: MockChatRoom[] = [
     matchStatus: "COUNSELING",
     reportTypeLabel: "disability",
     unreadCount: 2,
+    roomOpened: true,
   },
   {
     chatRoomId: CHAT_ROOM_2_ID,
@@ -917,6 +923,7 @@ const chatRooms: MockChatRoom[] = [
     matchStatus: "COUNSELING",
     reportTypeLabel: "disability",
     unreadCount: 0,
+    roomOpened: true,
   },
   {
     chatRoomId: CHAT_ROOM_3_ID,
@@ -933,8 +940,39 @@ const chatRooms: MockChatRoom[] = [
     matchStatus: "SENT",
     reportTypeLabel: "disability",
     unreadCount: 0,
+    // 아직 상담 수락 전 — 방이 열리지 않아 채팅 목록에 잡히지 않는다.
+    roomOpened: false,
   },
 ];
+
+/** 상담 수락 시 방을 연다(#325). 제안만 있고 방이 없던 건에 새 방을 만들어 목록에 넣는다. */
+function openConsultRoomForProposal(seed: {
+  proposalId: string;
+  reportId: string;
+  adjusterId: string;
+  adjusterName: string;
+}): MockChatRoom {
+  const now = new Date().toISOString();
+  const room: MockChatRoom = {
+    chatRoomId: crypto.randomUUID(),
+    lastMessage: null,
+    updatedAt: now,
+    adjusterId: seed.adjusterId,
+    adjusterName: seed.adjusterName,
+    avatarUrl: null,
+    reportId: seed.reportId,
+    caseNo: "",
+    roomStatus: "ACTIVE",
+    lastMessageAt: now,
+    proposalId: seed.proposalId,
+    matchStatus: "COUNSELING",
+    reportTypeLabel: "disability",
+    unreadCount: 0,
+    roomOpened: true,
+  };
+  chatRooms.push(room);
+  return room;
+}
 
 // GET /reports/{id}/proposals ↔ 채팅방 정합용 제안 메타(디자인 확장 필드). 상태·식별자는 chatRooms가 원천.
 const CHAT_PROPOSAL_META: Record<
@@ -1243,13 +1281,22 @@ export const handlers = [
     }
 
     // 빈 상태(대화 없음) 검증용 — E2E override
+    // 상담 수락 전(roomOpened=false) 제안은 방이 없으므로 목록에 넣지 않는다(#325).
     const source =
-      request.headers.get("x-mock-empty") === "chat-list" ? [] : chatRooms;
+      request.headers.get("x-mock-empty") === "chat-list"
+        ? []
+        : chatRooms.filter((room) => room.roomOpened);
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: camelToSnakeDeep({ rooms: source.map(toChatRoomDto) }),
+      // 목록 전체를 한 번에 돌려주므로 다음 페이지는 없다 — 커서 페이지네이션 필드는
+      // 명세가 필수로 선언해 생성 zod가 검증한다(빠지면 목록 조회가 통째로 실패).
+      data: camelToSnakeDeep({
+        rooms: source.map(toChatRoomDto),
+        nextCursor: null,
+        hasNext: false,
+      }),
     });
   }),
 
@@ -1455,8 +1502,16 @@ export const handlers = [
   }),
 
   // 상담 수락 (PATCH /chats/{id}/accept) — 내 제안 ACCEPTED·방 CLOSED·형제 방 REJECTED+CLOSED·리포트 CLOSED.
-  wire.patch(`${API_BASE_URL}/chats/:chatRoomId/accept`, async ({ params }) => {
+  wire.patch(`${API_BASE_URL}/chats/:chatRoomId/accept`, async ({ params, request }) => {
     await delay(300);
+
+    // 매칭 완료 실패 토스트 E2E용(#325) — 받은 제안 카드도 이 경로로 채택한다.
+    if (request.headers.get("x-mock-failure") === "accept-chat") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "서버 오류가 발생했습니다." },
+        { status: 500 },
+      );
+    }
 
     const chatRoomId = String(params.chatRoomId);
     const room = chatRooms.find((r) => r.chatRoomId === chatRoomId);
@@ -2878,9 +2933,11 @@ export const handlers = [
     });
   }),
 
-  // 제안 매칭(채택·거절) 통합 (이슈 #48) — PATCH /reports/:reportId/proposals/:proposalId {status}.
-  //   ACCEPTED: 대상 방 매칭완료 + 형제(같은 reportId) 방 자동종료(REJECTED·CLOSED) 캐스케이드.
-  //   REJECTED: 대상 방만 종료. 이미 확정된 방 재PATCH → 409.
+  // 상담 수락·거절 (이슈 #48·#325) — PATCH /reports/:reportId/proposals/:proposalId {status}.
+  //   ACCEPTED: 상담 채팅방을 열고(이미 열렸으면 같은 방 재사용) 제안을 COUNSELING으로.
+  //     응답 chat_room_id로 방 id를 돌려준다. 최종 채택(형제 종료 캐스케이드)은 여기가 아니라
+  //     PATCH /chats/:chatRoomId/accept가 한다.
+  //   REJECTED: 대상 제안만 종료. 이미 확정된 제안 재PATCH → 409.
   //   x-mock-failure:match-proposal → 500 INTERNAL_SERVER_ERROR (실패 토스트 E2E용).
   wire.patch(
     `${API_BASE_URL}/reports/:reportId/proposals/:proposalId`,
@@ -2926,35 +2983,28 @@ export const handlers = [
             { status: 409 },
           );
         }
-        // ACCEPTED는 COUNSELING(상담 진행 중)에서만 유효 — 실서버 전이 규칙 거울.
-        if (status === "ACCEPTED" && extra.status !== "COUNSELING") {
-          return HttpResponse.json(
-            {
-              status: "409",
-              code: "UNSUPPORTED_OPERATION",
-              message: "상담 진행 중인 제안만 매칭할 수 있습니다.",
-            },
-            { status: 409 },
-          );
-        }
         if (status === "ACCEPTED") {
-          extra.status = "ACCEPTED";
-          EXTRA_PROPOSALS.filter(
-            (proposal) =>
-              proposal.reportId === extra.reportId && proposal.proposalId !== proposalId,
-          ).forEach((proposal) => {
-            proposal.status = "REJECTED";
-          });
+          // 상담 수락 — 방이 없으면 열고, 이미 열려 있으면 같은 방을 그대로 돌려준다.
+          const opened =
+            chatRooms.find((room) => room.proposalId === proposalId) ??
+            openConsultRoomForProposal({
+              proposalId,
+              reportId: extra.reportId,
+              adjusterId: extra.adjusterId,
+              adjusterName: `${extra.nickname} 손해사정사`,
+            });
+          extra.status = "COUNSELING";
 
           return HttpResponse.json({
             status: "200",
-            message: "매칭이 완료되었습니다.",
+            message: "상담을 수락했습니다.",
             data: camelToSnakeDeep({
               reportId,
               proposalId,
               adjusterId: extra.adjusterId,
-              reportStatus: "CLOSED",
-              reviewStatus: "ACCEPTED",
+              reportStatus: "COUNSELING",
+              reviewStatus: "COUNSELING",
+              chatRoomId: opened.chatRoomId,
             }),
           });
         }
@@ -2984,43 +3034,25 @@ export const handlers = [
           { status: 409 },
         );
       }
-      // ACCEPTED는 COUNSELING(채팅방 개설 후)에서만 유효 — 실서버 전이 규칙 거울.
-      if (status === "ACCEPTED" && target.matchStatus !== "COUNSELING") {
-        return HttpResponse.json(
-          {
-            status: "409",
-            code: "UNSUPPORTED_OPERATION",
-            message: "상담 진행 중인 제안만 매칭할 수 있습니다.",
-          },
-          { status: 409 },
-        );
-      }
-
       if (status === "ACCEPTED") {
-        target.matchStatus = "ACCEPTED";
-        chatRooms
-          .filter(
-            (room) =>
-              room.reportId === target.reportId &&
-              room.proposalId !== target.proposalId,
-          )
-          .forEach((room) => {
-            room.matchStatus = "REJECTED";
-            room.roomStatus = "CLOSED";
-          });
+        // 상담 수락 — 방을 열고 COUNSELING으로. 이미 COUNSELING이면 같은 방을 돌려주고 아무것도 바꾸지 않는다.
+        target.roomOpened = true;
+        target.matchStatus = "COUNSELING";
 
         return HttpResponse.json({
           status: "200",
-          message: "매칭이 완료되었습니다.",
+          message: "상담을 수락했습니다.",
           data: camelToSnakeDeep({
             reportId,
             proposalId,
             adjusterId: target.adjusterId,
-            reportStatus: "CLOSED",
-            reviewStatus: "ACCEPTED",
+            reportStatus: "COUNSELING",
+            reviewStatus: "COUNSELING",
+            chatRoomId: target.chatRoomId,
           }),
         });
       }
+
 
       target.matchStatus = "REJECTED";
       target.roomStatus = "CLOSED";
