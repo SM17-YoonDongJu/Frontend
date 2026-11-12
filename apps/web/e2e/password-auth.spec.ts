@@ -126,6 +126,11 @@ test.describe("회원가입", () => {
       ).toBeVisible({ timeout: 10000 });
     });
 
+    // 오류 문구가 입력의 접근 가능한 설명으로 연결돼 스크린 리더가 입력에서 이유를 읽는다
+    await expect(page.getByLabel("아이디")).toHaveAccessibleDescription(
+      "아이디는 영문·숫자·밑줄 4~20자로 입력해 주세요.",
+    );
+
     await expect(page).toHaveURL(/\/signup\/password$/);
   });
 });
