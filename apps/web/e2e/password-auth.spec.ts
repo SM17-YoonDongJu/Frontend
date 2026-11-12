@@ -75,11 +75,12 @@ test.describe("회원가입", () => {
     ).toBeVisible({ timeout: 15000 });
 
     // 일반 가입 계정은 전화번호·성별·지역·소셜 연결이 비어 있다 — 그 상태로 마이페이지가 렌더되는지.
+    // 이름 히어로는 PC 전용이라 뷰포트 무관하게 보이는 회원 구분으로 확인한다.
     await hideQueryDevtools(page);
     await page.goto("/customer/mypage");
-    await expect(
-      page.getByRole("heading", { name: "홍길동 님" }).filter({ visible: true }),
-    ).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText("일반 회원").filter({ visible: true })).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test("이미 사용 중인 아이디는 폼 안에서 안내되고 로그인 안내 화면으로 튕기지 않는다", async ({

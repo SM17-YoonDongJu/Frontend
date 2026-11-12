@@ -25,7 +25,7 @@ export const passwordSchema = z
   .max(72, "비밀번호는 72자 이하로 입력해 주세요.")
   .refine(
     (value) => passwordByteLength(value) <= PASSWORD_MAX_BYTES,
-    "비밀번호가 너무 깁니다. 한글은 글자당 3자로 계산돼요.",
+    "비밀번호가 너무 깁니다. 조금 더 짧게 입력해 주세요.",
   );
 
 /** POST /auth/password/signup 요청 body. 아이디·비밀번호·이름만 받는다(생년월일·성별·전화번호 미수집). */
