@@ -32,6 +32,8 @@ export const reportKeys = createQueryKeys("report", {
   listInfinite: (filter?: ReportListInfiniteFilter) => [{ filter: filter ?? {} }],
   detail: (reportId: string) => [reportId],
   pendingReview: (filter?: ReviewListFilter) => [{ filter: filter ?? {} }],
+  // 검수 대기 화면(#326) — "더보기"로 page를 누적하므로 page는 키에서 제외.
+  pendingReviewInfinite: (filter?: Omit<ReviewListFilter, "page">) => [{ filter: filter ?? {} }],
   pendingReviewSummary: () => ["summary"],
   // 검수 대기 PC 프리뷰 패널 전용(고객 상세 detail 키와 스키마가 달라 캐시 분리).
   draftPreview: (reportId: string) => [reportId],

@@ -4,26 +4,16 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { z } from "zod";
 import { accidentTypeSchema } from "@/shared/model/accident-type";
+import { isRegionFilterValue } from "../_model/region-filter-options";
 
 // 사고 유형 필터 값은 명세 영문 enum + 전체.
 const typeSchema = z.enum(["전체", ...accidentTypeSchema.options]);
 
-// status 탭 값은 REPORTS.status 생명주기 중 Figma 탭 4종 + 전체(파라미터 생략) + 진행중 프리셋(헤더 진입용).
-const statusSchema = z.enum([
-  "전체",
-  "AWAITING_ADOPTION",
-  "COUNSELING",
-  "NOT_SELECTED",
-  "CLOSED",
-  "진행중",
-]);
+// 이 목록 API는 검수 단계(AWAITING_INSPECTION·AWAITING_ADOPTION) 리포트만 돌려준다.
+// 탭은 전체(파라미터 생략)와 AWAITING_ADOPTION만 둔다 — 나머지 상태는 늘 빈 목록이었다(#326).
+const statusSchema = z.enum(["전체", "AWAITING_ADOPTION"]);
 
 export type ReviewStatusTabValue = z.infer<typeof statusSchema>;
-
-// 백엔드가 status 다중값을 못 받아 프리셋은 클라이언트에서 이 상태들로 필터링.
-export const REVIEW_STATUS_PRESETS: Record<string, string[]> = {
-  진행중: ["AWAITING_ADOPTION", "COUNSELING"],
-};
 
 export function useReviewFilter() {
   const pathname = usePathname();
@@ -33,10 +23,14 @@ export function useReviewFilter() {
 
   const type = typeSchema.safeParse(params.get("type")).data ?? "전체";
   const status = statusSchema.safeParse(params.get("status")).data ?? "전체";
-  const region = params.get("region") ?? "전체";
+  // 목록에 없는 값(손으로 고친 URL·지원 종료된 옵션)은 전체로 본다 — select가 빈 값으로 어긋나지 않게.
+  const regionParam = params.get("region") ?? "";
+  const region = isRegionFilterValue(regionParam) ? regionParam : "전체";
 
-  // 목록 API 호출·클라이언트 필터에 쓸 실제 상태 배열(전체=undefined, 프리셋=다중, 단일=1개).
-  const statusValues = REVIEW_STATUS_PRESETS[status] ?? (status === "전체" ? undefined : [status]);
+  // 목록 API에 보낼 값. 전체는 파라미터를 생략한다.
+  const statusFilter = status === "전체" ? undefined : status;
+  const accidentTypeFilter = type === "전체" ? undefined : type;
+  const regionFilter = region === "전체" ? undefined : region;
 
   // router.replace를 startTransition으로 감싸야 리스트 Suspense 재서스펜드 시
   // React가 기존 화면을 유지한 채 pending 처리한다(window.history 직접 조작은
@@ -59,5 +53,16 @@ export function useReviewFilter() {
   const setStatus = (value: string) => setParam("status", value);
   const setRegion = (value: string) => setParam("region", value);
 
-  return { type, setType, status, setStatus, statusValues, region, setRegion, isPending };
+  return {
+    type,
+    setType,
+    status,
+    setStatus,
+    region,
+    setRegion,
+    statusFilter,
+    accidentTypeFilter,
+    regionFilter,
+    isPending,
+  };
 }
