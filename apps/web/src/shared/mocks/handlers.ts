@@ -3070,6 +3070,7 @@ export const handlers = [
         if (!target.roomOpened) {
           // 방이 처음 열리는 순간 — 시드에 있던 지난 대화(예: 상담 종료 안내)는 새 상담의 기록이 아니다.
           chatMessages[target.chatRoomId] = [];
+          target.lastMessage = null;
         }
         target.roomOpened = true;
         target.matchStatus = "COUNSELING";
