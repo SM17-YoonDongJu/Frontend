@@ -1252,7 +1252,13 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: camelToSnakeDeep({ rooms: source.map(toChatRoomDto) }),
+      // 목록 전체를 한 번에 돌려주므로 다음 페이지는 없다 — 커서 페이지네이션 필드는
+      // 명세가 필수로 선언해 생성 zod가 검증한다(빠지면 목록 조회가 통째로 실패).
+      data: camelToSnakeDeep({
+        rooms: source.map(toChatRoomDto),
+        nextCursor: null,
+        hasNext: false,
+      }),
     });
   }),
 
