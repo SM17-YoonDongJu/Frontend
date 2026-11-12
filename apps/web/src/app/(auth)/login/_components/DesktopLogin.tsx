@@ -3,7 +3,7 @@ import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { AuthHeader } from "../../_shared/ui/AuthHeader";
 import type { RecentLogin, SocialProvider } from "../../_shared/hooks/use-recent-login";
 import { LoginHero } from "./LoginHero";
-import { PasswordLoginForm } from "./PasswordLoginForm";
+import { PasswordLoginSection } from "./PasswordLoginSection";
 import { RecentLoginCard } from "./RecentLoginCard";
 import { SocialLoginButtons } from "./SocialLoginButtons";
 import { TermsNotice } from "./TermsNotice";
@@ -46,6 +46,14 @@ export function DesktopLogin({
           <LoginHero variant={mode} />
 
           <div className="flex w-full flex-col gap-5 rounded-card border border-line bg-card px-[1.8125rem] pt-[2.8125rem] pb-[1.8125rem] shadow-[0_1px_1px_rgba(21,32,46,0.03)]">
+            <PasswordLoginSection />
+
+            <div className="flex items-center gap-3">
+              <span className="h-[1px] flex-1 bg-line-2" />
+              <span className="text-[0.6875rem] tracking-[-0.01rem] text-ink-3">또는 소셜 계정으로</span>
+              <span className="h-[1px] flex-1 bg-line-2" />
+            </div>
+
             <SocialLoginButtons mode={mode} onSelect={onSelect} pendingProvider={pendingProvider} />
 
             {mode === "returning" && recentLogin && (
@@ -58,13 +66,6 @@ export function DesktopLogin({
                 <RecentLoginCard recentLogin={recentLogin} onSelect={onRecentSelect} />
               </>
             )}
-
-            <div className="flex items-center gap-3">
-              <span className="h-[1px] flex-1 bg-line-2" />
-              <span className="text-[0.6875rem] tracking-[-0.01rem] text-ink-3">또는 아이디로 로그인</span>
-              <span className="h-[1px] flex-1 bg-line-2" />
-            </div>
-            <PasswordLoginForm />
 
             {mode === "first" && <TermsNotice />}
           </div>

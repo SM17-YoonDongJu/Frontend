@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Scale } from "@/shared/ui/icons/Scale";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import type { SocialProvider } from "../../_shared/hooks/use-recent-login";
-import { PasswordLoginForm } from "./PasswordLoginForm";
+import { PasswordLoginSection } from "./PasswordLoginSection";
 import { SocialLoginButtons } from "./SocialLoginButtons";
 
 interface MobileLoginProps {
@@ -50,16 +50,16 @@ export function MobileLogin({ mode, onSelect, pendingProvider }: MobileLoginProp
         ))}
       </p>
 
-      <SocialLoginButtons mode={mode} onSelect={onSelect} pendingProvider={pendingProvider} layout="mobile" />
+      <PasswordLoginSection />
 
       <div className="mt-6 flex items-center gap-3">
         <span className="h-[1px] flex-1 bg-line-2" />
-        <span className="text-[0.6875rem] tracking-[-0.01rem] text-ink-3">또는 아이디로 로그인</span>
+        <span className="text-[0.6875rem] tracking-[-0.01rem] text-ink-3">또는 소셜 계정으로</span>
         <span className="h-[1px] flex-1 bg-line-2" />
       </div>
 
       <div className="mt-5">
-        <PasswordLoginForm />
+        <SocialLoginButtons mode={mode} onSelect={onSelect} pendingProvider={pendingProvider} layout="mobile" />
       </div>
 
       <div className="mt-6 flex items-center gap-[0.5625rem] rounded-xl bg-gold-soft px-4 py-3.5">

@@ -25,18 +25,43 @@ test.beforeEach(async ({ page }) => {
   await startLoggedOut(page);
 });
 
-test("01 로그인 화면 PC — 소셜 + 아이디 폼", async ({ page }) => {
+/** 로그인 화면의 아이디 폼은 기본으로 접혀 있다. */
+async function openPasswordLogin(page: Page) {
+  const toggle = page.getByRole("button", { name: "아이디로 로그인" });
+  await expect(async () => {
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  }).toPass({ timeout: 20000 });
+  // 셰브런 회전 트랜지션이 끝난 뒤 찍는다 — 중간 프레임이 잡히면 아이콘이 기운 채로 남는다.
+  await page.waitForTimeout(400);
+}
+
+test("01 로그인 화면 PC — 아이디 로그인 접힌 기본 상태", async ({ page }) => {
   await page.setViewportSize(DESKTOP);
   await page.goto("/login");
-  await expect(page.getByLabel("아이디")).toBeVisible();
+  await expect(page.getByRole("button", { name: "아이디로 로그인" })).toBeVisible();
   await page.screenshot({ path: `${DIR}/01-login-desktop.png`, fullPage: true });
 });
 
 test("02 로그인 화면 모바일", async ({ page }) => {
   await page.setViewportSize(MOBILE);
   await page.goto("/login");
-  await expect(page.getByLabel("아이디")).toBeVisible();
+  await expect(page.getByRole("button", { name: "아이디로 로그인" })).toBeVisible();
   await page.screenshot({ path: `${DIR}/02-login-mobile.png`, fullPage: true });
+});
+
+test("08 로그인 화면 PC — 아이디 로그인 펼친 상태", async ({ page }) => {
+  await page.setViewportSize(DESKTOP);
+  await page.goto("/login");
+  await openPasswordLogin(page);
+  await page.screenshot({ path: `${DIR}/08-login-desktop-expanded.png`, fullPage: true });
+});
+
+test("09 로그인 화면 모바일 — 아이디 로그인 펼친 상태", async ({ page }) => {
+  await page.setViewportSize(MOBILE);
+  await page.goto("/login");
+  await openPasswordLogin(page);
+  await page.screenshot({ path: `${DIR}/09-login-mobile-expanded.png`, fullPage: true });
 });
 
 test("03 가입 화면 PC", async ({ page }) => {
@@ -56,6 +81,7 @@ test("04 가입 화면 모바일", async ({ page }) => {
 test("05 로그인 실패 — 폼 안 인라인 안내", async ({ page }) => {
   await page.setViewportSize(DESKTOP);
   await page.goto("/login");
+  await openPasswordLogin(page);
   await page.getByLabel("아이디").fill("newmember");
   await page.getByLabel("비밀번호").fill("wrongpw");
   await expect(async () => {

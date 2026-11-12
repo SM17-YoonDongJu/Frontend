@@ -47,6 +47,15 @@ async function startLoggedOut(page: Page, userType?: "adjuster") {
   );
 }
 
+/** 로그인 화면의 아이디 폼은 기본으로 접혀 있다 — 펼쳐야 입력 칸이 나온다. */
+async function openPasswordLogin(page: Page) {
+  const toggle = page.getByRole("button", { name: "아이디로 로그인" });
+  await expect(async () => {
+    await toggle.click();
+    await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  }).toPass({ timeout: 20000 });
+}
+
 /** 하이드레이션 전 입력·클릭 유실 방지 — 제출과 결과 확인을 묶어 재시도한다. */
 async function submitAndExpect(page: Page, button: string, expectation: () => Promise<void>) {
   await expect(async () => {
@@ -127,6 +136,7 @@ test.describe("로그인", () => {
   }) => {
     await startLoggedOut(page);
     await page.goto(LOGIN_PATH);
+    await openPasswordLogin(page);
 
     // 백엔드가 아이디를 소문자로 정규화한다 — FE는 입력을 그대로 보낸다.
     await page.getByLabel("아이디").fill("NewMember");
@@ -146,6 +156,7 @@ test.describe("로그인", () => {
   test("사정사 계정으로 로그인하면 파트너 홈으로 이동한다", async ({ page }) => {
     await startLoggedOut(page, "adjuster");
     await page.goto(LOGIN_PATH);
+    await openPasswordLogin(page);
 
     await page.getByLabel("아이디").fill("adjuster1");
     await page.getByLabel("비밀번호").fill("password123");
@@ -160,6 +171,7 @@ test.describe("로그인", () => {
   }) => {
     await startLoggedOut(page);
     await page.goto(LOGIN_PATH);
+    await openPasswordLogin(page);
 
     await page.getByLabel("아이디").fill("newmember");
     await page.getByLabel("비밀번호").fill("wrongpw");
