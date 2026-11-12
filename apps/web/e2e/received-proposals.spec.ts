@@ -90,6 +90,36 @@ test("매칭을 완료하면 매칭한 제안만 남는다", async ({ page }) =>
   await expect(firstCard.getByText("매칭 완료", { exact: true })).toBeVisible();
 });
 
+test("추가 제안 리포트에서도 상담 수락 후 매칭 완료하면 매칭한 제안만 남는다", async ({ page }) => {
+  // 골절 리포트(고정 제안 목) — 상담 수락 전에는 한지원 제안에 방이 없다
+  const extraPath = "/customer/proposals/b2c9d0e1-3f4a-4b5c-8d6e-7f8a9b0c1d2e";
+  await page.goto(extraPath);
+
+  const sentCard = page.getByRole("listitem").filter({ hasText: "한지원" });
+  await expect(async () => {
+    await sentCard.getByRole("button", { name: "상담 수락" }).click();
+    await expect(page).toHaveURL(/\/customer\/chat\/[0-9a-f-]+/);
+  }).toPass({ timeout: 15000 });
+
+  // 수락으로 열린 방이 채팅 목록에 잡혀야 받은 제안 카드의 매칭 완료가 활성화된다.
+  // 목은 메모리 상태라 전체 새로고침(goto)이면 열린 방이 사라진다 — 뒤로 가기로 돌아온다.
+  await page.goBack();
+  await expect(page).toHaveURL(extraPath);
+  const consultCard = page.getByRole("listitem").filter({ hasText: "한지원" });
+  const matchButton = consultCard.getByRole("button", { name: "매칭 완료" });
+  await expect(matchButton).toBeEnabled();
+  await matchButton.click();
+
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "매칭 완료" }).click();
+
+  // 채택 결과가 제안 목록에도 반영된다 — 같은 리포트의 다른 제안은 종료되어 사라지고 상담 중에 머물지 않는다
+  await expect(page.getByText("이서준")).toHaveCount(0);
+  await expect(page.getByText("문태호")).toHaveCount(0);
+  await expect(consultCard.getByText("매칭 완료", { exact: true })).toBeVisible();
+});
+
 test("매칭 완료 확인을 취소하면 제안이 그대로 유지된다", async ({ page }) => {
   await page.goto(PATH);
 

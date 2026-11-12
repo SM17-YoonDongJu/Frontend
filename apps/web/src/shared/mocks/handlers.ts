@@ -945,6 +945,23 @@ const chatRooms: MockChatRoom[] = [
   },
 ];
 
+/**
+ * 제안 목록 target의 사고 유형 라벨("교통사고 · 후유장해" 등)을 채팅방 목의 유형 슬러그로 바꾼다.
+ * 매핑에 없으면 other — 채팅 목록 태그가 리포트와 다른 유형으로 뜨지 않게 한다.
+ */
+function accidentTypeSlugOf(label: string | undefined): string {
+  const head = label?.split("·")[0]?.trim() ?? "";
+  const slugByLabelPrefix: [string, string][] = [
+    ["교통사고", "traffic"],
+    ["후유장해", "disability"],
+    ["실손", "medical_indemnity"],
+    ["암", "cancer_diagnosis"],
+    ["화재", "fire"],
+    ["배상", "liability"],
+  ];
+  return slugByLabelPrefix.find(([prefix]) => head.startsWith(prefix))?.[1] ?? "other";
+}
+
 /** 상담 수락 시 방을 연다(#325). 제안만 있고 방이 없던 건에 새 방을 만들어 목록에 넣는다. */
 function openConsultRoomForProposal(seed: {
   proposalId: string;
@@ -953,6 +970,7 @@ function openConsultRoomForProposal(seed: {
   adjusterName: string;
 }): MockChatRoom {
   const now = new Date().toISOString();
+  const target = PROPOSAL_TARGETS[seed.reportId];
   const room: MockChatRoom = {
     chatRoomId: crypto.randomUUID(),
     lastMessage: null,
@@ -961,12 +979,12 @@ function openConsultRoomForProposal(seed: {
     adjusterName: seed.adjusterName,
     avatarUrl: null,
     reportId: seed.reportId,
-    caseNo: "",
+    caseNo: target ? `#${target.reportNo}` : "",
     roomStatus: "ACTIVE",
     lastMessageAt: now,
     proposalId: seed.proposalId,
     matchStatus: "COUNSELING",
-    reportTypeLabel: "disability",
+    reportTypeLabel: accidentTypeSlugOf(target?.accidentType),
     unreadCount: 0,
     roomOpened: true,
   };
@@ -1307,7 +1325,8 @@ export const handlers = [
     const room = chatRooms.find(
       (r) => r.chatRoomId === String(params.chatRoomId),
     );
-    if (!room) {
+    // 상담 수락 전(roomOpened=false) 제안에는 방이 없다 — 목록과 같이 단건 조회도 없는 방으로 본다(#325).
+    if (!room?.roomOpened) {
       return HttpResponse.json(
         { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
         { status: 404 },
@@ -1327,6 +1346,13 @@ export const handlers = [
     await delay(400);
 
     const chatRoomId = String(params.chatRoomId);
+    const unopenedRoom = chatRooms.find((r) => r.chatRoomId === chatRoomId && !r.roomOpened);
+    if (unopenedRoom) {
+      return HttpResponse.json(
+        { status: "404", code: "POST_NOT_FOUND", message: "채팅방을 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
     const all = chatMessages[chatRoomId] ?? [];
 
     const url = new URL(request.url);
@@ -1538,6 +1564,11 @@ export const handlers = [
         r.matchStatus = "REJECTED";
         r.roomStatus = "CLOSED";
       });
+    // 추가 제안(EXTRA_PROPOSALS)이 목록 원천인 리포트도 같은 결과를 반영한다 —
+    // 받은 제안의 매칭 완료가 이 경로로 옮겨 온 뒤 제안 목록이 상담 중에 머물지 않게(#325).
+    EXTRA_PROPOSALS.filter((proposal) => proposal.reportId === room.reportId).forEach((proposal) => {
+      proposal.status = proposal.proposalId === room.proposalId ? "ACCEPTED" : "REJECTED";
+    });
 
     return HttpResponse.json({
       status: "200",
@@ -3036,6 +3067,10 @@ export const handlers = [
       }
       if (status === "ACCEPTED") {
         // 상담 수락 — 방을 열고 COUNSELING으로. 이미 COUNSELING이면 같은 방을 돌려주고 아무것도 바꾸지 않는다.
+        if (!target.roomOpened) {
+          // 방이 처음 열리는 순간 — 시드에 있던 지난 대화(예: 상담 종료 안내)는 새 상담의 기록이 아니다.
+          chatMessages[target.chatRoomId] = [];
+        }
         target.roomOpened = true;
         target.matchStatus = "COUNSELING";
 
