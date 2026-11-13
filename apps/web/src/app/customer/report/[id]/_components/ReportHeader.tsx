@@ -9,7 +9,8 @@ import { REPORT_TITLE } from "../_model/report-meta";
 export interface ReportHeaderProps {
   accidentType: string;
   treatment: string | null;
-  issueCount: number;
+  /** 분석 결과가 없는 단계(분석 중·중단)에서는 생략해 쟁점 칩을 숨긴다. */
+  issueCount?: number;
   /** 데스크톱 우측 액션 블록(PDF·공유) */
   actions?: ReactNode;
   /** 모바일 상단 바 우측 공유 아이콘 버튼 */
@@ -47,10 +48,12 @@ export function ReportHeader({
           <div className="flex flex-wrap items-center gap-1.5 text-[0.78rem] text-ink-3">
             <span className="rounded-pill bg-paper-2 px-2.5 py-1">{accidentType}</span>
             {treatment && <span className="rounded-pill bg-paper-2 px-2.5 py-1">{treatment}</span>}
-            <span className="flex items-center gap-1 rounded-pill bg-green-soft px-2.5 py-1 text-green">
-              <Check className="text-[0.8125rem]" />
-              쟁점 {issueCount}건
-            </span>
+            {issueCount != null && (
+              <span className="flex items-center gap-1 rounded-pill bg-green-soft px-2.5 py-1 text-green">
+                <Check className="text-[0.8125rem]" />
+                쟁점 {issueCount}건
+              </span>
+            )}
           </div>
           <h1 className="mt-2 font-serif text-[1.625rem] font-bold text-ink">{REPORT_TITLE}</h1>
         </div>
