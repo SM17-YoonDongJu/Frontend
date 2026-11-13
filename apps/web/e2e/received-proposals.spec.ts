@@ -63,8 +63,9 @@ test("상담 수락을 누르면 채팅방이 열리고 그 방으로 이동한�
   // 수락 전에는 방이 없다 — 상담 중인 두 건만 채팅 목록에 잡힌다.
   await expect(async () => {
     await sentCard.getByRole("button", { name: "상담 수락" }).click();
-    // 수락 응답의 chatRoomId로 중간 확인 화면 없이 직행
-    await expect(page).toHaveURL(/\/customer\/chat\/[0-9a-f-]+/);
+    // 수락 응답의 chatRoomId로 중간 확인 화면 없이 직행 — 아무 방이 아니라 윤지후 제안의 방(CHAT_ROOM_3)이어야 한다.
+    // 서비스워커 응답은 Playwright가 못 읽어 응답 id를 직접 비교하지 못하므로 목이 돌려주는 고정 id로 확인한다.
+    await expect(page).toHaveURL(/\/customer\/chat\/e1000000-0000-4000-8000-000000000003$/);
   }).toPass({ timeout: 15000 });
 });
 
