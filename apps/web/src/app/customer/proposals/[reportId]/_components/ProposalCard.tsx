@@ -1,17 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { cn } from "@/shared/lib/utils";
 import { Avatar } from "@/shared/ui/Avatar";
 import { Button } from "@/shared/ui/Button";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
-import { MatchConfirmModal } from "@/shared/ui/chat/MatchConfirmModal";
 import { ShieldCheck } from "@/shared/ui/icons/ShieldCheck";
 import { Star } from "@/shared/ui/icons/Star";
-import { toast } from "@/shared/ui/toast";
-import { useMatchProposal } from "../../../_shared/api/use-match-proposal";
 import { getProposalAction } from "../../../_shared/model/proposal-actions";
 import { useViewedProposals } from "../_hooks/use-viewed-proposals";
 import { ConsultChatActions } from "./ConsultChatActions";
@@ -39,8 +35,6 @@ function formatCredential(career?: number | null, speciality?: string | null) {
 export function ProposalCard({ reportId, proposal, otherProposalNames }: ProposalCardProps) {
   const router = useRouter();
   const { isViewed, markViewed } = useViewedProposals();
-  const matchProposal = useMatchProposal(reportId);
-  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const {
     proposalId,
@@ -65,22 +59,6 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
   const openReviewReport = () => {
     markViewed(adjusterId);
     router.push(`/customer/report/${reportId}`);
-  };
-
-  // 매칭 완료 시 같은 리포트의 다른 제안이 자동 종료·되돌릴 수 없어 확인 모달을 거친다(채팅 화면과 동일 정책)
-  const openMatchConfirm = () => {
-    setConfirmOpen(true);
-  };
-
-  const confirmMatch = () => {
-    matchProposal.mutate(
-      { proposalId, status: "ACCEPTED" },
-      {
-        onSuccess: () => setConfirmOpen(false),
-        onError: () =>
-          toast.error("매칭 완료 처리에 실패했어요. 잠시 후 다시 시도해 주세요."),
-      },
-    );
   };
 
   return (
@@ -142,14 +120,18 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
       </div>
 
       {cardAction === "REQUEST_CONSULT" && (
-        <SentProposalActions proposalId={proposalId} onOpenDetail={openReviewReport} />
+        <SentProposalActions
+          reportId={reportId}
+          proposalId={proposalId}
+          onOpenDetail={openReviewReport}
+        />
       )}
 
       {cardAction === "IN_CONSULT" && (
         <ConsultChatActions
           proposalId={proposalId}
-          matchPending={matchProposal.isPending}
-          onMatchComplete={openMatchConfirm}
+          adjusterName={nickname}
+          otherProposalNames={otherProposalNames}
           onOpenDetail={openReviewReport}
         />
       )}
@@ -169,15 +151,6 @@ export function ProposalCard({ reportId, proposal, otherProposalNames }: Proposa
           </Button>
         </div>
       )}
-
-      <MatchConfirmModal
-        open={confirmOpen}
-        adjusterName={nickname}
-        endingConsultations={otherProposalNames.map((name) => ({ name }))}
-        pending={matchProposal.isPending}
-        onConfirm={confirmMatch}
-        onCancel={() => setConfirmOpen(false)}
-      />
     </article>
   );
 }

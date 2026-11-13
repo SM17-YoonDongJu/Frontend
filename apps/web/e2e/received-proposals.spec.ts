@@ -6,12 +6,14 @@ import { setAuthCookie } from "./_auth-cookie-helpers";
  *
  * 원칙: 핵심 사용자 흐름만 — 목록 열람 / 상담 수락 / 상담채팅 진행 / 매칭 완료(형제 제안 자동 종료) / 상세 보기 이동.
  * 시드 제안 3건: 김도현·정우성 COUNSELING("상담채팅 진행"+"매칭 완료"), 윤지후 SENT("상담 수락").
- * 채팅방은 제안 발송 시 선생성(#231) — SENT의 "상담 수락"은 생성 API 없이 기존 방으로 즉시 이동한다.
+ * 채팅방은 상담 수락 요청을 받아야 열린다(#325) — SENT의 "상담 수락"은 제안 PATCH 응답의
+ *   chatRoomId로 이동하고, 시드 상태에서는 윤지후 제안에 방이 없다.
+ * "매칭 완료"는 채팅방 헤더와 같은 PATCH /chats/{id}/accept를 쓴다 — 제안 PATCH는 상담 수락 전용이다.
  * 응답은 기본 MSW 핸들러가 제공 — 제안은 채팅 시드와 동일 원천(같은 사건 3건: 김도현·정우성·윤지후).
  * 거절 진입은 채팅 화면으로 일원화(#123) — 거절 흐름은 chat.spec.ts가 검증한다.
  * 빈 상태는 핸들러 오버라이드가 필요해 의식적으로 테스트하지 않는다(정적 레이어가 하위 대체).
- * 수락 실패는 x-mock-failure:match-proposal 헤더(fetch 래핑 주입 — MSW는 SW라 page.route 불가)로
- * 500을 강제해 실패 토스트 노출을 검증한다(이슈 #127).
+ * 실패는 x-mock-failure 헤더(fetch 래핑 주입 — MSW는 SW라 page.route 불가)로 500을 강제해
+ * 실패 토스트 노출을 검증한다(이슈 #127·#325). 매칭 완료는 accept-chat 값을 쓴다.
  */
 
 // 채팅·제안 공용 시드 사건(reportId) — handlers.ts DASHBOARD_PROPOSABLE_REPORT_ID
@@ -52,19 +54,19 @@ test("상담채팅 진행을 누르면 해당 제안의 채팅방으로 이동�
   }).toPass({ timeout: 10000 });
 });
 
-test("상담 수락을 누르면 확인 화면 없이 해당 제안의 채팅방으로 바로 이동한다", async ({
-  page,
-}) => {
+test("상담 수락을 누르면 채팅방이 열리고 그 방으로 이동한다", async ({ page }) => {
   await page.goto(PATH);
 
   const sentCard = page.getByRole("listitem").filter({ hasText: "윤지후" });
   await expect(sentCard).toBeVisible();
 
+  // 수락 전에는 방이 없다 — 상담 중인 두 건만 채팅 목록에 잡힌다.
   await expect(async () => {
     await sentCard.getByRole("button", { name: "상담 수락" }).click();
-    // 윤지후 방(CHAT_ROOM_3) — 중간 확인 화면 없이 채팅방 URL로 직행
-    await expect(page).toHaveURL(/\/customer\/chat\/e1000000-0000-4000-8000-000000000003/);
-  }).toPass({ timeout: 10000 });
+    // 수락 응답의 chatRoomId로 중간 확인 화면 없이 직행 — 아무 방이 아니라 윤지후 제안의 방(CHAT_ROOM_3)이어야 한다.
+    // 서비스워커 응답은 Playwright가 못 읽어 응답 id를 직접 비교하지 못하므로 목이 돌려주는 고정 id로 확인한다.
+    await expect(page).toHaveURL(/\/customer\/chat\/e1000000-0000-4000-8000-000000000003$/);
+  }).toPass({ timeout: 15000 });
 });
 
 test("매칭을 완료하면 매칭한 제안만 남는다", async ({ page }) => {
@@ -87,6 +89,36 @@ test("매칭을 완료하면 매칭한 제안만 남는다", async ({ page }) =>
 
   // 매칭 완료된 제안은 뱃지로 바뀐다(ACCEPTED)
   await expect(firstCard.getByText("매칭 완료", { exact: true })).toBeVisible();
+});
+
+test("추가 제안 리포트에서도 상담 수락 후 매칭 완료하면 매칭한 제안만 남는다", async ({ page }) => {
+  // 골절 리포트(고정 제안 목) — 상담 수락 전에는 한지원 제안에 방이 없다
+  const extraPath = "/customer/proposals/b2c9d0e1-3f4a-4b5c-8d6e-7f8a9b0c1d2e";
+  await page.goto(extraPath);
+
+  const sentCard = page.getByRole("listitem").filter({ hasText: "한지원" });
+  await expect(async () => {
+    await sentCard.getByRole("button", { name: "상담 수락" }).click();
+    await expect(page).toHaveURL(/\/customer\/chat\/[0-9a-f-]+/);
+  }).toPass({ timeout: 15000 });
+
+  // 수락으로 열린 방이 채팅 목록에 잡혀야 받은 제안 카드의 매칭 완료가 활성화된다.
+  // 목은 메모리 상태라 전체 새로고침(goto)이면 열린 방이 사라진다 — 뒤로 가기로 돌아온다.
+  await page.goBack();
+  await expect(page).toHaveURL(extraPath);
+  const consultCard = page.getByRole("listitem").filter({ hasText: "한지원" });
+  const matchButton = consultCard.getByRole("button", { name: "매칭 완료" });
+  await expect(matchButton).toBeEnabled();
+  await matchButton.click();
+
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  await dialog.getByRole("button", { name: "매칭 완료" }).click();
+
+  // 채택 결과가 제안 목록에도 반영된다 — 같은 리포트의 다른 제안은 종료되어 사라지고 상담 중에 머물지 않는다
+  await expect(page.getByText("이서준")).toHaveCount(0);
+  await expect(page.getByText("문태호")).toHaveCount(0);
+  await expect(consultCard.getByText("매칭 완료", { exact: true })).toBeVisible();
 });
 
 test("매칭 완료 확인을 취소하면 제안이 그대로 유지된다", async ({ page }) => {
@@ -117,7 +149,7 @@ test("매칭 완료가 실패하면 실패 안내 토스트가 보이고 제안 
     const originalFetch = window.fetch;
     window.fetch = (input, init = {}) => {
       const headers = new Headers(init.headers);
-      headers.set("x-mock-failure", "match-proposal");
+      headers.set("x-mock-failure", "accept-chat");
       return originalFetch(input, { ...init, headers });
     };
   });

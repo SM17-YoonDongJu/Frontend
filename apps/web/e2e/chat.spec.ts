@@ -10,8 +10,9 @@ import { clickChatHeaderAction, openChatHeaderMenu } from "./_chat-header-helper
  *   → 매칭 후 사건 진행 보기 → 공유 리포트 열기.
  * partner 무회귀: 평면 목록(그룹 없음)·헤더 더보기 상담 종료·상담 종료 흐름 그대로.
  *
- * 시드(기본 MSW): 같은 reportId·caseNo 3방(김도현·정우성·윤지후) 전부 ACTIVE.
- * 김도현·정우성 COUNSELING, 윤지후 SENT(#231 선생성 방) — 셋 다 그룹은 "비교 중"으로 동일.
+ * 시드(기본 MSW): 같은 reportId·caseNo 2방(김도현·정우성) 모두 COUNSELING·ACTIVE.
+ * 윤지후는 제안만 도착한 SENT라 방이 없다 — 방은 고객이 상담을 수락할 때 열린다(#325).
+ * 그래서 채팅 목록과 매칭 확인 모달의 "함께 종료되는 상담"에는 수락된 상담만 센다.
  * 전송 실패는 x-mock-failure 헤더로 강제. 헤더 보조 액션은 "더보기" 패널 안에 있다 — 단, 매칭 완료는
  * 데스크톱 비교 배너에 전용 버튼이 있어 더보기에서 빠지고, 매칭 거절은 데스크톱에 접근 경로가 없다(모바일 더보기 전용, 팀 결정).
  */
@@ -40,18 +41,19 @@ test("목록에 진입하면 최근 대화가 위로 정렬되어 보인다", as
   const rooms = page.getByRole("listitem").filter({ hasText: "손해사정사" });
   await expect(rooms.first()).toContainText(ROOM_KIM);
   await expect(page.getByText(ROOM_JUNG)).toBeVisible();
-  await expect(page.getByText(ROOM_YOON)).toBeVisible();
+  // 수락 전 제안은 방이 없어 목록에 나오지 않는다
+  await expect(page.getByText(ROOM_YOON)).toHaveCount(0);
 });
 
 test("고객 목록은 매칭 상태 그룹(상담 중·비교)으로 묶여 보인다", async ({ page }) => {
   await page.goto(CUSTOMER_LIST);
 
-  // 같은 사건 3방이 전부 비교 중 → "상담 중 · 비교" 섹션 + 카운트 3
+  // 같은 사건에서 수락한 2건이 비교 중 → "상담 중 · 비교" 섹션 + 카운트 2
   const section = page.getByText("상담 중 · 비교", { exact: true });
   await expect(section).toBeVisible();
   await expect(
     page.getByRole("listitem").filter({ hasText: "손해사정사" }),
-  ).toHaveCount(3);
+  ).toHaveCount(2);
 });
 
 test("검색어를 입력하면 이름·마지막 메시지로 필터되고 없으면 빈 상태가 보인다", async ({
@@ -215,14 +217,14 @@ test("모바일에서도 헤더 더보기로 매칭을 완료할 수 있다", as
 
   // 목록 상단 비교 배너(모바일 전용 문구)
   await page.goto(CUSTOMER_LIST);
-  await expect(page.getByText(/3명과 상담 중이에요/)).toBeVisible();
+  await expect(page.getByText(/2명과 상담 중이에요/)).toBeVisible();
 
   // 스레드 헤더 더보기 → 매칭 완료 → 모달 → 확정
   await page.goto(`${CUSTOMER_LIST}/${ROOM_1}`);
   await clickChatHeaderAction(page, "매칭 완료");
 
   const dialog = page.getByRole("dialog");
-  await expect(dialog.getByText("함께 종료되는 상담 2건")).toBeVisible();
+  await expect(dialog.getByText("함께 종료되는 상담 1건")).toBeVisible();
   await dialog.getByRole("button", { name: "매칭 완료" }).click();
 
   // 매칭 후 — 더보기 항목이 사건 진행 보기로 바뀐다
@@ -239,11 +241,11 @@ test("매칭 완료를 확정하면 형제 상담이 종료되고 매칭 완료�
   // 데스크톱은 더보기가 아니라 비교 배너의 전용 버튼으로 매칭 완료를 연다
   await page.getByRole("button", { name: "매칭 완료" }).click();
 
-  // 확인 모달 — 함께 종료되는 상담 2건(정우성·윤지후)
+  // 확인 모달 — 함께 종료되는 상담 1건(정우성)
   const dialog = page.getByRole("dialog");
   await expect(dialog).toBeVisible();
   await expect(dialog.getByText(/매칭할까요\?/)).toBeVisible();
-  await expect(dialog.getByText("함께 종료되는 상담 2건")).toBeVisible();
+  await expect(dialog.getByText("함께 종료되는 상담 1건")).toBeVisible();
 
   await dialog.getByRole("button", { name: "매칭 완료" }).click();
 
