@@ -10,6 +10,7 @@ export async function getReviewList(filter?: ReviewListFilter): Promise<ReviewLi
     query: {
       status: filter?.status,
       accidentType: filter?.accidentType,
+      region: filter?.region,
       page: filter?.page,
       size: filter?.size,
     },

@@ -244,20 +244,29 @@ function buildAdjusterProfile(adjusterId: string, withReviews: boolean) {
 }
 
 // 검수 대기 목 데이터 — reportId 안정 위해 모듈 스코프에 고정.
+// 실서버 목록은 검수 단계(AWAITING_INSPECTION·AWAITING_ADOPTION) 리포트만 돌려준다(#326) —
+// 상담 전환·미채택·종결 건은 이 목록에 나오지 않는다.
+// region은 사용자 지역 목록을 " · "로 이은 문자열이고, 필터는 목록에 그 값이 정확히 들어 있는 건만 고른다.
 // CONTRACT: 명세없음-임시 — caseId·title·region·claimedMin/Max·offerHeadroom은 list 미확장 필드(MSW 목킹).
 const PENDING_REVIEWS = [
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), 0)}T09:00:00Z`, caseId: "042", title: "우측 슬관절 인대 파열 · 등급 재산정", region: "서울 강남", claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2, held: false },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), -1)}T08:10:00Z`, caseId: "041", title: "다발성 늑골 골절 · 일실수입 과소", region: "경기 성남", claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3, held: false },
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "038", title: "요추 추간판탈출 · 특약 누락", region: "서울 송파", claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2, held: false },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), 0)}T09:00:00Z`, caseId: "042", title: "우측 슬관절 인대 파열 · 등급 재산정", region: "서울 강남구 · 서울 서초구", claimedMinAmount: 12_000_000, claimedMaxAmount: 18_000_000, offerHeadroom: 5_500_000, issueCount: 2, held: false },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_INSPECTION", createdAt: `${addDays(new Date(), -1)}T08:10:00Z`, caseId: "041", title: "다발성 늑골 골절 · 일실수입 과소", region: "경기 성남시", claimedMinAmount: 24_000_000, claimedMaxAmount: 31_000_000, offerHeadroom: 6_000_000, issueCount: 3, held: false },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T16:40:00Z", caseId: "038", title: "요추 추간판탈출 · 특약 누락", region: "서울 송파구", claimedMinAmount: 9_000_000, claimedMaxAmount: 14_000_000, offerHeadroom: 2_800_000, issueCount: 2, held: false },
   // title·claimedMin/Max null 응답 케이스 회귀용(offerHeadroom은 항상 계산되는 값이라 non-null 유지).
-  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "036", title: null, region: "인천 연수", claimedMinAmount: null, claimedMaxAmount: null, offerHeadroom: 1_600_000, issueCount: 1, held: false },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_ADOPTION", createdAt: "2026-06-17T14:05:00Z", caseId: "034", title: "경추 염좌 · 향후 치료비 미반영", region: "서울 마포", claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 2_100_000, issueCount: 1, held: false },
-  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_ADOPTION", createdAt: "2026-06-16T10:30:00Z", caseId: "033", title: "견관절 회전근개 파열 · 등급 재산정", region: "경기 수원", claimedMinAmount: 11_000_000, claimedMaxAmount: 15_500_000, offerHeadroom: 4_200_000, issueCount: 2, held: false },
-  { reportId: crypto.randomUUID(), accidentType: "cancer_diagnosis", status: "COUNSELING", createdAt: "2026-06-15T09:15:00Z", caseId: "031", title: "유사암 분류 쟁점 · 진단비 과소", region: "서울 종로", claimedMinAmount: 20_000_000, claimedMaxAmount: 20_000_000, offerHeadroom: 3_000_000, issueCount: 2, held: false },
-  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "COUNSELING", createdAt: "2026-06-14T13:50:00Z", caseId: "029", title: "통원 한도 적용 분쟁", region: "부산 해운대", claimedMinAmount: 2_800_000, claimedMaxAmount: 3_600_000, offerHeadroom: 900_000, issueCount: 1, held: false },
-  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "NOT_SELECTED", createdAt: "2026-06-13T08:40:00Z", caseId: "027", title: "다발성 늑골 골절 · 일실수입", region: "대구 수성", claimedMinAmount: 18_000_000, claimedMaxAmount: 24_000_000, offerHeadroom: 5_000_000, issueCount: 1, held: false },
-  { reportId: crypto.randomUUID(), accidentType: "fire", status: "CLOSED", createdAt: "2026-06-12T15:20:00Z", caseId: "024", title: "가재도구 손해액 산정", region: "광주 서구", claimedMinAmount: 8_500_000, claimedMaxAmount: 12_000_000, offerHeadroom: 1_800_000, issueCount: 1, held: false },
+  { reportId: crypto.randomUUID(), accidentType: "medical_indemnity", status: "AWAITING_INSPECTION", createdAt: "2026-06-18T11:20:00Z", caseId: "036", title: null, region: "인천 연수구", claimedMinAmount: null, claimedMaxAmount: null, offerHeadroom: 1_600_000, issueCount: 1, held: false },
+  { reportId: crypto.randomUUID(), accidentType: "traffic", status: "AWAITING_ADOPTION", createdAt: "2026-06-17T14:05:00Z", caseId: "034", title: "경추 염좌 · 향후 치료비 미반영", region: "서울 마포구", claimedMinAmount: 6_000_000, claimedMaxAmount: 9_000_000, offerHeadroom: 2_100_000, issueCount: 1, held: false },
+  { reportId: crypto.randomUUID(), accidentType: "disability", status: "AWAITING_ADOPTION", createdAt: "2026-06-16T10:30:00Z", caseId: "033", title: "견관절 회전근개 파열 · 등급 재산정", region: "경기 수원시", claimedMinAmount: 11_000_000, claimedMaxAmount: 15_500_000, offerHeadroom: 4_200_000, issueCount: 2, held: false },
 ];
+
+// 건수가 많은 계정 재현용(#326) — x-mock-scenario: pending-review-many. 한 페이지(20건)를 넘는 25건.
+const PENDING_REVIEWS_MANY = Array.from({ length: 25 }, (_, index) => ({
+  ...PENDING_REVIEWS[0]!,
+  reportId: crypto.randomUUID(),
+  caseId: String(200 + index),
+  title: `검수 대기 사건 ${String(index + 1).padStart(2, "0")}`,
+  status: "AWAITING_INSPECTION",
+  region: "서울 강남구",
+}));
 
 // 검수 내역 목 데이터 (이슈 #59/#130) — GET /adjusters/me/reviewed-reports.
 // 명세 items[] 7필드(report_id·case_no·title·accident_type·region·status·reviewed_at) 거울.
@@ -2882,38 +2891,42 @@ export const handlers = [
   }),
 
   // 검수 대기 목록 (활성 손해사정사 전용) — :reportId 라우트보다 먼저 등록
+  // 실서버 계약(#326): page는 1부터·size 기본 10(최대 100)으로 나눠 돌려주고 pagination에 총 건수·다음 페이지 유무를 담는다.
+  // statusCounts는 백엔드가 내린 적 없는 필드라 싣지 않는다. region은 사용자 지역 목록에 그 값이 정확히 든 건만 거른다.
+  // x-mock-scenario: pending-review-many → 한 페이지를 넘는 25건.
   wire.get(`${API_BASE_URL}/reports/pending-review`, async ({ request }) => {
     await delay(400);
 
     const url = new URL(request.url, "http://localhost");
-    const page = Number(url.searchParams.get("page") ?? "1");
-    const size = Number(url.searchParams.get("size") ?? "10");
+    const page = Math.max(1, Number(url.searchParams.get("page") ?? "1"));
+    const size = Math.min(100, Math.max(1, Number(url.searchParams.get("size") ?? "10")));
     const accidentType = url.searchParams.get("accidentType");
     const status = url.searchParams.get("status");
     const region = url.searchParams.get("region");
 
-    const list = PENDING_REVIEWS.filter(
+    const source =
+      request.headers.get("x-mock-scenario") === "pending-review-many"
+        ? PENDING_REVIEWS_MANY
+        : PENDING_REVIEWS;
+
+    const filtered = source.filter(
       (review) =>
         (!accidentType || review.accidentType === accidentType) &&
         (!status || review.status === status) &&
-        (!region || review.region === region),
+        (!region || review.region.split("·").some((value) => value.trim() === region)),
     );
 
-    // 탭 배지는 status 필터 적용 전 전체 분포 기준
-    const countsByStatus = PENDING_REVIEWS.reduce<Record<string, number>>((acc, review) => {
-      acc[review.status] = (acc[review.status] ?? 0) + 1;
-      return acc;
-    }, {});
-    const statusCounts = { total: PENDING_REVIEWS.length, ...countsByStatus };
+    const totalElements = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalElements / size));
+    const list = filtered.slice((page - 1) * size, page * size);
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: {
+      data: camelToSnakeDeep({
         list,
-        pagination: { page, size, totalElements: list.length, totalPages: 1, hasNext: false },
-        statusCounts,
-      },
+        pagination: { page, size, totalElements, totalPages, hasNext: page < totalPages },
+      }),
     });
   }),
 

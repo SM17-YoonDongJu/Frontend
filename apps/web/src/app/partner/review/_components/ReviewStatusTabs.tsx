@@ -1,8 +1,5 @@
 "use client";
 
-import type { ReviewStatusCounts } from "../../_shared/model/types";
-import { REVIEW_STATUS_PRESETS } from "../_hooks/use-review-filter";
-
 /** status 필터 탭바(단일 선택). 상태는 props로 주입받는 프레젠테이션 컴포넌트. */
 
 interface StatusOption {
@@ -11,25 +8,19 @@ interface StatusOption {
 }
 
 // 라벨은 Figma 문구 보존 — 빈 상태 문구도 이 목록을 공유.
+// 검수 대기 API는 검수 단계 리포트만 돌려줘 상담 전환·미채택·종결 탭은 늘 비어 있었다(#326).
 export const REVIEW_STATUS_OPTIONS: StatusOption[] = [
   { value: "전체", label: "전체" },
   { value: "AWAITING_ADOPTION", label: "전송 완료" },
-  { value: "COUNSELING", label: "상담 전환" },
-  { value: "NOT_SELECTED", label: "미채택" },
-  { value: "CLOSED", label: "종결" },
 ];
 
 interface Props {
   value: string;
-  counts?: ReviewStatusCounts;
   onSelect: (value: string) => void;
   isPending?: boolean;
 }
 
-export function ReviewStatusTabs({ value, counts, onSelect, isPending }: Props) {
-  // 헤더 "진행 중" 프리셋 진입 시 대응 상태 탭들을 함께 활성 표시.
-  const presetValues = REVIEW_STATUS_PRESETS[value];
-
+export function ReviewStatusTabs({ value, onSelect, isPending }: Props) {
   return (
     <div
       role="tablist"
@@ -40,8 +31,7 @@ export function ReviewStatusTabs({ value, counts, onSelect, isPending }: Props) 
       }`}
     >
       {REVIEW_STATUS_OPTIONS.map((option) => {
-        const active = presetValues ? presetValues.includes(option.value) : option.value === value;
-        const count = option.value === "전체" ? counts?.total : counts?.[option.value];
+        const active = option.value === value;
         return (
           <button
             key={option.value}
@@ -56,15 +46,6 @@ export function ReviewStatusTabs({ value, counts, onSelect, isPending }: Props) 
             }`}
           >
             {option.label}
-            {count !== undefined && (
-              <span
-                className={`flex h-3.5 min-w-[1.1875rem] items-center justify-center rounded-full px-1.5 text-[0.625rem] font-bold leading-none ${
-                  active ? "bg-navy text-white" : "bg-line-2 text-ink-2"
-                }`}
-              >
-                {count}
-              </span>
-            )}
           </button>
         );
       })}

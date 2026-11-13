@@ -15,6 +15,8 @@ export function useSubmitReview(reportId: string) {
         queryKey: reviewKeys.detail(reportId).queryKey,
       });
       queryClient.invalidateQueries({ queryKey: reportKeys.pendingReview._def });
+      // 검수 대기 화면은 무한 조회 키를 쓴다 — 접두사가 달라 위 키로는 갱신되지 않는다.
+      queryClient.invalidateQueries({ queryKey: reportKeys.pendingReviewInfinite._def });
     },
   });
 }

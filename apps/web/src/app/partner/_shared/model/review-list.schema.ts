@@ -10,7 +10,6 @@ export const reviewStatusSchema = enumWithFallback([
   "AWAITING_ADOPTION",
   "COUNSELING",
   "CLOSED",
-  // CONTRACT: 명세없음-임시 — 미채택 탭 대응값 백엔드 협의 중
   "NOT_SELECTED",
 ]);
 
@@ -39,18 +38,12 @@ export const paginationSchema = z.object({
   hasNext: z.boolean(),
 });
 
-// CONTRACT: 명세없음-임시 — 탭 건수 필드 백엔드 협의 중
-export const reviewStatusCountsSchema = z
-  .object({ total: z.number().int() })
-  .catchall(z.number().int());
-
 export const reviewListSchema = z.object({
   list: z.array(reviewListItemSchema),
   pagination: paginationSchema,
-  statusCounts: reviewStatusCountsSchema.optional(),
 });
 
-// statusCounts는 여전히 명세 미포함(백엔드 협의 중), list 원소는 범용 Item 스키마라 항목별 대조 생략.
+// list 원소는 범용 Item 스키마라 항목별 대조 생략.
 type _ReviewListDriftCheck = ExpectDriftCheck<
-  AssertFieldsExistInSpec<Omit<z.infer<typeof reviewListSchema>, "list" | "statusCounts">, PendingReviewListResponse>
+  AssertFieldsExistInSpec<Omit<z.infer<typeof reviewListSchema>, "list">, PendingReviewListResponse>
 >;

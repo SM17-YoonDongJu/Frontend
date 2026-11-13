@@ -2,9 +2,10 @@
 
 import { ChevronDown } from "@/shared/ui/icons/ChevronDown";
 import { useReviewFilter } from "../_hooks/use-review-filter";
+import { REGION_FILTER_GROUPS } from "../_model/region-filter-options";
 import { REVIEW_TYPE_OPTIONS } from "./ReviewTypeChips";
 
-export function ReviewFilterBar({ regions }: { regions: string[] }) {
+export function ReviewFilterBar() {
   const { type, setType, region, setRegion, isPending } = useReviewFilter();
 
   return (
@@ -39,10 +40,15 @@ export function ReviewFilterBar({ regions }: { regions: string[] }) {
           aria-label="지역 필터"
           className="appearance-none rounded-pill border border-line bg-card py-1.5 pl-6 pr-8 text-sm text-ink-2"
         >
-          {[...new Set(["전체", ...regions])].map((r) => (
-            <option key={r} value={r}>
-              {r === "전체" ? "지역 전체" : r}
-            </option>
+          <option value="전체">지역 전체</option>
+          {REGION_FILTER_GROUPS.map((group) => (
+            <optgroup key={group.label} label={group.label}>
+              {group.options.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </optgroup>
           ))}
         </select>
       </div>

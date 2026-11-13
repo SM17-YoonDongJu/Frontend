@@ -9,7 +9,7 @@ import { useProfile } from "../_shared/api/use-profile";
 const NAV_ITEMS = [
   { label: "홈", href: "/partner", showCount: false },
   { label: "검수 대기", href: "/partner/review", showCount: true },
-  { label: "진행 중", href: "/partner/review?status=진행중", showCount: false },
+  { label: "진행 중", href: "/partner/mypage/review-history", showCount: false },
 ] as const;
 
 export function PartnerHeader() {
