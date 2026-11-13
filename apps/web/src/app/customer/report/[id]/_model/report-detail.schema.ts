@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { CustomerReportDetailResponse, IssueItem } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 import { enumWithFallback } from "@/shared/lib/enum-with-fallback";
+import { analysisStateSchema } from "@/app/customer/_shared/model/analysis-state";
 
 /**
  * 리포트 상세. 출처: API 명세 GET /reports/{reportId}(백엔드 CustomerReportDetailResponse).
@@ -49,6 +50,7 @@ const rawReportDetailSchema = z.object({
   question: z.string().nullable(),
   adjusterId: z.uuid().nullable(),
   confidenceLevel: enumWithFallback(["LOW", "MEDIUM", "HIGH"]).nullable(),
+  analysisState: analysisStateSchema,
   reportNo: z.string().nullable(),
   reviewComment: z.string().nullable(),
   reviewedAt: z.string().nullable(),
