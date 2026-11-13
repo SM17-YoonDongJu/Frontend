@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 import { Button, buttonVariants } from "@/shared/ui/Button";
 import { REPORT_FILENAME, REPORT_TITLE } from "../_model/report-meta";
+import { hasAnalysisBody, reportPhase } from "../_model/report-phase";
 import type { ReportDetail } from "../_model/types";
 
 export function ReportActions({
   report,
-  compact = false,
+  compact = false
 }: {
   report: ReportDetail;
   /** 모바일 상단 바용 공유 아이콘 버튼 단독 렌더 */
@@ -43,7 +44,7 @@ export function ReportActions({
     try {
       const [{ pdf }, { ReportPdfDocument }] = await Promise.all([
         import("@react-pdf/renderer"),
-        import("../_pdf/ReportPdfDocument"),
+        import("../_pdf/ReportPdfDocument")
       ]);
       const blob = await pdf(<ReportPdfDocument report={report} />).toBlob();
       const url = URL.createObjectURL(blob);
@@ -80,6 +81,8 @@ export function ReportActions({
     );
   }
 
+  // 분석 결과가 없는 단계(분석 중·중단)에는 빈 PDF를 만들지 않는다.
+  const canSavePdf = hasAnalysisBody(reportPhase(report));
   const canReview = report.status === "MATCHED" && report.adjusterId != null;
 
   return (
@@ -93,7 +96,13 @@ export function ReportActions({
             리뷰 남기기
           </Link>
         )}
-        <Button variant="outline" size="sm" loading={loading} onClick={handlePdf}>
+        <Button
+          variant="outline"
+          size="sm"
+          loading={loading}
+          disabled={!canSavePdf}
+          onClick={handlePdf}
+        >
           PDF 저장
         </Button>
         <Button variant="outline" size="sm" onClick={handleShare}>

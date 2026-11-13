@@ -12,7 +12,7 @@ type Tone = NonNullable<StatusBadgeProps["tone"]>;
 const ISSUE_STATUS_META: Record<string, { label: string; tone: Tone }> = {
   CONFIRMED: { label: "확정", tone: "green" },
   TRUSTED: { label: "신뢰", tone: "gold" },
-  INFO: { label: "안내", tone: "neutral" },
+  INFO: { label: "안내", tone: "neutral" }
 };
 
 const ISSUE_STATUS_FALLBACK = { label: "안내", tone: "neutral" as Tone };
@@ -29,9 +29,11 @@ function formatImpact(won: number | null | undefined): string | null {
 
 export interface IssueReviewProps {
   issues: IssueItem[];
+  /** 사정사 검수가 반영된 리포트인지. 검수 전에는 AI 판정을 "확정"으로 읽히지 않게 표기한다. */
+  isReviewed: boolean;
 }
 
-export function IssueReview({ issues }: IssueReviewProps) {
+export function IssueReview({ issues, isReviewed }: IssueReviewProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   if (!issues.length) return null;
@@ -45,7 +47,11 @@ export function IssueReview({ issues }: IssueReviewProps) {
 
       <ol className="mt-4 space-y-4 lg:space-y-3">
         {issues.map((issue, i) => {
-          const meta = ISSUE_STATUS_META[issue.aiStatus] ?? ISSUE_STATUS_FALLBACK;
+          const baseMeta = ISSUE_STATUS_META[issue.aiStatus] ?? ISSUE_STATUS_FALLBACK;
+          const meta =
+            !isReviewed && issue.aiStatus === "CONFIRMED"
+              ? { ...baseMeta, label: "근거 확인" }
+              : baseMeta;
           const tags = issueTags(issue);
           const isOpen = openIndex === i;
           const canToggle = tags.length > 0;
@@ -55,7 +61,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
               key={issue.title}
               className={cn(
                 "pt-4 [&:not(:first-child)]:border-t [&:not(:first-child)]:border-line-2",
-                "first:pt-0 lg:mt-3 lg:rounded-card lg:border lg:border-line-2 lg:bg-paper-2 lg:p-4 lg:pt-4 lg:first:mt-0",
+                "first:pt-0 lg:mt-3 lg:rounded-card lg:border lg:border-line-2 lg:bg-paper-2 lg:p-4 lg:pt-4 lg:first:mt-0"
               )}
             >
               <button
@@ -84,7 +90,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
                   <ChevronDown
                     className={cn(
                       "mt-0.5 shrink-0 text-[1.125rem] text-ink-3 transition-transform lg:hidden",
-                      isOpen && "rotate-180",
+                      isOpen && "rotate-180"
                     )}
                   />
                 )}
@@ -98,7 +104,7 @@ export function IssueReview({ issues }: IssueReviewProps) {
                 <div
                   className={cn(
                     "mt-3 flex-wrap gap-1.5 pl-[2.125rem] lg:flex lg:pl-0",
-                    isOpen ? "flex" : "hidden",
+                    isOpen ? "flex" : "hidden"
                   )}
                 >
                   {tags.map((tag) => (

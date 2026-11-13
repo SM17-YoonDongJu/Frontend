@@ -83,22 +83,29 @@ test.describe("모바일 뷰(454px)", () => {
 test.describe("검수 대기 리포트(454px)", () => {
   test.use({ viewport: { width: 454, height: 900 } });
 
-  test("검수 전 리포트에 진입하면 검수 완료 문구 대신 대기 안내가 보인다", async ({ page }) => {
+  test("검수 전 리포트에 진입하면 기다리라는 안내 대신 AI 분석 결과 안내가 보인다", async ({
+    page,
+  }) => {
     await page.goto(AWAITING_PATH);
 
-    await expect(page.getByRole("heading", { name: "아직 검수 대기 중이에요" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "AI가 분석한 결과예요" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "아직 검수 대기 중이에요" })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: /검수해주셨어요/ })).toHaveCount(0);
     await expect(page.getByText("검수 완료")).toHaveCount(0);
 
     // AI 분석 본문은 검수 여부와 무관하게 유지되고, 검수 결과가 아님을 라벨로 구분한다.
-    await expect(page.getByText("AI 분석 결과")).toBeVisible();
+    await expect(page.getByText("AI 분석 결과", { exact: true })).toBeVisible();
     await expect(page.getByText("장해등급 과소 산정 가능")).toBeVisible();
   });
 
-  test("검수 대기 안내에서 받은 제안 확인하기를 누르면 제안 목록으로 이동한다", async ({
+  test("제안이 도착한 리포트는 대기 안내 없이 받은 제안 확인하기로 제안 목록에 이동한다", async ({
     page,
   }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-proposals-arrived" });
     await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "아직 검수 대기 중이에요" })).toHaveCount(0);
+    await expect(page.getByRole("heading", { name: "사정사 제안을 확인해보세요" })).toBeVisible();
 
     const link = page.getByRole("link", { name: "받은 제안 확인하기" });
     await expect(async () => {
@@ -106,9 +113,29 @@ test.describe("검수 대기 리포트(454px)", () => {
       await expect(page).toHaveURL(/\/customer\/proposals\//);
     }).toPass({ timeout: 10000 });
 
-    await expect(page.getByText("아직 도착한 제안이 없어요")).toBeVisible();
     // 분석 대상 요약이 없어도 리포트 상세로 돌아가는 진입점은 남는다.
     await expect(page.getByRole("link", { name: /분석 리포트/ })).toBeVisible();
+  });
+
+  test("분석 중인 리포트는 빈 섹션 대신 분석 중 안내를 보인다", async ({
+    page,
+  }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-analyzing" });
+    await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "분석 중이에요" })).toBeVisible();
+    await expect(page.getByText("AI 분석 결과", { exact: true })).toHaveCount(0);
+    await expect(page.getByText(/참고용 추정 분석/)).toHaveCount(0);
+  });
+
+  test("분석이 끝나면 새로고침 없이 분석 결과로 바뀐다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-analyzing-then-done" });
+    await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "분석 중이에요" })).toBeVisible();
+    // 5초 간격 폴링으로 완료 응답을 받아 본문으로 전환된다.
+    await expect(page.getByText("장해등급 과소 산정 가능")).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole("heading", { name: "분석 중이에요" })).toHaveCount(0);
   });
 
   test("검수 전 리포트를 사정사로 조회하면 대기 안내가 없다", async ({ page }) => {
@@ -117,8 +144,8 @@ test.describe("검수 대기 리포트(454px)", () => {
     });
     await page.goto(AWAITING_PATH);
 
-    await expect(page.getByRole("heading", { name: "아직 검수 대기 중이에요" })).toHaveCount(0);
-    await expect(page.getByText("AI 분석 결과")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "AI가 분석한 결과예요" })).toHaveCount(0);
+    await expect(page.getByText("AI 분석 결과", { exact: true })).toBeVisible();
   });
 });
 
@@ -158,6 +185,16 @@ test.describe("데스크톱 뷰(1280px)", () => {
     await expect(page.getByRole("heading", { name: "적용 가능 보장 항목" })).toBeVisible();
     await expect(page.getByRole("heading", { name: "누락 가능 특약" })).toBeVisible();
     await expect(page.getByRole("link", { name: "이 의견으로 상담하기" })).toBeVisible();
+  });
+
+  test("분석 중인 리포트는 PDF 저장 버튼이 비활성화된다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-analyzing" });
+    await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "분석 중이에요" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "PDF 저장" })).toBeDisabled();
+    // 분석 결과가 없는데 쟁점 0건 칩이 완료처럼 보이지 않는다.
+    await expect(page.getByText(/쟁점 \d+건/)).toHaveCount(0);
   });
 
   test("PDF 저장을 누르면 리포트가 PDF로 다운로드된다", async ({ page }) => {

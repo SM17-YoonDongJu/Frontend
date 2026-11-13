@@ -1,15 +1,16 @@
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import { formatManwon, formatManwonRange } from "@/shared/lib/format-amount";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
-import { REPORT_TITLE } from "../_model/report-meta";
+import { REPORT_DISCLAIMER, REPORT_TITLE } from "../_model/report-meta";
+import { reportPhase } from "../_model/report-phase";
 import type { ReportDetail } from "../_model/types";
 
 Font.register({
   family: "Gowun",
   fonts: [
     { src: "/fonts/GowunBatang-Regular.ttf" },
-    { src: "/fonts/GowunBatang-Bold.ttf", fontWeight: "bold" },
-  ],
+    { src: "/fonts/GowunBatang-Bold.ttf", fontWeight: "bold" }
+  ]
 });
 
 const INK = "#15202e";
@@ -21,7 +22,7 @@ const GOLD = "#8a6420";
 const ISSUE_LABEL: Record<string, string> = {
   CONFIRMED: "확정",
   TRUSTED: "신뢰",
-  INFO: "안내",
+  INFO: "안내"
 };
 
 const won = (n: number) => `${formatManwon(n)}만원`;
@@ -43,10 +44,15 @@ const s = StyleSheet.create({
   badge: { fontSize: 9, color: GOLD, fontWeight: "bold" },
   tag: { fontSize: 9, color: INK3, marginTop: 3 },
   li: { marginTop: 2 },
-  muted: { color: INK3, fontSize: 9 },
+  muted: { color: INK3, fontSize: 9 }
 });
 
 export function ReportPdfDocument({ report }: { report: ReportDetail }) {
+  // 사정사 검수가 반영되기 전에는 AI 분석 결과임을 제목·라벨에 드러낸다.
+  const isReviewed = reportPhase(report) === "adopted";
+  const issueLabel = (aiStatus: string) =>
+    !isReviewed && aiStatus === "CONFIRMED" ? "근거 확인" : (ISSUE_LABEL[aiStatus] ?? "안내");
+
   return (
     <Document>
       <Page size="A4" style={s.page}>
@@ -55,6 +61,7 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
           {report.issues.length}건
         </Text>
         <Text style={s.title}>{REPORT_TITLE}</Text>
+        {!isReviewed && <Text style={s.crumb}>AI 분석 결과 · 사정사 검수 전 참고용 리포트</Text>}
 
         {(report.adjuster?.nickname || report.reviewComment) && (
           <View style={s.section}>
@@ -67,7 +74,7 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
             <Text style={[s.muted, { marginTop: 4 }]}>
               {[
                 report.adjuster?.career != null ? `${report.adjuster.career}년차` : null,
-                report.reviewedAt && `${report.reviewedAt} 검수`,
+                report.reviewedAt && `${report.reviewedAt} 검수`
               ]
                 .filter(Boolean)
                 .join(" · ")}
@@ -76,7 +83,7 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
         )}
 
         <View style={s.navyCard}>
-          <Text style={s.navyLabel}>검토 보장</Text>
+          <Text style={s.navyLabel}>{isReviewed ? "검토 보장" : "예상 보상 범위"}</Text>
           <Text style={s.navyAmount}>
             {report.claimedMinAmount != null && report.claimedMaxAmount != null
               ? range(report.claimedMinAmount, report.claimedMaxAmount)
@@ -91,14 +98,14 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
 
         {report.issues.length > 0 && (
           <View style={s.section}>
-            <Text style={s.h2}>검토 의견 및 보완 사항</Text>
+            <Text style={s.h2}>{isReviewed ? "검토 의견 및 보완 사항" : "AI 분석 쟁점"}</Text>
             {report.issues.map((it, i) => (
               <View key={i} style={i === 0 ? undefined : s.issue}>
                 <View style={s.issueHead}>
                   <Text style={s.issueTitle}>
                     {i + 1}. {it.title}
                   </Text>
-                  <Text style={s.badge}>{ISSUE_LABEL[it.aiStatus] ?? "안내"}</Text>
+                  <Text style={s.badge}>{issueLabel(it.aiStatus)}</Text>
                 </View>
                 <Text style={{ marginTop: 2 }}>{it.description}</Text>
                 {it.tags?.[0] && <Text style={s.tag}>{it.tags[0]}</Text>}
@@ -139,6 +146,8 @@ export function ReportPdfDocument({ report }: { report: ReportDetail }) {
             ))}
           </View>
         )}
+
+        <Text style={[s.muted, { marginTop: 16, textAlign: "center" }]}>{REPORT_DISCLAIMER}</Text>
       </Page>
     </Document>
   );

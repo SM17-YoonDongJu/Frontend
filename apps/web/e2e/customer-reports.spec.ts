@@ -45,10 +45,10 @@ test.describe("내 리포트 목록", () => {
     await expect(firstCard.getByText("상담 종결 · 김도현 사정사")).toBeVisible();
     await expect(firstCard.getByText("제안 3 건")).toBeVisible();
 
-    // 검수 대기 건은 제안을 아직 받을 수 없다는 안내가 붙는다.
-    const awaitingCard = cards(page).filter({ hasText: "No.20260512-009" });
-    await expect(awaitingCard.getByText("검수 대기 중")).toBeVisible();
-    await expect(awaitingCard.getByText("검수 완료 후 제안을 받을 수 있어요")).toBeVisible();
+    // 검수 대기 건은 분석 상태에 따라 지금 할 수 있는 일을 알려준다(#331).
+    const analyzedCard = cards(page).filter({ hasText: "No.20260512-009" });
+    await expect(analyzedCard.getByText("검수 대기 중")).toBeVisible();
+    await expect(analyzedCard.getByText("AI 분석 결과를 지금 볼 수 있어요")).toBeVisible();
   });
 
   test("더보기를 누르면 다음 페이지 리포트가 이어 붙어 총 8건이 된다", async ({ page }) => {
@@ -69,6 +69,11 @@ test.describe("내 리포트 목록", () => {
     // 5 + 3 = 8건 누적, 마지막 페이지라 더보기는 사라진다.
     await expect(cards(page)).toHaveCount(8);
     await expect(moreButton).toHaveCount(0);
+
+    // 분석 중인 검수 대기 건은 결과 대신 분석 중 문구가 붙는다(#331).
+    await expect(
+      cards(page).filter({ hasText: "No.20260415-031" }).getByText("분석 중이에요"),
+    ).toBeVisible();
   });
 
   test("카드를 누르면 그 건의 받은 제안 목록으로 이동한다", async ({ page }) => {
@@ -81,6 +86,20 @@ test.describe("내 리포트 목록", () => {
       await firstCard.getByRole("link").click();
       await expect(page).toHaveURL(/\/customer\/proposals\/[0-9a-f-]+/);
     }).toPass({ timeout: 10000 });
+  });
+
+  test("제안이 없는 검수 대기 카드를 누르면 AI 분석 리포트 상세로 이동한다", async ({ page }) => {
+    await page.goto(PATH);
+    await expect(page.getByRole("heading", { name: "내 리포트" })).toBeVisible();
+
+    const analyzedCard = cards(page).filter({ hasText: "No.20260512-009" });
+    await expect(analyzedCard.getByText("AI 분석 결과를 지금 볼 수 있어요")).toBeVisible();
+
+    await expect(async () => {
+      await analyzedCard.getByRole("link").click();
+      await expect(page).toHaveURL(/\/customer\/report\/[0-9a-f-]+$/);
+    }).toPass({ timeout: 10000 });
+    await expect(page.getByText("AI 분석 결과", { exact: true })).toBeVisible();
   });
 
   test("리포트가 0건이면 빈 안내와 새 분석 시작 CTA가 보인다", async ({ page }) => {

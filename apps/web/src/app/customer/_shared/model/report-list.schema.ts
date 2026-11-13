@@ -2,6 +2,7 @@ import { z } from "zod";
 import type { ReportCardListResponse } from "@/shared/api/generated/types.gen";
 import type { AssertFieldsExistInSpec, ExpectDriftCheck } from "@/shared/lib/drift-check";
 import { enumWithFallback } from "@/shared/lib/enum-with-fallback";
+import { analysisStateSchema } from "./analysis-state";
 
 /**
  * 고객 리포트 목록 정본 — 대시보드·받은 제안·검수 내역·내 리포트 목록 공유(이슈 #128 통합).
@@ -20,6 +21,7 @@ export const reportListStatusSchema = enumWithFallback([
 export const reportListItemSchema = z.object({
   reportId: z.uuid(),
   status: reportListStatusSchema,
+  analysisState: analysisStateSchema,
   // 백엔드 row.accidentType() null 가능(사고유형 미확정).
   accidentType: z.string().nullable(),
   createdAt: z.string(),

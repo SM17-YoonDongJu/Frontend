@@ -8,12 +8,11 @@ import { FileText } from "@/shared/ui/icons/FileText";
 import { useChatList } from "@/shared/api/chat/use-chat-list";
 import type { ChatRoom } from "@/shared/api/chat/chat.schema";
 import { useDashboard } from "../_api/use-dashboard";
-import type {
-  DashboardActiveReport,
-  DashboardProposalSummary,
-} from "../_model/dashboard.schema";
+import { useReportAnalysisState } from "../_api/use-report-analysis-state";
+import type { DashboardActiveReport, DashboardProposalSummary } from "../_model/dashboard.schema";
 import { DASHBOARD_LINKS } from "../_model/dashboard-links";
 import { reportDisplayTitle } from "@/app/customer/_shared/model/report-title";
+import type { AnalysisState } from "@/app/customer/_shared/model/analysis-state";
 import { formatManwon } from "@/shared/lib/format-amount";
 
 const MAX_SUB_TODOS = 2;
@@ -33,7 +32,7 @@ interface ActionTodo {
 function buildTodos(
   activeReport: DashboardActiveReport | null,
   proposalSummary: DashboardProposalSummary | null,
-  unreadRoom: ChatRoom | null,
+  unreadRoom: ChatRoom | null
 ): ActionTodo[] {
   const list: ActionTodo[] = [];
 
@@ -51,7 +50,9 @@ function buildTodos(
         activeReport && proposalSummary.maxAmount != null ? (
           <>
             {reportDisplayTitle(activeReport)} · 최고 제안가{" "}
-            <span className="font-bold text-gold-2">{formatManwon(proposalSummary.maxAmount)}만원</span>{" "}
+            <span className="font-bold text-gold-2">
+              {formatManwon(proposalSummary.maxAmount)}만원
+            </span>{" "}
             — 제안을 비교하고 나에게 맞는 사정사를 선택해 보세요.
           </>
         ) : (
@@ -60,7 +61,7 @@ function buildTodos(
       ctaLabel: "제안 비교하기",
       subIcon: <FileText className="text-[1rem]" />,
       subTitle: `새 제안 ${count}건 도착`,
-      subDescription: activeReport ? reportDisplayTitle(activeReport) : "받은 제안 확인",
+      subDescription: activeReport ? reportDisplayTitle(activeReport) : "받은 제안 확인"
     });
   }
 
@@ -80,31 +81,48 @@ function buildTodos(
       ctaLabel: "채팅 열기",
       subIcon: <MessageSquare className="text-[1rem]" />,
       subTitle: `${unreadRoom.counterpart.name} 새 메시지`,
-      subDescription: description,
+      subDescription: description
     });
   }
 
   return list;
 }
 
-function buildInfoTodo(activeReport: DashboardActiveReport): ActionTodo {
+function buildInfoTodo(
+  activeReport: DashboardActiveReport,
+  analysisState: AnalysisState | undefined,
+): ActionTodo {
+  const title = reportDisplayTitle(activeReport);
+  // 분석이 끝난 리포트만 결과를 볼 수 있다고 알린다. 상태를 모르면(목록 미조회·첫 페이지 밖) 중립 문구.
+  const isAnalyzed = analysisState === "COMPLETED";
+
   return {
     key: "info",
     href: DASHBOARD_LINKS.report(activeReport.reportId),
-    heading: (
+    heading: isAnalyzed ? (
       <>
-        검수가 <span className="text-gold-2">진행 중</span>이에요
+        AI 분석 결과를 <span className="text-gold-2">확인</span>해보세요
+      </>
+    ) : (
+      <>
+        분석 현황을 <span className="text-gold-2">확인</span>해보세요
       </>
     ),
-    description: (
+    description: isAnalyzed ? (
       <>
-        {reportDisplayTitle(activeReport)} 검수를 진행하고 있어요. 결과가 준비되면 바로 알려드릴게요.
+        {title}의 AI 분석 결과를 리포트에서 볼 수 있어요. 사정사 검수가 끝나면 의견과 제안을
+        알려드릴게요.
+      </>
+    ) : (
+      <>
+        {title}의 분석이 끝나면 AI 분석 결과를 리포트에서 바로 볼 수 있어요. 사정사 검수가 끝나면
+        의견과 제안을 알려드릴게요.
       </>
     ),
     ctaLabel: "리포트 상세",
     subIcon: <FileText className="text-[1rem]" />,
-    subTitle: reportDisplayTitle(activeReport),
-    subDescription: "검수 진행 중",
+    subTitle: title,
+    subDescription: isAnalyzed ? "AI 분석 완료 · 검수 대기" : "분석 · 검수 대기",
   };
 }
 
@@ -113,6 +131,7 @@ export function ActionCenterCard() {
   const { data: chatRooms } = useChatList();
   const unreadRoom = chatRooms.find((room) => room.unreadCount > 0) ?? null;
   const todos = buildTodos(data.activeReport, data.proposalSummary, unreadRoom);
+  const analysisState = useReportAnalysisState(data.activeReport?.reportId ?? null);
 
   let main: ActionTodo | null = null;
   let subTodos: ActionTodo[] = [];
@@ -121,7 +140,7 @@ export function ActionCenterCard() {
     main = todos[0] ?? null;
     subTodos = todos.slice(1, 1 + MAX_SUB_TODOS);
   } else if (data.activeReport) {
-    main = buildInfoTodo(data.activeReport);
+    main = buildInfoTodo(data.activeReport, analysisState);
   }
 
   if (!main) return null;
