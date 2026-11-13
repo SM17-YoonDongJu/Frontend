@@ -1,11 +1,8 @@
 import Link from "next/link";
 import { formatManwon } from "@/shared/lib/format-amount";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
-import type {
-  ReportListItem,
-  ReportStatus,
-} from "@/app/customer/_shared/model/report-list.schema";
-import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
+import type { ReportListItem, ReportStatus } from "@/app/customer/_shared/model/report-list.schema";
+import { reportEntryHref } from "@/app/customer/_shared/model/report-routes";
 import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
 import { reportDisplayTitle } from "@/app/customer/_shared/model/report-title";
 
@@ -14,13 +11,13 @@ type PillTone = "gold" | "green" | "neutral";
 const STATUS_PILL: Partial<Record<ReportStatus, { label: string; tone: PillTone }>> = {
   AWAITING_INSPECTION: { label: "검수 중", tone: "neutral" },
   AWAITING_ADOPTION: { label: "제안 도착", tone: "gold" },
-  COUNSELING: { label: "매칭 완료", tone: "green" },
+  COUNSELING: { label: "매칭 완료", tone: "green" }
 };
 
 const PILL_TONE_CLASS: Record<PillTone, string> = {
   gold: "bg-gold-soft text-gold-ink",
   green: "bg-green-soft text-green",
-  neutral: "bg-line-2 text-ink-3",
+  neutral: "bg-line-2 text-ink-3"
 };
 
 function formatMonthDay(iso: string): string {
@@ -42,9 +39,13 @@ function reportFooter(report: ReportListItem): { label: string; value: string } 
     case "COUNSELING":
       return {
         label: "확정 보상액",
-        value: confirmedAmount !== null ? `${formatManwon(confirmedAmount)}만원` : "협의 중",
+        value: confirmedAmount !== null ? `${formatManwon(confirmedAmount)}만원` : "협의 중"
       };
     case "AWAITING_INSPECTION":
+      if (report.analysisState === "COMPLETED") {
+        return { label: "진행 상태", value: "AI 분석 완료 · 검수 대기" };
+      }
+      if (report.analysisState === "PROCESSING") return { label: "진행 상태", value: "분석 중" };
       return { label: "진행 상태", value: "검수 진행 중" };
     default:
       return { label: "진행 상태", value: REPORT_STATUS_META[report.status].label };
@@ -58,7 +59,7 @@ export function ReportSummaryCard({ report }: { report: ReportListItem }) {
 
   return (
     <Link
-      href={reportProposalsHref(report.reportId)}
+      href={reportEntryHref(report)}
       className="flex flex-col rounded-card border border-line bg-card p-[1.3125rem] transition hover:brightness-[.98]"
     >
       <div className="flex items-center justify-between">

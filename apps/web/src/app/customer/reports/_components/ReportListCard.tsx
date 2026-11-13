@@ -4,7 +4,7 @@ import { Chat } from "@/shared/ui/icons/Chat";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
 import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
-import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
+import { reportEntryHref } from "@/app/customer/_shared/model/report-routes";
 import { reportDisplayTitle } from "@/app/customer/_shared/model/report-title";
 import { ReportStatusBadges } from "./ReportStatusBadges";
 
@@ -30,7 +30,11 @@ function bottomLeftText(item: ReportListItem): string {
     if (item.adjusterNickname) return `${item.adjusterNickname}님이 제안을 보냈어요`;
     return `제안 ${item.proposalCount}건이 도착했어요`;
   }
-  if (item.status === "AWAITING_INSPECTION") return "검수 완료 후 제안을 받을 수 있어요";
+  if (item.status === "AWAITING_INSPECTION") {
+    if (item.analysisState === "COMPLETED") return "AI 분석 결과를 지금 볼 수 있어요";
+    if (item.analysisState === "PROCESSING") return "분석 중이에요";
+    return "검수 완료 후 제안을 받을 수 있어요";
+  }
   if (item.status === "COUNSELING") {
     if (item.adjusterNickname) return `${item.adjusterNickname} 사정사와 상담 중`;
     return "상담 진행 중";
@@ -50,10 +54,14 @@ export function ReportListCard({ item }: { item: ReportListItem }) {
 
   return (
     <Link
-      href={reportProposalsHref(item.reportId)}
+      href={reportEntryHref(item)}
       className={cn(
         "block rounded-card border p-4 shadow-card transition hover:brightness-[.99] md:p-5",
-        isArrived ? "border-line bg-card" : muted ? "border-line-2 bg-paper-2" : "border-line bg-paper-2",
+        isArrived
+          ? "border-line bg-card"
+          : muted
+            ? "border-line-2 bg-paper-2"
+            : "border-line bg-paper-2"
       )}
     >
       <div className="flex items-center gap-1.5">
@@ -66,7 +74,10 @@ export function ReportListCard({ item }: { item: ReportListItem }) {
       </div>
 
       <p
-        className={cn("mt-3 text-[0.9375rem] font-bold leading-[1.2]", muted ? "text-ink-3" : "text-ink")}
+        className={cn(
+          "mt-3 text-[0.9375rem] font-bold leading-[1.2]",
+          muted ? "text-ink-3" : "text-ink"
+        )}
       >
         {heading}
       </p>
@@ -74,14 +85,17 @@ export function ReportListCard({ item }: { item: ReportListItem }) {
 
       <div className="mt-3 flex items-center justify-between border-t border-line-2 pt-2.5">
         <span
-          className={cn("min-w-0 flex-1 truncate text-[0.75rem]", muted ? "text-ink-3" : "text-ink-2")}
+          className={cn(
+            "min-w-0 flex-1 truncate text-[0.75rem]",
+            muted ? "text-ink-3" : "text-ink-2"
+          )}
         >
           {bottomLeftText(item)}
         </span>
         <span
           className={cn(
             "ml-2 flex shrink-0 items-center gap-1 text-[0.75rem] font-bold",
-            isArrived ? "text-gold-ink" : "text-ink-3",
+            isArrived ? "text-gold-ink" : "text-ink-3"
           )}
         >
           {isArrived && <Chat className="size-[0.875rem]" />}

@@ -11,7 +11,7 @@ export function ReportListView() {
 
   const list = useMemo(
     () => dedupeByReportId(data.pages.flatMap((page) => page.list)),
-    [data.pages],
+    [data.pages]
   );
 
   return (
@@ -55,7 +55,7 @@ export function ReportListView() {
             )}
 
             <p className="px-5 pb-6 text-center text-[0.6875rem] leading-[1.5] text-ink-3 md:px-0 md:text-[0.75rem]">
-              리포트를 선택하면 도착한 제안 목록으로 이동합니다.
+              받은 제안이 있으면 제안 목록으로, 없으면 AI 분석 결과로 이동합니다.
             </p>
           </>
         )}
