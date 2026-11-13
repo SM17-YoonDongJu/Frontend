@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { accept, activitySummary, addHold, analysisStatus, apply, create, createReview, dashboard, decide, deregister, detail, getAdjusterDetail, getAdjusters, getMe, getMessages, getMyApplication, getMyInsurances, getMyNotifications, getMyPage, getMySettings, getProfile, getReviews, getRoom, getSharedReport, home, list, listMyRooms, logout, oauthCallback, type Options, pendingReview, proposals, read, read1, readAll, receivedProposals, register, register1, reissue, reject, report, reviewedReports, reviewReport, reviewWorkspace, send, summary, updateMe, updateMySettings, updateProfile, upload, uploadAttachment, withdraw } from '../sdk.gen';
-import type { AcceptData, AcceptResponse, ActivitySummaryData, ActivitySummaryResponse, AddHoldData, AddHoldResponse, AnalysisStatusData, AnalysisStatusResponse, ApplyData, ApplyResponse, CreateData, CreateResponse, CreateReviewData, CreateReviewResponse, DashboardData, DashboardResponse, DecideData, DecideResponse, DeregisterData, DeregisterResponse, DetailData, DetailResponse, GetAdjusterDetailData, GetAdjusterDetailResponse, GetAdjustersData, GetAdjustersResponse, GetMeData, GetMeResponse, GetMessagesData, GetMessagesResponse, GetMyApplicationData, GetMyApplicationResponse, GetMyInsurancesData, GetMyInsurancesResponse, GetMyNotificationsData, GetMyNotificationsResponse, GetMyPageData, GetMyPageResponse, GetMySettingsData, GetMySettingsResponse, GetProfileData, GetProfileResponse, GetReviewsData, GetReviewsResponse, GetRoomData, GetRoomResponse, GetSharedReportData, GetSharedReportResponse, HomeData, HomeResponse, ListData, ListMyRoomsData, ListMyRoomsResponse, ListResponse, LogoutData, LogoutResponse, OauthCallbackData, OauthCallbackResponse, PendingReviewData, PendingReviewResponse, ProposalsData, ProposalsResponse, Read1Data, Read1Response, ReadAllData, ReadAllResponse, ReadData, ReadResponse2, ReceivedProposalsData, ReceivedProposalsResponse, Register1Data, Register1Response, RegisterData, RegisterResponse2, ReissueData, ReissueResponse, RejectData, RejectResponse, ReportData, ReportResponse, ReviewedReportsData, ReviewReportData, ReviewReportResponse2, ReviewWorkspaceData, ReviewWorkspaceResponse2, SendData, SendResponse, SummaryData, SummaryResponse, UpdateMeData, UpdateMeResponse, UpdateMySettingsData, UpdateMySettingsResponse, UpdateProfileData, UpdateProfileResponse, UploadAttachmentData, UploadAttachmentResponse2, UploadData, UploadResponse2, WithdrawData, WithdrawResponse } from '../types.gen';
+import { accept, activitySummary, addHold, analysisStatus, apply, create, createReview, dashboard, decide, deregister, detail, getAdjusterDetail, getAdjusters, getMe, getMessages, getMyApplication, getMyInsurances, getMyNotifications, getMyPage, getMySettings, getProfile, getReviews, getRoom, getSharedReport, home, list, listMyRooms, login, login1, logout, oauthCallback, type Options, pendingReview, proposals, read, read1, readAll, receivedProposals, register, register1, reissue, reject, report, reviewedReports, reviewReport, reviewWorkspace, send, signup, summary, updateMe, updateMySettings, updateProfile, upload, uploadAttachment, withdraw } from '../sdk.gen';
+import type { AcceptData, AcceptResponse, ActivitySummaryData, ActivitySummaryResponse, AddHoldData, AddHoldResponse, AnalysisStatusData, AnalysisStatusResponse, ApplyData, ApplyResponse, CreateData, CreateResponse, CreateReviewData, CreateReviewResponse, DashboardData, DashboardResponse, DecideData, DecideResponse, DeregisterData, DeregisterResponse, DetailData, DetailResponse, GetAdjusterDetailData, GetAdjusterDetailResponse, GetAdjustersData, GetAdjustersResponse, GetMeData, GetMeResponse, GetMessagesData, GetMessagesResponse, GetMyApplicationData, GetMyApplicationResponse, GetMyInsurancesData, GetMyInsurancesResponse, GetMyNotificationsData, GetMyNotificationsResponse, GetMyPageData, GetMyPageResponse, GetMySettingsData, GetMySettingsResponse, GetProfileData, GetProfileResponse, GetReviewsData, GetReviewsResponse, GetRoomData, GetRoomResponse, GetSharedReportData, GetSharedReportResponse, HomeData, HomeResponse, ListData, ListMyRoomsData, ListMyRoomsResponse, ListResponse, Login1Data, Login1Response, LoginData, LoginResponse, LogoutData, LogoutResponse, OauthCallbackData, OauthCallbackResponse, PendingReviewData, PendingReviewResponse, ProposalsData, ProposalsResponse, Read1Data, Read1Response, ReadAllData, ReadAllResponse, ReadData, ReadResponse2, ReceivedProposalsData, ReceivedProposalsResponse, Register1Data, Register1Response, RegisterData, RegisterResponse2, ReissueData, ReissueResponse, RejectData, RejectResponse, ReportData, ReportResponse, ReviewedReportsData, ReviewReportData, ReviewReportResponse2, ReviewWorkspaceData, ReviewWorkspaceResponse2, SendData, SendResponse, SignupData, SignupResponse, SummaryData, SummaryResponse, UpdateMeData, UpdateMeResponse, UpdateMySettingsData, UpdateMySettingsResponse, UpdateProfileData, UpdateProfileResponse, UploadAttachmentData, UploadAttachmentResponse2, UploadData, UploadResponse2, WithdrawData, WithdrawResponse } from '../types.gen';
 
 export const deregisterMutation = (options?: Partial<Options<DeregisterData>>): UseMutationOptions<DeregisterResponse, DefaultError, Options<DeregisterData>> => {
     const mutationOptions: UseMutationOptions<DeregisterResponse, DefaultError, Options<DeregisterData>> = {
@@ -320,10 +320,52 @@ export const register1Mutation = (options?: Partial<Options<Register1Data>>): Us
     return mutationOptions;
 };
 
+export const signupMutation = (options?: Partial<Options<SignupData>>): UseMutationOptions<SignupResponse, DefaultError, Options<SignupData>> => {
+    const mutationOptions: UseMutationOptions<SignupResponse, DefaultError, Options<SignupData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await signup({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const loginMutation = (options?: Partial<Options<LoginData>>): UseMutationOptions<LoginResponse, DefaultError, Options<LoginData>> => {
+    const mutationOptions: UseMutationOptions<LoginResponse, DefaultError, Options<LoginData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await login({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
 export const logoutMutation = (options?: Partial<Options<LogoutData>>): UseMutationOptions<LogoutResponse, DefaultError, Options<LogoutData>> => {
     const mutationOptions: UseMutationOptions<LogoutResponse, DefaultError, Options<LogoutData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await logout({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const login1Mutation = (options?: Partial<Options<Login1Data>>): UseMutationOptions<Login1Response, DefaultError, Options<Login1Data>> => {
+    const mutationOptions: UseMutationOptions<Login1Response, DefaultError, Options<Login1Data>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await login1({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -877,6 +919,33 @@ export const listMyRoomsOptions = (options?: Options<ListMyRoomsData>) => queryO
     },
     queryKey: listMyRoomsQueryKey(options)
 });
+
+export const listMyRoomsInfiniteQueryKey = (options?: Options<ListMyRoomsData>): QueryKey<Options<ListMyRoomsData>> => createQueryKey('listMyRooms', options, true, ['chat-room-controller']);
+
+export const listMyRoomsInfiniteOptions = (options?: Options<ListMyRoomsData>) => {
+    const opts = infiniteQueryOptions<ListMyRoomsResponse, DefaultError, InfiniteData<ListMyRoomsResponse>, QueryKey<Options<ListMyRoomsData>>, string | Pick<QueryKey<Options<ListMyRoomsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+    // @ts-ignore
+    {
+        queryFn: async ({ pageParam, queryKey, signal }) => {
+            // @ts-ignore
+            const page: Pick<QueryKey<Options<ListMyRoomsData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+                query: {
+                    cursor: pageParam
+                }
+            };
+            const params = createInfiniteParams(queryKey, page);
+            const { data } = await listMyRooms({
+                ...options,
+                ...params,
+                signal,
+                throwOnError: true
+            });
+            return data;
+        },
+        queryKey: listMyRoomsInfiniteQueryKey(options)
+    });
+    return opts as Omit<typeof opts, 'initialData'>;
+};
 
 export const getRoomQueryKey = (options: Options<GetRoomData>) => createQueryKey('getRoom', options, false, ['chat-room-controller']);
 

@@ -7,7 +7,10 @@
  * - `mock:expiredResponseCount`             → 보호 엔드포인트가 401 EXPIRED_TOKEN을 돌려준 횟수(#224).
  *   Playwright `page.on("response")`는 WebKit에서 서비스워커 경유 응답 이벤트를 흘리지 않아
  *   E2E 관측 채널을 MSW 쪽 localStorage로 둔다.
- * - `mock:loggedOut` = "true"               → 로그아웃 상태(#155), 보호 엔드포인트가 401 LOGIN_REQUIRED
+ * - `mock:loggedOut` = "true"               → 로그아웃 상태(#155), 보호 엔드포인트가 401 LOGIN_REQUIRED.
+ *   아이디·비밀번호 가입·로그인 성공(#322)이 이 플래그를 지워 세션 복귀를 재현한다.
+ * - `mock:passwordAccount`                  → 아이디·비밀번호 가입 계정의 이름(#322). 설정되면
+ *   GET /users/me가 프로필이 빈 일반 가입 계정으로 응답한다.
  *
  * 플래그가 없으면 만료 없음 = 기존 동작 그대로.
  */
@@ -15,6 +18,7 @@ const SCENARIO_KEY = "mock:tokenExpired";
 const REISSUE_COUNT_KEY = "mock:reissueCount";
 const EXPIRED_COUNT_KEY = "mock:expiredResponseCount";
 const LOGGED_OUT_KEY = "mock:loggedOut";
+const PASSWORD_ACCOUNT_KEY = "mock:passwordAccount";
 
 type TokenScenario = "once" | "refresh-expired";
 
@@ -63,6 +67,24 @@ export function setLoggedOut(): void {
 
 export function isLoggedOut(): boolean {
   return read(LOGGED_OUT_KEY) === "true";
+}
+
+/** 로그인 성공으로 세션이 다시 서는 것(실서버의 Set-Cookie)에 대응 — 보호 엔드포인트가 200을 돌려준다. */
+export function clearLoggedOut(): void {
+  remove(LOGGED_OUT_KEY);
+}
+
+/**
+ * 아이디·비밀번호로 가입한 계정(#322) — 값은 가입 시 보낸 이름.
+ * 이 계정은 프로필이 비어 있어(전화번호·지역·아바타 null, 성별 빈 문자열, 소셜 연결 없음)
+ * GET /users/me 응답 모양이 소셜 계정과 다르다. 새로고침 후에도 유지돼야 해서 localStorage에 둔다.
+ */
+export function setPasswordAccount(name: string): void {
+  write(PASSWORD_ACCOUNT_KEY, name);
+}
+
+export function readPasswordAccount(): string | null {
+  return read(PASSWORD_ACCOUNT_KEY);
 }
 
 export function reissueCallCount(): number {

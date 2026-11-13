@@ -1,4 +1,5 @@
 import {
+  useId,
   type ChangeEventHandler,
   type InputHTMLAttributes,
   type ReactNode,
@@ -47,7 +48,13 @@ export function Input({
   ...rest
 }: InputProps) {
   const border = error ? "border-terra" : "border-line";
-  const shared = { value, defaultValue, ...rest };
+  // 오류·힌트 문구를 입력과 연결해 스크린 리더가 입력에서 이유를 읽도록 한다(둘은 동시에 보이지 않는다).
+  const messageId = useId();
+  const hasMessage = Boolean(error || hint);
+  const describedBy =
+    [rest["aria-describedby"], hasMessage ? messageId : undefined].filter(Boolean).join(" ") ||
+    undefined;
+  const shared = { value, defaultValue, ...rest, "aria-describedby": describedBy };
 
   let field: ReactNode;
   if (multiline) {
@@ -94,9 +101,13 @@ export function Input({
     <div className={cn("flex flex-col gap-[0.4375rem]", className)}>
       {field}
       {error ? (
-        <span className="text-[0.75rem] font-medium text-terra">{error}</span>
+        <span id={messageId} className="text-[0.75rem] font-medium text-terra">
+          {error}
+        </span>
       ) : hint ? (
-        <span className="text-[0.75rem] text-ink-3">{hint}</span>
+        <span id={messageId} className="text-[0.75rem] text-ink-3">
+          {hint}
+        </span>
       ) : null}
     </div>
   );

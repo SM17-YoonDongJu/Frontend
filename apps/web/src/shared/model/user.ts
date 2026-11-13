@@ -47,7 +47,7 @@ export const meSchema = z
   }));
 
 /** role → userType 파생. 응답에 userType이 없어 FE가 계산한다(ADMIN은 고객 화면 비대상 → 피보험자 취급). */
-function deriveUserType(role: z.infer<typeof userRoleSchema>): UserType {
+export function deriveUserType(role: z.infer<typeof userRoleSchema>): UserType {
   return role === "CERTIFICATED_ADJUSTER" || role === "UNCERTIFICATED_ADJUSTER"
     ? "adjuster"
     : "insured_person";

@@ -5,11 +5,14 @@ import { chatReportReasonSchema } from "@/shared/api/chat/chat.schema";
 import { API_BASE_URL } from "@/shared/api/config";
 import { wire } from "@/shared/mocks/wire-response";
 import {
+  clearLoggedOut,
   consumeReissue,
   isAccessTokenExpired,
   isLoggedOut,
+  readPasswordAccount,
   recordExpiredResponse,
   setLoggedOut,
+  setPasswordAccount,
   waitForExpiredResponses,
 } from "@/shared/mocks/auth-token-state";
 import { registerDeviceTokenBodySchema } from "@/shared/model/device-token.schema";
@@ -633,6 +636,27 @@ const MOCK_ME: Record<string, unknown> = {
 };
 
 /**
+ * 아이디·비밀번호로 가입한 계정(#322)은 프로필이 비어 있다 — 전화번호·지역·아바타 null, 성별 빈 문자열, 소셜 연결 없음.
+ * 조회마다 덮어쓰면 PATCH /users/me로 채운 값이 사라지므로 가입 직후 한 번만 MOCK_ME에 적용하고,
+ * 이후 조회는 수정값을 그대로 돌려준다.
+ */
+let passwordProfileApplied = false;
+
+function applyPasswordAccountProfile(name: string): void {
+  if (passwordProfileApplied) return;
+  passwordProfileApplied = true;
+  Object.assign(MOCK_ME, {
+    nickname: name,
+    phone_number: null,
+    gender: "",
+    region: null,
+    avatar_url: null,
+    email: null,
+    social_provider: null,
+  });
+}
+
+/**
  * 목 role 결정 — 기본 USER(피보험자).
  * localStorage["mock:role"]=CERTIFICATED_ADJUSTER → 파트너 전환 섹션 노출(#105).
  * localStorage["mock:userType"]="adjuster" → 사정사 화면 검증용(응답에 userType이 없으므로 role로 매핑).
@@ -1249,7 +1273,13 @@ export const handlers = [
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
-      data: camelToSnakeDeep({ rooms: source.map(toChatRoomDto) }),
+      // 목록 전체를 한 번에 돌려주므로 다음 페이지는 없다 — 커서 페이지네이션 필드는
+      // 명세가 필수로 선언해 생성 zod가 검증한다(빠지면 목록 조회가 통째로 실패).
+      data: camelToSnakeDeep({
+        rooms: source.map(toChatRoomDto),
+        nextCursor: null,
+        hasNext: false,
+      }),
     });
   }),
 
@@ -1937,6 +1967,106 @@ export const handlers = [
     );
   }),
 
+  // 아이디·비밀번호 가입 (#322) — 전역 응답 래퍼 거울. 성공 201.
+  // 토큰은 소셜과 동일하게 HttpOnly 쿠키로만 내려가고 body엔 없음 → data = { user_id, nickname, role }.
+  // 요청 필드는 name, 응답 필드는 nickname(소셜 가입 계약과 동일). 역할은 USER 고정 — 이 경로로 사정사 계정은 못 만든다.
+  // 에러 재현: login_id "takenid"→409 DUPLICATE_RESOURCE, 형식 위반→400 BAD_REQUEST(`<필드>: <문구>` 첫 위반 1건만).
+  wire.post(`${API_BASE_URL}/auth/password/signup`, async ({ request }) => {
+    await delay(400);
+
+    const body = (await request.json().catch(() => ({}))) as {
+      login_id?: string;
+      password?: string;
+      name?: string;
+    };
+
+    const loginId = body.login_id ?? "";
+    const password = body.password ?? "";
+    const name = body.name ?? "";
+
+    // 백엔드는 첫 번째 위반 필드 하나만 message에 담는다 — 검사 순서도 그대로 거울.
+    const violation = !/^[A-Za-z0-9_]{4,20}$/.test(loginId)
+      ? "login_id: 아이디는 영문·숫자·밑줄 4~20자여야 합니다."
+      : password.length < 8 || password.length > 72
+        ? "password: 비밀번호는 8~72자여야 합니다."
+        : new TextEncoder().encode(password).length > 72
+          ? "password: 비밀번호는 UTF-8 기준 72바이트 이내여야 합니다."
+          : name.length < 1 || name.length > 30
+            ? "name: 이름은 1~30자여야 합니다."
+            : null;
+
+    if (violation) {
+      return HttpResponse.json(
+        { status: "400", code: "BAD_REQUEST", message: violation },
+        { status: 400 },
+      );
+    }
+
+    // 백엔드가 아이디를 소문자로 정규화하므로 중복 판정도 소문자 기준.
+    if (loginId.toLowerCase() === "takenid") {
+      return HttpResponse.json(
+        { status: "409", code: "DUPLICATE_RESOURCE", message: "이미 사용 중인 아이디입니다." },
+        { status: 409 },
+      );
+    }
+
+    // 실서버의 Set-Cookie 대응 — 가입 성공만으로 로그인 상태가 된다(로그인 재호출 없음).
+    clearLoggedOut();
+    // 이후 GET /users/me가 프로필 빈 일반 가입 계정으로 응답하게 표시(새로고침 후에도 유지).
+    setPasswordAccount(name);
+    passwordProfileApplied = false;
+
+    return HttpResponse.json(
+      {
+        status: "201",
+        message: "회원가입이 완료되었습니다.",
+        data: camelToSnakeDeep({
+          userId: MOCK_ME_ID,
+          nickname: name,
+          role: "USER",
+        }),
+      },
+      { status: 201 },
+    );
+  }),
+
+  // 아이디·비밀번호 로그인 (#322) — 성공 200. 아이디 대소문자 무관(백엔드가 소문자로 정규화).
+  // 에러 재현: password "wrongpw"→401 LOGIN_FAILED. 아이디 없음·비밀번호 불일치·탈퇴 계정을
+  //   백엔드가 계정 열거 방지로 구분하지 않으므로 목도 하나의 코드·문구로만 돌려준다.
+  wire.post(`${API_BASE_URL}/auth/password/login`, async ({ request }) => {
+    await delay(400);
+
+    const body = (await request.json().catch(() => ({}))) as {
+      login_id?: string;
+      password?: string;
+    };
+
+    if (!body.login_id || !body.password) {
+      return HttpResponse.json(
+        { status: "400", code: "BAD_REQUEST", message: "login_id: 아이디를 입력해 주세요." },
+        { status: 400 },
+      );
+    }
+
+    if (body.password === "wrongpw") {
+      return HttpResponse.json(
+        { status: "401", code: "LOGIN_FAILED", message: "아이디 또는 비밀번호가 올바르지 않습니다." },
+        { status: 401 },
+      );
+    }
+
+    clearLoggedOut();
+    return HttpResponse.json({
+      status: "200",
+      message: "로그인되었습니다.",
+      data: camelToSnakeDeep({
+        userId: MOCK_ME_ID,
+        nickname: readPasswordAccount() ?? MOCK_ME.nickname,
+        role: resolveMockRole(),
+      }),
+    });
+  }),
+
   // 본인 프로필 조회 (이슈 #31 프로필 편집 + 대시보드 헤더 공용). :adjusterId 라우트보다 먼저 등록
   wire.get(`${API_BASE_URL}/adjusters/me/profile`, async ({ request }) => {
     await delay(500);
@@ -2297,6 +2427,11 @@ export const handlers = [
         { status: 500 },
       );
     }
+    // 아이디·비밀번호 가입 계정(#322)은 프로필이 비어 있다 — 전화번호·지역·아바타 null,
+    // 성별 빈 문자열, 소셜 연결 없음. 실서버 응답 모양을 그대로 거울(빈 문자열 포함).
+    const passwordAccountName = readPasswordAccount();
+    if (passwordAccountName !== null) applyPasswordAccountProfile(passwordAccountName);
+
     // 응답에 userType이 없다(FE가 role에서 파생). mock:userType override는 resolveMockRole이 role로 매핑한다.
     return HttpResponse.json({
       status: "200",
