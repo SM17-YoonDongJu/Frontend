@@ -121,10 +121,48 @@ test("검수 중: 제안이 없으면 제안 비교 카드가 없고 진행 중�
   ).toBeVisible();
 });
 
+test("검수 전 분석 완료: 지금 할 일이 AI 분석 결과 확인을 안내하고 리포트 상세로 이동한다", async ({
+  page,
+}) => {
+  await page.setExtraHTTPHeaders({
+    "x-mock-scenario": "dashboard-inspecting",
+    "x-mock-empty": "chat-list",
+  });
+  await page.goto(PATH);
+
+  await expect(
+    page.getByRole("heading", { name: "AI 분석 결과를 확인해보세요" }).filter({ visible: true }),
+  ).toBeVisible();
+
+  const cta = page.getByRole("link", { name: /리포트 상세/ }).filter({ visible: true }).first();
+  await expect(async () => {
+    await cta.click();
+    await expect(page).toHaveURL(/\/customer\/report\/[0-9a-f-]+$/);
+  }).toPass({ timeout: 10000 });
+});
+
+test("제안이 없는 검수 대기 리포트 카드를 누르면 AI 분석 리포트 상세로 이동한다", async ({
+  page,
+}) => {
+  await page.setExtraHTTPHeaders({ "x-mock-scenario": "dashboard-inspecting" });
+  await page.goto(PATH);
+
+  const card = page
+    .getByRole("link")
+    .filter({ hasText: "AI 분석 완료 · 검수 대기" })
+    .filter({ visible: true })
+    .first();
+
+  await expect(async () => {
+    await card.click();
+    await expect(page).toHaveURL(/\/customer\/report\/[0-9a-f-]+$/);
+  }).toPass({ timeout: 10000 });
+});
+
 test("분석 중: 제목이 아직 없는 리포트도 진행 중인 분석과 지금 할 일이 사고 유형 제목으로 보인다", async ({
   page,
 }) => {
-  // 읽지 않은 채팅이 없어야 지금 할 일이 검수 진행 안내로 떨어진다.
+  // 읽지 않은 채팅이 없어야 지금 할 일이 분석 현황 안내로 떨어진다.
   await page.setExtraHTTPHeaders({
     "x-mock-scenario": "dashboard-analyzing",
     "x-mock-empty": "chat-list",
@@ -139,9 +177,9 @@ test("분석 중: 제목이 아직 없는 리포트도 진행 중인 분석과 �
     page.getByText("실손 의료비 분석 요청", { exact: true }).filter({ visible: true }).first(),
   ).toBeVisible();
 
-  // 지금 할 일도 빈 제목 대신 사고 유형 제목으로 검수 진행을 안내한다
+  // 지금 할 일도 빈 제목 대신 사고 유형 제목으로 분석 현황을 안내한다
   await expect(
-    page.getByText(/실손 의료비 분석 요청 검수를 진행하고 있어요/).filter({ visible: true }),
+    page.getByText(/실손 의료비 분석 요청의 분석이 끝나면 AI 분석 결과를/).filter({ visible: true }),
   ).toBeVisible();
 });
 
