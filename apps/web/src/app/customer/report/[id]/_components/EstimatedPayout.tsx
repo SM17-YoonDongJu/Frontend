@@ -2,19 +2,18 @@ import { AmountRange } from "@/shared/ui/AmountRange";
 import { ConfidenceGauge, type ConfidenceLevel } from "@/shared/ui/ConfidenceGauge";
 import { AlertTriangle } from "@/shared/ui/icons/AlertTriangle";
 import { formatManwon } from "@/shared/lib/format-amount";
+import type { ConfidenceNoteView } from "../_model/confidence-note";
+import { ConfidenceNote } from "./ConfidenceNote";
 import { PayoutRangeBar } from "./PayoutRangeBar";
-
-const CONFIDENCE_NOTE: Record<ConfidenceLevel, string> = {
-  HIGH: "신뢰도 높음 — 현재 자료 기준 단계적으로 검토하는 보수적 범위입니다.",
-  MEDIUM: "신뢰도 보통 — 추가 자료 확보 시 범위가 조정될 수 있어요.",
-  LOW: "신뢰도 낮음 — 자료가 부족해 변동 폭이 커요. 자료 보강을 권해요.",
-};
 
 export interface EstimatedPayoutProps {
   claimedMinAmount: number | null;
   claimedMaxAmount: number | null;
   offeredAmount?: number | null;
+  /** 게이지 전용(상세 confidenceLevel). 동작 불변. */
   confidenceLevel?: ConfidenceLevel | null;
+  /** 등급 문구·사유 표시 결정 — resolveConfidenceNote 결과. 컴포넌트는 분기를 다시 짜지 않는다. */
+  confidenceNote: ConfidenceNoteView;
 }
 
 export function EstimatedPayout({
@@ -22,6 +21,7 @@ export function EstimatedPayout({
   claimedMaxAmount,
   offeredAmount,
   confidenceLevel,
+  confidenceNote,
 }: EstimatedPayoutProps) {
   const shortfallAmount =
     offeredAmount != null && claimedMinAmount != null ? claimedMinAmount - offeredAmount : null;
@@ -81,6 +81,15 @@ export function EstimatedPayout({
             낮을 수 있어요.
           </p>
         )}
+
+        {/* 모바일은 사유가 있을 때만 등급 문구 + 사유 박스(#324 D2). 게이지는 데스크톱 전용 그대로. */}
+        {confidenceNote.showMobile && (
+          <ConfidenceNote
+            note={confidenceNote.note}
+            reasons={confidenceNote.reasons}
+            className="mt-4"
+          />
+        )}
       </div>
 
       {/* 데스크톱: 기존 룩 유지 */}
@@ -90,10 +99,12 @@ export function EstimatedPayout({
         ) : (
           <p className="font-serif text-[1.5rem] font-bold">미산정</p>
         )}
-        {confidenceLevel && (
-          <p className="max-w-[15rem] rounded-card bg-white/10 px-4 py-3 text-[0.78rem] leading-relaxed text-white/80">
-            {CONFIDENCE_NOTE[confidenceLevel]}
-          </p>
+        {confidenceNote.showDesktop && (
+          <ConfidenceNote
+            note={confidenceNote.note}
+            reasons={confidenceNote.reasons}
+            className="max-w-[15rem]"
+          />
         )}
       </div>
     </section>

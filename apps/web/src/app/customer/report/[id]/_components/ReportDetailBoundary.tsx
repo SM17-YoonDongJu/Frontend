@@ -1,6 +1,7 @@
 "use client";
 
 import { AsyncBoundary } from "@/shared/ui/AsyncBoundary";
+import { usePrefetchReportAnalysisMetrics } from "../_api/use-report-analysis-metrics";
 import { ReportDetailSkeleton } from "./ReportDetailSkeleton";
 import { ReportDetailView } from "./ReportDetailView";
 
@@ -10,6 +11,9 @@ const ERROR_MESSAGES = {
 };
 
 export function ReportDetailBoundary({ reportId }: { reportId: string }) {
+  // 수치는 상세와 따로 받되 요청은 동시에 시작한다 — 사유 박스가 본문보다 늦게 붙어 내용을 밀어내지 않게.
+  usePrefetchReportAnalysisMetrics(reportId);
+
   return (
     <AsyncBoundary
       fallback={<ReportDetailSkeleton />}
