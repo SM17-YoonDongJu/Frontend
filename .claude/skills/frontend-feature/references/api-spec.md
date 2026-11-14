@@ -74,7 +74,7 @@ auth · user · settings · report · review · matching · chat · payment · a
 | 403 | `CHAT_NOT_A_MEMBER` | 채팅방 멤버 아님 — `/chats/{chatRoomId}/shared-report` 등 방 참여자 전용 리소스 |
 | 404 | `USER_NOT_FOUND` | 사용자 없음 |
 | 404 | `POST_NOT_FOUND` | 게시물 없음 |
-| 404 | `REPORT_NOT_FOUND` | 리포트 없음 — `/reports/{id}/review`·`/hold`·`/chats/{chatRoomId}/shared-report` 404가 사용 |
+| 404 | `REPORT_NOT_FOUND` | 리포트 없음 — `GET /reports/{id}`·`/reports/{id}/analysis-metrics`·`/analysis-status`·`/proposals`·`/review`·`/hold`·`/chats/{chatRoomId}/shared-report` 404가 사용(백엔드 `*QueryService` 확인, #324) |
 | 404 | `CHAT_ROOM_NOT_FOUND` | 채팅방 없음 — `/chats/{chatRoomId}/shared-report` |
 | 404 | `PROPOSAL_NOT_FOUND` | 제안(공유리포트=report_review) 없음 — `/chats/{chatRoomId}/shared-report` |
 | 404 | `SUBSCRIPTION_NOT_FOUND` | 구독 정보 없음 |

@@ -277,6 +277,25 @@ API 명세 확정 필드(단일 진실). 카드는 이 필드로만 구성(이�
 
 - 표시 기본=만원 요약, 입력/확인 단계만 `formatWon`. 로케일 `"ko-KR"` 고정(하이드레이션 불일치 방지).
 
+## 10. 리포트 AI 분석 근거 수치 (#324, `GET /reports/{reportId}/analysis-metrics`)
+
+필드명은 백엔드 `ReportAnalysisMetricsResponse`의 camelCase 그대로(`available`·`unavailableReason`·`confidence.reasons`·`input.docTypes`·`retrieval.caseFunnel`·`verification.clauseCitations`·`pipeline.totalMs` …). 의미의 단일 출처는 AI 레포 `src/report_worker/README.md`「리포트 수치」. 아래 FE 식별자는 #324 리더 확정(사용자 위임, PR 리뷰에서 최종 확인).
+
+| 개념 | 식별자 | 위치 |
+|------|--------|------|
+| 쿼리키 | `reportKeys.analysisMetrics(reportId)` — detail 캐시와 분리 | `shared/api/query-keys.ts` |
+| API 함수 / 조회 훅 | `getReportAnalysisMetrics` / `useReportAnalysisMetrics(reportId, { enabled })` (non-suspense) | `report/[id]/_api` |
+| prefetch 훅 | `usePrefetchReportAnalysisMetrics(reportId)` — 상세 suspense 경계 바깥에서 상세 조회와 동시에 요청 시작(하이드레이션 뒤 effect) | `report/[id]/_api` |
+| zod / 추론 타입 | `reportAnalysisMetricsSchema` / `ReportAnalysisMetrics` | `report/[id]/_model` |
+| 수치 없음 사유 enum | `unavailableReason`: `NO_DRAFT`(초안 없음·처리 중·BLOCKED 등) · `LEGACY_REPORT`(초안은 있으나 수치 없음) · `UNAVAILABLE`(서버가 수치를 못 읽음) — `enumWithFallback` → 모르는 값 `UNKNOWN` | `metricsUnavailableReasonSchema` / `MetricsUnavailableReason` |
+| 화면 상태 | `AnalysisMetricsState`(`loading`·`hidden`·`legacy`·`unavailable`·`ready`) / `toAnalysisMetricsState` | `report/[id]/_model` |
+| 등급 문구 결정 | `CONFIDENCE_NOTE` · `LOW_TERMS_GAP_NOTE` · `TERMS_DATA_GAP_REASONS` · `hasTermsDataGapReason` · `resolveConfidenceNote` | `report/[id]/_model/confidence-note.ts` |
+| 표시 포맷 | `DOC_TYPE_LABEL`(AI DocType → 업로드 화면 라벨) · `formatDocTypes` · `formatRatioPercent` · `formatDurationMs` · `buildAnalysisMetricsSections` | `report/[id]/_model/analysis-metrics-format.ts` |
+| 컴포넌트 | `ConfidenceNote` · `AnalysisMetricsPanel` · `AnalysisMetricsSection` · `AnalysisMetricsNotice` · `AnalysisMetricsPanelSkeleton` | `report/[id]/_components` |
+| MSW | `ANALYSIS_METRICS_FIXTURES` / `AnalysisMetricsFixtureKey`, 헤더 `x-mock-metrics`·`x-mock-metrics-delay`, failure `analysis-metrics`·`analysis-metrics-forbidden`·`analysis-metrics-missing` | `shared/mocks/handlers.ts` |
+
+- AI 문서 유형(`docTypes` 값, lower_snake): `diagnosis` 진단서 · `policy` 보험증권 · `payout_notice` 보험금 지급결과서 · `claim` 청구서 · `hospitalization_cert` 입원 확인서 · `medical_receipt` 진료비 영수증 · `other` 기타. 업로드 슬롯 키(`documentSlotKey`, camelCase)와 **다른 체계**다 — 섞지 않는다.
+
 ## 출처
 
 - API 명세서 DB: `collection://7ce30798-f08f-82ee-81bb-875a29ed96bd` (필드·enum 단일 진실)
