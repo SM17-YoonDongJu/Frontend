@@ -1151,6 +1151,170 @@ const DASHBOARD_MOCK = {
   },
 };
 
+// 리포트 AI 분석 근거 수치 목 (#324) — GET /reports/{reportId}/analysis-metrics, 백엔드 ReportAnalysisMetricsResponse 거울.
+// 백엔드는 nullable 키를 생략하지 않고 null로 내려준다 → 픽스처도 모든 키를 명시한다(값 없으면 null, 배열·맵은 빈 값).
+// camelCase로 쓰고 와이어(snake) 변환은 wire.get이 한다(byLabel의 한글 키·evidence.case 키는 변환 영향 없음).
+// 사유 문자열은 AI metrics.py 상수·README「신뢰도 등급」표 그대로(대시 U+2014, 가운뎃점 U+00B7) — 다시 치지 말고 복사한다.
+const BASE_ANALYSIS_METRICS = {
+  available: true,
+  unavailableReason: null,
+  version: 1,
+  confidence: { level: "HIGH", reasons: [] },
+  input: {
+    documentCount: 4,
+    docTypes: ["policy", "diagnosis", "medical_receipt", "medical_receipt"],
+    ocrConfidence: { min: 0.93, avg: 0.94 },
+    docTypeConfidence: { min: 0.8, avg: 0.9 },
+    piiMasked: { total: 6, byLabel: { 주민등록번호: 1, 전화번호: 2, 이름: 3 }, documents: 4, freeText: 2 },
+  },
+  retrieval: {
+    policyMatched: true,
+    evidence: { terms: 2, schedule: 1, case: 2 },
+    caseFunnel: { candidates: 12, deduped: 9, relevant: 2, kept: 2 },
+    disabilityScheduleSource: "terms",
+  },
+  verification: {
+    disability: { extracted: 1, verified: 1, combinedRate: 10, confidence: "high", pendingReeval: false, reclassified: [] },
+    clauseCitations: { cited: 3, grounded: 3, ungrounded: [], statuteMentions: 1 },
+    judge: { ran: true, unavailable: false, flagged: 0, checkedChars: 12480, totalChars: 12480, coverage: 1, evidenceChunks: 5 },
+  },
+  pipeline: {
+    nodeCount: 12,
+    failedNodes: [],
+    totalMs: 73043,
+    nodes: [{ node: "load_context", ms: 140, status: "ok" }],
+  },
+};
+
+/** available=false 응답 — 백엔드 unavailable()과 같은 모양(사유만 non-null, 나머지 전부 null). */
+function unavailableMetrics(unavailableReason: string) {
+  return {
+    available: false,
+    unavailableReason,
+    version: null,
+    confidence: null,
+    input: null,
+    retrieval: null,
+    verification: null,
+    pipeline: null,
+  };
+}
+
+/** 상태별 수치 픽스처(#324) — E2E가 x-mock-metrics 헤더 값(키)으로 고른다. */
+export const ANALYSIS_METRICS_FIXTURES = {
+  high: BASE_ANALYSIS_METRICS,
+  // AI README 골든 예시. 손상명(추간판 탈출)은 화면 어디에도 나오면 안 된다(#324 D6).
+  medium: {
+    ...BASE_ANALYSIS_METRICS,
+    confidence: {
+      level: "MEDIUM",
+      reasons: [
+        "가입금액 미보유 — 제시액 기준 어림 범위",
+        "근거 미확인 주장 1건",
+        "인용 검증 범위 일부(96%)",
+        "근거에 없는 조항 인용 1건",
+        "후유장해 지급률 추정 불확실",
+      ],
+    },
+    verification: {
+      disability: {
+        extracted: 2,
+        verified: 2,
+        combinedRate: 20,
+        confidence: "low",
+        pendingReeval: false,
+        reclassified: [{ injury: "추간판 탈출", from: 30, to: 20 }],
+      },
+      clauseCitations: { cited: 3, grounded: 2, ungrounded: ["제99조"], statuteMentions: 1 },
+      judge: { ran: true, unavailable: false, flagged: 1, checkedChars: 12000, totalChars: 12480, coverage: 0.96, evidenceChunks: 5 },
+    },
+  },
+  // LOW — 약관 근거 없음(rag_empty). 자료 보강 권유를 뺀 교체 문구 대상.
+  "low-terms": {
+    ...BASE_ANALYSIS_METRICS,
+    confidence: {
+      level: "LOW",
+      reasons: ["약관 근거를 찾지 못함", "가입금액 미보유 — 제시액 기준 어림 범위", "인용 검증 미수행"],
+    },
+    retrieval: {
+      policyMatched: true,
+      evidence: { terms: 0, schedule: 0, case: 2 },
+      caseFunnel: BASE_ANALYSIS_METRICS.retrieval.caseFunnel,
+      disabilityScheduleSource: null,
+    },
+    verification: {
+      disability: null,
+      clauseCitations: { cited: 0, grounded: 0, ungrounded: [], statuteMentions: 0 },
+      judge: { ran: false, unavailable: false, flagged: 0, checkedChars: 0, totalChars: 9800, coverage: 0, evidenceChunks: 0 },
+    },
+  },
+  // LOW — 가입 상품 약관이 DB에 없음(policy_not_in_db). 교체 문구 대상.
+  "low-policy": {
+    ...BASE_ANALYSIS_METRICS,
+    confidence: {
+      level: "LOW",
+      reasons: ["가입 상품 약관이 DB에 없어 일반 약관으로 분석", "가입금액 미보유 — 제시액 기준 어림 범위"],
+    },
+    retrieval: { ...BASE_ANALYSIS_METRICS.retrieval, policyMatched: false },
+    verification: { ...BASE_ANALYSIS_METRICS.verification, disability: null },
+  },
+  // LOW — 보상 범위 산출 불가. 약관 공백이 아니라 기존 LOW 문구(자료 보강 권유)를 유지한다.
+  "low-range": {
+    ...BASE_ANALYSIS_METRICS,
+    confidence: {
+      level: "LOW",
+      reasons: ["보상 범위 산출 불가(제시액·가입금액 없음)", "가입금액 미보유 — 제시액 기준 어림 범위"],
+    },
+    verification: { ...BASE_ANALYSIS_METRICS.verification, disability: null },
+  },
+  // available인데 그룹·값 일부가 null — 검증은 통과하고 그 행·섹션만 숨는다.
+  "null-mixed": {
+    ...BASE_ANALYSIS_METRICS,
+    confidence: { level: "MEDIUM", reasons: ["인용 검증 미수행", "일부 분석 단계 실패"] },
+    input: {
+      documentCount: 2,
+      docTypes: ["diagnosis", "x_ray"],
+      ocrConfidence: { min: null, avg: 0.912 },
+      docTypeConfidence: null,
+      piiMasked: null,
+    },
+    retrieval: null,
+    verification: {
+      disability: null,
+      clauseCitations: null,
+      judge: { ran: false, unavailable: true, flagged: null, checkedChars: 0, totalChars: null, coverage: null, evidenceChunks: null },
+    },
+    pipeline: { nodeCount: 11, failedNodes: ["case_search"], totalMs: null, nodes: [] },
+  },
+  "no-draft": unavailableMetrics("NO_DRAFT"),
+  legacy: unavailableMetrics("LEGACY_REPORT"),
+  unavailable: unavailableMetrics("UNAVAILABLE"),
+  // 명세에 없는 사유값 — 화면은 UNKNOWN으로 받아 "불러올 수 없음"으로 처리한다.
+  "unknown-reason": unavailableMetrics("NOT_YET_DEFINED"),
+  // 계약 위반(배열 자리에 null) — 생성 zod가 거부해 "불러올 수 없음"이 떠야 한다.
+  malformed: {
+    ...BASE_ANALYSIS_METRICS,
+    input: { ...BASE_ANALYSIS_METRICS.input, docTypes: null },
+  },
+};
+
+export type AnalysisMetricsFixtureKey = keyof typeof ANALYSIS_METRICS_FIXTURES;
+
+function isAnalysisMetricsFixtureKey(value: string | null): value is AnalysisMetricsFixtureKey {
+  return value !== null && Object.hasOwn(ANALYSIS_METRICS_FIXTURES, value);
+}
+
+/**
+ * x-mock-metrics 헤더 → 픽스처. 없거나 모르는 값이면 high — 상세 기본 confidenceLevel(HIGH)과 같은 컬럼을 지킨다.
+ * 수치 핸들러와 상세 핸들러가 같은 판정을 쓰도록 공유한다.
+ */
+function analysisMetricsFixtureFor(request: Request) {
+  const key = request.headers.get("x-mock-metrics");
+  return isAnalysisMetricsFixtureKey(key)
+    ? ANALYSIS_METRICS_FIXTURES[key]
+    : ANALYSIS_METRICS_FIXTURES.high;
+}
+
 export const handlers = [
 
   // 문의 폼 제출 (#220) — 백엔드 확정 전 임시 목(요청: Notion "POST /contact-inquiries").
@@ -3629,13 +3793,55 @@ export const handlers = [
     });
   }),
 
+  // 리포트 AI 분석 근거 수치 (#324) — GET /reports/{reportId}/analysis-metrics. :reportId GET보다 먼저 등록.
+  // 모든 reportId 기본 high. E2E 헤더(page.setExtraHTTPHeaders는 모든 요청에 붙으므로 전용 헤더를 쓰고
+  // x-mock-scenario와 섞지 않는다):
+  //   x-mock-metrics: <AnalysisMetricsFixtureKey> → 해당 픽스처(없거나 모르는 값 → high).
+  //     상세 핸들러도 같은 헤더를 읽어 confidenceLevel을 픽스처 confidence.level에 맞춘다(같은 컬럼).
+  //   x-mock-metrics-delay: infinite → 응답을 영원히 보류(로딩 고정).
+  //   x-mock-failure: analysis-metrics → 500 INTERNAL_SERVER_ERROR
+  //                   analysis-metrics-forbidden → 403 FORBIDDEN
+  //                   analysis-metrics-missing → 404 REPORT_NOT_FOUND
+  wire.get(`${API_BASE_URL}/reports/:reportId/analysis-metrics`, async ({ request }) => {
+    await delay(request.headers.get("x-mock-metrics-delay") === "infinite" ? "infinite" : 500);
+
+    const failure = request.headers.get("x-mock-failure");
+    if (failure === "analysis-metrics") {
+      return HttpResponse.json(
+        { status: "500", code: "INTERNAL_SERVER_ERROR", message: "분석 근거 수치를 불러오지 못했습니다." },
+        { status: 500 },
+      );
+    }
+    if (failure === "analysis-metrics-forbidden") {
+      return HttpResponse.json(
+        { status: "403", code: "FORBIDDEN", message: "리포트 열람 권한이 없습니다." },
+        { status: 403 },
+      );
+    }
+    if (failure === "analysis-metrics-missing") {
+      return HttpResponse.json(
+        { status: "404", code: "REPORT_NOT_FOUND", message: "리포트를 찾을 수 없습니다." },
+        { status: 404 },
+      );
+    }
+
+    return HttpResponse.json({
+      status: "200",
+      message: "정상 처리되었습니다.",
+      data: analysisMetricsFixtureFor(request),
+    });
+  }),
+
   // 리포트 상세 조회 (고객측 — issue: CONFIRMED/TRUSTED/INFO). 파트너 검수는 /review로 분리(#130).
   // 시나리오 override(x-mock-scenario, #331):
   //   report-analyzing → 분석 중(PROCESSING)·본문 비어 있음 / report-analyzing-then-done → 첫 요청 3초 뒤부터 COMPLETED(폴링 전환 검증)
   //   report-proposals-arrived → 제안 도착(AWAITING_ADOPTION)·reviewedAt null(최종 채택 전).
+  // x-mock-metrics(#324): 수치 픽스처에 등급이 있으면 confidenceLevel을 그 값으로(헤더 없으면 HIGH 그대로).
   wire.get(`${API_BASE_URL}/reports/:reportId`, async ({ request, params }) => {
     await delay(500);
     const scenario = request.headers.get("x-mock-scenario");
+    // 수치 confidence.level과 상세 confidenceLevel은 같은 컬럼 — 수치 핸들러와 같은 픽스처를 본다.
+    const metricsFixture = analysisMetricsFixtureFor(request);
 
     const reportId =
       typeof params.reportId === "string"
@@ -3703,7 +3909,9 @@ export const handlers = [
           },
         ],
         question: "보험금이 적게 나온 것 같아요",
-        confidenceLevel: "HIGH",
+        // 수치가 없는 픽스처(unavailable 계열)는 등급도 없으니 기존 기본 HIGH를 유지한다.
+        confidenceLevel:
+          metricsFixture.confidence === null ? "HIGH" : metricsFixture.confidence.level,
         // 스펙 필수 — 분석 처리 상태.
         analysisState: isAnalyzing ? "PROCESSING" : "COMPLETED",
         reportNo: "20260520-017",

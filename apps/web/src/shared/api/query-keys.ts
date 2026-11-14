@@ -31,6 +31,8 @@ export const reportKeys = createQueryKeys("report", {
   // 내 리포트 목록(무한 조회, 이슈 #128). dashboard용 list(suspense query)와 캐시 분리.
   listInfinite: (filter?: ReportListInfiniteFilter) => [{ filter: filter ?? {} }],
   detail: (reportId: string) => [reportId],
+  // 리포트 AI 분석 근거 수치(#324). detail 캐시와 분리 — 늦거나 실패해도 상세 본문에 번지지 않게.
+  analysisMetrics: (reportId: string) => [reportId],
   pendingReview: (filter?: ReviewListFilter) => [{ filter: filter ?? {} }],
   // 검수 대기 화면(#326) — "더보기"로 page를 누적하므로 page는 키에서 제외.
   pendingReviewInfinite: (filter?: Omit<ReviewListFilter, "page">) => [{ filter: filter ?? {} }],

@@ -3,10 +3,14 @@
 import { useMe } from "@/shared/api/use-me";
 import { accidentTypeLabel } from "@/shared/model/accident-type";
 import { Check } from "@/shared/ui/icons/Check";
+import { useReportAnalysisMetrics } from "../_api/use-report-analysis-metrics";
 import { useReportDetail } from "../_api/use-report-detail";
+import { toAnalysisMetricsState } from "../_model/analysis-metrics-state";
+import { resolveConfidenceNote } from "../_model/confidence-note";
 import { REPORT_DISCLAIMER } from "../_model/report-meta";
 import { hasAnalysisBody, reportPhase } from "../_model/report-phase";
 import { AdjusterContact } from "./AdjusterContact";
+import { AnalysisMetricsPanel } from "./AnalysisMetricsPanel";
 import { CoverageApplicable } from "./CoverageApplicable";
 import { CoveragePotentialMissing } from "./CoveragePotentialMissing";
 import { EstimatedPayout } from "./EstimatedPayout";
@@ -26,6 +30,12 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
   const showAdjusterContact = !isAdjuster && data.adjuster?.nickname != null;
   const phase = reportPhase(data);
   const showBody = hasAnalysisBody(phase);
+
+  // 분석 근거 수치는 상세와 따로 받는다(늦거나 실패해도 본문은 먼저) — 한 번 받아 신뢰도 박스·패널에 같이 내려준다.
+  const analysisMetricsQuery = useReportAnalysisMetrics(reportId, { enabled: showBody });
+  const analysisMetrics = toAnalysisMetricsState(analysisMetricsQuery);
+  const confidenceLevel = data.confidenceLevel === "UNKNOWN" ? null : data.confidenceLevel;
+  const confidenceNote = resolveConfidenceNote(confidenceLevel, analysisMetrics);
 
   return (
     <div className="mx-auto w-full max-w-[67.5rem] px-5 pb-9 pt-[1.125rem] tracking-[-0.01rem] lg:px-4 lg:py-8">
@@ -80,7 +90,8 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
                   claimedMinAmount={data.claimedMinAmount}
                   claimedMaxAmount={data.claimedMaxAmount}
                   offeredAmount={data.offeredAmount}
-                  confidenceLevel={data.confidenceLevel === "UNKNOWN" ? null : data.confidenceLevel}
+                  confidenceLevel={confidenceLevel}
+                  confidenceNote={confidenceNote}
                 />
                 <IssueReview issues={data.issues} isReviewed={phase === "adopted"} />
                 <div className="space-y-[1.125rem] md:grid md:grid-cols-2 md:gap-6 md:space-y-0 lg:block lg:space-y-6">
@@ -88,6 +99,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
                   <CoveragePotentialMissing contracts={data.omittedSpecialContract} />
                 </div>
                 <LegalBasis items={data.basisTermsPrecedents} />
+                <AnalysisMetricsPanel state={analysisMetrics} />
               </div>
             </div>
           )}
