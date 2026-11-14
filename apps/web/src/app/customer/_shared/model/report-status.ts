@@ -4,6 +4,8 @@ export type ReportListStatus =
   | "COUNSELING"
   | "MATCHED"
   | "NOT_SELECTED"
+  | "BLOCKED"
+  | "NEEDS_REUPLOAD"
   | "UNKNOWN";
 
 export type ReportStatusTone = "gold" | "green" | "navy" | "neutral";
@@ -23,6 +25,8 @@ export const REPORT_STATUS_META: Record<
   COUNSELING: { label: "상담 중", tone: "navy", showCheck: false, muted: false },
   MATCHED: { label: "종결", tone: "neutral", showCheck: true, muted: true },
   NOT_SELECTED: { label: "선택 받지 못함", tone: "neutral", showCheck: false, muted: true },
+  BLOCKED: { label: "처리 불가", tone: "neutral", showCheck: false, muted: true },
+  NEEDS_REUPLOAD: { label: "재업로드 필요", tone: "neutral", showCheck: false, muted: false },
   // 명세에 없는 상태 — 어떤 단계인지 단정하지 않는 중립 라벨로 보여준다.
   UNKNOWN: { label: "확인 필요", tone: "neutral", showCheck: false, muted: false },
 };

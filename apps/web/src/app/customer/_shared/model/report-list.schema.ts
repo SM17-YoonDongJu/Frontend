@@ -16,6 +16,9 @@ export const reportListStatusSchema = enumWithFallback([
   "COUNSELING",
   "MATCHED",
   "NOT_SELECTED",
+  // 분석이 멈춘 리포트(AI 워커가 기록)는 고객 응답에서도 그대로 내려온다.
+  "BLOCKED",
+  "NEEDS_REUPLOAD",
 ]);
 
 export const reportListItemSchema = z.object({

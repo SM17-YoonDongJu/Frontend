@@ -16,6 +16,9 @@ export const reportStatusSchema = enumWithFallback([
   // 백엔드가 고객 노출 시 CLOSED를 MATCHED로 매핑 — CLOSED는 내려오지 않는다.
   "MATCHED",
   "NOT_SELECTED",
+  // 분석이 멈춘 리포트(AI 워커가 기록)는 고객 응답에서도 그대로 내려온다.
+  "BLOCKED",
+  "NEEDS_REUPLOAD",
 ]);
 
 // 백엔드 IssueItem{title,opinion,status,tags,impactAmount} → 기존 소비처(description·aiStatus) 필드명 유지.
@@ -51,6 +54,9 @@ const rawReportDetailSchema = z.object({
   adjusterId: z.uuid().nullable(),
   confidenceLevel: enumWithFallback(["LOW", "MEDIUM", "HIGH"]).nullable(),
   analysisState: analysisStateSchema,
+  // 사유 코드는 값이 늘어날 수 있어 문자열로 받는다. 문구는 백엔드가 정해 그대로 보여준다.
+  analysisFailureReason: z.string().nullish(),
+  analysisFailureMessage: z.string().nullish(),
   reportNo: z.string().nullable(),
   reviewComment: z.string().nullable(),
   reviewedAt: z.string().nullable(),
