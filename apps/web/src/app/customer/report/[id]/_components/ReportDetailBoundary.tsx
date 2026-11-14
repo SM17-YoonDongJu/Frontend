@@ -5,8 +5,15 @@ import { usePrefetchReportAnalysisMetrics } from "../_api/use-report-analysis-me
 import { ReportDetailSkeleton } from "./ReportDetailSkeleton";
 import { ReportDetailView } from "./ReportDetailView";
 
+const REPORT_NOT_FOUND_MESSAGE = {
+  title: "리포트를 찾을 수 없어요",
+  desc: "삭제되었거나 잘못된 주소예요.",
+};
+
+// 실서버 상세·분석 근거 조회의 404는 REPORT_NOT_FOUND, POST_NOT_FOUND는 기존 호환용 — 같은 문구로 보인다.
 const ERROR_MESSAGES = {
-  POST_NOT_FOUND: { title: "리포트를 찾을 수 없어요", desc: "삭제되었거나 잘못된 주소예요." },
+  POST_NOT_FOUND: REPORT_NOT_FOUND_MESSAGE,
+  REPORT_NOT_FOUND: REPORT_NOT_FOUND_MESSAGE,
   FORBIDDEN: { title: "접근 권한이 없어요", desc: "본인 리포트만 확인할 수 있어요." },
 };
 
