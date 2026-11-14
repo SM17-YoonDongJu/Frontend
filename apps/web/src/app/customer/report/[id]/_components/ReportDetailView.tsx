@@ -68,7 +68,14 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
           </div>
 
           {phase !== "adopted" ? (
-            !isAdjuster && <ReportPhaseNotice phase={phase} reportId={reportId} />
+            !isAdjuster && (
+              <ReportPhaseNotice
+                phase={phase}
+                reportId={reportId}
+                analysisState={data.analysisState}
+                failureMessage={data.analysisFailureMessage}
+              />
+            )
           ) : (
             <ReportSummary
               status={data.status}

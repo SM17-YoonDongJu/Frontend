@@ -19,6 +19,8 @@ const STATUS_PILL_LABEL: Record<ReportStatus, string> = {
   COUNSELING: "매칭 완료",
   MATCHED: "매칭 완료",
   NOT_SELECTED: "제안 도착",
+  BLOCKED: "처리 불가",
+  NEEDS_REUPLOAD: "재업로드 필요",
   // 명세에 없는 상태 — 어떤 단계인지 단정하지 않는 중립 라벨로 보여준다.
   UNKNOWN: "확인 필요",
 };
@@ -28,6 +30,8 @@ const STATUS_PILL_LABEL: Record<ReportStatus, string> = {
 function currentStepIndex(status: ReportStatus): number {
   if (status === "AWAITING_INSPECTION") return 2;
   if (status === "MATCHED") return 4;
+  // 분석이 멈춘 리포트는 검수에 닿지 못했으므로 신청 완료 단계에 머문다.
+  if (status === "BLOCKED" || status === "NEEDS_REUPLOAD") return 1;
   return 3;
 }
 

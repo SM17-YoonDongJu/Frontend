@@ -19,7 +19,9 @@ const STATUS_TO_STEP: Record<ReportListItemStatus, AnalysisStep> = {
   COUNSELING: "EXPERT_REVIEW",
   MATCHED: "PROPOSAL_ARRIVED",
   NOT_SELECTED: "PROPOSAL_ARRIVED",
-  // 명세에 없는 상태 — 스테퍼를 앞당기지 않고 첫 단계로 둔다.
+  // 분석이 멈춘 상태·명세에 없는 상태 — 스테퍼를 앞당기지 않고 첫 단계로 둔다.
+  BLOCKED: "INFO_INPUT",
+  NEEDS_REUPLOAD: "INFO_INPUT",
   UNKNOWN: "INFO_INPUT",
 };
 

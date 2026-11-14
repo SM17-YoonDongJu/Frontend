@@ -292,6 +292,35 @@ const REVIEWED_REPORTS = [
 // createdAt은 달력 기준(오늘/어제 고정) → 조회 시각과 무관하게 오늘·어제·이전 세 그룹이 항상 나온다.
 // read-all 호출 시 isRead를 모듈 상태로 전부 true 반영.
 // 오늘 항목: 오늘 자정 기준 hoursBack 시간 전, 단 자정을 넘지 않게 클램프(새벽 조회 시에도 오늘 유지).
+// 분석이 멈춘 리포트 시나리오(#335) — 문구는 백엔드가 정해 내려준다. 사유 코드는 늘어날 수 있다.
+const STOPPED_REPORT_SCENARIOS: Record<
+  string,
+  { state: string; reason: string | null; message: string | null }
+> = {
+  "report-reupload-domain-mismatch": {
+    state: "NEEDS_REUPLOAD",
+    reason: "DOMAIN_MISMATCH",
+    message:
+      "업로드하신 문서에서 보험 청구 서류를 찾지 못했어요. 보험증권·진단서 같은 청구 서류를 올려주세요.",
+  },
+  "report-reupload-missing-policy": {
+    state: "NEEDS_REUPLOAD",
+    reason: "MISSING_REQUIRED_DOCUMENTS",
+    message: "업로드하신 문서에서 보험증권을 확인하지 못했어요. 보험증권을 다시 올려주세요.",
+  },
+  "report-reupload-no-message": { state: "NEEDS_REUPLOAD", reason: null, message: null },
+  "report-blocked": {
+    state: "BLOCKED",
+    reason: null,
+    message: "처리할 수 없는 요청이에요. 고객센터로 문의해주세요.",
+  },
+  "report-failed": {
+    state: "FAILED",
+    reason: "UNREADABLE_FILE",
+    message: "파일을 읽을 수 없어요. 다시 업로드해주세요.",
+  },
+};
+
 // 분석 중 → 완료 전환 시나리오(#331): 리포트별 첫 요청 시각부터 3초 동안만 PROCESSING.
 const ANALYSIS_PENDING_MS = 3_000;
 const analysisFirstSeenAt = new Map<string, number>();
@@ -2870,6 +2899,33 @@ export const handlers = [
       });
     }
 
+    // 분석이 멈춘 리포트 1건(#335) — 목록 카드의 안내 문구 검증용.
+    if (request.headers.get("x-mock-scenario") === "reports-stopped") {
+      return HttpResponse.json({
+        status: "200",
+        message: "정상 처리되었습니다.",
+        data: camelToSnakeDeep({
+          list: [
+            {
+              reportId: "9a8b7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d",
+              status: "NEEDS_REUPLOAD",
+              title: "보험과 무관한 문서",
+              analysisState: "NEEDS_REUPLOAD",
+              accidentType: "기타",
+              createdAt: "2026-11-14T09:00:00Z",
+              reportNo: "20261114-001",
+              claimedMinAmount: null,
+              claimedMaxAmount: null,
+              proposalCount: 0,
+              reviewedAt: null,
+              adjusterNickname: null,
+            },
+          ],
+          pagination: { page, size, totalElements: 1, totalPages: 1, hasNext: false },
+        }),
+      });
+    }
+
     // 액세스 토큰 만료 주입 (#109) — /users/me와 동시에 401을 받게 해 단일-flight 재발급을 검증한다.
     if (isAccessTokenExpired()) {
       recordExpiredResponse();
@@ -3836,6 +3892,7 @@ export const handlers = [
   // 시나리오 override(x-mock-scenario, #331):
   //   report-analyzing → 분석 중(PROCESSING)·본문 비어 있음 / report-analyzing-then-done → 첫 요청 3초 뒤부터 COMPLETED(폴링 전환 검증)
   //   report-proposals-arrived → 제안 도착(AWAITING_ADOPTION)·reviewedAt null(최종 채택 전).
+  //   report-reupload-domain-mismatch · report-reupload-missing-policy · report-reupload-no-message · report-blocked · report-failed → 분석이 멈춘 리포트(#335).
   // x-mock-metrics(#324): 수치 픽스처에 등급이 있으면 confidenceLevel을 그 값으로(헤더 없으면 HIGH 그대로).
   wire.get(`${API_BASE_URL}/reports/:reportId`, async ({ request, params }) => {
     await delay(500);
@@ -3860,13 +3917,18 @@ export const handlers = [
       scenario === "report-analyzing" ||
       (scenario === "report-analyzing-then-done" && isAnalysisPending(responseReportId));
     const isProposalsArrived = scenario === "report-proposals-arrived";
+    const stopped = STOPPED_REPORT_SCENARIOS[scenario ?? ""];
+    // 분석 중·멈춤은 본문(금액·쟁점·보장·근거)이 비어 내려온다.
+    const hasNoBody = isAnalyzing || stopped != null;
 
     return HttpResponse.json({
       status: "200",
       message: "정상 처리되었습니다.",
       data: camelToSnakeDeep({
         reportId: responseReportId,
-        status: isCustomerSample
+        status: stopped && stopped.state !== "FAILED"
+          ? stopped.state
+          : isCustomerSample
           ? "MATCHED"
           : isProposalsArrived
             ? "AWAITING_ADOPTION"
@@ -3874,18 +3936,18 @@ export const handlers = [
         // 백엔드는 사고 유형 슬러그를 내려준다(표시 라벨 변환은 소비처 accidentTypeLabel 책임).
         accidentType: "traffic",
         treatment: "우측 슬관절 후방십자인대 파열",
-        claimedMinAmount: isAnalyzing ? null : isCustomerSample ? 13_500_000 : 12_000_000,
-        claimedMaxAmount: isAnalyzing ? null : isCustomerSample ? 17_000_000 : 18_000_000,
-        offeredAmount: isAnalyzing ? null : 8_500_000,
-        applicableGuarantees: isAnalyzing ? [] : ["상해후유장해 담보", "골절 진단비 특약", "입원·통원 일당"],
-        omittedSpecialContract: isAnalyzing ? [] : ["외모변형 장해특약"],
-        basisTermsPrecedents: isAnalyzing ? [] : [
+        claimedMinAmount: hasNoBody ? null : isCustomerSample ? 13_500_000 : 12_000_000,
+        claimedMaxAmount: hasNoBody ? null : isCustomerSample ? 17_000_000 : 18_000_000,
+        offeredAmount: hasNoBody ? null : 8_500_000,
+        applicableGuarantees: hasNoBody ? [] : ["상해후유장해 담보", "골절 진단비 특약", "입원·통원 일당"],
+        omittedSpecialContract: hasNoBody ? [] : ["외모변형 장해특약"],
+        basisTermsPrecedents: hasNoBody ? [] : [
           "약관 제12조 (후유장해 보험금 산정기준)",
           "분쟁조정 2023-1456 (장해등급 재산정 인정 사례)",
           "대법원 2019다○○○○ (후유장해 인과관계 판단)",
         ],
         // 백엔드 CustomerReportDetailResponse.issue(단수) — title/opinion/status/tags/impactAmount.
-        issue: isAnalyzing ? [] : [
+        issue: hasNoBody ? [] : [
           {
             title: "장해등급 과소 산정 가능",
             opinion: "현재 자료만으로는 12급 적용을 단정하기 어려워요.",
@@ -3913,7 +3975,9 @@ export const handlers = [
         confidenceLevel:
           metricsFixture.confidence === null ? "HIGH" : metricsFixture.confidence.level,
         // 스펙 필수 — 분석 처리 상태.
-        analysisState: isAnalyzing ? "PROCESSING" : "COMPLETED",
+        analysisState: stopped ? stopped.state : isAnalyzing ? "PROCESSING" : "COMPLETED",
+        analysisFailureReason: stopped?.reason ?? null,
+        analysisFailureMessage: stopped?.message ?? null,
         reportNo: "20260520-017",
         adjusterId: isCustomerSample ? CUSTOMER_SAMPLE_ADJUSTER_ID : null,
         reviewComment: isCustomerSample

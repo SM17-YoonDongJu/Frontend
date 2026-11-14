@@ -149,6 +149,64 @@ test.describe("검수 대기 리포트(454px)", () => {
   });
 });
 
+test.describe("분석이 멈춘 리포트(454px)", () => {
+  test.use({ viewport: { width: 454, height: 900 } });
+
+  test("보험 청구 서류가 아닌 문서면 사유 문구와 함께 다시 올리라고 안내한다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-reupload-domain-mismatch" });
+    await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "문서를 다시 올려주세요" })).toBeVisible();
+    await expect(page.getByText("보험 청구 서류를 찾지 못했어요")).toBeVisible();
+    // 분석 결과가 없으니 본문과 면책 문구는 보이지 않는다.
+    await expect(page.getByText("AI 분석 결과", { exact: true })).toHaveCount(0);
+    await expect(page.getByText(/참고용 추정 분석/)).toHaveCount(0);
+  });
+
+  test("확인하지 못한 서류가 있으면 어느 서류를 다시 올려야 하는지 보인다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-reupload-missing-policy" });
+    await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "문서를 다시 올려주세요" })).toBeVisible();
+    await expect(page.getByText("보험증권을 다시 올려주세요")).toBeVisible();
+  });
+
+  test("백엔드 문구가 없으면 기본 안내가 그대로 나온다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-reupload-no-message" });
+    await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "문서를 다시 올려주세요" })).toBeVisible();
+    await expect(page.getByText("리포트 분석이 끝나지 않았어요.")).toBeVisible();
+  });
+
+  test("처리할 수 없는 요청이면 고객센터 문의 안내가 보인다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-blocked" });
+    await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "처리할 수 없는 요청이에요" })).toBeVisible();
+    await expect(page.getByText("고객센터로 문의해주세요")).toBeVisible();
+  });
+
+  test("분석에 실패하면 실패 사유 문구가 보인다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-failed" });
+    await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "문서 분석에 실패했어요" })).toBeVisible();
+    await expect(page.getByText("파일을 읽을 수 없어요")).toBeVisible();
+  });
+
+  test("사정사로 조회하면 고객용 중단 안내가 없다", async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem("mock:userType", "adjuster");
+    });
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "report-reupload-domain-mismatch" });
+    await page.goto(AWAITING_PATH);
+
+    await expect(page.getByRole("heading", { name: "분석 리포트" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "문서를 다시 올려주세요" })).toHaveCount(0);
+  });
+});
+
 test.describe("사정사 조회(454px)", () => {
   test.use({ viewport: { width: 454, height: 900 } });
 

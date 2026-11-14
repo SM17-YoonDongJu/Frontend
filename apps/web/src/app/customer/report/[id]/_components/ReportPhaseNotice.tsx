@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { Clock } from "@/shared/ui/icons/Clock";
 import { reportProposalsHref } from "@/app/customer/_shared/model/report-routes";
+import {
+  ANALYSIS_STOPPED_COPY,
+  type AnalysisState
+} from "@/app/customer/_shared/model/analysis-state";
 import type { ReportPhase } from "../_model/report-phase";
 
 type NoticePhase = Exclude<ReportPhase, "adopted">;
@@ -31,8 +35,26 @@ const NOTICE_COPY: Record<
   }
 };
 
-export function ReportPhaseNotice({ phase, reportId }: { phase: NoticePhase; reportId: string }) {
-  const copy = NOTICE_COPY[phase];
+export function ReportPhaseNotice({
+  phase,
+  reportId,
+  analysisState,
+  failureMessage
+}: {
+  phase: NoticePhase;
+  reportId: string;
+  analysisState?: AnalysisState;
+  /** 분석이 멈춘 이유를 설명하는 백엔드 문구. 없으면 기본 문구를 쓴다. */
+  failureMessage?: string | null;
+}) {
+  const base = NOTICE_COPY[phase];
+  const isStopped = phase === "analysisStopped";
+  const copy = {
+    ...base,
+    title:
+      (isStopped && analysisState && ANALYSIS_STOPPED_COPY[analysisState]?.title) || base.title,
+    body: (isStopped && failureMessage?.trim()) || base.body
+  };
 
   return (
     <section className="rounded-card border border-line bg-card px-[1.0625rem] py-4 lg:rounded-card-lg lg:p-6">
