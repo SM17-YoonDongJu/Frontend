@@ -102,6 +102,17 @@ test.describe("내 리포트 목록", () => {
     await expect(page.getByText("AI 분석 결과", { exact: true })).toBeVisible();
   });
 
+  test("분석이 멈춘 리포트 카드는 제안 0건 대신 문서를 다시 올리라고 안내한다", async ({ page }) => {
+    await page.setExtraHTTPHeaders({ "x-mock-scenario": "reports-stopped" });
+    await page.goto(PATH);
+
+    const stoppedCard = cards(page).filter({ hasText: "No.20261114-001" });
+    await expect(stoppedCard.getByText("재업로드 필요")).toBeVisible();
+    await expect(stoppedCard.getByText("검수 대기 중")).toHaveCount(0);
+    await expect(stoppedCard.getByText("문서를 다시 올려야 해요")).toBeVisible();
+    await expect(stoppedCard.getByText("제안 0건 · 미진행 종결")).toHaveCount(0);
+  });
+
   test("리포트가 0건이면 빈 안내와 새 분석 시작 CTA가 보인다", async ({ page }) => {
     // MSW 서비스워커가 fetch를 가로채므로 page.route가 아닌 런타임 시나리오 헤더로 빈 리스트를 강제한다.
     await page.setExtraHTTPHeaders({ "x-mock-scenario": "reports-empty" });
