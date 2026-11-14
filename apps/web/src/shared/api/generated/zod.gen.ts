@@ -800,6 +800,164 @@ export const ApiResponseReportAnalysisStatusResponseSchema = z.object({
     data: ReportAnalysisStatusResponseSchema.optional()
 });
 
+/**
+ * 판례 검색 깔때기 — 후보 → 사건 단위 중복 제거 → 관련성 필터 → 상위 4. 결과가 0건이면 전부 0. 필터가 판정에 실패하거나 전부 탈락시키면 그대로 통과시키므로, relevant=deduped라도 '걸러낼 것이 없었다'는 뜻은 아니다. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsCaseFunnelSchema = z.object({
+    candidates: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    deduped: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    relevant: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    kept: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish()
+});
+
+/**
+ * 본문 조항 인용 실재율(정규식 휴리스틱). v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsClauseCitationsSchema = z.object({
+    cited: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    grounded: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    ungrounded: z.array(z.string()),
+    statute_mentions: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish()
+});
+
+/**
+ * 신뢰도 등급(reports.confidence_level)과 그 사유(저장된 수치). HIGH면 사유가 없는 것이 정상이다
+ */
+export const MetricsConfidenceSchema = z.object({
+    level: z.string().nullish(),
+    reasons: z.array(z.string())
+});
+
+/**
+ * Judge 근거 청크 수(출처별, 중복 제거 후). v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsEvidenceSchema = z.object({
+    terms: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    schedule: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    case: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish()
+});
+
+/**
+ * 인용 검증(Judge) 결과. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsJudgeSchema = z.object({
+    ran: z.boolean().nullish(),
+    unavailable: z.boolean().nullish(),
+    flagged: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    checked_chars: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    total_chars: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    coverage: z.number().nullish(),
+    evidence_chunks: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish()
+});
+
+/**
+ * 마스킹 토큰([분류]) 수. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsPiiMaskedSchema = z.object({
+    total: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    by_label: z.record(z.string(), z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' })),
+    documents: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    free_text: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish()
+});
+
+/**
+ * 노드 실행 기록. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsPipelineNodeSchema = z.object({
+    node: z.string().nullish(),
+    ms: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    status: z.string().nullish()
+});
+
+/**
+ * output_guardrail까지의 노드 실행 기록(collect_metrics·persist 제외). v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsPipelineSchema = z.object({
+    node_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    failed_nodes: z.array(z.string()),
+    total_ms: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    nodes: z.array(MetricsPipelineNodeSchema)
+});
+
+/**
+ * 과대분류로 낮춘 장해 항목. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsReclassificationSchema = z.object({
+    injury: z.string().nullish(),
+    from: z.number().nullish(),
+    to: z.number().nullish()
+});
+
+/**
+ * 후유장해 검증. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsDisabilitySchema = z.object({
+    extracted: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    verified: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    combined_rate: z.number().nullish(),
+    confidence: z.string().nullish(),
+    pending_reeval: z.boolean().nullish(),
+    reclassified: z.array(MetricsReclassificationSchema)
+});
+
+/**
+ * 검색 근거. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsRetrievalSchema = z.object({
+    policy_matched: z.boolean().nullish(),
+    evidence: MetricsEvidenceSchema.nullish(),
+    case_funnel: MetricsCaseFunnelSchema.nullish(),
+    disability_schedule_source: z.string().nullish()
+});
+
+/**
+ * 0~1, 소수 3자리. 0.0은 인식된 라인이 없던 문서. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsScoreStatsSchema = z.object({
+    min: z.number().nullish(),
+    avg: z.number().nullish()
+});
+
+/**
+ * 입력 품질. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsInputSchema = z.object({
+    document_count: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    doc_types: z.array(z.string()),
+    ocr_confidence: MetricsScoreStatsSchema.nullish(),
+    doc_type_confidence: MetricsScoreStatsSchema.nullish(),
+    pii_masked: MetricsPiiMaskedSchema.nullish()
+});
+
+/**
+ * 검증 결과. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export const MetricsVerificationSchema = z.object({
+    disability: MetricsDisabilitySchema.nullish(),
+    clause_citations: MetricsClauseCitationsSchema.nullish(),
+    judge: MetricsJudgeSchema.nullish()
+});
+
+/**
+ * AI 리포트 생성 과정의 기술 수치(draft.metrics v1 허용 목록)와 신뢰도 등급의 근거
+ */
+export const ReportAnalysisMetricsResponseSchema = z.object({
+    available: z.boolean(),
+    unavailable_reason: z.string().nullish(),
+    version: z.int().min(-2147483648, { error: 'Invalid value: Expected int32 to be >= -2147483648' }).max(2147483647, { error: 'Invalid value: Expected int32 to be <= 2147483647' }).nullish(),
+    confidence: MetricsConfidenceSchema.nullish(),
+    input: MetricsInputSchema.nullish(),
+    retrieval: MetricsRetrievalSchema.nullish(),
+    verification: MetricsVerificationSchema.nullish(),
+    pipeline: MetricsPipelineSchema.nullish()
+});
+
+export const ApiResponseReportAnalysisMetricsResponseSchema = z.object({
+    status: z.string().optional(),
+    message: z.string().optional(),
+    data: ReportAnalysisMetricsResponseSchema.optional()
+});
+
 export const PendingReviewListResponseSchema = z.object({
     list: z.array(z.record(z.string(), z.unknown())),
     pagination: PaginationSchema
@@ -1041,6 +1199,14 @@ export const StatsSchema = z.object({
     total_count: z.number().int().optional()
 });
 
+export const AdjusterMyPageCertificationSchema = z.object({
+    license_no: z.string().nullish(),
+    registration_no: z.string().nullish(),
+    verified_at: z.iso.datetime({ offset: true, local: true }).nullish(),
+    activity_region: z.string(),
+    created_at: z.iso.datetime({ offset: true, local: true })
+});
+
 export const MonthlyActivitySchema = z.object({
     completed_count: z.number().int().optional(),
     consultation_converted_count: z.number().int().optional(),
@@ -1062,7 +1228,7 @@ export const AdjusterMyPageResponseSchema = z.object({
     profile: ProfileSchema,
     stats: StatsSchema,
     monthly_activity: MonthlyActivitySchema,
-    certification: CertificationSchema
+    certification: AdjusterMyPageCertificationSchema
 });
 
 export const ApiResponseAdjusterMyPageResponseSchema = z.object({
@@ -1461,6 +1627,15 @@ export const zAnalysisStatusPath = z.object({
  * OK
  */
 export const zAnalysisStatusResponse = ApiResponseReportAnalysisStatusResponseSchema;
+
+export const zAnalysisMetricsPath = z.object({
+    reportId: z.uuid()
+});
+
+/**
+ * OK
+ */
+export const zAnalysisMetricsResponse = ApiResponseReportAnalysisMetricsResponseSchema;
 
 export const zPendingReviewQuery = z.object({
     status: z.string().optional(),

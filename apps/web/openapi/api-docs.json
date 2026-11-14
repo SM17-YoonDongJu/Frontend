@@ -1371,6 +1371,37 @@
         }
       }
     },
+    "/reports/{reportId}/analysis-metrics": {
+      "get": {
+        "tags": [
+          "report-controller"
+        ],
+        "operation_id": "analysisMetrics",
+        "parameters": [
+          {
+            "name": "reportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseReportAnalysisMetricsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/reports/pending-review": {
       "get": {
         "tags": [
@@ -4799,6 +4830,568 @@
           "report_id"
         ]
       },
+      "ApiResponseReportAnalysisMetricsResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "$ref": "#/components/schemas/ReportAnalysisMetricsResponse"
+          }
+        }
+      },
+      "MetricsCaseFunnel": {
+        "type": "object",
+        "description": "판례 검색 깔때기 — 후보 → 사건 단위 중복 제거 → 관련성 필터 → 상위 4. 결과가 0건이면 전부 0. 필터가 판정에 실패하거나 전부 탈락시키면 그대로 통과시키므로, relevant=deduped라도 '걸러낼 것이 없었다'는 뜻은 아니다. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "candidates": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "검색 후보 수"
+          },
+          "deduped": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "사건 단위 중복 제거 후"
+          },
+          "relevant": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "관련성 필터 통과"
+          },
+          "kept": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "최종 채택(상위 4)"
+          }
+        }
+      },
+      "MetricsClauseCitations": {
+        "type": "object",
+        "description": "본문 조항 인용 실재율(정규식 휴리스틱). v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "cited": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "본문이 인용한 약관 조항 수(중복 제거, 법령 조문 제외)"
+          },
+          "grounded": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "그중 근거 청크에 있는 조항 수"
+          },
+          "ungrounded": {
+            "type": "array",
+            "description": "근거에 없는 조항 번호(본문 첫 등장 순, 예: 제99조). 없으면 빈 배열",
+            "items": {
+              "type": "string"
+            }
+          },
+          "statute_mentions": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "법령 조문 인용 수(cited에 포함되지 않음)"
+          }
+        },
+        "required": [
+          "ungrounded"
+        ]
+      },
+      "MetricsConfidence": {
+        "type": "object",
+        "description": "신뢰도 등급(reports.confidence_level)과 그 사유(저장된 수치). HIGH면 사유가 없는 것이 정상이다",
+        "properties": {
+          "level": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "reports.confidence_level(상세 confidence_level과 같은 값, 대문자). 비어 있으면 null. 관례값 HIGH | MEDIUM | LOW"
+          },
+          "reasons": {
+            "type": "array",
+            "description": "등급 사유(화면에 그대로 써도 되는 고정 문구, LOW 사유가 먼저). 없으면 빈 배열",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "reasons"
+        ]
+      },
+      "MetricsDisability": {
+        "type": "object",
+        "description": "후유장해 검증. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "extracted": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "추출한 장해 항목 수"
+          },
+          "verified": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "검증한 항목 수"
+          },
+          "combined_rate": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "합산 지급률(%)"
+          },
+          "confidence": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "장해 감수 신뢰도 원문(소문자, 예: high·medium·low)"
+          },
+          "pending_reeval": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "재평가 대상 여부"
+          },
+          "reclassified": {
+            "type": "array",
+            "description": "과대분류로 낮춘 항목. 없으면 빈 배열",
+            "items": {
+              "$ref": "#/components/schemas/MetricsReclassification"
+            }
+          }
+        },
+        "required": [
+          "reclassified"
+        ]
+      },
+      "MetricsEvidence": {
+        "type": "object",
+        "description": "Judge 근거 청크 수(출처별, 중복 제거 후). v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "terms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "약관"
+          },
+          "schedule": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "장해분류표"
+          },
+          "case": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "판례"
+          }
+        }
+      },
+      "MetricsInput": {
+        "type": "object",
+        "description": "입력 품질. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "document_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "입력 문서 수"
+          },
+          "doc_types": {
+            "type": "array",
+            "description": "문서 순 doc_type(중복 포함, 예: policy·diagnosis·medical_receipt). 없으면 빈 배열",
+            "items": {
+              "type": "string"
+            }
+          },
+          "ocr_confidence": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsScoreStats",
+            "description": "OCR 신뢰도. 유효한 값이 없으면 null"
+          },
+          "doc_type_confidence": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsScoreStats",
+            "description": "문서 유형 분류 신뢰도. 유효한 값이 없으면 null"
+          },
+          "pii_masked": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsPiiMasked",
+            "description": "개인정보 마스킹 건수"
+          }
+        },
+        "required": [
+          "doc_types"
+        ]
+      },
+      "MetricsJudge": {
+        "type": "object",
+        "description": "인용 검증(Judge) 결과. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "ran": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "판정을 수행했으면 true(checked_chars > 0)"
+          },
+          "unavailable": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "Judge를 쓸 수 없었으면 true"
+          },
+          "flagged": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "근거 미확인 판정 수"
+          },
+          "checked_chars": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "검증한 본문 글자 수"
+          },
+          "total_chars": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "본문 전체 글자 수"
+          },
+          "coverage": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "checked_chars/total_chars(소수 2자리). total_chars가 0이면 0.0"
+          },
+          "evidence_chunks": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "Judge에 넘긴 근거 청크 수(상한 20)"
+          }
+        }
+      },
+      "MetricsPiiMasked": {
+        "type": "object",
+        "description": "마스킹 토큰([분류]) 수. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "total": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "전체"
+          },
+          "by_label": {
+            "type": "object",
+            "additional_properties": {
+              "type": "integer",
+              "format": "int32"
+            },
+            "description": "한국어 라벨별 건수(라벨 → 정수, 예: 이름·전화번호). 키 순서에 의미 없음(jsonb 정렬). 없으면 빈 객체"
+          },
+          "documents": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "OCR 문서 본문의 토큰 수"
+          },
+          "free_text": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "사용자 자유입력(질문·설명·추가정보)의 토큰 수"
+          }
+        },
+        "required": [
+          "by_label"
+        ]
+      },
+      "MetricsPipeline": {
+        "type": "object",
+        "description": "output_guardrail까지의 노드 실행 기록(collect_metrics·persist 제외). v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "node_count": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "노드 수"
+          },
+          "failed_nodes": {
+            "type": "array",
+            "description": "실패한 노드명. 없으면 빈 배열",
+            "items": {
+              "type": "string"
+            }
+          },
+          "total_ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "노드 소요 ms의 합(벽시계 시간이 아님)"
+          },
+          "nodes": {
+            "type": "array",
+            "description": "노드별 기록(실행 순). 없으면 빈 배열",
+            "items": {
+              "$ref": "#/components/schemas/MetricsPipelineNode"
+            }
+          }
+        },
+        "required": [
+          "failed_nodes",
+          "nodes"
+        ]
+      },
+      "MetricsPipelineNode": {
+        "type": "object",
+        "description": "노드 실행 기록. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "node": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "노드명"
+          },
+          "ms": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "소요 ms"
+          },
+          "status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "ok | failed"
+          }
+        }
+      },
+      "MetricsReclassification": {
+        "type": "object",
+        "description": "과대분류로 낮춘 장해 항목. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "injury": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "손상명(건강정보)"
+          },
+          "from": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "원래 지급률(%)"
+          },
+          "to": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "낮춘 지급률(%)"
+          }
+        }
+      },
+      "MetricsRetrieval": {
+        "type": "object",
+        "description": "검색 근거. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "policy_matched": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "description": "가입 상품 약관을 DB에서 찾았으면 true"
+          },
+          "evidence": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsEvidence",
+            "description": "Judge 근거 청크 수(중복 제거 후)"
+          },
+          "case_funnel": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsCaseFunnel",
+            "description": "판례 검색 깔때기. 판례 검색 단계가 실패하면 null"
+          },
+          "disability_schedule_source": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "장해분류표 출처. terms(가입 약관) | standard(표준표 폴백). 후유장해 경로가 아니거나 표를 검색하지 않았으면 null"
+          }
+        }
+      },
+      "MetricsScoreStats": {
+        "type": "object",
+        "description": "0~1, 소수 3자리. 0.0은 인식된 라인이 없던 문서. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "min": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "최솟값"
+          },
+          "avg": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "format": "double",
+            "description": "평균"
+          }
+        }
+      },
+      "MetricsVerification": {
+        "type": "object",
+        "description": "검증 결과. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.",
+        "properties": {
+          "disability": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsDisability",
+            "description": "후유장해 검증. 후유장해 경로가 아니면 null"
+          },
+          "clause_citations": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsClauseCitations",
+            "description": "본문 조항 인용 실재율(정규식 휴리스틱)"
+          },
+          "judge": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsJudge",
+            "description": "인용 검증(Judge) 결과"
+          }
+        }
+      },
+      "ReportAnalysisMetricsResponse": {
+        "type": "object",
+        "description": "AI 리포트 생성 과정의 기술 수치(draft.metrics v1 허용 목록)와 신뢰도 등급의 근거",
+        "properties": {
+          "available": {
+            "type": "boolean",
+            "description": "수치를 내려줄 수 있으면 true. false면 unavailable_reason만 non-null이고 나머지는 모두 null"
+          },
+          "unavailable_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "available=false일 때만 non-null. NO_DRAFT(AI 초안 없음 — 처리 중·BLOCKED·NEEDS_REUPLOAD·FAILED) | LEGACY_REPORT(초안에 수치 없음 — AI#92 이전 리포트 또는 수치 계산 실패) | UNAVAILABLE(수치를 읽지 못함 — 조회 실패·지원하지 않는 버전·손상된 값)"
+          },
+          "version": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "format": "int32",
+            "description": "수치 스키마 버전. available=true면 항상 1, false면 null"
+          },
+          "confidence": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsConfidence",
+            "description": "신뢰도 등급과 사유. available=true면 항상 non-null, false면 null"
+          },
+          "input": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsInput",
+            "description": "입력 품질. available=false면 null. true여도 저장된 수치에 이 그룹이 없으면 null"
+          },
+          "retrieval": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsRetrieval",
+            "description": "검색 근거. available=false면 null. true여도 저장된 수치에 이 그룹이 없으면 null"
+          },
+          "verification": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsVerification",
+            "description": "검증 결과. available=false면 null. true여도 저장된 수치에 이 그룹이 없으면 null"
+          },
+          "pipeline": {
+            "type": "null",
+            "$ref": "#/components/schemas/MetricsPipeline",
+            "description": "처리 경로. available=false면 null. true여도 저장된 수치에 이 그룹이 없으면 null"
+          }
+        },
+        "required": [
+          "available"
+        ]
+      },
       "ApiResponsePendingReviewListResponse": {
         "type": "object",
         "properties": {
@@ -5655,6 +6248,45 @@
           }
         }
       },
+      "AdjusterMyPageCertification": {
+        "type": "object",
+        "properties": {
+          "license_no": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "deprecated": true,
+            "description": "registration_no와 같은 값(하위 호환용)"
+          },
+          "registration_no": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "등록/자격 번호(미입력이면 null)"
+          },
+          "verified_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time",
+            "description": "자격 인증 시각(미인증이면 null)"
+          },
+          "activity_region": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "activity_region",
+          "created_at"
+        ]
+      },
       "AdjusterMyPageResponse": {
         "type": "object",
         "properties": {
@@ -5668,7 +6300,7 @@
             "$ref": "#/components/schemas/MonthlyActivity"
           },
           "certification": {
-            "$ref": "#/components/schemas/Certification"
+            "$ref": "#/components/schemas/AdjusterMyPageCertification"
           }
         },
         "required": [

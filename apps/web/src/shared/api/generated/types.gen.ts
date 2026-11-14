@@ -889,6 +889,352 @@ export type ReportAnalysisStatusResponse = {
     failed_documents: Array<FailedDocument>;
 };
 
+export type ApiResponseReportAnalysisMetricsResponse = {
+    status?: string;
+    message?: string;
+    data?: ReportAnalysisMetricsResponse;
+};
+
+/**
+ * 판례 검색 깔때기 — 후보 → 사건 단위 중복 제거 → 관련성 필터 → 상위 4. 결과가 0건이면 전부 0. 필터가 판정에 실패하거나 전부 탈락시키면 그대로 통과시키므로, relevant=deduped라도 '걸러낼 것이 없었다'는 뜻은 아니다. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsCaseFunnel = {
+    /**
+     * 검색 후보 수
+     */
+    candidates?: number | null;
+    /**
+     * 사건 단위 중복 제거 후
+     */
+    deduped?: number | null;
+    /**
+     * 관련성 필터 통과
+     */
+    relevant?: number | null;
+    /**
+     * 최종 채택(상위 4)
+     */
+    kept?: number | null;
+};
+
+/**
+ * 본문 조항 인용 실재율(정규식 휴리스틱). v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsClauseCitations = {
+    /**
+     * 본문이 인용한 약관 조항 수(중복 제거, 법령 조문 제외)
+     */
+    cited?: number | null;
+    /**
+     * 그중 근거 청크에 있는 조항 수
+     */
+    grounded?: number | null;
+    /**
+     * 근거에 없는 조항 번호(본문 첫 등장 순, 예: 제99조). 없으면 빈 배열
+     */
+    ungrounded: Array<string>;
+    /**
+     * 법령 조문 인용 수(cited에 포함되지 않음)
+     */
+    statute_mentions?: number | null;
+};
+
+/**
+ * 신뢰도 등급(reports.confidence_level)과 그 사유(저장된 수치). HIGH면 사유가 없는 것이 정상이다
+ */
+export type MetricsConfidence = {
+    /**
+     * reports.confidence_level(상세 confidence_level과 같은 값, 대문자). 비어 있으면 null. 관례값 HIGH | MEDIUM | LOW
+     */
+    level?: string | null;
+    /**
+     * 등급 사유(화면에 그대로 써도 되는 고정 문구, LOW 사유가 먼저). 없으면 빈 배열
+     */
+    reasons: Array<string>;
+};
+
+/**
+ * 후유장해 검증. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsDisability = {
+    /**
+     * 추출한 장해 항목 수
+     */
+    extracted?: number | null;
+    /**
+     * 검증한 항목 수
+     */
+    verified?: number | null;
+    /**
+     * 합산 지급률(%)
+     */
+    combined_rate?: number | null;
+    /**
+     * 장해 감수 신뢰도 원문(소문자, 예: high·medium·low)
+     */
+    confidence?: string | null;
+    /**
+     * 재평가 대상 여부
+     */
+    pending_reeval?: boolean | null;
+    /**
+     * 과대분류로 낮춘 항목. 없으면 빈 배열
+     */
+    reclassified: Array<MetricsReclassification>;
+};
+
+/**
+ * Judge 근거 청크 수(출처별, 중복 제거 후). v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsEvidence = {
+    /**
+     * 약관
+     */
+    terms?: number | null;
+    /**
+     * 장해분류표
+     */
+    schedule?: number | null;
+    /**
+     * 판례
+     */
+    case?: number | null;
+};
+
+/**
+ * 입력 품질. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsInput = {
+    /**
+     * 입력 문서 수
+     */
+    document_count?: number | null;
+    /**
+     * 문서 순 doc_type(중복 포함, 예: policy·diagnosis·medical_receipt). 없으면 빈 배열
+     */
+    doc_types: Array<string>;
+    /**
+     * OCR 신뢰도. 유효한 값이 없으면 null
+     */
+    ocr_confidence?: MetricsScoreStats | null;
+    /**
+     * 문서 유형 분류 신뢰도. 유효한 값이 없으면 null
+     */
+    doc_type_confidence?: MetricsScoreStats | null;
+    /**
+     * 개인정보 마스킹 건수
+     */
+    pii_masked?: MetricsPiiMasked | null;
+};
+
+/**
+ * 인용 검증(Judge) 결과. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsJudge = {
+    /**
+     * 판정을 수행했으면 true(checked_chars > 0)
+     */
+    ran?: boolean | null;
+    /**
+     * Judge를 쓸 수 없었으면 true
+     */
+    unavailable?: boolean | null;
+    /**
+     * 근거 미확인 판정 수
+     */
+    flagged?: number | null;
+    /**
+     * 검증한 본문 글자 수
+     */
+    checked_chars?: number | null;
+    /**
+     * 본문 전체 글자 수
+     */
+    total_chars?: number | null;
+    /**
+     * checked_chars/total_chars(소수 2자리). total_chars가 0이면 0.0
+     */
+    coverage?: number | null;
+    /**
+     * Judge에 넘긴 근거 청크 수(상한 20)
+     */
+    evidence_chunks?: number | null;
+};
+
+/**
+ * 마스킹 토큰([분류]) 수. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsPiiMasked = {
+    /**
+     * 전체
+     */
+    total?: number | null;
+    /**
+     * 한국어 라벨별 건수(라벨 → 정수, 예: 이름·전화번호). 키 순서에 의미 없음(jsonb 정렬). 없으면 빈 객체
+     */
+    by_label: {
+        [key: string]: number;
+    };
+    /**
+     * OCR 문서 본문의 토큰 수
+     */
+    documents?: number | null;
+    /**
+     * 사용자 자유입력(질문·설명·추가정보)의 토큰 수
+     */
+    free_text?: number | null;
+};
+
+/**
+ * output_guardrail까지의 노드 실행 기록(collect_metrics·persist 제외). v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsPipeline = {
+    /**
+     * 노드 수
+     */
+    node_count?: number | null;
+    /**
+     * 실패한 노드명. 없으면 빈 배열
+     */
+    failed_nodes: Array<string>;
+    /**
+     * 노드 소요 ms의 합(벽시계 시간이 아님)
+     */
+    total_ms?: number | null;
+    /**
+     * 노드별 기록(실행 순). 없으면 빈 배열
+     */
+    nodes: Array<MetricsPipelineNode>;
+};
+
+/**
+ * 노드 실행 기록. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsPipelineNode = {
+    /**
+     * 노드명
+     */
+    node?: string | null;
+    /**
+     * 소요 ms
+     */
+    ms?: number | null;
+    /**
+     * ok | failed
+     */
+    status?: string | null;
+};
+
+/**
+ * 과대분류로 낮춘 장해 항목. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsReclassification = {
+    /**
+     * 손상명(건강정보)
+     */
+    injury?: string | null;
+    /**
+     * 원래 지급률(%)
+     */
+    from?: number | null;
+    /**
+     * 낮춘 지급률(%)
+     */
+    to?: number | null;
+};
+
+/**
+ * 검색 근거. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsRetrieval = {
+    /**
+     * 가입 상품 약관을 DB에서 찾았으면 true
+     */
+    policy_matched?: boolean | null;
+    /**
+     * Judge 근거 청크 수(중복 제거 후)
+     */
+    evidence?: MetricsEvidence | null;
+    /**
+     * 판례 검색 깔때기. 판례 검색 단계가 실패하면 null
+     */
+    case_funnel?: MetricsCaseFunnel | null;
+    /**
+     * 장해분류표 출처. terms(가입 약관) | standard(표준표 폴백). 후유장해 경로가 아니거나 표를 검색하지 않았으면 null
+     */
+    disability_schedule_source?: string | null;
+};
+
+/**
+ * 0~1, 소수 3자리. 0.0은 인식된 라인이 없던 문서. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsScoreStats = {
+    /**
+     * 최솟값
+     */
+    min?: number | null;
+    /**
+     * 평균
+     */
+    avg?: number | null;
+};
+
+/**
+ * 검증 결과. v1에서 항상 값이 있는 필드도 저장된 수치에서 빠지거나 null이면 null로 내려간다. 배열·맵은 null 대신 빈 값이다.
+ */
+export type MetricsVerification = {
+    /**
+     * 후유장해 검증. 후유장해 경로가 아니면 null
+     */
+    disability?: MetricsDisability | null;
+    /**
+     * 본문 조항 인용 실재율(정규식 휴리스틱)
+     */
+    clause_citations?: MetricsClauseCitations | null;
+    /**
+     * 인용 검증(Judge) 결과
+     */
+    judge?: MetricsJudge | null;
+};
+
+/**
+ * AI 리포트 생성 과정의 기술 수치(draft.metrics v1 허용 목록)와 신뢰도 등급의 근거
+ */
+export type ReportAnalysisMetricsResponse = {
+    /**
+     * 수치를 내려줄 수 있으면 true. false면 unavailable_reason만 non-null이고 나머지는 모두 null
+     */
+    available: boolean;
+    /**
+     * available=false일 때만 non-null. NO_DRAFT(AI 초안 없음 — 처리 중·BLOCKED·NEEDS_REUPLOAD·FAILED) | LEGACY_REPORT(초안에 수치 없음 — AI#92 이전 리포트 또는 수치 계산 실패) | UNAVAILABLE(수치를 읽지 못함 — 조회 실패·지원하지 않는 버전·손상된 값)
+     */
+    unavailable_reason?: string | null;
+    /**
+     * 수치 스키마 버전. available=true면 항상 1, false면 null
+     */
+    version?: number | null;
+    /**
+     * 신뢰도 등급과 사유. available=true면 항상 non-null, false면 null
+     */
+    confidence?: MetricsConfidence | null;
+    /**
+     * 입력 품질. available=false면 null. true여도 저장된 수치에 이 그룹이 없으면 null
+     */
+    input?: MetricsInput | null;
+    /**
+     * 검색 근거. available=false면 null. true여도 저장된 수치에 이 그룹이 없으면 null
+     */
+    retrieval?: MetricsRetrieval | null;
+    /**
+     * 검증 결과. available=false면 null. true여도 저장된 수치에 이 그룹이 없으면 null
+     */
+    verification?: MetricsVerification | null;
+    /**
+     * 처리 경로. available=false면 null. true여도 저장된 수치에 이 그룹이 없으면 null
+     */
+    pipeline?: MetricsPipeline | null;
+};
+
 export type ApiResponsePendingReviewListResponse = {
     status?: string;
     message?: string;
@@ -1167,11 +1513,30 @@ export type Stats = {
     total_count?: number;
 };
 
+export type AdjusterMyPageCertification = {
+    /**
+     * registration_no와 같은 값(하위 호환용)
+     *
+     * @deprecated
+     */
+    license_no?: string | null;
+    /**
+     * 등록/자격 번호(미입력이면 null)
+     */
+    registration_no?: string | null;
+    /**
+     * 자격 인증 시각(미인증이면 null)
+     */
+    verified_at?: string | null;
+    activity_region: string;
+    created_at: string;
+};
+
 export type AdjusterMyPageResponse = {
     profile: Profile;
     stats: Stats;
     monthly_activity: MonthlyActivity;
-    certification: Certification;
+    certification: AdjusterMyPageCertification;
 };
 
 export type ApiResponseAdjusterMyPageResponse = {
@@ -1969,6 +2334,24 @@ export type AnalysisStatusResponses = {
 };
 
 export type AnalysisStatusResponse = AnalysisStatusResponses[keyof AnalysisStatusResponses];
+
+export type AnalysisMetricsData = {
+    body?: never;
+    path: {
+        reportId: string;
+    };
+    query?: never;
+    url: '/reports/{reportId}/analysis-metrics';
+};
+
+export type AnalysisMetricsResponses = {
+    /**
+     * OK
+     */
+    200: ApiResponseReportAnalysisMetricsResponse;
+};
+
+export type AnalysisMetricsResponse = AnalysisMetricsResponses[keyof AnalysisMetricsResponses];
 
 export type PendingReviewData = {
     body?: never;
