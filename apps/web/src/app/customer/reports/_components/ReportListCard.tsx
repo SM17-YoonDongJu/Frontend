@@ -4,6 +4,7 @@ import { Chat } from "@/shared/ui/icons/Chat";
 import { ChevronRight } from "@/shared/ui/icons/ChevronRight";
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
 import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
+import { ANALYSIS_STOPPED_COPY } from "@/app/customer/_shared/model/analysis-state";
 import { reportEntryHref } from "@/app/customer/_shared/model/report-routes";
 import { reportDisplayTitle } from "@/app/customer/_shared/model/report-title";
 import { ReportStatusBadges } from "./ReportStatusBadges";
@@ -23,6 +24,9 @@ function toDisplayDate(iso: string) {
 }
 
 function bottomLeftText(item: ReportListItem): string {
+  // 분석이 멈춘 리포트는 진행 상태와 무관하게 지금 해야 할 일을 먼저 알린다.
+  const stopped = ANALYSIS_STOPPED_COPY[item.analysisState];
+  if (stopped) return stopped.cardText;
   if (item.status === "AWAITING_ADOPTION") {
     if (item.adjusterNickname && item.proposalCount > 1) {
       return `${item.adjusterNickname} 외 ${item.proposalCount - 1}명이 제안을 보냈어요`;

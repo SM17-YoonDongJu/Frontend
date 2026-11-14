@@ -1,10 +1,21 @@
 import type { ReportListItem } from "@/app/customer/_shared/model/report-list.schema";
+import { ANALYSIS_STOPPED_COPY } from "@/app/customer/_shared/model/analysis-state";
 import { REPORT_STATUS_META } from "@/app/customer/_shared/model/report-status";
 import { StatusBadge } from "@/shared/ui/StatusBadge";
 import { Check } from "@/shared/ui/icons/Check";
 import { Spinner } from "@/shared/ui/icons/Spinner";
 
 export function ReportStatusBadges({ item }: { item: ReportListItem }) {
+  // 분석이 멈춘 리포트는 검수 대기 배지(스피너)와 모순되지 않게 멈춘 상태를 표시한다.
+  const stopped = ANALYSIS_STOPPED_COPY[item.analysisState];
+  if (stopped) {
+    return (
+      <StatusBadge tone="terra" className="rounded-pill">
+        {stopped.badge}
+      </StatusBadge>
+    );
+  }
+
   if (item.status === "AWAITING_ADOPTION") {
     return (
       <>
