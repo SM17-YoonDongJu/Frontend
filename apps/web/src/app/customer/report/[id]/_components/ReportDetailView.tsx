@@ -10,6 +10,7 @@ import { resolveConfidenceNote } from "../_model/confidence-note";
 import { REPORT_DISCLAIMER } from "../_model/report-meta";
 import { hasAnalysisBody, reportPhase } from "../_model/report-phase";
 import { AdjusterContact } from "./AdjusterContact";
+import { AnalysisMetricsPanel } from "./AnalysisMetricsPanel";
 import { CoverageApplicable } from "./CoverageApplicable";
 import { CoveragePotentialMissing } from "./CoveragePotentialMissing";
 import { EstimatedPayout } from "./EstimatedPayout";
@@ -98,6 +99,7 @@ export function ReportDetailView({ reportId }: { reportId: string }) {
                   <CoveragePotentialMissing contracts={data.omittedSpecialContract} />
                 </div>
                 <LegalBasis items={data.basisTermsPrecedents} />
+                <AnalysisMetricsPanel state={analysisMetrics} />
               </div>
             </div>
           )}
